@@ -1,0 +1,15 @@
+ERROR: model run stopped with return value 137.
+
+JOB STATISTICS
+==============
+Job ID: 6373702
+Cluster: snellius
+User/Group: ybhatti/ybhatti
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 64
+CPU Utilized: 00:03:53
+CPU Efficiency: 9.33% of 00:41:36 core-walltime
+Job Wall-clock time: 00:00:39
+Memory Utilized: 1.36 MB
+Memory Efficiency: 0.00% of 112.00 GB
