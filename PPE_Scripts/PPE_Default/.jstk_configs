@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#--------------------------------------------------------------------------------------------------
+#
+# Current jobscript toolkit configuration.
+# It is not recommended to edit it (it has been created for later usage in jobsubm_echam.sh).
+#
+# Automatically generated on 2024-05-24_14.42 by ybhatti by means of prepare_run.sh.
+#
+# Jobscript toolkit version 1.2 (March  2016, svn revision r3070).
+#
+#--------------------------------------------------------------------------------------------------
+
+#--
+dir_exp_user="my_experiments"
+
+#--
+dir_exp_templates="setup_templates"
+
+#--
+dir_run_examples="setup_templates/run_examples"
+
+#--
+dir_emispec_examples="setup_templates/emi_spec_examples"
+
+#--
+dir_symlink_examples="setup_templates/symlink_script_examples"
+
+#--
+dir_jstk_ancil="jobscript_toolkit_ancillaries"
+
+#--
+def_model_family="echam_family"
+
+#--
+def_model_type="echam6-ham"
+
+#--
+def_exp_pattern="run_defaults_\$model_type"
+

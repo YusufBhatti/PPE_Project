@@ -1,0 +1,159 @@
+#------------------------------------------------------------
+# Reference of the svn 'base' version of the current code:
+
+Path: /home/ybhatti/yusufb/Branches/PPE_Aerosol
+Working Copy Root Path: /home/ybhatti/yusufb/Branches/PPE_Aerosol
+URL: https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Relative URL: ^/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Repository Root: https://svn.iac.ethz.ch/external/echam-hammoz
+Repository UUID: 5abd231c-38af-11dd-ab7a-a2415d6bb57b
+Revision: 7533
+Node Kind: directory
+Schedule: normal
+Last Changed Author: ybhatti
+Last Changed Rev: 7533
+Last Changed Date: 2024-05-24 10:41:21 +0200 (Fri, 24 May 2024)
+
+
+#--------------------------------------------------------------------------
+# List of modified / added / removed files as compared to the svn 'base' version
+# (filtered out from any non-versioned file, which won't anyway be seen in the patch):
+
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/.svnignore
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/Makefile
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/aclocal.m4
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/output.0
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/output.1
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/output.2
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/requests
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/traces.0
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/traces.1
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/autom4te.cache/traces.2
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/bin
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/blas
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/blas/Makefile.in
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/app
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/config
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/doc
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/doc/coding_standards
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/doc/pio
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/doc/pio/graphics
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/doc/pio/tex
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/doc/tex
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/examples
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/examples/pio
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/interfaces
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/interfaces/f2003
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/interfaces/python
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/interfaces/ruby
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/interfaces/testdata
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/m4
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/src
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/src/pkgconfig
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/tables
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/tables/grib_api
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/tables/grib_api/grib2
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/tests
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/cdi/util
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/config
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config/config.h.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config/mh-linux
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config.log
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config.lt
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config.status
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/configure
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/configure~
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/contrib
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/contrib/cray_fail_wrapper
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/contrib/declan
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/contrib/mvapich_mpiexec_wrapper
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/contrib/nagfor_fail_wrapper
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/contrib/required_autotools
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/atmosphere
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/externaldata
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr/cr2009_03_31_rjs
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr/cr2014_05_09_rjs
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr/cr2014_07_15_rjs
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr_graphics
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr_graphics/fig_crow
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr_graphics/fig_crowaero_clim
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr_graphics/fig_hamaero
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/guide/cr_graphics/fig_hamaero_clim
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/echam/science
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/jsbach
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/doc/jsbach/namelists
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/echam6_inherited
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/echam6_inherited/examples
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/echam6_inherited/standard_environments
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/echam6_inherited/standard_experiments
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/include
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/jobscript_toolkit_ancillaries
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/jsbach
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/lapack
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/lapack/Makefile.in
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/lib
+A       /home/ybhatti/yusufb/Branches/PPE_Aerosol/libtool
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/m4
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/emi_spec_examples
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_climatologic_echam6
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_climatologic_echam6-hamm7
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_climatologic_echam6-hamm7_perturbed
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_climatologic_echam6-hamsalsa
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_defaults_echam6
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_defaults_echam6-ham
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_defaults_echam6-hammoz
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_defaults_echam6-moz
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_echam6-hamm7_gfas+accmip_interpolated_validation_cand
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_echam6-hamm7_gfas+ceds_validation_cand
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_echam6-moz-amip
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_echam6-moz-piControl
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_transient_echam6-hamm7
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_transient_echam6-hammoz
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/run_examples/run_transient_echam6-moz
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/setup_templates/symlinks_examples
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/src
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/src/Makefile.am
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/src/Makefile.in
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/support
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/support/Makefile.in
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/test
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/util
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/util/Makefile.in
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/util/mkexp
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/util/quickplots
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/util/quickplots/Makefile.in
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/config
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/config/checkdoc
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/config/checksrc
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/contrib
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/contrib/00nagfor-libtool-patch
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/contrib/01aix-deplib-rpath-patch
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/contrib/02nagfor53-shared-patch
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/contrib/nagfor-libtool-patch
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/doc
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/doc/images
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/doc/src
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/examples
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/include
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/inst_headers
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/inst_headers/f90
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/m4
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/perf
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/scripts
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/src/core
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/src/pkgconfig
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/src/xt
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/tests
+ M      /home/ybhatti/yusufb/Branches/PPE_Aerosol/yaxt/util

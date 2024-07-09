@@ -1,0 +1,253 @@
+
+ echam6 MPI interface runtime information:
+  Used MPI version: 4.0
+  Run on 60 processors.
+  Number of OpenMP threads not given!
+
+  Environment variable ECHAM6_THREADS either not set,
+  or not available to echam6 root PE. Set to 1!
+
+ 
+ 
+ ===========================================================
+ 
+ ECHAM - Release 6.3.02
+ Copyright by Max-Planck-Institute for Meteorology, 2015
+ Read echam6.f90 and mpi-m_sla_201202.pdf before using ECHAM6
+ 
+ Repository:
+ Branch    :
+ Revision  :
+ 
+ HAMMOZ - Release candidate for: HAM2.3-MOZ1.0
+ Copyright by the ECHAM-HAMMOZ consortium, 2017
+ Project info: https://redmine.hammoz.ethz.ch/projects/hammoz
+ Read doc/ECHAM-HAMMOZ_namelists.pdf for details on the HAMMOZ namelists.
+ 
+ ===========================================================
+ 
+ 
+ Opened namelist file namelist.echam
+ Atmosphere standard output is assigned to file echam6.log.
+ 
+ ======================================================================
+ Start initialization in control
+ ======================================================================
+ Automatic determined byte size of types for I/O:
+ INTEGER                :   4
+ INTEGER (4 byte range) :   4
+ INTEGER (8 byte range) :   8
+ REAL                   :   4
+ REAL (single)          :   4
+ REAL (double)          :   8
+ LOGICAL                :   4
+ 
+ Automatic determined machine constants (8 byte REAL):
+ Epsilon                      =     0.111022302462516E-15
+ Precision                    =     0.222044604925031E-15
+ Safe minimum                 =     0.222507385850720-307
+ Reciprocal of safe minimum   =     0.449423283715579+308
+ Underflow threshold          =     0.222507385850720-307
+ 
+ Number of digits in mantissa =     53
+ Base                         =      2
+ Minimum exponent             =  -1021
+ Largest exponent             =   1024
+ 
+ Rounding mode according the IEEE definition.
+ 
+ Namelist file namelist.echam reopened
+ Read date (initial/restart):  1. Jan     1989 12:00:00
+ Basic initialization of time manager <echam time manager> done.
+ Namelist file namelist.echam reopened
+ Start date replaced by namelist start date:  1. Apr     2006 00:00:00
+ Warning: New time manager position < 0
+ Time step and start date evaluation done.
+ Initial state of time manager <echam time manager> is locked now!
+ State of manager >>echam time manager<<
+ Step counter :            0
+ Time step [s]:    450.00000000000000
+ Initial date:  1. Apr     2006 00:00:00
+ Current date:  1. Apr     2006 00:00:00
+ 
+ Using DT_STOP for model stop.
+ Stop experiment at:  1. May     2006 01:00:00
+ Previous date: 31. Mar     2006 23:52:30
+ Next date    :  1. Apr     2006 00:07:30
+ 
+ 
+ Total number of PEs:   60 set A:  20 set B:   3
+ ------------------------------------------------------------------------------
+ Blocking information:
+ reordering (lreg)           =     F
+ number of blocks (ngplks)   =    24
+ size of blocks (nproma)     =    16
+ size of last block (npromz) =    16
+ ------------------------------------------------------------------------------
+ Number of points on each column (NNP):
+ 64     63     62     61     60     59     58     57     56     55     54
+ 53     52     51     50     49     48     47     46     45     44     43
+ 42     41     40     39     38     37     36     35     34     33     32
+ 31     30     29     28     27     26     25     24     23     22     21
+ 20     19     18     17     16     15     14     13     12     11     10
+ 9      8      7      6      5      4      3      2      1
+ Displacement of the first point of columns (NMP):
+ 0     64    127    189    250    310    369    427    484    540    595
+ 649    702    754    805    855    904    952    999   1045   1090   1134
+ 1177   1219   1260   1300   1339   1377   1414   1450   1485   1519   1552
+ 1584   1615   1645   1674   1702   1729   1755   1780   1804   1827   1849
+ 1870   1890   1909   1927   1944   1960   1975   1989   2002   2014   2025
+ 2035   2044   2052   2059   2065   2070   2074   2077   2079
+ setdyn: check setting of stratospheric diffusion
+ Namelist file namelist.echam already opened, rewind file to beginning
+ Damping factor for strong stratospheric damping      (hdamp) =    0.100E+01
+ Critical velocity for horizontal diffusion enhancing (vcrit) =    0.142E+05
+ 
+ |
+ | setsubmodel
+ |
+ 
+ Namelist file namelist.echam already opened, rewind file to beginning
+ ------------------------------------------------------------------------------
+ --- 2  submodels registered: METHOX HAM
+ --- Submodel switches processed.
+ --- METHOX module :active
+ --- TRANSDIAG module :*not* active
+ --- HAM aerosol module :active
+ --- MOZ chemistry module :*not* active
+ --- Satellite processor diagnostics :*not* active
+ --- ISCCP cloud diagnostics :*not* active
+ --- Burden diagnostics :active
+ --- CCN climatology :*not* active
+ --- Flight-track simulator :*not* active
+ --- Run with Lin&Rood (tpcore) tracer advection.
+ --- Age-of-air submodel :*not* active
+ --- AeroCom diags submodel :*not* active
+ ------------------------------------------------------------------------------
+ Melting temperature  :   273.15 [K]
+ Lower table bound    :    50.00 [K]
+ Upper table bound    :   400.00 [K]
+ Full table settings  :
+ Temperature delta  :        0.001 [K]
+ Inverse delta      :     1000.000 [1/K]
+ Indices [lb,ctr,ub]:    50000  273150  400000
+ Spline table settings:
+ Temperature delta  :        0.025 [K]
+ Inverse delta      :       40.000 [1/K]
+ Indices [lb,ctr,ub]:     2000   10926   16000
+ Table split indices:    10926   10925
+ l_volc =.FALSE.  --> volcanic forcing off
+ Namelist file namelist.echam already opened, rewind file to beginning
+ Cloud cover scheme: diagnostic (Sundqvist)
+ Convection: Nordeng (default)
+ ---
+ --- Prognostic eq. for cloud droplet- and ice crystal-number concentration (lcdnc_progn) T
+ ---
+ --- Activation scheme (ncd_activ)                    =  :         2
+ --- -> Lohmann et al. (1999) + Abdul-Razzak and Ghan (2000)
+ ---
+ --- Sub-grid updraft PDF (nactivpdf)                 =  :         0
+ --- -> Mean updraft from TKE scheme without PDF
+ ---
+ --- Cirrus scheme (nic_cirrus)                    =  :         2
+ --- -> Kaercher & Lohmann, JGR 2002
+ ---
+ --- Autoconversion (nauto)                    =  :         2
+ --- -> Khairoutdinov and Kogan (2000)
+ ---
+ --- Orographic cirrus cloud (lorocirrus)                    =  : FALSE
+ ---
+ --- Secondary ice production (lsecprod)                    =  : FALSE
+ ---
+ --- Dynamical minimum CDNC (ldyn_cdnc_min)                 =  : FALSE
+ ---
+ --- Fixed minimum CDNC (cdnc_min_fixed) =  :        40
+ ---
+ --- mo_cumulus_flux: Entrainment rate for shallow convection: entrscv=     0.300000000000000E-02
+ --- mo_cumulus_flux: Entrainment rate for penetrative convection: entrpen=     0.200000000000000E-03
+ --- mo_cumulus_flux: relat. cloud massflux at level above nonbuoyanc: cmfctop=    0.200000000000000E+00
+ --- mo_cumulus_flux: autoconversion for convect. clouds: cprcon=    0.900000000000000E-03
+ max. level for cloud base of mid level convection: nmctop = 29
+ --- highest inversion level: jbmin =  :        40
+ --- lowest inversion level: jbmax =  :        45
+ --- highest level for condensation: ncctop =  :        13
+ --- lowest level for tropopause calc.: nccbot =  :        35
+ Namelist file namelist.echam already opened, rewind file to beginning
+ LW sampling strategy:  1 using 140 g-points per time step
+ SW sampling strategy:  1 using 112 g-points per time step
+ lrad = .TRUE.  --> Doing radiation radiation
+ ih2o = 1 --> prognostic H2O(gas,liquid,ice)
+ ico2 = 2 --> CO2 volume mixing ratio=  0.35390000E-03
+ ich4 = 3 --> CH4 (trop) volume mixing ratio =  0.16936000E-05
+ io3  = 4 --> gridpoint O3 climatology from IPCC-NetCDF file
+ in2o = 3 --> N2O (trop) volume mixing ratio=  0.30950000E-06
+ icfc = 2 --> CFC11    volume mixing ratio=  0.25280000E-09
+ CFC12    volume mixing ratio=  0.46620000E-09
+ ighg = 0 --> no scenario, fixed greenhouse gases and/or cfc
+ io2  = 2 --> O2    volume mixing ratio=  0.20946000E+00
+ iaero= 1 --> prognostic aerosol (sub model)
+ nmonth=0 --> annual cycle on
+ --> USE AER RRTM Shortwave Model
+ --> USE New (V4) LRTM Model
+ isolrad = 3 --> solar constant for amip runs
+ ldiur =.TRUE.  --> diurnal cycle on
+ instantaneous forcing diagnostic:
+ solar radiation  F thermal radiation  F
+ --- setup_cloud_optics: Exponent for variable liquid-cloud inohomgeneity: zinpar=   0.10000000000000001
+ --- setup_cloud_optics: Ice-cloud inohomogeneity factor: zinhomi=   0.69999999999999996
+ Namelist file namelist.echam already opened, rewind file to beginning
+ iheatcal = 1 : momentum deposion, heating and diff coeff
+ No time stepping mismatch check defined for MONTHS and YEARS.
+ Event <rerun interval> : interval            1  months : adjustment last : offset[sec]            0
+ Event <checkpoint interval> : interval            1  months : adjustment exact : offset[sec]            0
+ No time stepping mismatch check defined for MONTHS and YEARS.
+ Event <rebuild file names> : interval            1  months : adjustment first : offset[sec]            0
+ No time stepping mismatch check defined for MONTHS and YEARS.
+ Event <output interval> : interval            1  months : adjustment last : offset[sec]            0
+ Event <couple get-from-ocean> : interval            1  days : adjustment exact : offset[sec]            0
+ Event <couple put-to-ocean> : interval            1  days : adjustment exact : offset[sec]            0
+ Event <radiation computation> : interval            2  hours : adjustment first : offset[sec]            0
+ Event <albedo computation> : interval            2  hours : adjustment first : offset[sec]            0
+ Event <AMIP2 table 4 diagnostics> : interval            1  days : adjustment exact : offset[sec]            0
+ Event <dynamical diagnostics> : interval            5  days : adjustment exact : offset[sec]            0
+ Event <vertical dyn-diag> : interval            5  days : adjustment exact : offset[sec]            0
+ 
+ Namelist file namelist.echam already opened, rewind file to beginning
+ Namelist file namelist.echam already opened, rewind file to beginning
+ Namelist file namelist.echam already opened, rewind file to beginning
+ Namelist file namelist.echam already opened, rewind file to beginning
+ WARNING: init_subm: lforcererun set to FALSE, as internal reruns are incompatible with HAMMOZ
+ 
+ ------------------------------------------------------------------------------
+ INFO   : init_hammoz_perturbations: Reading namelist hammoz_perturbation.inc...
+ Namelist file namelist.echam already opened, rewind file to beginning
+
+================================================================================
+
+FATAL ERROR in setham: Namelist hammoz_perturbations not correctly read! ierr = 1
+ FINISH called from PE: 0
+
+--------------------------------------------------------------------------------
+
+
+/home/ybhatti/yusufb/Branches/PPE_Aerosol/lib/libsupport.so.0(cf_util_backtrace+0x1f) [0x1554880d1b9f]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x61464e]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x714d45]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0xac2875]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x41dc75]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x40a74c]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x4175f2]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x40898d]
+/lib64/libc.so.6(__libc_start_main+0xe5) [0x1554810a9d85]
+/gpfs/work3/0/prjs0937/yusufb/ECHAM/OUTPUT/snellius/PPE_Default/./echam6() [0x4089ee]
+
+Use addr2line for address to line number conversion.
+
+
+================================================================================
+
+Abort(1) on node 0 (rank 0 in comm 0): application called MPI_Abort(MPI_COMM_WORLD, 1) - process 0
+slurmstepd: error: *** STEP 6373702.0 ON tcn1024 CANCELLED AT 2024-05-24T15:02:00 ***
+srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
+srun: error: tcn1024: tasks 0-59: Killed
+srun: Terminating StepId=6373702.0
