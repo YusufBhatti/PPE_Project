@@ -1,0 +1,177 @@
+/* include/config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Define as the number of bits in a byte, if `limits.h' doesn't. */
+#undef CHAR_BIT
+
+/* printf(3) format string for subsstype */
+#undef CONF_XT_INT_FMT
+
+/* Maximal value for XT_INT */
+#undef CONF_XT_INT_MAX
+
+/* Minimal value for XT_INT */
+#undef CONF_XT_INT_MIN
+
+/* type kind override */
+#undef C_INT
+
+/* type kind override */
+#undef C_LONG
+
+/* type kind override */
+#undef C_LONG_LONG
+
+/* type kind override */
+#undef C_SHORT
+
+/* Define to dummy `main' function (if any) required to link to the Fortran
+   libraries. */
+#undef FC_DUMMY_MAIN
+
+/* Define if F77 and FC dummy `main' functions are identical. */
+#undef FC_DUMMY_MAIN_EQ_F77
+
+/* Define to a macro mangling the given C identifier (in lower and upper
+   case), which must not contain underscores, for linking with Fortran. */
+#undef FC_FUNC
+
+/* As FC_FUNC, but for C identifiers containing underscores. */
+#undef FC_FUNC_
+
+/* Define to 1 if your Fortran compiler doesn't accept -c and -o together. */
+#undef FC_NO_MINUS_C_MINUS_O
+
+/* Define to 1 if __builtin_clzl is available, 0 if not */
+#undef HAVE_DECL___BUILTIN_CLZL
+
+/* Define to 1 if __builtin_ctzl is available, 0 if not */
+#undef HAVE_DECL___BUILTIN_CTZL
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* type kind override */
+#undef HAVE_FORTRAN_ISO_C_INT
+
+/* type kind override */
+#undef HAVE_FORTRAN_ISO_C_LONG
+
+/* type kind override */
+#undef HAVE_FORTRAN_ISO_C_LONG_LONG
+
+/* type kind override */
+#undef HAVE_FORTRAN_ISO_C_SHORT
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define if you have POSIX threads libraries and header files. */
+#undef HAVE_PTHREAD
+
+/* Have PTHREAD_PRIO_INHERIT. */
+#undef HAVE_PTHREAD_PRIO_INHERIT
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#undef LT_OBJDIR
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
+
+/* Name of package */
+#undef PACKAGE
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to necessary symbol if this constant uses a non-standard name on
+   your system. */
+#undef PTHREAD_CREATE_JOINABLE
+
+/* The size of `int', as computed by sizeof. */
+#undef SIZEOF_INT
+
+/* The size of `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
+
+/* The size of `short', as computed by sizeof. */
+#undef SIZEOF_SHORT
+
+/* The size of `unsigned long', as computed by sizeof. */
+#undef SIZEOF_UNSIGNED_LONG
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* If the compiler supports a TLS storage class define it to that here */
+#undef TLS
+
+/* use MPI parallel process environment */
+#undef USE_MPI
+
+/* Version number of package */
+#undef VERSION
+
+/* Type to use for enumeration of distributed elements. */
+#undef XT_INT
+
+/* return absolute value of v */
+#undef XT_INT_ABS
+
+/* MPI Datatype for type for enumeration of distributed elements. */
+#undef XT_INT_MPIDT
+
+/* Maximum value of MPI_Fint. */
+#undef XT_MPI_FINT_MAX
+
+/* MPI Datatype for type for counts of distributed elements. */
+#undef XT_UINT_MPIDT
+
+/* Define to 1 if type `char' is unsigned and you are not using gcc.  */
+#ifndef __CHAR_UNSIGNED__
+# undef __CHAR_UNSIGNED__
+#endif

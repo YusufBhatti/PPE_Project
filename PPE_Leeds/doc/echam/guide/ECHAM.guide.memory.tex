@@ -1,0 +1,573 @@
+\subsection{Output Streams and Memory Buffer}
+\label{sec.output_stream}
+%------------------------------------------------------------------------------
+\subsubsection{Functionality}
+
+The {\bf Output Stream} interface maintains a list of output
+streams. Generally one ore more streams are associated to an output
+file. Each stream has attributes specifying the file name, file type,
+etc.{}. It further holds a linked list of {\bf Memory Buffer elements},
+of 2 to 4 dimensional arrays and associated meta information.
+
+%------------------------------------------------------------------------------
+\subsubsection{Usage}
+
+First, a new output stream must be created by calling subroutine {\tt
+new\_stream}\index{streams!new\_stream}. 
+Afterwards fields may be allocated by calling {\tt
+add\_stream\_element}\index{streams!add\_stream\_element}.
+
+\subsubsection*{Create a new output stream}
+
+The access to the output stream interface is provided by module {\tt
+mo\_memory\_base}\index{streams!mo\_memory\_base}
+\index{memory!mo\_memory\_base}:
+%
+{\small
+\begin{verbatim}
+  USE mo_memory_base, ONLY: t_stream,                                    &
+                            new_stream, delete_stream,                   &
+                            default_stream_setting, add_stream_element,  &
+                            get_stream_element, set_stream_element_info, &
+                            memory_info,                                 &
+                            ABOVESUR2, ...
+\end{verbatim}}
+%
+To create a new output stream the routine {\tt
+new\_stream}\index{streams!new\_stream} has to be called:
+%
+{\small
+\begin{verbatim}
+  TYPE (t_stream) ,pointer :: mystream
+  ...
+  CALL new_stream (mystream ,'mystream')
+\end{verbatim}}
+%
+{\tt mystream} is a pointer holding a reference to the output stream
+returned by subroutine {\tt new\_stream}. {\tt 'mystream'} is the
+identification name
+of the output stream.
+
+By default, the output and rerun filenames are derived from the name
+of the output stream (here 'mystream') by appending a respective
+suffix (here {\tt '\_mystream'}) to the standard filenames.  The
+content of the output stream is written to the rerun file and to the
+output file. To change the defaults, optional parameters may be provided
+(cf.{} section \ref{sec.new_stream}).
+
+\subsubsection*{Add a field to an output stream}
+
+To include items in the output stream {\tt mystream} the routine {\tt
+add\_stream\_element} has to be called. A unique name must be given to
+identify the quantity and a pointer associated to the field is
+returned. For example, to add a surface field {\tt a} and an
+atmospheric field {\tt b} with names {\tt 'A'} and {\tt 'B'}, the
+following sequence of subroutine calls is 
+required\index{streams!add\_stream\_element}:
+%
+{\small
+\begin{verbatim}
+  REAL, POINTER :: a (:,:)
+  REAL, POINTER :: b (:,:,:)
+  REAL, POINTER :: c (:,:)
+  ...
+  CALL add_stream_element (mystream, 'A' ,a )
+  CALL add_stream_element (mystream, 'B' ,b )
+\end{verbatim}}
+%
+By default suitable sizes are assumed for surface (2-d pointer {\tt
+a}) or atmospheric fields (3-d pointer {\tt b}).  To choose
+other sizes (e.g.{} spectral fields or a non-standard number of
+vertical layers) optional parameters must be specified.  The
+specification of the optional parameters is given in section
+{\ref{sec.add_stream_element}}
+
+A routine is available to associate a pointer (here {\tt c}) with an
+item (here {\tt 'A'}) already included in the list (previously by another
+sub-model for example):
+%
+{\small
+\begin{verbatim}
+  CALL get_stream_element (mystream, 'A', c)
+\end{verbatim}}
+%
+If stream element {\tt 'A'} has not been created beforehand, a null
+pointer is returned for {\tt c}.
+
+%------------------------------------------------------------------------------
+\subsubsection{Create an output stream}
+\label{sec.new_stream}
+
+Optional parameters may be passed to subroutines
+{\tt new\_stream} and {\tt add\_stream\_element}
+in order to specify the attributes of output streams
+and memory buffers. Furthermore, routines are available to
+change default values for optional parameters.
+
+The interface of the routine to create an output stream 
+is\index{streams!new\_stream}:
+
+{\small
+\begin{tabular}{|llllp{7cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt SUBROUTINE new\_stream}&
+\multicolumn{3}{p{11cm}|}
+                         {\tt (stream ,name [,filetype]
+                         [,post\_suf] [,rest\_suf] [,init\_suf]
+                         [,lpost] [,lpout] [,lrerun] [,lcontnorest] 
+                         [,linit] [,interval])}\\
+\hline
+name&type&intent&default&description\\
+\hline
+\,stream     &type(t\_stream)&pointer&       & Returned reference to
+                                               the new output stream.\\
+\,name       &character(len=*) &in  &        & Name of the new output stream.\\
+{[filetype]} &integer      &in      &out\_filetype & Type of output
+                                               file. The default
+                                               (GRIB) may be changed
+                                               in namelist 
+                                               /SDSCTL/. Alternatively 
+                                               NETCDF may be passed.\\
+{[post\_suf]}&character(len=*) &in      &'\_'//name& Suffix of the
+                                               output file associated
+                                               with the stream. The
+                                               default is derived from
+                                               the name of the output
+                                               stream.\\
+{[rest\_suf]}&character(len=*) &in      &'\_'//name& Suffix of the
+                                               rerun file.\\
+{[init\_suf]}&character(len=*) &in      &'\_'//name& Suffix of initial file.\\
+{[lpost]}    &logical      &in      &.true.  & Postprocessing flag. If
+                                               .true.{}
+                                               an output file is
+                                               created for this stream.\\
+{[lpout]}    &logical      &in      &.true.  & Output flag. The stream
+                                               is written to the
+                                               output file if {\tt
+                                                 lpout=.true} \\
+{[lrerun]}   &logical      &in      &.true.  & If .true.{} the stream
+                                               is read/written from/to the
+                                               rerun file.\\
+{[lcontnorest]} &logical   &in      &---     & Continue a restart even
+if this stream is not present in any rerun file. \\
+{[linit]}    &logical      &in      &.true.  & Write to initial file
+(does not work?)\\
+{[interval]}&type(io\_time\_event)&in&putdata& Postprocessing output
+                                               interval. Default:
+                                               12 hours.\\
+\hline
+\multicolumn{5}{p{16cm}}{Optional parameters are given in brackets [ ].
+They should always be passed by keyword because the number and
+ordering of optional parameters may change.}\\
+\end{tabular}}
+
+Valid values for the argument {\tt out\_filetype} are defined within
+module {\tt mo\_memory\_base}\index{streams!mo\_memory\_base}:
+{\small
+\begin{verbatim}
+  INTEGER ,PARAMETER :: GRIB      = 1
+  INTEGER ,PARAMETER :: NETCDF    = 2
+\end{verbatim}}
+
+For specification of a non-standard output time interval data type
+{\tt io\_time\_event}\index{data type!io\_time\_event} 
+(defined in module {\tt mo\_time\_event}
+\index{time manager!mo\_time\_event}) 
+has to
+be passed as argument {\tt interval}. For example, in order to write
+every time step or in 6 hourly intervals, specify: {\tt
+interval=io\_time\_event(1,'steps','first',0)} or {\tt
+(6,'hours','first',0)}, respectively.
+
+Once a stream has been created, a reference can be obtained by calling
+subroutine {\bf get\_stream}\index{streams!get\_stream}:
+
+{\small
+\begin{tabular}{|llllp{7cm}|}
+\hline
+\multicolumn{5}{|l|}
+{\tt SUBROUTINE get\_stream (stream ,name)}\\
+\hline
+name&type&intent&default&description\\
+\hline
+\,stream     &type(t\_stream)&pointer&       & Returned reference to the
+                                               output stream.\\
+\,name       &character(len=*) &in      &        & Name of the output stream.\\
+\hline
+\end{tabular}}
+
+
+%------------------------------------------------------------------------------
+\subsubsection{Add a field to the output stream}
+\label{sec.add_stream_element}
+
+The routine to add new elements to the output stream 
+is\index{streams!add\_stream\_element}:
+
+{\small
+\begin{tabular}{|llllp{6cm}|}
+\hline
+\multicolumn{3}{|l}
+{\tt SUBROUTINE add\_stream\_element}&
+\multicolumn{2}{p{9cm}|}
+ {\tt (stream ,name ,ptr [,ldims] [,gdims]
+ [,klev] [,ktrac] [,units] [,longname] [,repr] 
+ [,lpost] [,laccu] [lmiss,] [missval,] [,reset] [,lrerun] [,contnorest]
+ [,table] [,code] [,bits] [,leveltype] 
+ [,dimnames] [,mem\_info] [,p4] [,no\_default] [,verbose])}\\
+\hline
+name&type&intent&default&description\\
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf mandatory arguments :}\\
+stream     &type(t\_stream) &inout    &     & Output stream.\\
+name       &character(len=*)&in       &     & Name of the field to add
+                                              to the output stream.\\
+ptr        &real(:,:[,:][,:])&pointer &     & Returned reference to
+                                              the memory of the
+                                              2- or 3- or 4-dimensional
+                                              field.\\
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf specification of dimensions :}\\
+{[ldims(:)]}   &integer     &in &cf.\,text & Local size on actual processor.\\
+{[gdims(:)]}   &integer     &in &cf.\,text & Global size of the
+field.\\
+{[klev]}       &integer     &in &cf.\,text & Number of vertical levels.\\
+{[ktrac]}      &integer     &in &0         & Number of tracers. \\
+{[repr]}       &integer     &in &GRIDPOINT & Representation.\\
+{[leveltype]}  &integer     &in &cf.\,text & Dimension index of the
+                                             vertical coordinate.\\
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf postprocessing flags :}\\
+{[lpost]}      &logical &in&.false.& Write the field to the
+                                     postprocessing file.\\
+{[laccu]}      &logical &in&.false.& ``Accumulation'' flag: Does no
+accumulation but divides variable by the number of seconds of the
+output interval and resets it to {\tt reset} after output.\\
+{[reset]}      &real    &in&0.     & Reset field to this value at initialization,
+and after output if {\tt laccu=.true.} or {\tt reset} is not zero.\\
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf rerun flags :}\\
+{[lrerun]}     &logical &in&.false.& Flag to read/write field from/to
+                                     the rerun file.\\
+{[contnorest]} &logical &in&.false.& If {\tt contnorest=.true.},
+continue restart, stop otherwise.\\
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf attributes for NetCDF output :}\\
+{[units]}      &character(len=*)&in&' '                & Physical units.\\
+{[longname]}   &character(len=*)&in&' '                & Long name.\\
+{[dimnames(:)]}&character(len=*)&in&'lon'[,'lev'],'lat'& Dimension names.\\ 
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf attributes for GRIB output :}\\
+{[table]}      &integer     &in& 0  & table number.\\
+{[code]}       &integer     &in& 0  & code number.\\
+{[bits]}       &integer     &in& 16 & number of bits used for encoding.\\
+\hline
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf Missing values :} \\
+{[lmiss]}      &logical     &in&.false.&If {\tt lmiss=.true.}, missing
+values are set to {\tt missval}, not set at all otherwise.\\
+{[missval]}    &real        &in& $-9\times10^{33}$& missing value.\\
+%------------------------------------------------------------------------------
+\multicolumn{5}{|l|}{\bf miscellaneous arguments :}\\
+{[mem\_info]}  &type(memory\_info)&pointer&&Reference to meta data information.\\
+{[p4(:,:,:,:)]}&real              &pointer&& Pointer to allocated memory provided.\\
+{[no\_default]}&logical         &in&.false.&Default values usage flag.\\
+{[verbose]}    &logical         &in&.false.&Produce diagnostic printout.\\ 
+\hline
+\end{tabular}}
+
+Most arguments of the routine are optional. They may be given for the
+following purposes:
+\begin{description}
+\item{\bf specification of dimensions:}\\
+  The total size of the field is specified by the parameter {\tt
+  gdims}. In a parallel environment, the part allocated on a processor
+  element is specified by the parameter {\tt ldims}. The order of
+  dimensions is (lon,lat) for 2--d, (lon,lev,lat) for 3--d and
+  (lon,lev,any,lat) for 4--dimensional gridpoint fields. The number of
+  size of {\tt gdims} and {\tt ldims} corresponds to the rank of {\tt
+  ptr(:,:)}.
+
+  Generally, it is not necessary to give dimension information. The
+  sizes of the 
+  fields are derived from the model field sizes.  If a 2--dimensional
+  pointer {\tt ptr(:,:)} is provided for {\tt ptr}, a SURFACE field is
+  assumed. If a 3-dimensional pointer {\tt ptr(:,:,:)} is provided, a
+  HYBRID field (lon,lev,lat) is assumed.
+
+  For the following cases optional arguments must be specified to
+  overwrite the defaults:
+  \begin{description}
+  \item{\bf The number of vertical levels differs from the number of
+  model levels}\\
+
+    To specify a number of levels different from the standard
+    $\sigma$--hybrid co--ordinate system used in the model, the
+    parameter {\tt klev} 
+    may be specified. A HYBRID coordinate system is assumed in this
+    case. However if the field is written to the postprocessing file
+    {\tt (lpost=.true.)}, it is recommended to either pass a dimension
+    index to parameter {\tt leveltype} or the name of the dimensions
+    to {\tt dimnames} in order to pass proper attributes to the
+    NetCDF and GRIB writing routines.
+
+    For the usual cases, dimension indices are predefined (cf.~table
+    \ref{tab.dims}) and may be accessed from module {\tt mo\_netcdf}.
+    New dimensions may be defined by the use of the subroutine {\tt
+    add\_dim} as described in section \ref{sec.dim}.
+
+  \item{\bf The field is not a gridpoint field}\\
+    For non Gaussian gridpoint fields appropriate values should be
+    passed as parameter {\tt repr}. Predefined values ({\tt
+      mo\_linked\_list}) are:
+  {\small
+\begin{verbatim}
+     INTEGER ,PARAMETER :: UNKNOWN   = -huge(0)
+     INTEGER ,PARAMETER :: GAUSSIAN  = 1
+     INTEGER ,PARAMETER :: FOURIER   = 2
+     INTEGER ,PARAMETER :: SPECTRAL  = 3
+     INTEGER ,PARAMETER :: HEXAGONAL = 4
+     INTEGER ,PARAMETER :: LAND      = 5
+     INTEGER ,PARAMETER :: GRIDPOINT = GAUSSIAN
+  \end{verbatim}}
+    In all other cases, {\tt gdims} and {\tt ldims} have to be defined
+    explicitly.
+  \end{description}  
+\item{\bf postprocessing flags:}\\\index{postprocessing flags}
+  In order to write a field to an output file, {\tt
+  lpost=.true.} must be specified. Generally the actual values of the
+  field are written.  However, if {\tt laccu=.true.} is specified, the
+  values are divided by the number of seconds of the output interval
+  before output and set to the value of the variable {\tt reset}
+  afterwards. The default is 0.
+  In this case the fields should be incremented at
+  each time step with values multiplied by the time step length in
+  order to write temporarily averaged values to the output
+  file. If the field is set to the maximum or
+  minimum value during the output time period, values of
+  {\tt reset=-huge(0.)} or {\tt reset=huge(0.)} shall be passed.
+\item{\bf rerun flags:}\\\index{rerun flags}
+  To include the field in the rerun files, {\tt lrerun=.true.} must be
+  specified.
+\item{\bf attributes for NetCDF output:}\\\index{attributes NetCDF}
+  For NetCDF output, the physical units, long name, and dimension
+  names of the field should be provided.
+\item{\bf attributes for GRIB output:}\\\index{attributes GRIB}
+  For GRIB output, a table number and code number is
+  required. A predefined value {\tt AUTO} may be passed
+  as parameter {\tt code} in order to automatically generate unique
+  GRIB code numbers. The number of bits used for encoding may be
+  changed by argument {\tt bits}.
+\item{\bf miscellaneous arguments:}\\
+  If {\tt verbose=.true.} is specified, a printout is generated.
+
+  The default values of the optional parameters may be changed by
+  calling the subroutine\\ {\tt default\_stream\_setting} as described
+  below. However if {\tt no\_defaults=.true.} is specified, these
+  changed default values will not be used.
+
+  Generally memory is allocated for the argument {\tt ptr} when
+  calling {\tt add\_stream\_element}, but memory may be provided
+  externally by passing it via the argument {\tt p4}. Even if
+  2--dimensional or 
+  3--dimensional arrays are accessed via {\tt ptr}, 4--dimensional
+  fields are used internally and must be passed for {\tt p4} (with
+  dimension sizes (lon,lat,1,1) or (lon,lev,lat,1), respectively).
+
+  Meta data information about memory may be accessed by the argument {\tt
+  mem\_info}.
+
+\end{description}
+
+%------------------------------------------------------------------------------
+\subsubsection{Change of default values for optional arguments}
+
+The default values for the optional arguments of subroutine {\tt
+add\_stream\_entry}
+\index{streams!add\_stream\_entry} 
+may be changed for all subsequent calls related to
+an output stream by calling the subroutine\\ {\tt
+default\_stream\_setting}. 
+\index{streams!default\_stream\_setting}
+This subroutine accepts the same arguments
+as subroutine {\tt add\_stream\_entry}:
+
+{\small
+\begin{tabular}{|llllp{6cm}|}
+\hline
+\multicolumn{3}{|l}
+{\tt SUBROUTINE default\_stream\_setting}&
+\multicolumn{2}{p{9cm}|}
+   {\tt (stream [,units] [,ldims] [,gdims] [,repr]
+         [,lpost] [,laccu] [,reset] [,lrerun] [,contnorest]
+         [,table] [,code] [,bits] [,leveltype]
+         [,dimnames] [,no\_default])}\\
+\hline
+\end{tabular}}
+
+If {\tt no\_default=.true.} is not given, previously changed
+default values are kept.
+
+Properties and attributes of an existing stream element may be changed
+by calling\\ {\tt set\_stream\_element\_info}
+\index{streams!set\_stream\_element\_info}. Again, the arguments are
+similar to those of {\tt add\_stream\_element\_info}:
+
+{\small
+\begin{tabular}{|llllp{6cm}|}
+\hline
+\multicolumn{3}{|l}
+{\tt set\_stream\_element\_info}&
+\multicolumn{2}{p{9cm}|}
+   {\tt (stream ,name ,longname [,units] 
+         [,ldims] [,gdims] [,ndim] [,klev] [,ktrac] [,alloc] [,repr]
+         [,lpost] [,laccu] [,lmiss] [,missval] [,reset] [,lrerun]
+         [,contnorest] [,table] [,code] [,bits] [,leveltype]
+         [,dimnames] [,no\_default])}\\
+\hline
+\end{tabular}}
+
+%------------------------------------------------------------------------------
+\subsubsection{Access to stream elements}
+
+References to previously defined stream elements or to their meta data
+can be obtained by calling the subroutine {\tt get\_stream\_element}
+\index{streams!get\_stream\_element} or
+{\tt
+  get\_stream\_element\_info}\index{streams!get\_stream\_element\_info}, 
+respectively:
+
+{\small
+\begin{tabular}{|lllp{6cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt get\_stream\_element\_info}&
+\multicolumn{2}{p{9cm}|}
+ { (stream, name, info)}\\
+\hline
+name&type&intent&description\\
+\hline
+stream & type(t\_stream)   & in  & output stream to which reference
+has to be added.\\
+name   & character(len=*)  & in  & name of stream element.\\
+info   & type(memory\_info)& out & copy of meta data type content.\\
+\hline
+\end{tabular}}
+
+{\small
+\begin{tabular}{|lllp{6cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt get\_stream\_element}&
+\multicolumn{2}{p{9cm}|}
+ { (stream, name, ptr)}\\
+\hline
+name&type&intent&description\\
+\hline
+stream & type(t\_stream)  & in      & output stream list.\\
+name   & character(len=*) & in      & name of stream element.\\
+ptr    & real(:,:[,:][,:])& pointer & returned reference to stream
+                                      element memory.\\
+\hline
+\end{tabular}}
+
+%------------------------------------------------------------------------------
+\subsubsection{Doubling of stream element entries}
+
+It is possible to add a reference to an output stream element to
+another output stream. By calling the subroutine {\tt
+add\_stream\_reference}. 
+\index{streams!add\_stream\_reference}
+This is useful when the same field shall be
+written to different output files. 
+
+{\small\begin{tabular}{|lllp{6cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt add\_stream\_reference}&
+\multicolumn{2}{p{9cm}|}
+ { (stream ,name [,fromstream] [,lpost] [,kprec)]}\\
+\hline
+name&type&intent&description\\
+\hline
+stream     & type(t\_stream) & inout & output stream list to extend.\\
+name       & character(len=*)& in    & name of stream element to add.\\
+{[fromstream]} & character(len=*)& in    & name of output stream to take
+                                       the element from.\\
+{[lpost]}      & logical         & in    & postprocessing flag of the 
+                                       output stream reference.\\
+{[kprec]}      & integer         & in    & precision of GRIB format in
+bits (default: 16). \\
+\hline     
+\end{tabular}}
+
+%------------------------------------------------------------------------------
+\subsubsection{Definition of new dimensions}
+\label{sec.dim}
+
+  \begin{table}[htb]
+  {\small\begin{tabular}{|llllllp{2cm}|}
+  \hline
+  dimension index & name & klev & GRIB      & values & units & longname\\
+                  &      &      & leveltype &        &       &\\
+  \hline
+  HYBRID     & "lev"     & nlev   & 109 & 1,\dots,nlev    &    & hybrid level at layer midpoints\\
+  HYBRID\_H  & "ilev"    & nlev+1 & 109 & 1,\dots,nlev+1  &    & hybrid level at layer interfaces\\
+  SURFACE    & "surface" & 1      &   1 & 0               &    & surface field\\
+  ABOVESUR2  & "2m"      & 1      & 105 & 0               & m  & level 2m above the surface\\
+  ABOVESUR10 & "10m"     & 1      & 105 & 0               & m  & level 10m above the surface\\
+  BELOWSUR   & "jpgrnd"  & 5      & 111 & 3,19,78,268,698 & cm &
+  levels below the surface\\
+  TILES      & "tiles"   & ntiles & 70  & 1,\dots,ntiles &    & land
+  surface tile\\ 
+  SOILLEV    & "soil\_layer"& nsoil& 71  & 1              & cm & soil
+  levels (water)\\ 
+  ROOTZONE   & "root\_zones"& nroot\_zones& 72  & 1,\dots,nroot\_zones
+  & & root zone \\
+  CANOPY     & "canopy\_layer"& ncanopy & 73  & 1,\dots,ncanopy &    & layers in canopy \\
+  \hline
+  \end{tabular}}
+  \caption{Predefined dimensions}
+  \label{tab.dims}
+  \end{table}
+
+If other dimensions are required than those defined in Table
+\ref{tab.dims}, new dimensions can be defined by calling the subroutine
+{\tt add\_dim} defined in module {\tt mo\_netcdf}.
+
+\index{streams!add\_dim}
+{\small
+\begin{tabular}{|llllp{6cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt SUBROUTINE add\_dim}&
+\multicolumn{3}{p{10cm}|}
+                         {\tt (name ,len [,longname] [,units]
+                               [,levtyp] [,single] [,value] 
+                               [,indx]) }\\
+\hline
+name&type&intent&default&description\\
+\hline
+name         & character(len=*) & in &           & name of dimension.\\
+len          & integer          & in &           & size of dimension.\\
+{[longname]} & character(len=*) & in & ' '       & long name of dimension.\\
+{[units]}    & character(len=*) & in & ' '       & physical units of dimension.\\
+{[levtyp]}   & integer          & in & 0         & GRIB level type.\\
+{[single]}   & logical          & in & .false.   & flag indicating
+                                                   single level fields.\\
+{[value]}    & real             & in & 1,2,\dots & values of dimension field.\\
+{[indx]}     & integer          & out&           & index to be passed 
+                                                   as argument {\tt leveltype} to subroutine
+                                                   {\tt add\_stream\_element}.\\
+\hline
+\end{tabular}}
+
+\pagebreak
+%==============================================================================

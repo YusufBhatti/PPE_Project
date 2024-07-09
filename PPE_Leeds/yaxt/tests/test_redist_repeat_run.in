@@ -1,0 +1,12 @@
+#! @SHELL@
+set -e
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 1 @abs_builddir@/test_redist_repeat
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 1 @abs_builddir@/test_redist_repeat_f
+#
+# Local Variables:
+# mode: sh
+# End:
+#

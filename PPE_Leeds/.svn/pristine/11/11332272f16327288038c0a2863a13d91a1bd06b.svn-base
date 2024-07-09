@@ -1,0 +1,243 @@
+
+\section[cr2014\_07\_14\_rjs: Radiative convective equilibrium]{cr2014\_07\_14\_rjs:
+  Simulation of radiative--convective equilibrium using \echam}\label{cr20140715rjs}
+
+\subsection{Introduction}
+
+The radiative--convective equilibrium (RCE) offers a possibility
+to improve our fundamental understanding of processes in the
+atmosphere and their impact on climate change
+(e.g.~\cite{man641}). The idea behind this simplified modeling
+of the atmosphere 
+is that the basic 
+atmospheric structure, especially in the tropics, is determined by the
+balance between cooling of the atmosphere through radiative processes
+and a commensurate heating through convection, mainly by the net
+release of latent heat through precipitation. 
+
+The RCE has been investigated in models of different complexity,
+ranging from simple energy balance, 1--dimensional column models to
+high resolution LES simulations. The RCE is also implemented into the 
+general circulation model \echam{} by creating a model configuration,
+where the resulting climate is given merely through the balance of
+radiative processes and convection. Columns can interact with each
+other and thus create a mean three--dimensional circulation which
+develops interactively, although it is very different from the general
+circulation we know from the real Earth. E.g., the RCE results in slowly moving
+convective clusters of sometimes continental extension (\cite{pop131}).  
+
+To inhibit net energy transport from the tropics to the poles,
+homogeneous boundary conditions are specified, where every gridpoint
+of the sphere receives the same incoming solar radiation
+(e.g.~$340\,{\rm W/m^2}$). A diurnal
+cycle may be switched on but is kept exactly the same for each column
+representing a pulsating light source shining from all directions
+equally. The Earth's rotation velocity is set to zero. In the standard
+RCE configuration, land--sea contrasts are removed by specifiying an
+underlying mixed--layer ocean with a constant ocean albedo, but can
+easily be included in idealized form for land--sea contrast
+studies~(\cite{bec14x}). Besides the modifications mentioned 
+above and technical details listed below, the results of the
+ECHAM--RCE 
+well resemble the tropics of a control simulation with the full
+\echam{} model in the mean
+state~\cite{pop131}.
+However, this model version has not been tested
+for possible equilibria dependence on the initial boundary conditions
+yet, nor for complete isotropy of variables expected from the
+homogeneous boundary conditions. 
+
+\subsection{Namelist settings for radiative--convective equilibrium}
+
+The simulation of the radiative--convective equilibrium needs some
+special namelist settings in order to switch off the diurnal cycle for
+example. Table~\ref{tab_cr20140715_rcenamelist} gives an
+overview of the necessary settings.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}p{6.0cm}p{2.5cm}}\hline\hline
+\caption[RCE namelist]{Namelist setting for radiative--convective
+  equilibrium simulations with \echam}\\\hline
+\label{tab_cr20140715_rcenamelist}
+\endfirsthead
+\caption[]{RCE namelist --- continued}\\\hline
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{2}{r}{end of table}
+\endlastfoot
+\multicolumn{1}{c}{Variable} & \multicolumn{1}{c}{Explanation} & \multicolumn{1}{c}{default} \\\hline
+\multicolumn{3}{c}{{\tt runctl} namelist}\\\hline
+$ {\tt earth\_angular\_velocity} = {\tt 0.0}$ &  switch off Coriolis force: no rotation &
+{\tt 7.29212e-5} \\
+${\tt lrce} = {\tt .true.} $ & turn on radiative--convective equilibrium mode:\newline
+                                same zenith angle at all grid points
+                                with either a perpetual day or (${\tt
+                                  ldiur}={\tt .true.}$) a diurnal
+                                cycle that is equal for all grid
+                                points (the irradiation is dimmed and
+                                brightened independently of the
+                                geographic position).\newline  
+                                use constant ocean surface albedo (0.07)\newline
+                                ignore dynamical planetary boundary
+                                layer height in
+                      planetary boundary layer calculation. & {\tt .false.}\\
+${\tt ly360} = {\tt .true.}$ & use a 360 days calendar (this is not
+a prerequisite for an RCE simulation) & {\tt
+  .false.}\\
+${\tt l\_orbvsop87}  = {\tt .false.}$ &  use PCMDI (AMIP) orbit that
+does not change with time and corresponds to a Kepler orbit. & {\tt
+  .true.}\\
+\hline
+\multicolumn{3}{c}{{\tt radctl} namelist}\\\hline
+$ {\tt cecc}  = {\tt 0.0}$ &  eccentricity of Kepler orbit is set to
+zero meaning that the orbit is circular & {\tt 0.016715} \\
+$ {\tt cobld} = {\tt 0.0}$ & obliquity in degrees is set to zero &
+{\tt 23.441} \\ 
+$ {\tt iaero} = {\tt 0}  $ & simulate an aerosol free atmosphere &
+{\tt 2} \\
+$ {\tt isolrad} = {\tt 4\,{\rm or}\,5}$ & solar irradiation\newline
+${\tt isolrad} = {\tt 4}$: solar irradiation for RCE including a
+diurnal cycle. In this case, {\tt ldiur} must be set to {\tt .true.}\newline
+${\tt isolrad} = {\tt 5}$: time constant solar irradiation for RCE. In
+this case, {\tt ldiur} must be set to {\tt .false.}& {\tt 3}\\
+$ {\tt icfc}    = {\tt 0}$ & switch off all effects of
+chlorofluorocarbons &  {\tt 2} \\ 
+\hline
+\end{longtable}
+
+\subsection{Initial and boundary conditions}
+
+The initial and boundary conditions are different from the usual model
+set--up since they are isotropic except for the initial conditions into
+which a small perturbation of the isotropy is introduced.
+
+The initial and boundary conditions can be generated in various
+resolutions from initial and boundary condition files that exist
+already. The script {\tt create\_initial\_files\_rce\_aqua.sh} is
+provided at {\tt /pool/data/ECHAM6/input/r0004/rce/bin}. In order to
+change the resolution, you have to modify the values of the variables
+{\tt RES}, {\tt ILEV}, {\tt OCERES} according to the desired spectral
+resolution, vertical levels, and ocean resolution, respectively. In
+that case, initial and boundary condition files of standard \echam{}
+have to exist in the new resolution {\tt RES}, {\tt ILEV}, {\tt
+  OCERES} in {\tt /pool/data/ECHAM6/input/r0001}. The following
+tables~\ref{tab_cr20140715_janspec}--\ref{tab_cr20140715_surf} give an
+overview of the values of the variables modified for
+radiative--convective equilibrium simulations with \echam.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}p{11cm}}\hline\hline
+\caption[Spectral initial data for RCE]{Spectral initial data in {\tt
+    \{RES\}\{LEV\}\_jan\_spec\_rce.nc} for radiative--convective
+  equilibrium simulations}\\\hline
+\label{tab_cr20140715_janspec}
+\endfirsthead
+\caption[]{Spectral initial data for RCE --- continued}\\\hline
+\endhead
+\hline\multicolumn{2}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{2}{r}{end of table}
+\endlastfoot
+Variable  & Description \\\hline
+${\tt SVO} = 10^{-8}{\rm 1/s}$ & vorticity of the wind field, is
+transformed to spectral space in the file\\
+${\tt SD} = 10^{-8}{\rm 1/s}$ & divergence of the wind
+field, is transformed to spectral space in the file\\
+${\tt STP} = (300 {\rm K},11.5261)$ & temperature is set to $300
+\rm{K}$ at all model levels globally and the logarithm of the surface
+pressure $\ln(p_{\rm surf}/(1 {\rm Pa}))$. Both are transformed to
+spectral space in the file and stored in the variable {\tt STP}, the
+pressure is stored in the ``level'' ${\tt nlev} + 1$. \\
+${\tt Q} = 10^{-8}$ & specific humidity stored in grid point space.\\\hline  
+\hline
+\end{longtable}
+
+The vorticity and divergence of the wind field are set to a small
+value in order to initiate dynamics in the atmosphere. Finally, this leads to
+spatial inhomogeneities and triggers 
+regional dynamics. 
+
+The surface variables collected in {\tt
+  \{RES\}\{OCR\}\_jan\_surf\_rce.nc} are mostly set to zero with only
+a few exceptions. Table~\ref{tab_cr20140715_jansurf} lists the
+respective variables.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}p{9cm}}\hline\hline
+\caption[Surface initial data for RCE]{Surface (initial) data in {\tt 
+  \{RES\}\{OCR\}\_jan\_surf\_rce.nc} for radiative--convective
+  equilibrium simulations}\\\hline
+\label{tab_cr20140715_jansurf}
+\endfirsthead
+\caption[]{Surface initial data for RCE --- continued}\\\hline
+\endhead
+\hline\multicolumn{2}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{2}{r}{end of table}
+\endlastfoot
+Variable  & Description \\\hline
+${\tt SLM}=0$ & land--sea mask set to zero to indicate that there is ocean
+everywhere \\
+${\tt GEOSP}=0{\rm m^2/s^2}$ & The surface geopotential is set to zero (no
+mountains)\\
+${\tt WS}=0{\rm m}$ & soil wetness \\
+${\tt SN}=0{\rm m}$ & snow depth \\
+${\tt SLF}=0$ & fractional land--sea mask \\
+${\tt AZ0}=0.001{\rm m}$ & surface roughness \\
+${\tt ALB}=0.07$ & surface background albedo\\
+${\tt FOREST}=0$ & vegetation type\\
+${\tt WSMX}=10^{-13}{\rm m}$ & field capacity of soil\\
+${\tt FAO}=0$ & FAO data set\\
+${\tt GLAC}=0$ & glacier mask\\
+${\tt ALAKE}=0$ & lake mask\\
+${\tt OROMEA}=0{\rm m^2/s^2}$ & mean orography \\
+${\tt OROSTD}=0{\rm m^2/s^2}$ & standard deviation of orography \\
+${\tt OROSIG}=0^\circ$ & orographic slope\\
+${\tt OROGAM}=0^\circ$ & orographic anisotropy\\
+${\tt OROTHE}=0^\circ$ & orographic angle\\
+${\tt OROPIC}=0{\rm m}$ & elevation of orographic peaks\\
+${\tt OROVAL}=0{\rm m}$ & elevation of orographic valleys\\
+\hline
+\end{longtable}
+
+The following files listed in Table~\ref{tab_cr20140715_surf} contain
+variables related to boundary conditions 
+at the surface:
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{4cm}}\hline\hline
+\caption[Surface initial data for RCE]{Surface boundary condition data
+  for radiative--convective 
+  equilibrium simulations}\\\hline
+\label{tab_cr20140715_surf}
+\endfirsthead
+\caption[]{Surface boundary condition data for RCE --- continued}\\\hline
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{2}{r}{end of table}
+\endlastfoot
+Variable  & Description \\\hline
+{\tt \{RES\}\_amip2sst\_rce.nc} & ${\tt sst}=300{\rm K}$ & sea surface temperature \\
+{\tt \{RES\}\_amip2sic\_rce.nc} & ${\tt sic}=0\%$ & sea ice coverage\\
+{\tt \{RES\}\_qflux\_rce.nc} & ${\tt aflux}=0$ & heat flux in the
+ocean for simulations including mixed--layer ocean\\
+\hline
+\end{longtable}
+
+As ozone profile, an equatorial column from an ozone file from the
+AC\&C/SPARC ozone data base for CMIP5 for the year 1870 is taken and
+stored in {\tt  \{RES\}\_ozone\_CMIP5\_rce.nc}.
+
+For all other land--surface files, the usual \echam--files can be linked
+since they do not have any influence on the results as long as the
+planet has a pure ocean surface.

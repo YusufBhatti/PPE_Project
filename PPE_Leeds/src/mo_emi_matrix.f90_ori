@@ -1,0 +1,796 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+!! handling a matrix of emissioning conditions
+!!
+!! concepts of the routines:
+!! see document: "New ECHAM5 Boundary condition scheme" by M. G. Schultz, H. Schmidt, O. Stein,
+!!                                                         S. Schroeder - June 2008
+!! see also: http://hammoz.icg.fz-juelich.de/data/BoundaryConditions
+!!
+!! @author S. Schroeder, FZ-Juelich
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2008-11)
+!!
+!! @par Copyright
+!! 2009 by MPI-M and FZJ
+!! This software is provided for non-commercial use only.
+!!
+MODULE mo_emi_matrix
+  USE mo_kind,                     ONLY: dp
+  USE mo_external_field_processor, ONLY: EF_INACTIVE, EF_VALUE, EF_FILE, EF_MODULE
+  USE mo_external_field_processor, ONLY: EF_3D, EF_LONLAT, EF_LATLEV, EF_LEV, EF_LAT, EF_SINGLE
+  USE mo_external_field_processor, ONLY: EF_TIMERESOLVED, EF_IGNOREYEAR, EF_CONSTANT
+
+  IMPLICIT NONE
+
+  PRIVATE
+
+  PUBLIC :: em_read
+  PUBLIC :: em_get_sector_info
+  PUBLIC :: em_get_bc_from_matrix
+  PUBLIC :: em_get_SectorIndex
+  PUBLIC :: maxsectors
+  PUBLIC :: maxvars
+!!   PUBLIC :: ematrix
+
+  PUBLIC :: EM_NONE, EM_SURFACE, EM_VOLUME, EM_LEVEL50M, EM_FIRE, EM_OTHER
+
+  INTEGER, PARAMETER :: maxsectors   = 30    ! max number of sectors
+  INTEGER, PARAMETER :: maxvars      = 50    ! max number of variables in one sector
+
+  INTEGER, PARAMETER :: EM_NONE     = 0
+  INTEGER, PARAMETER :: EM_SURFACE  = 1
+  INTEGER, PARAMETER :: EM_VOLUME   = 2
+  INTEGER, PARAMETER :: EM_LEVEL50M = 3
+  INTEGER, PARAMETER :: EM_FIRE     = 4
+  INTEGER, PARAMETER :: EM_OTHER    = 5
+
+  TYPE, PUBLIC :: emi_var
+  ! type of emission variable
+    CHARACTER(LEN=512) :: ev_varname
+    REAL(KIND=dp)      :: ev_factor
+  END TYPE emi_var
+
+  TYPE, PUBLIC :: emi_sector
+  ! type of emission sector
+    CHARACTER(LEN=64)  :: es_sectorname
+    CHARACTER(LEN=512) :: es_file
+    CHARACTER(LEN=512) :: es_varname
+    INTEGER            :: es_nvars
+    TYPE(emi_var)      :: es_variables(maxvars)
+    INTEGER            :: es_eftype       ! external field type
+    INTEGER            :: es_efgeometry   ! external field geometry
+    INTEGER            :: es_eftimedef    ! external field time axis
+    REAL(dp)           :: es_efvalue  
+    INTEGER            :: es_emtype       ! emission (application) type
+  END TYPE emi_sector
+
+  TYPE, PUBLIC :: emi_matrix
+  ! type of emission matrix
+    CHARACTER(LEN=512) :: em_basepath
+    INTEGER            :: em_nsectors
+    TYPE(emi_sector)   :: em_sectors(maxsectors)
+  END TYPE emi_matrix
+
+  TYPE(emi_matrix)     :: ematrix
+
+  ! subprograms
+
+  CONTAINS
+
+!-----------------------------------------------------------------------
+!>
+!! get next data line of input file
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2008-11)
+!!
+  SUBROUTINE get_next_dataline (iunit, inline, eof)
+
+  INTEGER, INTENT(IN)             :: iunit
+  CHARACTER(LEN=512), INTENT(OUT) :: inline
+  LOGICAL, INTENT(OUT)            :: eof
+
+  INTEGER                         :: status
+
+    status = 0
+    inline ='#'
+    DO WHILE ((inline(1:1) == '#') .AND. (status .GE. 0))
+      read(iunit,'(a)',iostat=status) inline
+      inline = ADJUSTL(inline)
+      IF (LEN_TRIM(inline) == 0) inline(1:1) = '#'     ! skip empty lines
+    ENDDO
+    eof = (status < 0)
+  END SUBROUTINE get_next_dataline
+
+!>
+!! read file with description and emission matrix
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2008-11)
+!!
+  SUBROUTINE em_read (nsectors, cbasepath)
+  ! should be called by p_io
+  ! values should be broadcasted to other PEs after the call
+
+  USE mo_filename,      ONLY: find_next_free_unit
+  USE mo_util_string,   ONLY: toupper
+  USE mo_exception,     ONLY: message, em_error, em_warn, em_info
+  USE mo_mpi,           ONLY: p_parallel, p_parallel_io, p_io, p_bcast
+
+  INTEGER, INTENT(out)          :: nsectors
+  CHARACTER(LEN=*), INTENT(out) :: cbasepath
+
+  INTEGER              :: iunit, start_ndx, tokenlen, i, j, ierr
+  INTEGER              :: eftype, efgeometry, eftimedef
+  INTEGER              :: emtype, nvars, matvec(maxsectors)
+  REAL(KIND=dp)        :: factor, efvalue
+  CHARACTER(LEN=512)   :: inline, filename, ctoken
+  CHARACTER(LEN=256)   :: eftypestring, domainstring, errmsg
+  CHARACTER(LEN=64)    :: secname, varname
+  LOGICAL              :: eof, llast
+
+  ! Initialisation
+  nsectors = 0
+  cbasepath = ''
+  ematrix%em_basepath = 'INVALID PATH!'
+  ematrix%em_nsectors = 0
+  DO i=1, maxsectors
+    ematrix%em_sectors(i)%es_nvars  = 0
+    ematrix%em_sectors(i)%es_emtype = -1
+    ematrix%em_sectors(i)%es_eftype = -1
+    ematrix%em_sectors(i)%es_efgeometry = -1
+    ematrix%em_sectors(i)%es_eftimedef = -1
+    ematrix%em_sectors(i)%es_efvalue = 0._dp
+  END DO
+  matvec(:) = -1
+
+  ! read the emissions matrix on the I/O processor
+  IF (p_parallel_io) THEN
+    iunit = find_next_free_unit (30, 100)
+    OPEN(iunit,file="emi_spec.txt")
+
+    ! first section: BASEPATH
+
+    CALL get_next_dataline (iunit, inline, eof)
+    IF (toupper(inline(1:8)) /= 'BASEPATH') THEN
+      CALL message('em_read', 'First entry in emi_spec.txt must be BASEPATH', &
+                   level=em_error)
+    END IF
+    start_ndx = INDEX(inline,'=') + 1
+    CALL extract_token(inline, '=', 512, start_ndx, tokenlen, ctoken)
+    ! cut off trailing comment if present
+    start_ndx = 1
+    CALL extract_token(ctoken, '#', 512, start_ndx, tokenlen, ctoken)
+    ematrix%em_basepath = TRIM(ctoken)
+    CALL message('em_read', 'Basepath for emission data files: '//TRIM(ctoken), level=em_info)
+    cbasepath = TRIM(ctoken)
+
+    ! second section: SECTORS
+    CALL get_next_dataline (iunit, inline, eof)
+    DO WHILE (toupper(inline(1:6)) /= 'MATRIX')
+      nsectors = nsectors + 1
+
+      ! read emission sector (short) name
+      start_ndx = 1
+      CALL extract_token(inline, '=', 64, start_ndx, tokenlen, ctoken)
+      secname = ctoken
+
+      ! read boundary condition type
+      CALL extract_token(inline, ',', 64, start_ndx, tokenlen, ctoken)
+      eftypestring = toupper(ctoken(1:tokenlen))
+!!write(0,*) '            #debug# ',TRIM(secname),  &
+!!': start, tokenlen, ctoken = ',start_ndx, tokenlen, '"'//ctoken//'"'
+      !! test validity of eftypestring
+      eftype = -1
+      IF (TRIM(eftypestring) == 'EF_INACTIVE') THEN
+        eftype = EF_INACTIVE
+        CALL message('em_read', 'Detected inactive boundary condition for sector '  &
+                     //TRIM(secname)//' in emi_spec.txt!', level=em_warn)
+      END IF
+      IF (TRIM(eftypestring) == 'EF_VALUE' ) eftype = EF_VALUE
+      IF (TRIM(eftypestring) == 'EF_MODULE') eftype = EF_MODULE
+      IF (TRIM(eftypestring) == 'EF_FILE'  ) eftype = EF_FILE
+      IF (TRIM(eftypestring) == '') THEN
+        CALL message('em_read', 'No processing information for sector '  &
+                             //TRIM(secname)//' in emi_spec.txt! Will use EF_INACTIVE.', level=em_warn)
+        eftype = EF_INACTIVE
+      END IF
+      IF (eftype < 0) THEN
+        CALL message ('em_read', 'Invalid EF type for sector '//TRIM(secname)   &
+                      //' in emi_spec.txt: "'//TRIM(eftypestring)//'"!', &
+                       level=em_error)
+        CALL get_next_dataline (iunit, inline,eof)
+        CYCLE     ! ignore rest of input. Program will abort anyhow
+      END IF
+
+      !! for eftype == EF_FILE must read filename, varname and domainstring
+      !! all others except EF_INACTIVE need only domainstring 
+      !! The domainstring contains information related to the definition of a 
+      !! boundary condition plus a keyword to identify the way how emissions
+      !! from this sector shall be applied (surface, volume, level50m, etc.)
+      filename=''
+      varname=''
+      efgeometry = -1
+      eftimedef = -1
+      efvalue = 0._dp
+      emtype = -1
+
+      IF (eftype == EF_FILE) THEN
+        CALL extract_token(inline, ',', 512, start_ndx, tokenlen, ctoken)
+        filename = ctoken
+        IF (TRIM(filename) == '') THEN
+          CALL message('em_read', 'Empty filename for sector '//TRIM(secname)  &
+                       //' in spite of EF_FILE!', level=em_error)
+        END IF
+        CALL extract_token(inline, ',', 64, start_ndx, tokenlen, ctoken)
+        varname = ctoken
+        IF (TRIM(varname) == '') THEN
+          CALL message('em_read', 'Empty varname for sector '//TRIM(secname)  &
+                       //' in spite of EF_FILE!', level=em_error)
+        END IF
+!!write(0,*) '           #debug# filename, varname = ',TRIM(filename),', ',TRIM(varname)
+      END IF
+
+      CALL extract_token(inline, '#', 256, start_ndx, tokenlen, ctoken)
+      domainstring = toupper(ctoken)
+      ierr = 0
+      SELECT CASE (eftype)
+      CASE (EF_INACTIVE)     ! nothing to be done
+      CASE (EF_FILE)
+         CALL parse_ds(domainstring, ierr, errmsg, emtype, &
+                       efgeometry=efgeometry, eftimedef=eftimedef)
+      CASE (EF_VALUE)
+         CALL parse_ds(domainstring, ierr, errmsg, emtype, efvalue=efvalue)
+      CASE (EF_MODULE)
+         CALL parse_ds(domainstring, ierr, errmsg, emtype)
+      CASE DEFAULT                ! error branch: message already printed above
+      END SELECT
+
+      IF (ierr /= 0) THEN
+        CALL message('em_read', errmsg, level=em_error)
+        CALL message('', 'sector = '//TRIM(secname)//', domainstring = '//TRIM(domainstring))
+      END IF
+
+      IF (eftype >= 0) THEN
+        IF (nsectors <= maxsectors) THEN
+          ematrix%em_sectors(nsectors)%es_sectorname = secname
+          ematrix%em_sectors(nsectors)%es_file       = filename
+          ematrix%em_sectors(nsectors)%es_varname    = varname
+          ematrix%em_sectors(nsectors)%es_eftype     = eftype   
+          ematrix%em_sectors(nsectors)%es_efgeometry = efgeometry
+          ematrix%em_sectors(nsectors)%es_eftimedef  = eftimedef
+          ematrix%em_sectors(nsectors)%es_efvalue    = efvalue  
+          ematrix%em_sectors(nsectors)%es_emtype     = emtype   
+        ELSE
+          CALL message ('em_read', 'Too many sectors defined in emi_spec.txt!', &
+                        level=em_error)
+        END IF
+      END IF
+
+      CALL get_next_dataline (iunit, inline,eof)
+    ENDDO
+    ematrix%em_nsectors = nsectors
+
+  ! third section: Species-sector-matrix
+
+    IF (ematrix%em_nsectors == 0) THEN
+      CALL message('em_read', 'No sectors defined in emi_spec.txt!', level=em_error)
+    END IF
+
+  ! first get the matrix header line
+
+    CALL get_next_dataline (iunit, inline, eof)
+    IF (.NOT. eof) THEN
+      start_ndx = 1
+      CALL condense_string(inline, tokenlen)
+      i = 1
+      ! get dummy string (e.g. 'SPEC' heading)
+      CALL extract_token(inline, ' ', 32, start_ndx, tokenlen, ctoken, llast=llast)
+      ! extract sector names and associate them with sector definition above
+      DO WHILE (.NOT. llast)
+        CALL extract_token(inline, ' ', 32, start_ndx, tokenlen, ctoken, llast=llast)
+        DO j=1, ematrix%em_nsectors
+          IF (TRIM(ctoken) == TRIM(ematrix%em_sectors(j)%es_sectorname)) matvec(i)=j
+        END DO
+        IF (matvec(i) == 0 .AND. .NOT. llast) THEN
+          CALL message('em_read', 'No sector definition for sector '//TRIM(ctoken)//'!', &
+                       level=em_warn)
+        END IF
+        i = i + 1
+      END DO
+    END IF
+  
+  ! now read matrix until end of file
+    DO WHILE (.NOT. eof)
+      CALL get_next_dataline (iunit, inline,eof)
+      IF (.NOT. eof) THEN
+        start_ndx = 1
+        CALL condense_string(inline, tokenlen)
+        i = 1
+        ! get variable (i.e. species) name
+        CALL extract_token(inline, ' ', 32, start_ndx, tokenlen, ctoken, llast=llast)
+        varname = TRIM(ctoken)
+        DO WHILE (.NOT. llast)
+          CALL extract_token(inline, ' ', 32, start_ndx, tokenlen, ctoken, llast=llast)
+          IF (matvec(i) > 0 .AND. .NOT. llast) THEN
+            ! check for "not available" character(s)
+            IF (ctoken(1:1) == '-' .OR. ctoken(1:1) == 'X' .OR. ctoken(1:1) == 'x') THEN
+              factor = 0._dp
+            ELSE
+              READ(ctoken, *) factor
+              nvars = ematrix%em_sectors(matvec(i))%es_nvars + 1
+              ematrix%em_sectors(matvec(i))%es_nvars = nvars
+              ematrix%em_sectors(matvec(i))%es_variables(nvars)%ev_varname = varname
+              ematrix%em_sectors(matvec(i))%es_variables(nvars)%ev_factor = factor
+            END IF
+          END IF
+          i = i + 1
+        END DO
+!       READ(inline,*) varname, (factors(i), i=1,ematrix%em_nsectors)
+!       DO i=1, ematrix%em_nsectors
+!         IF (factors(i) > 0.0_dp) THEN
+!           ematrix%em_sectors(matvec(i))%es_nvars = ematrix%em_sectors(matvec(i))%es_nvars + 1
+!           ematrix%em_sectors(matvec(i))%es_variables(ematrix%em_sectors(matvec(i))%es_nvars)%ev_varname = varname
+!           ematrix%em_sectors(matvec(i))%es_variables(ematrix%em_sectors(matvec(i))%es_nvars)%ev_factor = factors(i)
+!         END IF
+!       END DO
+      END IF
+    END DO
+  END IF    ! p_parallel_io
+  
+  !! distribute across all processors
+  IF (p_parallel) THEN
+    CALL p_bcast_em(ematrix, p_io)
+    CALL p_bcast(nsectors,p_io)
+    CALL p_bcast(cbasepath,p_io)
+  END IF
+
+  END SUBROUTINE em_read
+
+  !-----------------------------------------------------------------------------------
+  ! extract a substring from an input line
+  ! this routine handles white spaces
+  ! start_ndx is modified to point to the next character after the delimiter or to the string end
+  ! if delimiter is not found, return the remainder of the string
+  SUBROUTINE extract_token(cstring, cdelim, maxlen, start_ndx, tokenlen, ctoken, lfound, llast)
+  
+  CHARACTER(LEN=*), INTENT(in)     :: cstring
+  CHARACTER(LEN=1), INTENT(in)     :: cdelim
+  INTEGER, INTENT(in)              :: maxlen
+  INTEGER, INTENT(inout)           :: start_ndx
+  INTEGER, INTENT(out)             :: tokenlen
+  CHARACTER(LEN=maxlen), INTENT(out) :: ctoken
+  LOGICAL, INTENT(out), OPTIONAL   :: lfound, llast
+
+  CHARACTER(LEN=512)         :: ctmp
+  INTEGER                    :: istop
+  LOGICAL                    :: lofound, lolast
+
+  lofound = .FALSE.
+  lolast = .FALSE.
+  IF (start_ndx <= 0) start_ndx = 1     ! make sure it works
+  ! check for end of input string
+  IF (start_ndx > LEN_TRIM(cstring)) THEN
+    start_ndx = LEN_TRIM(cstring)+1
+    lolast = .TRUE.
+    ctoken = ''
+  ELSE
+    ! check for delimiter
+    istop = INDEX(cstring(start_ndx:), cdelim)
+    IF (istop == 0) THEN        ! delimiter not found - assume here comes the last token
+      lolast = .TRUE.
+      ctmp = TRIM(ADJUSTL(cstring(start_ndx:)))   
+      start_ndx = LEN_TRIM(cstring)+1
+    ELSE                        ! delimiter found
+      lofound = .TRUE. 
+      ctmp = TRIM(ADJUSTL(cstring(start_ndx:start_ndx+istop-2)))
+      start_ndx = start_ndx + istop  ! points to one character behind delimiter
+    END IF
+!!write(0,*) '     #debug# lfound, llast, start_ndx, istop, ctmp = ',lofound, lolast, start_ndx, istop, ctmp
+    ! return token
+    IF (LEN_TRIM(ctmp) > maxlen) THEN
+      ctoken = ctmp(1:maxlen)
+    ELSE
+      ctoken = TRIM(ctmp)
+    END IF
+  END IF
+  tokenlen = LEN_TRIM(ctoken)
+  IF (PRESENT(lfound)) THEN
+    lfound = lofound
+  END IF
+  IF (PRESENT(llast)) THEN
+    llast = lolast
+  END IF
+!!write(0,*) '     #debug# token, tokenlen = ',ctoken,tokenlen
+
+  END SUBROUTINE extract_token
+   
+  !-----------------------------------------------------------------------------------
+  ! remove duplicate blanks from a string
+  ! This is needed for parsing the MATRIX section
+  SUBROUTINE condense_string(cstring, len)
+  
+  CHARACTER(LEN=*), INTENT(inout)  :: cstring
+  INTEGER, INTENT(out)             :: len
+
+  INTEGER                    :: i, j
+  LOGICAL                    :: lblank
+
+  lblank = .FALSE.
+  len = LEN_TRIM(cstring)
+  IF (len == 0) RETURN
+
+  j = 0
+  ! ignore leading blanks
+  i = 1
+  DO WHILE (cstring(i:i) == ' ')
+    i = i+1
+  END DO
+  DO i=1,len
+    IF (lblank) THEN                 ! a blank has been found at the last step
+      IF (cstring(i:i) /= ' ') THEN  ! ignore another blank
+        lblank = .FALSE.
+        j = j+1
+        cstring(j:j) = cstring(i:i)
+      END IF
+    ELSE                             ! last character was not a blank -> copy
+      j = j+1
+      cstring(j:j) = cstring(i:i)
+      IF (cstring(i:i) == ' ') lblank = .TRUE.
+    END IF
+  END DO
+  cstring(j+1:) = ' '
+
+  len = j
+  END SUBROUTINE condense_string
+  
+  !-----------------------------------------------------------------------------------
+  ! subroutines for string parsing (see em_read)
+  SUBROUTINE parse_ds(cstring, ierr, errmsg, emtype, efgeometry, eftimedef, efvalue)
+
+  CHARACTER(LEN=*),   INTENT(in)  :: cstring
+  INTEGER,            INTENT(out) :: ierr
+  CHARACTER(LEN=256), INTENT(out) :: errmsg
+  INTEGER,            INTENT(out) :: emtype
+  INTEGER, OPTIONAL,  INTENT(out) :: efgeometry, eftimedef
+  REAL(dp), OPTIONAL, INTENT(out) :: efvalue
+
+  INTEGER           :: start_ndx, tokenlen
+  LOGICAL           :: llast, lfound, lnum
+  CHARACTER(LEN=32) :: ctoken
+
+  !-- set default values
+  ierr = 0
+  errmsg = ''
+  emtype     = EM_SURFACE
+  IF (PRESENT(efgeometry)) THEN
+    efgeometry = EF_LONLAT    ! this is typical for emission files
+  END IF
+  IF (PRESENT(eftimedef)) THEN
+    eftimedef  = EF_TIMERESOLVED
+  END IF
+  IF (PRESENT(efvalue)) THEN
+    efvalue = 0._dp
+  END IF
+
+  !-- split domainstring at commas and analyze each substring
+  ! note: at least one sub string must be given
+  IF (LEN_TRIM(cstring) == 0) THEN
+    ierr = 1
+    errmsg = 'Empty attribute string! You must at least provide a value for '  &
+             //'the application mode (surface, volume, etc.)'
+    RETURN
+  END IF
+
+  start_ndx = 1    ! absolute position in string
+  llast = .FALSE.
+  DO WHILE(.NOT. llast)
+    CALL extract_token(cstring, ',', 32, start_ndx, tokenlen, ctoken, llast=llast)
+    lfound = .FALSE.
+!!write(0,*) '            #debug# ',start_ndx, '.... next token = ',trim(ctoken), &
+!!', tokenlen = ',tokenlen
+    ! look for known tokens (token is uppercase because domainstring is uppercase)
+    IF (PRESENT(efgeometry)) THEN
+      SELECT CASE (TRIM(ctoken))
+      CASE ('EF_LONLAT')
+        efgeometry = EF_LONLAT
+        lfound = .TRUE.
+      CASE ('EF_3D')
+        efgeometry = EF_3D
+        lfound = .TRUE.
+      CASE ('EF_LATLEV')
+        efgeometry = EF_LATLEV
+        lfound = .TRUE.
+      CASE ('EF_LAT')
+        efgeometry = EF_LAT
+        lfound = .TRUE.
+      CASE ('EF_LEV')
+        efgeometry = EF_LEV
+        lfound = .TRUE.
+      CASE ('EF_SINGLE')
+        efgeometry = EF_SINGLE
+        lfound = .TRUE.
+      CASE DEFAULT       !! nothing, but valid
+      END SELECT
+    END IF
+    IF (PRESENT(eftimedef)) THEN
+      SELECT CASE (TRIM(ctoken))
+      CASE ('EF_TIMERESOLVED')
+        eftimedef = EF_TIMERESOLVED
+        lfound = .TRUE.
+      CASE ('EF_IGNOREYEAR')
+        eftimedef = EF_IGNOREYEAR
+        lfound = .TRUE.
+      CASE ('EF_CONSTANT')
+        eftimedef = EF_CONSTANT
+        lfound = .TRUE.
+      CASE DEFAULT
+      END SELECT
+    END IF
+!! skip interpolation flags for now...
+!!      CASE ('EF_NOINTER')
+!!      CASE ('EF_LINEAR')
+!!      CASE ('EF_CUBIC')
+!! we could also parse EF_TIMEINDEX and EF_TIMEOFFSET (split at '=' and extract value)
+!! do nothing for now
+    IF (.NOT. lfound) THEN
+      SELECT CASE (TRIM(ctoken))
+      CASE ('SURFACE')
+        emtype = EM_SURFACE
+        lfound = .TRUE.
+      CASE ('VOLUME')
+        emtype = EM_VOLUME
+        lfound = .TRUE.
+      CASE ('LEVEL50M')
+        emtype = EM_LEVEL50M
+        lfound = .TRUE.
+      CASE ('FIRE')
+        emtype = EM_FIRE
+        lfound = .TRUE.
+      CASE ('OTHER')
+        emtype = EM_OTHER
+        lfound = .TRUE.
+      CASE DEFAULT
+      END SELECT
+    END IF
+    IF (PRESENT(efvalue) .AND. .NOT. lfound) THEN
+    ! test if token is numerical value (use better test from library??)
+      lnum = testnum(ctoken)
+      IF (lnum) THEN
+        READ(ctoken, *) efvalue
+        lfound = .TRUE.
+      ELSE
+        ierr = 2
+        errmsg = 'Invalid floating point number! '//TRIM(ctoken)
+      END IF
+    END IF
+    ! if nothing has been found until now, we have an invalid token string
+    IF (.NOT. lfound) THEN
+      ierr = 3
+      errmsg = 'Undefined token in domainstring: '//TRIM(ctoken)
+      RETURN
+    END IF
+  END DO
+
+  !! consistency checks
+  IF (PRESENT(efgeometry)) THEN
+    IF (emtype == EM_SURFACE .AND. efgeometry == EF_3D) THEN
+      ierr = 4
+      errmsg = 'Inconsistent setting of EM_TYPE (surface) and EF_GEOMETRY (3D)!'
+    END IF
+  END IF
+  !! more of these ..???
+  END SUBROUTINE parse_ds
+
+  FUNCTION testnum(string)    RESULT(lnum)
+
+  CHARACTER(len=*), INTENT(in)    :: string
+  LOGICAL                         :: lnum, lsign
+  CHARACTER(len=16)               :: ctest
+  INTEGER                         :: i, j, jmax
+
+  lnum = .TRUE.
+  ctest = '0123456789+-.'     ! must not contain exponential sign in position 1
+  j = -1
+  jmax = 3
+  DO i=1,LEN_TRIM(string)
+    lsign = (string(1:1) == '+' .OR. string(1:1) == '-')
+    IF (INDEX(TRIM(ctest), string(i:i)) == 0) lnum = .FALSE.
+    IF (i == 1) ctest = '0123456789.eE'      ! sign not allowed again until after 'e', 'E'
+    IF (string(i:i) == '.') THEN
+      ctest = '0123456789eE'    ! only one decimal point allowed
+      IF (i == 1 .AND. LEN_TRIM(string) == 1) lnum = .FALSE.   ! avoid dot-only
+      IF (lsign .AND. i == 2 .AND. LEN_TRIM(string) == 2) lnum = .FALSE.
+    END IF
+    IF (string(i:i) == 'e' .OR. string(i:i) == 'E') THEN
+      ctest = '0123456789+-'
+      j = 0
+    END IF
+    IF (j == 1 .AND. (string(i:i) == '+' .OR. string(i:i) == '-')) jmax = 4
+    IF (j > 0) ctest = '0123456789'
+    IF (j >= 0) j = j+1              ! count digits of exponent
+    IF (j > jmax) lnum = .FALSE.        ! overflow
+  END DO
+
+  END FUNCTION testnum
+
+  !! broadcast emission matrix structure
+  SUBROUTINE p_bcast_em (em_struc, p_source, comm)
+  USE mo_mpi, ONLY: p_bcast, p_all_comm
+
+  TYPE(emi_matrix),  INTENT(INOUT) :: em_struc
+  INTEGER,           INTENT(in)    :: p_source
+  INTEGER, OPTIONAL, INTENT(in)    :: comm
+
+  INTEGER :: p_comm, jsec, jvar
+
+  IF (PRESENT(comm)) THEN
+     p_comm = comm
+  ELSE
+     p_comm = p_all_comm
+  ENDIF
+
+  CALL p_bcast(em_struc%em_basepath,    p_source, p_comm)
+  CALL p_bcast(em_struc%em_nsectors,    p_source, p_comm)
+  CALL p_bcast(em_struc%em_basepath,    p_source, p_comm)
+  DO jsec=1, em_struc%em_nsectors
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_sectorname,   p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_file,         p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_varname,      p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_nvars,        p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_eftype,       p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_efgeometry,   p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_eftimedef,    p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_efvalue,      p_source, p_comm)
+    CALL p_bcast(em_struc%em_sectors(jsec)%es_emtype,       p_source, p_comm)
+    DO jvar=1, em_struc%em_sectors(jsec)%es_nvars
+      CALL p_bcast(em_struc%em_sectors(jsec)%es_variables(jvar)%ev_varname, p_source, p_comm)
+      CALL p_bcast(em_struc%em_sectors(jsec)%es_variables(jvar)%ev_factor,  p_source, p_comm)
+    END DO
+  END DO
+
+  END SUBROUTINE p_bcast_em
+
+
+  SUBROUTINE em_get_sector_info(i, sectorname, nvars)
+
+  INTEGER, INTENT(in)             :: i
+  CHARACTER(LEN=64), INTENT(out)  :: sectorname
+  INTEGER, INTENT(out)            :: nvars
+
+  IF (i > ematrix%em_nsectors) THEN
+write(0,*) 'em_get_sector_info: Sector index out of range! Should not happen!!'
+  END IF
+
+  sectorname = ematrix%em_sectors(i)%es_sectorname
+  nvars      = ematrix%em_sectors(i)%es_nvars
+
+  END SUBROUTINE
+
+  SUBROUTINE em_get_bc_from_matrix( i, j, bc_struc, emtype, emfactor, varname)
+
+  USE mo_exception,                ONLY: message, em_error
+  USE mo_boundary_condition,       ONLY: bc_nml, BC_EVERYWHERE, BC_BOTTOM
+  USE mo_boundary_condition,       ONLY: BC_REPLACE
+  USE mo_filename,                 ONLY: str_filter
+
+  INTEGER,          INTENT(IN)   :: i, j
+  TYPE(bc_nml),     INTENT(OUT)  :: bc_struc
+  INTEGER,          INTENT(out)  :: emtype
+  REAL(dp),         INTENT(out)  :: emfactor  ! emission scaling factor
+  CHARACTER(LEN=64), INTENT(out) :: varname   ! actually name of a species
+
+  CHARACTER(LEN=512) :: cfile, help
+  INTEGER            :: ndx, ndx_c
+
+  !-- set default values
+  emfactor = 1._dp
+  bc_struc%ef_interpolate = 0               !! add to parse_ds later (?)
+  bc_struc%ef_units= 'kg m-2 s-1'           !! add to parse_ds later (?)
+  bc_struc%bc_mode = BC_REPLACE             !! needed for extended emi diagnostics
+
+  !-- fill easy stuff
+  emtype = ematrix%em_sectors(i)%es_emtype
+  varname = ematrix%em_sectors(i)%es_variables(j)%ev_varname
+  bc_struc%ef_type     = ematrix%em_sectors(i)%es_eftype
+  bc_struc%ef_geometry = ematrix%em_sectors(i)%es_efgeometry
+  bc_struc%ef_timedef  = ematrix%em_sectors(i)%es_eftimedef
+  bc_struc%ef_value    = ematrix%em_sectors(i)%es_efvalue
+
+  !-- construct correct file name template
+  IF (bc_struc%ef_type == EF_FILE) THEN
+    IF (LEN_TRIM(ematrix%em_sectors(i)%es_file) == 0) THEN
+      CALL message('em_get_bc_from_matrix', 'Empty file name for EF_FILE in ' &
+                   //TRIM(ematrix%em_sectors(i)%es_sectorname), level=em_error)
+    END IF
+    ndx_c = INDEX(ematrix%em_sectors(i)%es_file,'%C')
+     IF (ndx_c > 0) THEN
+       help = ematrix%em_sectors(i)%es_file
+       help(ndx_c:ndx_c)='$'
+       ndx=INDEX(help,'%')
+       DO WHILE (ndx > 0)
+         help(ndx:ndx)='$'
+         ndx=INDEX(help,'%')
+       ENDDO
+       help(ndx_c:ndx_c)='%'
+       cfile = str_filter(help,0, 0, 0, 0, 0, 0,0,TRIM(ematrix%em_sectors(i)%es_variables(j)%ev_varname),"T00","L00")
+       ndx=INDEX(cfile,'$')
+       DO WHILE (ndx > 0)
+         cfile(ndx:ndx)='%'
+         ndx=INDEX(cfile,'$')
+       ENDDO
+!! write(0,*) '            #debug# ',"em_get_bc_from_matrix: expandierter cfile=", cfile
+       bc_struc%ef_template = TRIM(ematrix%em_basepath)//'/'//TRIM(cfile)
+     ELSE
+       bc_struc%ef_template = TRIM(ematrix%em_basepath)//'/'//TRIM(ematrix%em_sectors(i)%es_file)
+     ENDIF
+  ENDIF
+
+  !-- construct bc_domain value
+  ! note: except for "volume" emissions (i.e. aircraft, volcanoes) all boundary conditions
+  ! are defined as BC_BOTTOM, i.e. as 2D fields. Vertical distribution takes place where
+  ! necessary in emi_interface in mo_emi_interface.
+  SELECT CASE (ematrix%em_sectors(i)%es_emtype)
+  CASE (EM_SURFACE)
+    bc_struc%bc_domain = BC_BOTTOM
+  CASE (EM_VOLUME)
+    bc_struc%bc_domain = BC_EVERYWHERE
+    !! WARNING: this might be wrong (e.g. aircraft) -- default to BC_ALTITUDE here?
+    !! might need to expand parse_ds to allow for additional options ...
+  CASE (EM_LEVEL50M)
+    bc_struc%bc_domain = BC_BOTTOM
+!!  bc_struc%bc_domain = BC_LEVEL
+!!  bc_struc%bc_minlev = nlev-1
+!!  bc_struc%bc_maxlev = nlev-1
+  CASE (EM_FIRE)
+    bc_struc%bc_domain = BC_BOTTOM
+!!  bc_struc%bc_domain = BC_EVERYWHERE
+!!  bc_struc%bc_mode   = BC_SPECIAL
+  CASE (EM_OTHER)
+    bc_struc%bc_domain = BC_BOTTOM
+  END SELECT
+
+  !!--- replace %C0 in varname field by species name
+  !! must be made more flexible to allow for "emis_%C0" for example  ### mgs
+  IF (index(ematrix%em_sectors(i)%es_varname,'%') > 0) THEN
+    bc_struc%ef_varname = trim(ematrix%em_sectors(i)%es_variables(j)%ev_varname)
+  ELSE
+    bc_struc%ef_varname = trim(ematrix%em_sectors(i)%es_varname)
+  ENDIF
+  emfactor = ematrix%em_sectors(i)%es_variables(j)%ev_factor
+  END SUBROUTINE em_get_bc_from_matrix
+
+  FUNCTION em_get_SectorIndex (name) RESULT(index)
+  USE mo_exception,                ONLY: message, em_error
+  CHARACTER(LEN=*), INTENT(IN) :: name
+  INTEGER :: index
+
+  LOGICAL :: found
+  INTEGER :: i
+
+! Determine index of sector in matrix
+
+  i = 0
+  found = .false.
+  DO WHILE ((.NOT. found) .AND. (i <= ematrix%em_nsectors))
+    i = i + 1
+    IF (ematrix%em_sectors(i)%es_sectorname == name) found = .true.
+  ENDDO
+  IF (i .gt. ematrix%em_nsectors) CALL message('em_get_bc_from_matrix', 'no sector '//trim(name)//' defined!',level=em_error)
+  index = i
+  END FUNCTION em_get_SectorIndex
+
+END MODULE mo_emi_matrix

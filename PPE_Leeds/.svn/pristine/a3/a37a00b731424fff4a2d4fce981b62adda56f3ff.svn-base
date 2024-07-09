@@ -1,0 +1,46 @@
+@STRING{ACP = {Atmos.~Chem.~Phys.}}
+@STRING{ATE = {Atmos.~Env.}}
+@STRING{APH = {Ann.~Phys.}}
+@STRING{GRL = {Geophys.~Res.~Lett.}}
+@STRING{JAC = {J.~Atmos.~Chem.}}
+@STRING{JAMES = {J.~Adv.~in Modeling Earth Systems}}
+@STRING{JAS = {J.~Atm.~Sci.}}
+@STRING{JGR = {J.~Geophysical Research}}
+@STRING{JOC = {J.~of~Climate}}
+@STRING{MET = {Meteorolog.~Zeitschrift}}
+@STRING{MWR = {Monthly Weather Review}}
+@STRING{QMS = {Q.~J.~R.~Meteorol.~Soc}}
+
+@ARTICLE{man641, 
+AUTHOR = {S.~Manabe and R.~Strickler}, 
+TITLE = {Thermal equilibrium of the atmosphere with a convective adjustment}, 
+JOURNAL = {J.~Atmos.~Sci.}, 
+YEAR = {1964},
+VOLUME = {21},
+PAGES = {361--385},
+DOI = {10.1175/1520-0469(1964)021<0361:teotaw>2.0.co;2}, 
+ABSTRACT = {met320}
+}
+
+@ARTICLE{bec14x,
+AUTHOR = {T.~Becker and B.~Stevens}, 
+TITLE = {Climate and climate sensitivity to changing {CO$_{2}$} on 
+         an idealized land planet}, 
+JOURNAL = JAMES, 
+YEAR = {2014},
+VOLUME = {(submitted)},
+PAGES = {}
+}
+
+@ARTICLE{pop131,
+AUTHOR = {D.~Popke and B.~Stevens and A.~Voigt},
+TITLE = {Climate and climate change in a radiative--convective equilibrium 
+         version of {ECHAM6}},
+JOURNAL = JAMES,
+YEAR = {2013},
+VOLUME = {5},
+NUMBER = {1},
+PAGES = {1--14},
+DOI = {10.1029/2012MS000191},
+ABSTRACT = {met317}
+}

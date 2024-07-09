@@ -1,0 +1,47 @@
+# NEC SX-6 @ DKRZ
+#-------------------------------------------------------------------------
+
+ARCH       = SX
+
+MARCH      = -sx6
+
+MPIROOT    =
+MPI_LIB    =
+
+case `uname -n` in
+cross|ds*)
+    MPIROOT     = /SX/opt/mpisx/inst
+    MPI_LIB     = -lmpi
+    MPI_INCLUDE = -I${MPIROOT}/lib	
+    NETCDFROOT  = /pool/SX-6/netcdf/netcdf-3.6.0-p1
+    LIBS        = -L../lib -lsupport -L/SX/opt/MathKeisan/lib -llapack -lblas
+    ;;
+esac
+
+case `uname -s` in
+SUPER-UX)
+    CC  = c++
+    F90 = f90
+    ;;
+*)
+    CC  = sxc++
+    F90 = sxf90
+    AR  = sxar
+    AS  = sxas
+esac
+
+CFLAGS   = $MARCH -Chopt
+
+FFLAGS   = $MARCH -Chopt 
+F90FLAGS = $MARCH -f2003 -Chopt -Ep -Wl,-Z 16G -pi line=1000 -DHAVE_LIBNETCDF64 -DHAMMOZ
+
+DEFOPT   = -D
+
+MODOPT   = -I
+
+SRCDIRS  =
+
+
+
+
+

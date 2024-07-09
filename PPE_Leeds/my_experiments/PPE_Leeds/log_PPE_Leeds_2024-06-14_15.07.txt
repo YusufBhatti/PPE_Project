@@ -1,0 +1,84 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2013-01-01 00:00:00
+Starting date for this run:        2013-01-01 00:00:00
+Ending date for this run:          2013-02-01 00:00:00
+
+
+----
+Create a backup of the current state of this code...
+
+All the source information (and how to restore this code) can be found here:
+./source_info_PPE_Leeds_2024-06-14_15.07.txt
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 20 nprocb = 3
+
+----
+Setting machine-specific variables and create the batch job script...
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Leeds/echam_jobscript_PPE_Leeds.sh
+
+----
+Recording the compute settings:
+ - queue name: normal
+ - job name: PPE_Leeds
+ - number of cpus: 60
+
+----
+Creating the output directory...
+
+Output directory: /home/ybhatti/yusufb/ECHAM/OUTPUT/PPE_Leeds/
+
+----
+Parsing namelist_PPE_Leeds.echam to get input files-related flags...
+
+----
+Starting input files linking process into /home/ybhatti/yusufb/ECHAM/OUTPUT/PPE_Leeds/...
+
+with:
+
+input_basepath: /home/ybhatti/yusufb/MODEL_INPUT/v0002
+nudg_basepath: /home/ybhatti/yusufb/MODEL_INPUT/Nudging/era5_T63L47
+exp_dir: /home/ybhatti/yusufb/ECHAM/OUTPUT/PPE_Leeds/
+hres: T63
+vres: L47
+oceres: GR15
+start_yyyymm: 201301
+stop_yyyymm: 201302
+start_year_m1: 2012
+stop_year_p1: 2014
+start_yyyymm_m1: 201212
+stop_yyyymm_p1: 201303
+flag_time_dep_sst_sic: false
+sst_sic_dataset: amip
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: rcp45
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+
+ERROR! Nudging data for T63L47 at 201301 in netcdf format does not seem to be available in /home/ybhatti/yusufb/MODEL_INPUT/Nudging/era5_T63L47.
+You may check if alternate format exists for this date and change the NDGCTL namelist parameters accordingly.
+Exiting

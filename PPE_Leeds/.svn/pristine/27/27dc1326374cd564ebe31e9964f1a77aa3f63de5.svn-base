@@ -1,0 +1,709 @@
+\chapter{Surface processes}\label{c6}
+
+\section{Heat budget of the soil}\label{s6.1}
+
+\subsection{Land surface temperature}\label{su6.1.1.}
+
+The surface energy balance is the link between the atmosphere and the
+underlying surface, with the surface temperature $T_s$ as the key variable. The
+interface between the land surface and the atmosphere can be understood as
+a `layer' at the surface which is in contact with the atmosphere. The
+surface energy balance for this layer can then be written as
+
+\begin{equation}
+C_L \frac{\partial T_s}{\partial t}=R_{net}+LE+H+G\label{6.1}
+\end{equation}
+
+where $C_L$ is the heat capacity of the layer [Jm$^{-2}$K$^{-1}$], $H$ is
+the sensible heat flux, $LE$ the latent heat flux ($L$ is the latent heat
+of vaporization or sublimation of water, respectively), $G$ is the ground
+heat flux and $R_{net}$ the net radiation consisting of the following
+components,
+
+\begin{equation}
+R_{net}=(1-\alpha_s)R_{sd}+ \epsilon R_{ld}-\epsilon\sigma T_s^4\label{6.2}
+\end{equation}
+
+where $\alpha_s$ is the surface albedo, $R_{sd}$ the downwelling solar
+radiation, $R_{ld}$ the downwelling longwave radiation, $\epsilon$ the
+surface emissivity, and $\alpha$ the Stefan-Boltzmann constant. Note
+that in \eref{6.1} downward (upward) fluxes are positive
+(negative). Due to the strong coupling between the surface and the
+atmosphere, the numerical solution of \eref{6.1} is closely linked to
+the vertical heat transfer within the atmosphere (c.f. section
+\ref{sec:para1}). In ECHAM5, an implicit coupling scheme is used
+\citep{schulz01} which is unconditionally stable and allows to 
+synchronously calculate the prognostic variables and the surface
+fluxes. In order to avoid iterations, the nonlinear terms appearing in
+the flux formulations are replaced by truncated Taylor
+expansions. These terms are the upward longwave radiation (i.e. the
+last term in \eref{6.2})
+
+\begin{equation}
+\epsilon\sigma(T_s^{n+1})^4\approx \epsilon\sigma (T_s^n)^4+ 4
+\epsilon\sigma(T_s^n)^3(T_s^{n+1}-T_{s}^n)\equiv 
+\epsilon\sigma(T_{rad}^{n+1})^4,
+\label{6.3}\end{equation}
+
+where $T_{rad}^{n+1}$ is an effective `radiative temperature' used in the
+radiation scheme to close the energy balance, and the saturated specific
+humidity
+
+\begin{equation}
+q_s(T_s^{n+1})
+\approx q_s(T_s^n)+\left.\frac{\partial q_s}{\partial T_s}\right|_{T_s^n}
+(T_s^{n+1}-T_s^n)\label{6.4}
+\end{equation}
+
+where $n$ is the time level. With these linearizations, an expression for
+$T_s^{n+1}$ is obtained which implicitly includes the surface fluxes at
+time level $n+1$, and $T_s^{n+1}$, on the other hand, is used in the
+vertical diffusion scheme for calculating new fluxes and atmospheric
+profiles of temperature and humidity. This ensures energy conservation in
+the coupled system because the atmosphere receives the same surface fluxes
+as applied in the land surface scheme.
+
+\subsection{Soil temperatures}\label{su6.1.2}
+
+The temperature profile within the soil is calculated from the thermal
+diffusion equation
+
+\begin{equation}
+C_s\frac{\partial T}{\partial t}=-\frac{\partial G}{\partial
+z}=-\frac{\partial}{\partial z}\left(-\lambda_s\frac{\partial T}{\partial
+z}\right)\label{6.5}
+\end{equation}
+
+where $C_s=\rho_s c_s$ is the volumetric heat capacity of the soil,
+[Jm$^{-3}$K$^{-1}$], $\rho_s$ the soil density [kgm$^{-3}$], $c_s$ the
+soil specific heat [Jkg$^{-1}$K$^{-1}$], $G$ is the thermal heat flux
+(positive downward), $\lambda_s=\rho_s c_s k_s$ is the thermal
+conductivity [Wm$^{-1}$K$^{-1}$], $\kappa_s$ the thermal diffusivity
+[m$^2$s$^{-1}$] and $z$ the depth [m]. For the numerical solution
+of \eref{6.5}, the upper 10 m of the soil are divided into 5 unevenly
+spaced layers with thicknesses, from top to bottom, according to
+0.065, 0.254, 0.913, 2.902, and 5.700 [m]. An implicit time
+integration scheme is applied where the finite difference form of
+\eref{6.5} is reduced to a system of the type:
+
+\begin{equation}
+T^{n+1}_{k+1}=A^n_k+B^n_kT^{n+1}_k\label{6.6}
+\end{equation}
+
+where $n$ is the time level and $k$ the layer index. The coefficients
+$A^n_k$ and $B^n_k$  include the vertical increments $\Delta z$, the time
+step $\Delta t$, the volumetric heat capacity $C_s$, the thermal
+conductivity $\lambda_s$ and the temperature at time level $n$ in $A^n_k$.
+The coefficients $A$ and $B$ are obtained by integrating upward from
+bottom to top, assuming vanishing heat flux at the bottom of the lowest
+layer. The solution of \eref{6.6} proceeds from top to bottom by using
+
+\begin{equation}
+T^{n+1}_1= T^{n+1}_s\label{6.7}
+\end{equation}
+
+as the upper boundary condition. For snow-free land, spatially varying
+$C_s$ and $\kappa_s$ are prescribed for ice sheets/glaciers and for
+five soil types according to the FAO soil map. For snow covered land, the
+solution method remains unchanged, except that a mass-weighted mixture of
+soil and snow is applied to determine the properties $\rho_s, c_s,
+\kappa_s$. For example, if the snow fills the top soil layer completely,
+and the next one partially, the respective properties for snow are used
+for the top layer and a mass-weighted mixture is used for the next one.
+
+\section{Water budget}\label{s6.2}
+
+Budget equations are formulated for the following water reservoirs (depth
+in m)
+
+\begin{itemize}
+\item Snow $h_{snc}$ (water equivalent) intercepted by the canopy
+\item Snow $h_{sn}$ (water equivalent) at the surface
+\item Rain water $h_{wc}$ intercepted by the canopy
+\item Soil water $h_{ws}$ \end{itemize}
+
+\subsection{Interception of snow by the canopy}\label{su6.2.1}
+
+The snow interception scheme \citep{roesch01} accounts for the effects
+of snowfall ($c_v S$, where $c_{v}=0.25$ is an interception parameter
+and $S$ the snowfall rate), sublimation of snow from the canopy
+$(E_{snc} < 0)$, or deposition $(E_{snc}> 0)$, and unloading of snow
+due to slipping and melting $U(T_c)$ and wind $U(v_c)$, where $T_c$
+and $v_c$ are temperature and wind speed in the canopy, respectively,
+
+\begin{equation}
+\rho_w\dnd{h_{snc}}{t}=c_{v}S+E_{snc}-\rho_wh_{snc}[U(T_c)+U(v_c)].\label{6.8}
+\end{equation}
+
+The accumulation of snow on the canopy is limited by the capacity of the
+interception reservoir, $h_{snc} \le h_{cin}$, where the interception
+reservoir, $h_{cin}$, is a function of the leaf area index, $LAI$,
+
+\begin{equation}
+h_{cin} = h_{0}LAI\label{6.9}
+\end{equation}
+
+with $h_{0}=2\cdot 10^{-4}$ m.
+The unloading processes are parameterized according to
+
+\begin{equation}
+U(T_c)=(T_c-c_1)/c_2\ge 0\label{6.10}
+\end{equation}
+
+\begin{equation}
+U(v_c)=v_c/c_3\ge 0\label{6.11}
+\end{equation}
+
+with $c_1 = (T_0 - 3)$, where $T_0$ is the freezing temperature of
+water [K], $c_2 = 1.87 \cdot 10^5$ Ks and $c_3 = 1.56 \cdot
+10^5$ m.  Because $T_c$ and $v_c$ are not available in the model, the
+respective values at the lowest model level are used
+instead. Consistent with this assumption, the snow melt parameterized
+according to \eref{6.10} results in a cooling of the lowest model
+layer
+
+\begin{equation}
+\dnd{T_c}{t}=-\rho_wh_{snc}U(T_{c}) \frac{L_f}{c_p}\frac{g}{\Delta 
+p}\label{6.12}
+\end{equation}
+
+where $\Delta p$ is the pressure thickness of the lowest model layer.
+
+\subsection{Snow at the surface}\label{su6.2.2}
+
+The snow budget at the surface is given by
+
+\begin{equation}
+\rho_w\dnd{h_{sn}}{t}=(1-c_{v})S+E_{sn}-M_{sn}+\rho_wh_{snc}U(v_c)\label{6.13}.
+\end{equation}
+
+Here, $E_{sn}<0$ is the sublimation of snow, $E_{sn} > 0$  the deposition,
+and $M_{sn}$ is the snow melt
+
+\begin{equation}
+M_{sn}=\frac{C_s}{L_f}\left ( \frac{T^*-T_0}{\Delta t}\right)\label{6.14}
+\end{equation}
+
+where $C_s$ is the heat capacity of the snow layer, $\rho_w$ the density
+of water, $L_f$ the latent heat of fusion, and $T^*$ is the
+surface temperature obtained from the surface energy balance equation 
+\eref{6.1}
+without considering snow melt. The `final' surface temperature, i.e.
+including the cooling due to snow melt, is given by
+
+\begin{equation}
+T_s=T^*-\frac{L_f}{C_s}(M_{sn}\Delta t)=T_0\label{6.15}.
+\end{equation}
+
+For the special case of complete melting during one time step $M_{sn}\Delta t$
+is limited by the available snow amount $\rho_wh_{sn}$ so
+that $T^* >T_s \ge T_0$. Over ice sheets and glaciers, snow processes 
+are neglected,
+i.e. $h_{sn}=h_{snc}=0$. However, a melting term analogous to
+\eref{6.14} is
+diagnosed for $T^* > T_0$ and $T_s$ is set to $T_0$ in this case.
+
+\subsection{Interception of rain by the canopy}\label{su6.2.3}
+
+Analogous to snowfall, a fraction $c_{v}R$ of the incoming rain $R$ is
+intercepted in the canopy with an upper limit defined by the capacity of
+the interception reservoir, $h_{cin}$, analogous to the interception of
+snowfall
+
+\begin{equation}
+\rho_w\dnd{h_{wc}}{t}=c_{v}R+E_{wc}+\rho_w h_{snc}U(T_c)\label{6.16}
+\end{equation}
+
+where $E_{wc}< 0$  is the evaporation and $E_{wc}> 0$ the dew deposition.
+Melting of $h_{snc}$ according to \eref{6.8} and \eref{6.10} 
+contributes to $h_{wc}$
+unless the capacity of the interception reservoir is exceeded. In that
+case, the excess water would contribute to the soil water budget through
+the term $M_{snc}$  in \eref{6.17}.
+
+\subsection{Soil water}\label{su6.2.4}
+
+Changes in soil water $h_{ws}$ due to rainfall, evaporation, snow melt,
+surface runoff and drainage are calculated for a single bucket with
+geographically varying maximum field capacity $h_{cws}$
+
+\begin{equation}
+\rho_w\dnd{h_{ws}}{t}=(1-c_{v})R+E_{ws}+M_{sn}+M_{snc}-R_s-D\label{6.17}
+\end{equation}
+
+where $E_{ws}<0$ includes the effects of bare-soil evaporation and
+evapotranspiration, and $E_{ws}>0$ the dew deposition. $M_{sn}$ is the
+snow melt at the surface according to \eref{6.14}, $M_{snc}$ the
+excess snow melt in the canopy, $R_{s}$ the surface runoff and $D$ the
+drainage.  Runoff and drainage are calculated from a scheme which
+takes into account the heterogeneous distribution of field capacities
+within a grid-cell \citep{duemnil92}. The storage capacity of the soil
+is not represented by a unique value, as in the traditional bucket
+scheme, but by a set of values with a probability density function
+$F(h_{ws})$. Then, a `storage capacity distribution curve' can be
+defined, which represents the fraction $f_{ws}$ of the grid-cell in
+which the storage capacity is less or equal to $h_{ws}$
+
+\begin{equation}
+f_{ws}=1-(1-h_{ws}/h_{cws})^b\label{6.18}
+\end{equation}
+
+where $b$  is a shape parameter that defines the sub-grid scale
+characteristics of the basin or grid-cell. By integrating over one time
+step all fluxes in \eref{6.17} contributing to the total water
+input
+
+\begin{equation}
+Q=\frac{\Delta t}{\rho_w} [(1-c_{v})R+M_{sn}+M_{snc}+\max
+(0,E_{ws})]\label{6.19},
+\end{equation}
+
+the surface runoff can be expressed as
+
+\begin{equation}
+\frac{\Delta 
+t}{\rho_w}R_s=Q-(h_{cws}-h_{ws})+\left[\left(1-\frac{h_{ws}}{h_{cws}}\right)^{1/(1+b)}
+-\frac{Q}{(1+b) h_{cws}}\right]^{1+b}\label{6.20}
+\end{equation}
+
+provided that the soil is not brought to saturation during one time step
+(i.e. [$\cdots] > 0$). In this case, $Q>0$  will always result in $R_s>0$
+due to the contribution from sub-grid scale areas that become saturated.
+If, on the other hand, $Q$ and $h_{ws}$ are large enough for generating
+saturation of the whole grid-cell so that $[ \cdots ] \le 0$, the
+traditional bucket approach is applied, i.e. the surface runoff is given
+by the excess of water above the maximum value
+
+\begin{equation}
+\frac{\Delta t}{\rho_w}R_s=Q-(h_{cws}-h_{ws})\label{6.21}.
+\end{equation}
+
+The infiltration of water into the soil during one time step can be
+expressed as $I=Q-R_s \Delta t/\rho_w$. No infiltration is allowed in
+frozen soil, so that $R_s \Delta t/\rho_w=Q$ in this case. The shape
+parameter $b$ in \eref{6.18} and \eref{6.20} is parameterized as a 
+function of the
+steepness of the sub-grid scale terrain, or standard deviation of height
+$\sigma_z$ in the grid-cell, according to
+
+\begin{equation}
+b=\frac{\sigma_z-\sigma_0}{\sigma_z+\sigma_{max}}\label{6.22}
+\end{equation}
+
+where $\sigma_0= 100$ m is a threshold value below which a small constant,
+$b = 0.01$, is applied, and $\sigma_{max}$  is a resolution dependent
+maximum value so that $b \to 0.5$ for $\sigma_z \to \sigma_{max}$.
+Drainage occurs independently of the water input $Q$ if the soil water
+$h_{ws}$ is between 5\% and 90\% of the field capacity $h_{cws}$ (`slow
+drainage') or between 90\% and 100\% of $h_{cws}$ (`fast drainage'):
+
+\begin{eqnarray}D&=&0 \mbox{ for} \; \left\{h_{ws}\le 
+h_{min}\right\}\label{6.23}\\
+D&=&d_{min}\left(\frac{h_{ws}}{h_{cvs}}\right) \, \mbox{for} \,
+\left\{h_{min} < h_{ws}\le h_{dr}\right\}\label{6.24}\\
+D&=&d_{min}\left(\frac{h_{ws}}{h_{cws}}\right)+(d_{max}-d_{min})
+\left[\frac{h_{ws}-h_{dr}}{h_{cws}-h_{dr}}\right]^d
+\,\mbox{for} \, \{h_{ws} > h_{dr}\}\label{6.25}
+\end{eqnarray}
+
+
+with
+
+\begin{center}
+\begin{tabular}{lll}
+$d_{min}$&=&$2.8 \cdot 10^{-7}$kg/(m$^2$s)\\
+$d_{max}$&=&$2.8 \cdot 10^{-5}$kg/(m$^2$s)\\
+$d$&=&1.5\\
+$h_{min}$&=&$0.05 \cdot h_{cws}$ \\
+$h_{dr}$&=&$0.9 \cdot h_{cws}$.
+\end{tabular}
+\end{center}
+
+\section{Lake model\label{sec:lake}}
+
+A simple scheme is used for calculating the water temperature, ice
+thickness and ice temperature of lakes, with water/ice fraction of 100\%
+assigned to all non-coastal land points with land fraction $f_{l}\le 50\%$.
+For $f_{l} > 50\%$, the water/ice fraction is set to zero. The 
+temperature $T_w$
+of a constant-depth mixed layer ($h_m=10$ m) is estimated from the heat
+budget equation by neglecting both horizontal heat fluxes and those at the
+bottom of the layer. Thus, $T_w$ is uniquely determined by the net surface
+heat flux, $H$, which represents the sum of all radiative and turbulent
+flux components,
+
+\begin{equation}
+C_w\dnd{T_w}{t} = H\label{6.26}
+\end{equation}
+
+where $C_w = c_w\rho_wh_m$ is the heat capacity of the layer and $c_p$
+the specific heat of water at constant pressure. Ice formation may
+occur if $T_w$ falls below the freezing point $T_0$. However, for
+numerical reasons, ice formation is suppressed until the cooling,
+during a time step, becomes large enough to form a slab of ice with
+thickness $h_i \ge h_{min}$ and $h_{min}=0.1$ m. Therefore, the finite
+difference form of (\ref{6.26}) includes a residual term $(R_f \le 0$;
+see below) which takes into account `unrealized freezing' from the
+previous time step in the case $0<h_i \le h_{min}$
+
+\begin{equation}
+\frac{C_w(T^*-T^n_w)}{\Delta t} =H+R_f\label{6.27}
+\end{equation}
+
+where $n$  is the time level and $T^*$ a preliminary water temperature.
+
+\renewcommand{\labelenumi}{\roman{enumi}.}
+
+\paragraph*{Cases:}
+\begin{enumerate}
+
+\item $T^* \ge T_{0}$. Here, the new temperature is given by 
+$T^{n+1}_w=T^*$. Moreover,
+$h_i^{n+1}=0$ and $R_f=0$.
+
+\item $T^* < T_{0}$ but $C_w(T^*-T_{0})/\Delta t>
+-(\rho_iL_{f}h_{min})/\Delta t$, where $\rho_{i}$
+is the ice density
+and $L_{f}$ the latent heat of fusion. In this  case of  `unrealized
+ice formation', the cooling is not large enough to form a slab of ice
+with $h_i\ge h_{min}$, so that $h_i^{n+1}=0$ and $T_w^{n+1}=T_{0}$, while
+
+\begin{equation}
+R_{f}=\frac{C_w(T^*-T_0)}{\Delta t} <0\label{6.28}
+\end{equation}
+
+is used in \eref{6.27} at the next time step. Assuming, for example, a
+constant $H<0$ in \eref{6.27}, $R_{f}$ will steadily decrease in the course
+of the integration until the following conditions are fulfilled:
+
+\item  $T^* < T_{0}$ and $R_f\le-(\rho_{i}L_{f}h_{min})/\Delta t$. In 
+this case,
+the cooling is large enough to form a slab of ice with
+$h_{i}\ge h_{min}$ so that $T^{n+1}_{w}=T_{0}$, $R_{f}=0$ and
+
+\begin{equation}
+h_{i}^{n+1}=-\left(\frac{C_w}{\rho_{i}L_{f}}\right)
+(T^*-T_{0})\label{6.29}.
+\end{equation}
+\end{enumerate}
+
+Once a slab of ice is formed (note that partial ice cover is not taken
+into accout, i.e. a lake is either ice-free or totally covered with ice),
+changes in ice thickness may
+result from freezing at the bottom, through conductive heat fluxes
+($H_{c}$), melting ($M_{i}$) at the surface, sublimation of ice
+$(E_{i}<0$) or deposition $(E_{i}>0$):
+
+\begin{equation}
+\rho_{i}\dnd{h_{i}}{t}=\frac{(H_{c}-M_{i})}{L_{f}} + E_{i}.\label{6.30}
+\end{equation}
+
+$M_{i}$ is calculated together with the ice temperature, and $H_{c}$ is defined
+as
+
+\begin{equation}
+H_{c}=-\frac{\kappa_{i}}{h_{eff}}(T_{i}-T_{0})\label{6.31}
+\end{equation}
+
+where $T_{i}\le T_{0}$ is the surface temperature of the ice layer, 
+$\kappa_{i}$ the
+thermal conductivity of ice and $h_{eff}$ an effective ice thickness 
+which takes into
+account the effect of a snow layer (with depth $h_{sni}$) on the 
+conductive heat
+flux
+
+\begin{equation}
+h_{eff}=h_{i}+\left(\frac{\kappa_{i}}{\kappa_{s}}\right)h_{sni}\label{6.32}
+\end{equation}
+
+where $\kappa_{s}$ is the thermal conductivity of snow.
+The finite difference form of \eref{6.30} involves the calculation of 
+a preliminary
+ice thickness $h^{*}$, analogous to $T^{*}$ in \eref{6.27},
+
+\begin{equation}
+\rho_{i}\frac{(h^*-h^n_{i})}{\Delta 
+t}=\frac{(H_{c}-M_{i})}{L_{f}}+E_{i}\label{6.33}
+\end{equation}
+
+\paragraph*{Cases:}
+
+\begin{enumerate}
+\item $h^* \ge h_{min}$ so that  $h^{n+1}_{i}=h^*$.
+
+\item $0<h^*<h_{min}$. In this case of `unrealized melting', part of 
+the available
+heat is used to decrease the ice thickness to the minimum value
+$h_{i}^{n+1}=h_{min}$, while the residual flux
+
+\begin{equation}
+R_{m}=\frac{\rho_{i}L_{f}(h_{min}-h^*)}{\Delta t}>0\label{6.34}
+\end{equation}
+
+is used for the calculation of the surface temperature (see below).
+
+
+\item $h^*\le 0$. In this case of complete melting, $h^{n+1}_{i}=0$, 
+and the residual heat
+(if $h^*<0$) is used to increase the water temperature according to
+
+
+\begin{equation}
+C_w\frac{(T^{n+1}_{w}-T^n_{w})}{\Delta t}=\frac{-\rho_{i}L_{f}h^*}{\Delta
+t}\label{6.35}
+\end{equation}
+
+with $T^{n}_{w}=T_{0}$.
+\end{enumerate}
+
+The
+surface temperature is calculated from the heat budget of a thin slab of
+ice with thickness $h_{0}$= 0.1 m
+
+\begin{equation}
+C_i\dnd{T_{i}}{t}=H+H_{c}\label{6.36}
+\end{equation}
+
+where $C_i=\rho_{i}c_{i}h_{0}$ is the heat capacity of the slab
+and $c_i$ the specific heat of ice. $H$ is the net surface heat flux (sum
+of all radiative and turbulent flux components) and  the conductive heat
+flux is defined in \eref{6.31}. The finite difference form of 
+\eref{6.36} includes the
+residual term  defined in \eref{6.34}, which is non-zero (positive) 
+for the case
+of `unrealized melting'
+
+\begin{equation}
+C_i\frac{(T^{*}-T^n_{i})}{\Delta
+t}=H+R_{m}-\frac{\kappa_{i}}{h_{eff}}(T^{*}-T_{0})\label{6.37}
+\end{equation}
+
+or, equivalently,
+
+\begin{equation}
+\left(\frac{C_i}{\Delta t}+\frac{\kappa_{i}}{h_{eff}}\right)T^{*}
+=H+R_{m}+\frac{C_{i}}{\Delta t}T^{n}_{i}+\frac{K_{i}}{h_{eff}}T_{0}\label{6.38}
+\end{equation}
+
+where $T^*$ is a
+preliminary temperature.
+
+
+\paragraph*{Cases:}
+
+\begin{enumerate}
+\item $T^* \le T_{0}$. In this case, the new surface temperature is 
+given by $T^{n+1}_{i}=T^*$.
+
+\item $T^* > T_{0}$. In this case, the new surface temperature is set to the
+freezing point $T^{n+1}_{i}=T_{0}$ and the residual heat flux, i.e. the ice
+melt
+
+\begin{equation}
+M_{i}=\left(\frac{C_i}{\Delta 
+t}+\frac{\kappa_{i}}{h_{eff}}\right)(T^{*}-T_{0}), \label{6.39}
+\end{equation}
+
+is used in \eref{6.33} for calculating  $h_{i}$ at the next time step.
+\end{enumerate}
+\renewcommand{\labelenumi}{\arabic{enumi}.}
+
+The snow depth on lake-ice ($h_{sni}$ in m) is obtained from the 
+following budget
+equation
+
+\begin{equation}
+\rho_{w}\dnd{h_{sni}}{t}=S+E_{sni}-M_{sni}\label{6.40}
+\end{equation}
+
+where $S$ is the snowfall rate, $E_{sni}<0$ the sublimation,  $E_{sni}>0$ the
+deposition, and $M_{sni}$ the snow melt calculated analogous to
+\eref{6.39}. Note that no
+melting of ice is allowed unless the snow has vanished completely.
+
+
+\section{Sea-ice}\label{s6.4}
+
+Sea-ice concentration, $f_{si}$, is interpolated in time from
+monthly observations while sea-ice thickness, $h_{si}$, is prescribed according
+to $h_{si}$ = 2 m (1 m)  for the northern (southern) hemisphere, 
+respectively, if
+$f_{si} > 0.01$. Otherwise, $f_{si}$ = 0 and $h_{si}$ = 0. Sea-ice 
+temperature is
+calculated analogous to lake-ice temperature (c.f. \eref{6.36} to 
+\eref{6.38}). The only
+difference is that the freezing temperature of freshwater ($T_0$ =
+0\grad) is
+replaced by the freezing temperature of saline water, $T_{0s}$ = -1.77\grad.
+Furthermore, a residual heat flux analogous to $M_{i}$ in \eref{6.39} 
+is calculated
+for diagnostic purposes (note that $h_{si}$ is not calculated but prescribed)
+and snow on sea-ice is not taken into account.
+
+
+\section{Coupling to mixed layer ocean}\label{s6.5}
+
+As an option, the sea surface temperature, $SST$, and sea-ice
+thickness, $h_{i}$, can be calculated in a way analogous to the lake
+model (see section \ref{sec:lake}). The main differences are (i) that the
+mixed layer depth is assumed to be larger ($h$ = 50 m) and (ii) that
+the ocean heat transport has to be taken into account. The heat budget
+of a constant-depth mixed layer can be written as
+
+\begin{equation}
+C_{m}\dnd{T_{m}}{t}=H-Q\label{6.41}
+\end{equation}
+
+where $T_{m}= SST$, $H$ = net surface heat flux (including all radiative and
+turbulent fluxes), $Q$ = ocean heat transport and $C_{m}$ is the heat 
+capacity of
+the slab. While $Q$ is unkown, its monthly climatology, $Q_{clim}$, can be
+derived from \eref{6.41} by replacing $T_{m}$ by the observed $SST$ 
+climatology, $T_{clim}$,
+and $H$ by its climatology, $H_{clim}$. For consistency, $H_{clim}$ 
+has to be computed
+from the uncoupled AGCM with $T_{clim}$ used as lower boundary forcing,
+resulting in
+
+\begin{equation}
+Q_{clim}=H_{clim}-C_{m}\dnd{T_{clim}}{t}\label{6.42}.
+\end{equation}
+
+This simple approach of approximating $Q$ in \eref{6.41} by its
+monthly climatology has the main advantage that systematic errors in
+simulated SST are practically avoided while $SST$ variability is captured
+through the variability of $H$. The main limitation is that variability of
+ocean heat transports is neglected. The flux \eref{6.42} is applied also, with
+appropriate area weighting, in those regions where sea-ice is observed,
+according to climatology, except when the observed ice fraction is larger
+than 0.9. In order to avoid excessive ice formation in the southern ocean,
+a constant heat flux of 20 W/m$^2$ is applied to the sea-ice equation in
+those regions.
+
+\section{Surface albedo}\label{su6.5.1}
+
+For snow-free land surfaces, an annual mean background
+albedo $\alpha_{bg}$ has been derived from satellite data and values 
+allocated to a
+high-resolution global distribution of major ecosystem complexes
+(Hagemann, 2002).
+For most surfaces, the albedo of snow and ice is
+assumed to be a linear function of surface temperature, ranging between a
+minimum value at the melting point $T_{s}=T_{0}$  and a maximum value 
+for `cold'
+temperatures $T_{s}\le T_{0}-T_{d}$:
+
+\begin{equation}
+\alpha_{sn}=\alpha_{sn,min}+(\alpha_{sn,max}-\alpha_{sn,min}) 
+f(T_{s})\label{6.43}
+\end{equation}
+
+where
+
+\begin{equation}
+f(T_{s})=\min\left\{\max\left[\left(\frac{T_{0}-T_{s}}{T_{0}-T_{d}}\right),0\right],1\right\}
+\label{6.44}\end{equation}
+
+with $T_{d}=T_{0}-1$ for sea-ice and lake-ice (with or
+without snow) and $T_{d}=T_{0}-5$ for snow on land and ice sheets.
+
+The minimum and maximum values of snow/ice albedos are assigned as given in table \ref{tab:suralb}.
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|l|c|c|}\hline
+Surface type &$a_{sn,min}$&$a_{sn,max}$\\ \hline\hline
+land &	0.30&0.80\\ \hline
+canopy&	0.20&	0.20\\ \hline
+  land ice&	0.60&	0.80\\ \hline
+  sea ice &	0.50&	0.75\\ \hline
+lake ice&	0.50&	0.75\\ \hline
+snow on lake ice&	0.60&	0.80\\ \hline
+\end{tabular}
+\end{center}
+\caption{Snow and ice albedos for different surface types\label{tab:suralb}}
+\end{table}
+
+Over snow-covered land, the grid-mean albedo depends on a number of
+parameters such as the fractional forest area, the leaf area index, the
+bare-soil albedo, the snow albedo according to \eref{6.43}, and the fractional
+snow cover of both the ground and the canopy (Roesch et al., 2001). The
+fractional snow cover at the ground is a function of snow depth
+($h_{sn}$ in m water equivalent) and slope of terrain approximated by 
+the subgrid-scale
+standard deviation of height $\sigma_{z}$
+
+\begin{equation}
+f_{sn}=\gamma_{1} \tanh (100 h_{sn})\sqrt{
+\frac{1000 h_{sn}}{1000 h_{sn}+\gamma_{2}\sigma_{z}
++\epsilon}}\label{6.45}
+\end{equation}
+
+where $\gamma_{1}$=0.95, $\gamma_{2}$= 0.15 and $\epsilon$ is a
+small number used to avoid division by zero for totally flat and snow-free
+grid-cells.
+The fractional snow cover of the canopy is defined as
+
+\begin{equation}
+f_{snc}=\min \left(1,\frac{h_{snc}}{h_{cin}}\right)\label{6.46}
+\end{equation}
+where $h_{snc}$ is the snow depth at the canopy and $h_{cin}$ the
+interception capacity.  As in the Canadian Land Surface Scheme (CLASS;
+\cite{verseghy91}), the albedo of snow-covered forests is related to a
+sky view factor ($SVF$) which describes the degree of canopy
+closure. The $SVF$ is related to the leaf area index $LAI$ by an
+exponential function according to
+
+\begin{equation}
+SVF=e^{-(r LAI)}\label{6.47}
+\end{equation}
+
+with $r=1$ for both needleleaf and broadleaf trees. The total forest
+albedo is computed as
+
+\begin{equation}
+\alpha_{for}=SVF \alpha_{g}+(1-SVF) \alpha_{can}\label{6.48}
+\end{equation}
+
+where $\alpha_{g}$ is the albedo of the ground
+
+\begin{equation}
+\alpha_{g}=f_{sn} \alpha_{sn}+(1-f_{sn}) \alpha_{bg}\label{6.49}
+\end{equation}
+
+and $\alpha_{can}$ the albedo of the canopy
+
+\begin{equation}
+\alpha_{can}=f_{snc}\alpha_{snc}+(1-f_{snc}) \alpha_{sfr}\label{6.50}
+\end{equation}
+
+  where $\alpha_{snc}=0.2$ is the albedo of the snow-covered part of
+the canopy and $\alpha_{sfr}$ the albedo of the snow-free canopy. The
+grid-mean albedo is finally given by
+
+\begin{equation}
+\alpha_{surf}=f_{for} \alpha_{for}+(1-f_{for}) \alpha_{g}\label{6.51}
+\end{equation}
+
+where $f_{for}$ is the fractional forest area. To be consistent with
+the definition of the background albedo $\alpha_{bg}$
+\citep{hagemann02}, we set
+$\alpha_{sfr}=\alpha_{bg}$ so that $\alpha_{surf}=\alpha_{bg}$ for a
+snow-free grid-cell.
+
+Over water surfaces (lake, ocean), the albedo is set to a constant
+value $\alpha_{sea}=0.07$. When a grid-cell is partially covered with
+sea ice, the grid-mean albedo is defined as a weighted average
+
+\begin{equation}
+\alpha_{surf}=f_{sea} \alpha_{sea}+f_{ice} \alpha_{sn}\label{6.52}
+\end{equation}
+
+
+where $f_{sea}$ and $f_{ice}$ are the respective fractional areas and
+$\alpha_{sn}$ is given by \eref{6.43}.  Note that the land fraction is
+either 1 (100\% land) or zero, so that \eref{6.51} applies to all land
+points while \eref{6.52} is used for all grid points covered with
+water and/or ice.
+

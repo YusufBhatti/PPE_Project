@@ -1,0 +1,1775 @@
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridCreate]{gridCreate}
+\else
+gridCreate
+\fi
+}
+\begin{verbatim}
+    int gridCreate(int gridtype, int size);
+\end{verbatim}
+
+Create a horizontal Grid
+\ifpdfoutput{}{(\ref{gridCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefNP]{gridDefNP}
+\else
+gridDefNP
+\fi
+}
+\begin{verbatim}
+    void gridDefNP(int gridID, int np);
+\end{verbatim}
+
+Define the number of parallels between a pole and the equator
+\ifpdfoutput{}{(\ref{gridDefNP})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefNumber]{gridDefNumber}
+\else
+gridDefNumber
+\fi
+}
+\begin{verbatim}
+    void gridDefNumber(int gridID, const int number);
+\end{verbatim}
+
+Define the reference number for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefNumber})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefPosition]{gridDefPosition}
+\else
+gridDefPosition
+\fi
+}
+\begin{verbatim}
+    void gridDefPosition(int gridID, const int position);
+\end{verbatim}
+
+Define the position of grid in the reference file
+\ifpdfoutput{}{(\ref{gridDefPosition})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefReference]{gridDefReference}
+\else
+gridDefReference
+\fi
+}
+\begin{verbatim}
+    void gridDefReference(int gridID, const char *reference);
+\end{verbatim}
+
+Define the reference URI for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefReference})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefUUID]{gridDefUUID}
+\else
+gridDefUUID
+\fi
+}
+\begin{verbatim}
+    void gridDefUUID(int gridID, const char *uuid);
+\end{verbatim}
+
+Define the UUID for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefUUID})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXbounds]{gridDefXbounds}
+\else
+gridDefXbounds
+\fi
+}
+\begin{verbatim}
+    void gridDefXbounds(int gridID, const double *xbounds);
+\end{verbatim}
+
+Define the bounds of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXlongname]{gridDefXlongname}
+\else
+gridDefXlongname
+\fi
+}
+\begin{verbatim}
+    void gridDefXlongname(int gridID, const char *longname);
+\end{verbatim}
+
+Define the longname of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXname]{gridDefXname}
+\else
+gridDefXname
+\fi
+}
+\begin{verbatim}
+    void gridDefXname(int gridID, const char *name);
+\end{verbatim}
+
+Define the name of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXsize]{gridDefXsize}
+\else
+gridDefXsize
+\fi
+}
+\begin{verbatim}
+    void gridDefXsize(int gridID, int xsize);
+\end{verbatim}
+
+Define the number of values of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXunits]{gridDefXunits}
+\else
+gridDefXunits
+\fi
+}
+\begin{verbatim}
+    void gridDefXunits(int gridID, const char *units);
+\end{verbatim}
+
+Define the units of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXvals]{gridDefXvals}
+\else
+gridDefXvals
+\fi
+}
+\begin{verbatim}
+    void gridDefXvals(int gridID, const double *xvals);
+\end{verbatim}
+
+Define the values of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYbounds]{gridDefYbounds}
+\else
+gridDefYbounds
+\fi
+}
+\begin{verbatim}
+    void gridDefYbounds(int gridID, const double *ybounds);
+\end{verbatim}
+
+Define the bounds of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYlongname]{gridDefYlongname}
+\else
+gridDefYlongname
+\fi
+}
+\begin{verbatim}
+    void gridDefYlongname(int gridID, const char *longname);
+\end{verbatim}
+
+Define the longname of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYname]{gridDefYname}
+\else
+gridDefYname
+\fi
+}
+\begin{verbatim}
+    void gridDefYname(int gridID, const char *name);
+\end{verbatim}
+
+Define the name of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYsize]{gridDefYsize}
+\else
+gridDefYsize
+\fi
+}
+\begin{verbatim}
+    void gridDefYsize(int gridID, int ysize);
+\end{verbatim}
+
+Define the number of values of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYunits]{gridDefYunits}
+\else
+gridDefYunits
+\fi
+}
+\begin{verbatim}
+    void gridDefYunits(int gridID, const char *units);
+\end{verbatim}
+
+Define the units of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYvals]{gridDefYvals}
+\else
+gridDefYvals
+\fi
+}
+\begin{verbatim}
+    void gridDefYvals(int gridID, const double *yvals);
+\end{verbatim}
+
+Define the values of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDestroy]{gridDestroy}
+\else
+gridDestroy
+\fi
+}
+\begin{verbatim}
+    void gridDestroy(int gridID);
+\end{verbatim}
+
+Destroy a horizontal Grid
+\ifpdfoutput{}{(\ref{gridDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDuplicate]{gridDuplicate}
+\else
+gridDuplicate
+\fi
+}
+\begin{verbatim}
+    int gridDuplicate(int gridID);
+\end{verbatim}
+
+Duplicate a horizontal Grid
+\ifpdfoutput{}{(\ref{gridDuplicate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqNP]{gridInqNP}
+\else
+gridInqNP
+\fi
+}
+\begin{verbatim}
+    int gridInqNP(int gridID);
+\end{verbatim}
+
+Get the number of parallels between a pole and the equator
+\ifpdfoutput{}{(\ref{gridInqNP})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqNumber]{gridInqNumber}
+\else
+gridInqNumber
+\fi
+}
+\begin{verbatim}
+    int gridInqNumber(int gridID);
+\end{verbatim}
+
+Get the reference number to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqNumber})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqPosition]{gridInqPosition}
+\else
+gridInqPosition
+\fi
+}
+\begin{verbatim}
+    int gridInqPosition(int gridID);
+\end{verbatim}
+
+Get the position of grid in the reference file
+\ifpdfoutput{}{(\ref{gridInqPosition})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqReference]{gridInqReference}
+\else
+gridInqReference
+\fi
+}
+\begin{verbatim}
+    char *gridInqReference(int gridID, char *reference);
+\end{verbatim}
+
+Get the reference URI to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqReference})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqSize]{gridInqSize}
+\else
+gridInqSize
+\fi
+}
+\begin{verbatim}
+    int gridInqSize(int gridID);
+\end{verbatim}
+
+Get the size of a Grid
+\ifpdfoutput{}{(\ref{gridInqSize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqType]{gridInqType}
+\else
+gridInqType
+\fi
+}
+\begin{verbatim}
+    int gridInqType(int gridID);
+\end{verbatim}
+
+Get the type of a Grid
+\ifpdfoutput{}{(\ref{gridInqType})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqUUID]{gridInqUUID}
+\else
+gridInqUUID
+\fi
+}
+\begin{verbatim}
+    void gridInqUUID(int gridID, char *uuid);
+\end{verbatim}
+
+Get the UUID to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqUUID})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXbounds]{gridInqXbounds}
+\else
+gridInqXbounds
+\fi
+}
+\begin{verbatim}
+    int gridInqXbounds(int gridID, double *xbounds);
+\end{verbatim}
+
+Get the bounds of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXlongname]{gridInqXlongname}
+\else
+gridInqXlongname
+\fi
+}
+\begin{verbatim}
+    void gridInqXlongname(int gridID, char *longname);
+\end{verbatim}
+
+Get the longname of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXname]{gridInqXname}
+\else
+gridInqXname
+\fi
+}
+\begin{verbatim}
+    void gridInqXname(int gridID, char *name);
+\end{verbatim}
+
+Get the name of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXsize]{gridInqXsize}
+\else
+gridInqXsize
+\fi
+}
+\begin{verbatim}
+    int gridInqXsize(int gridID);
+\end{verbatim}
+
+Get the number of values of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXunits]{gridInqXunits}
+\else
+gridInqXunits
+\fi
+}
+\begin{verbatim}
+    void gridInqXunits(int gridID, char *units);
+\end{verbatim}
+
+Get the units of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXvals]{gridInqXvals}
+\else
+gridInqXvals
+\fi
+}
+\begin{verbatim}
+    int gridInqXvals(int gridID, double *xvals);
+\end{verbatim}
+
+Get all values of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYbounds]{gridInqYbounds}
+\else
+gridInqYbounds
+\fi
+}
+\begin{verbatim}
+    int gridInqYbounds(int gridID, double *ybounds);
+\end{verbatim}
+
+Get the bounds of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYlongname]{gridInqYlongname}
+\else
+gridInqYlongname
+\fi
+}
+\begin{verbatim}
+    void gridInqXlongname(int gridID, char *longname);
+\end{verbatim}
+
+Get the longname of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYname]{gridInqYname}
+\else
+gridInqYname
+\fi
+}
+\begin{verbatim}
+    void gridInqYname(int gridID, char *name);
+\end{verbatim}
+
+Get the name of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYsize]{gridInqYsize}
+\else
+gridInqYsize
+\fi
+}
+\begin{verbatim}
+    int gridInqYsize(int gridID);
+\end{verbatim}
+
+Get the number of values of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYunits]{gridInqYunits}
+\else
+gridInqYunits
+\fi
+}
+\begin{verbatim}
+    void gridInqYunits(int gridID, char *units);
+\end{verbatim}
+
+Get the units of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYvals]{gridInqYvals}
+\else
+gridInqYvals
+\fi
+}
+\begin{verbatim}
+    int gridInqYvals(int gridID, double *yvals);
+\end{verbatim}
+
+Get all values of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamClose]{streamClose}
+\else
+streamClose
+\fi
+}
+\begin{verbatim}
+    void streamClose(int streamID);
+\end{verbatim}
+
+Close an open dataset
+\ifpdfoutput{}{(\ref{streamClose})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefByteorder]{streamDefByteorder}
+\else
+streamDefByteorder
+\fi
+}
+\begin{verbatim}
+    void streamDefByteorder(int streamID, int byteorder);
+\end{verbatim}
+
+Define the byte order
+\ifpdfoutput{}{(\ref{streamDefByteorder})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefRecord]{streamDefRecord}
+\else
+streamDefRecord
+\fi
+}
+\begin{verbatim}
+    void streamDefRecord(int streamID, int varID, int levelID);
+\end{verbatim}
+
+Define the next record
+\ifpdfoutput{}{(\ref{streamDefRecord})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefTimestep]{streamDefTimestep}
+\else
+streamDefTimestep
+\fi
+}
+\begin{verbatim}
+    int streamDefTimestep(int streamID, int tsID);
+\end{verbatim}
+
+Define time step
+\ifpdfoutput{}{(\ref{streamDefTimestep})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefVlist]{streamDefVlist}
+\else
+streamDefVlist
+\fi
+}
+\begin{verbatim}
+    void streamDefVlist(int streamID, int vlistID);
+\end{verbatim}
+
+Define the variable list
+\ifpdfoutput{}{(\ref{streamDefVlist})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqByteorder]{streamInqByteorder}
+\else
+streamInqByteorder
+\fi
+}
+\begin{verbatim}
+    int streamInqByteorder(int streamID);
+\end{verbatim}
+
+Get the byte order
+\ifpdfoutput{}{(\ref{streamInqByteorder})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqFiletype]{streamInqFiletype}
+\else
+streamInqFiletype
+\fi
+}
+\begin{verbatim}
+    int streamInqFiletype(int streamID);
+\end{verbatim}
+
+Get the filetype
+\ifpdfoutput{}{(\ref{streamInqFiletype})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqTimestep]{streamInqTimestep}
+\else
+streamInqTimestep
+\fi
+}
+\begin{verbatim}
+    int streamInqTimestep(int streamID, int tsID);
+\end{verbatim}
+
+Get time step
+\ifpdfoutput{}{(\ref{streamInqTimestep})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqVlist]{streamInqVlist}
+\else
+streamInqVlist
+\fi
+}
+\begin{verbatim}
+    int streamInqVlist(int streamID);
+\end{verbatim}
+
+Get the variable list
+\ifpdfoutput{}{(\ref{streamInqVlist})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamOpenRead]{streamOpenRead}
+\else
+streamOpenRead
+\fi
+}
+\begin{verbatim}
+    int streamOpenRead(const char *path);
+\end{verbatim}
+
+Open a dataset for reading
+\ifpdfoutput{}{(\ref{streamOpenRead})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamOpenWrite]{streamOpenWrite}
+\else
+streamOpenWrite
+\fi
+}
+\begin{verbatim}
+    int streamOpenWrite(const char *path, int filetype);
+\end{verbatim}
+
+Create a new dataset
+\ifpdfoutput{}{(\ref{streamOpenWrite})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamReadVar]{streamReadVar}
+\else
+streamReadVar
+\fi
+}
+\begin{verbatim}
+    void streamReadVar(int streamID, int varID, double *data, int *nmiss);
+\end{verbatim}
+
+Read a variable
+\ifpdfoutput{}{(\ref{streamReadVar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamReadVarSlice]{streamReadVarSlice}
+\else
+streamReadVarSlice
+\fi
+}
+\begin{verbatim}
+    void streamReadVarSlice(int streamID, int varID, int levelID, double *data, 
+                            int *nmiss);
+\end{verbatim}
+
+Read a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamReadVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteRecord]{streamWriteRecord}
+\else
+streamWriteRecord
+\fi
+}
+\begin{verbatim}
+    void streamWriteRecord(int streamID, const double *data, int nmiss);
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteRecord})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVar]{streamWriteVar}
+\else
+streamWriteVar
+\fi
+}
+\begin{verbatim}
+    void streamWriteVar(int streamID, int varID, const double *data, int nmiss);
+\end{verbatim}
+
+Write a variable
+\ifpdfoutput{}{(\ref{streamWriteVar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarF]{streamWriteVarF}
+\else
+streamWriteVarF
+\fi
+}
+\begin{verbatim}
+    void streamWriteVarF(int streamID, int varID, const float *data, int nmiss);
+\end{verbatim}
+
+Write a variable
+\ifpdfoutput{}{(\ref{streamWriteVarF})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarSlice]{streamWriteVarSlice}
+\else
+streamWriteVarSlice
+\fi
+}
+\begin{verbatim}
+    void streamWriteVarSlice(int streamID, int varID, int levelID, const double *data, 
+                             int nmiss);
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarSliceF]{streamWriteVarSliceF}
+\else
+streamWriteVarSliceF
+\fi
+}
+\begin{verbatim}
+    void streamWriteVarSliceF(int streamID, int varID, int levelID, const float *data, 
+                              int nmiss);
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteVarSliceF})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisCreate]{taxisCreate}
+\else
+taxisCreate
+\fi
+}
+\begin{verbatim}
+    int taxisCreate(int taxistype);
+\end{verbatim}
+
+Create a Time axis
+\ifpdfoutput{}{(\ref{taxisCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefCalendar]{taxisDefCalendar}
+\else
+taxisDefCalendar
+\fi
+}
+\begin{verbatim}
+    void taxisDefCalendar(int taxisID, int calendar);
+\end{verbatim}
+
+Define the calendar
+\ifpdfoutput{}{(\ref{taxisDefCalendar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefRdate]{taxisDefRdate}
+\else
+taxisDefRdate
+\fi
+}
+\begin{verbatim}
+    void taxisDefRdate(int taxisID, int rdate);
+\end{verbatim}
+
+Define the reference date
+\ifpdfoutput{}{(\ref{taxisDefRdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefRtime]{taxisDefRtime}
+\else
+taxisDefRtime
+\fi
+}
+\begin{verbatim}
+    void taxisDefRtime(int taxisID, int rtime);
+\end{verbatim}
+
+Define the reference time
+\ifpdfoutput{}{(\ref{taxisDefRtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefVdate]{taxisDefVdate}
+\else
+taxisDefVdate
+\fi
+}
+\begin{verbatim}
+    void taxisDefVdate(int taxisID, int vdate);
+\end{verbatim}
+
+Define the verification date
+\ifpdfoutput{}{(\ref{taxisDefVdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefVtime]{taxisDefVtime}
+\else
+taxisDefVtime
+\fi
+}
+\begin{verbatim}
+    void taxisDefVtime(int taxisID, int vtime);
+\end{verbatim}
+
+Define the verification time
+\ifpdfoutput{}{(\ref{taxisDefVtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDestroy]{taxisDestroy}
+\else
+taxisDestroy
+\fi
+}
+\begin{verbatim}
+    void taxisDestroy(int taxisID);
+\end{verbatim}
+
+Destroy a Time axis
+\ifpdfoutput{}{(\ref{taxisDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqCalendar]{taxisInqCalendar}
+\else
+taxisInqCalendar
+\fi
+}
+\begin{verbatim}
+    int taxisInqCalendar(int taxisID);
+\end{verbatim}
+
+Get the calendar
+\ifpdfoutput{}{(\ref{taxisInqCalendar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqRdate]{taxisInqRdate}
+\else
+taxisInqRdate
+\fi
+}
+\begin{verbatim}
+    int taxisInqRdate(int taxisID);
+\end{verbatim}
+
+Get the reference date
+\ifpdfoutput{}{(\ref{taxisInqRdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqRtime]{taxisInqRtime}
+\else
+taxisInqRtime
+\fi
+}
+\begin{verbatim}
+    int taxisInqRtime(int taxisID);
+\end{verbatim}
+
+Get the reference time
+\ifpdfoutput{}{(\ref{taxisInqRtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqVdate]{taxisInqVdate}
+\else
+taxisInqVdate
+\fi
+}
+\begin{verbatim}
+    int taxisInqVdate(int taxisID);
+\end{verbatim}
+
+Get the verification date
+\ifpdfoutput{}{(\ref{taxisInqVdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqVtime]{taxisInqVtime}
+\else
+taxisInqVtime
+\fi
+}
+\begin{verbatim}
+    int taxisInqVtime(int taxisID);
+\end{verbatim}
+
+Get the verification time
+\ifpdfoutput{}{(\ref{taxisInqVtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCat]{vlistCat}
+\else
+vlistCat
+\fi
+}
+\begin{verbatim}
+    void vlistCat(int vlistID2, int vlistID1);
+\end{verbatim}
+
+Concatenate two variable lists
+\ifpdfoutput{}{(\ref{vlistCat})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCopy]{vlistCopy}
+\else
+vlistCopy
+\fi
+}
+\begin{verbatim}
+    void vlistCopy(int vlistID2, int vlistID1);
+\end{verbatim}
+
+Copy a variable list
+\ifpdfoutput{}{(\ref{vlistCopy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCopyFlag]{vlistCopyFlag}
+\else
+vlistCopyFlag
+\fi
+}
+\begin{verbatim}
+    void vlistCopyFlag(int vlistID2, int vlistID1);
+\end{verbatim}
+
+Copy some entries of a variable list
+\ifpdfoutput{}{(\ref{vlistCopyFlag})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCreate]{vlistCreate}
+\else
+vlistCreate
+\fi
+}
+\begin{verbatim}
+    int vlistCreate(void);
+\end{verbatim}
+
+Create a variable list
+\ifpdfoutput{}{(\ref{vlistCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttFlt]{vlistDefAttFlt}
+\else
+vlistDefAttFlt
+\fi
+}
+\begin{verbatim}
+    int vlistDefAttFlt(int vlistID, int varID, const char *name, int type, int len, 
+                       const double *dp);
+\end{verbatim}
+
+Define a floating point attribute
+\ifpdfoutput{}{(\ref{vlistDefAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttInt]{vlistDefAttInt}
+\else
+vlistDefAttInt
+\fi
+}
+\begin{verbatim}
+    int vlistDefAttInt(int vlistID, int varID, const char *name, int type, int len, 
+                       const int *ip);
+\end{verbatim}
+
+Define an integer attribute
+\ifpdfoutput{}{(\ref{vlistDefAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttTxt]{vlistDefAttTxt}
+\else
+vlistDefAttTxt
+\fi
+}
+\begin{verbatim}
+    int vlistDefAttTxt(int vlistID, int varID, const char *name, int len, const char *tp);
+\end{verbatim}
+
+Define a text attribute
+\ifpdfoutput{}{(\ref{vlistDefAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefTaxis]{vlistDefTaxis}
+\else
+vlistDefTaxis
+\fi
+}
+\begin{verbatim}
+    void vlistDefTaxis(int vlistID, int taxisID);
+\end{verbatim}
+
+Define the time axis
+\ifpdfoutput{}{(\ref{vlistDefTaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVar]{vlistDefVar}
+\else
+vlistDefVar
+\fi
+}
+\begin{verbatim}
+    int vlistDefVar(int vlistID, int gridID, int zaxisID, int tsteptype);
+\end{verbatim}
+
+Define a Variable
+\ifpdfoutput{}{(\ref{vlistDefVar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarCode]{vlistDefVarCode}
+\else
+vlistDefVarCode
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarCode(int vlistID, int varID, int code);
+\end{verbatim}
+
+Define the code number of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarCode})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarDatatype]{vlistDefVarDatatype}
+\else
+vlistDefVarDatatype
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarDatatype(int vlistID, int varID, int datatype);
+\end{verbatim}
+
+Define the data type of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarDatatype})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarLongname]{vlistDefVarLongname}
+\else
+vlistDefVarLongname
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarLongname(int vlistID, int varID, const char *longname);
+\end{verbatim}
+
+Define the long name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarMissval]{vlistDefVarMissval}
+\else
+vlistDefVarMissval
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarMissval(int vlistID, int varID, double missval);
+\end{verbatim}
+
+Define the missing value of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarMissval})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarName]{vlistDefVarName}
+\else
+vlistDefVarName
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarName(int vlistID, int varID, const char *name);
+\end{verbatim}
+
+Define the name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarStdname]{vlistDefVarStdname}
+\else
+vlistDefVarStdname
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarStdname(int vlistID, int varID, const char *stdname);
+\end{verbatim}
+
+Define the standard name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarStdname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarUnits]{vlistDefVarUnits}
+\else
+vlistDefVarUnits
+\fi
+}
+\begin{verbatim}
+    void vlistDefVarUnits(int vlistID, int varID, const char *units);
+\end{verbatim}
+
+Define the units of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarUnits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDestroy]{vlistDestroy}
+\else
+vlistDestroy
+\fi
+}
+\begin{verbatim}
+    void vlistDestroy(int vlistID);
+\end{verbatim}
+
+Destroy a variable list
+\ifpdfoutput{}{(\ref{vlistDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDuplicate]{vlistDuplicate}
+\else
+vlistDuplicate
+\fi
+}
+\begin{verbatim}
+    int vlistDuplicate(int vlistID);
+\end{verbatim}
+
+Duplicate a variable list
+\ifpdfoutput{}{(\ref{vlistDuplicate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAtt]{vlistInqAtt}
+\else
+vlistInqAtt
+\fi
+}
+\begin{verbatim}
+    int vlistInqAtt(int vlistID, int varID, int attnum, char *name, int *typep, int *lenp);
+\end{verbatim}
+
+Get information about an attribute
+\ifpdfoutput{}{(\ref{vlistInqAtt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttFlt]{vlistInqAttFlt}
+\else
+vlistInqAttFlt
+\fi
+}
+\begin{verbatim}
+    int vlistInqAttFlt(int vlistID, int varID, const char *name, int mlen, double *dp);
+\end{verbatim}
+
+Get the value(s) of a floating point attribute
+\ifpdfoutput{}{(\ref{vlistInqAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttInt]{vlistInqAttInt}
+\else
+vlistInqAttInt
+\fi
+}
+\begin{verbatim}
+    int vlistInqAttInt(int vlistID, int varID, const char *name, int mlen, int *ip);
+\end{verbatim}
+
+Get the value(s) of an integer attribute
+\ifpdfoutput{}{(\ref{vlistInqAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttTxt]{vlistInqAttTxt}
+\else
+vlistInqAttTxt
+\fi
+}
+\begin{verbatim}
+    int vlistInqAttTxt(int vlistID, int varID, const char *name, int mlen, char *tp);
+\end{verbatim}
+
+Get the value(s) of a text attribute
+\ifpdfoutput{}{(\ref{vlistInqAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqNatts]{vlistInqNatts}
+\else
+vlistInqNatts
+\fi
+}
+\begin{verbatim}
+    int vlistInqNatts(int vlistID, int varID, int *nattsp);
+\end{verbatim}
+
+Get number of variable attributes
+\ifpdfoutput{}{(\ref{vlistInqNatts})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqTaxis]{vlistInqTaxis}
+\else
+vlistInqTaxis
+\fi
+}
+\begin{verbatim}
+    int vlistInqTaxis(int vlistID);
+\end{verbatim}
+
+Get the time axis
+\ifpdfoutput{}{(\ref{vlistInqTaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarCode]{vlistInqVarCode}
+\else
+vlistInqVarCode
+\fi
+}
+\begin{verbatim}
+    int vlistInqVarCode(int vlistID, int varID);
+\end{verbatim}
+
+Get the Code number of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarCode})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarDatatype]{vlistInqVarDatatype}
+\else
+vlistInqVarDatatype
+\fi
+}
+\begin{verbatim}
+    int vlistInqVarDatatype(int vlistID, int varID);
+\end{verbatim}
+
+Get the data type of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarDatatype})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarGrid]{vlistInqVarGrid}
+\else
+vlistInqVarGrid
+\fi
+}
+\begin{verbatim}
+    int vlistInqVarGrid(int vlistID, int varID);
+\end{verbatim}
+
+Get the Grid ID of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarGrid})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarLongname]{vlistInqVarLongname}
+\else
+vlistInqVarLongname
+\fi
+}
+\begin{verbatim}
+    void vlistInqVarLongname(int vlistID, int varID, char *longname);
+\end{verbatim}
+
+Get the longname of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarMissval]{vlistInqVarMissval}
+\else
+vlistInqVarMissval
+\fi
+}
+\begin{verbatim}
+    double vlistInqVarMissval(int vlistID, int varID);
+\end{verbatim}
+
+Get the missing value of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarMissval})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarName]{vlistInqVarName}
+\else
+vlistInqVarName
+\fi
+}
+\begin{verbatim}
+    void vlistInqVarName(int vlistID, int varID, char *name);
+\end{verbatim}
+
+Get the name of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarStdname]{vlistInqVarStdname}
+\else
+vlistInqVarStdname
+\fi
+}
+\begin{verbatim}
+    void vlistInqVarStdname(int vlistID, int varID, char *stdname);
+\end{verbatim}
+
+Get the standard name of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarStdname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarUnits]{vlistInqVarUnits}
+\else
+vlistInqVarUnits
+\fi
+}
+\begin{verbatim}
+    void vlistInqVarUnits(int vlistID, int varID, char *units);
+\end{verbatim}
+
+Get the units of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarUnits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarZaxis]{vlistInqVarZaxis}
+\else
+vlistInqVarZaxis
+\fi
+}
+\begin{verbatim}
+    int vlistInqVarZaxis(int vlistID, int varID);
+\end{verbatim}
+
+Get the Zaxis ID of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarZaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistNgrids]{vlistNgrids}
+\else
+vlistNgrids
+\fi
+}
+\begin{verbatim}
+    int vlistNgrids(int vlistID);
+\end{verbatim}
+
+Number of grids in a variable list
+\ifpdfoutput{}{(\ref{vlistNgrids})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistNvars]{vlistNvars}
+\else
+vlistNvars
+\fi
+}
+\begin{verbatim}
+    int vlistNvars(int vlistID);
+\end{verbatim}
+
+Number of variables in a variable list
+\ifpdfoutput{}{(\ref{vlistNvars})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistNzaxis]{vlistNzaxis}
+\else
+vlistNzaxis
+\fi
+}
+\begin{verbatim}
+    int vlistNzaxis(int vlistID);
+\end{verbatim}
+
+Number of zaxis in a variable list
+\ifpdfoutput{}{(\ref{vlistNzaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisCreate]{zaxisCreate}
+\else
+zaxisCreate
+\fi
+}
+\begin{verbatim}
+    int zaxisCreate(int zaxistype, int size);
+\end{verbatim}
+
+Create a vertical Z-axis
+\ifpdfoutput{}{(\ref{zaxisCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefLevels]{zaxisDefLevels}
+\else
+zaxisDefLevels
+\fi
+}
+\begin{verbatim}
+    void zaxisDefLevels(int zaxisID, const double *levels);
+\end{verbatim}
+
+Define the levels of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefLevels})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefLongname]{zaxisDefLongname}
+\else
+zaxisDefLongname
+\fi
+}
+\begin{verbatim}
+    void zaxisDefLongname(int zaxisID, const char *longname);
+\end{verbatim}
+
+Define the longname of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefName]{zaxisDefName}
+\else
+zaxisDefName
+\fi
+}
+\begin{verbatim}
+    void zaxisDefName(int zaxisID, const char *name);
+\end{verbatim}
+
+Define the name of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefUnits]{zaxisDefUnits}
+\else
+zaxisDefUnits
+\fi
+}
+\begin{verbatim}
+    void zaxisDefUnits(int zaxisID, const char *units);
+\end{verbatim}
+
+Define the units of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefUnits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDestroy]{zaxisDestroy}
+\else
+zaxisDestroy
+\fi
+}
+\begin{verbatim}
+    void zaxisDestroy(int zaxisID);
+\end{verbatim}
+
+Destroy a vertical Z-axis
+\ifpdfoutput{}{(\ref{zaxisDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqLevel]{zaxisInqLevel}
+\else
+zaxisInqLevel
+\fi
+}
+\begin{verbatim}
+    double zaxisInqLevel(int zaxisID, int levelID);
+\end{verbatim}
+
+Get one level of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqLevel})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqLevels]{zaxisInqLevels}
+\else
+zaxisInqLevels
+\fi
+}
+\begin{verbatim}
+    void zaxisInqLevels(int zaxisID, double *levels);
+\end{verbatim}
+
+Get all levels of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqLevels})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqLongname]{zaxisInqLongname}
+\else
+zaxisInqLongname
+\fi
+}
+\begin{verbatim}
+    void zaxisInqLongname(int zaxisID, char *longname);
+\end{verbatim}
+
+Get the longname of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqName]{zaxisInqName}
+\else
+zaxisInqName
+\fi
+}
+\begin{verbatim}
+    void zaxisInqName(int zaxisID, char *name);
+\end{verbatim}
+
+Get the name of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqSize]{zaxisInqSize}
+\else
+zaxisInqSize
+\fi
+}
+\begin{verbatim}
+    int zaxisInqSize(int zaxisID);
+\end{verbatim}
+
+Get the size of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqSize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqType]{zaxisInqType}
+\else
+zaxisInqType
+\fi
+}
+\begin{verbatim}
+    int zaxisInqType(int zaxisID);
+\end{verbatim}
+
+Get the type of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqType})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqUnits]{zaxisInqUnits}
+\else
+zaxisInqUnits
+\fi
+}
+\begin{verbatim}
+    void zaxisInqUnits(int zaxisID, char *units);
+\end{verbatim}
+
+Get the units of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqUnits})}

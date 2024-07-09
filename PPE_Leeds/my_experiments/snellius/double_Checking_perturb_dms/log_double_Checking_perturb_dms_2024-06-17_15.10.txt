@@ -1,0 +1,10 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+Did not find ncdump! Please fix your path (e.g. module load netcdf).

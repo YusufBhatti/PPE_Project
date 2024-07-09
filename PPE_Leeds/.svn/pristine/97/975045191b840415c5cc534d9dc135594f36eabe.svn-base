@@ -1,0 +1,33 @@
+This section contains functions to define a new vertical Z-axis
+and to get information from an existing Z-axis.
+A Z-axis object is necessary to define a variable.
+The following different Z-axis types are available:
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{{\large\tt ZAXIS\_SEDIMENT\_BOTTOM\_TW \ \ }}
+\item[{\large\tt ZAXIS\_GENERIC           }]  Generic user defined level
+\item[{\large\tt ZAXIS\_SURFACE           }]  Surface level
+\item[{\large\tt ZAXIS\_MEANSEA          }]  Mean sea level
+\item[{\large\tt ZAXIS\_TOA                  }]  Norminal top of atmosphere
+\item[{\large\tt ZAXIS\_ATMOSPHERE   }]  Entire atmosphere
+\item[{\large\tt ZAXIS\_SEA\_BOTTOM  }]  Sea bottom
+\item[{\large\tt ZAXIS\_ISENTROPIC      }]  Isentropic (theta) level
+\item[{\large\tt ZAXIS\_HYBRID            }]  Hybrid level
+\item[{\large\tt ZAXIS\_SIGMA              }]  Sigma level
+\item[{\large\tt ZAXIS\_PRESSURE          }]  Isobaric pressure level in Pascal
+\item[{\large\tt ZAXIS\_HEIGHT            }]  Height above ground in meters
+\item[{\large\tt ZAXIS\_ALTITUDE          }]  Altitude above mean sea level in meters
+\item[{\large\tt ZAXIS\_CLOUD\_BASE        }]  Cloud base level
+\item[{\large\tt ZAXIS\_CLOUD\_TOP         }]  Level of cloud tops
+\item[{\large\tt ZAXIS\_ISOTHERM\_ZERO    }]  Level of 0$^{\circ}$ C isotherm
+\item[{\large\tt ZAXIS\_SNOW                   }]  Snow level
+\item[{\large\tt ZAXIS\_LAKE\_BOTTOM               }]  Lake or River Bottom
+\item[{\large\tt ZAXIS\_SEDIMENT\_BOTTOM        }]  Bottom Of Sediment Layer
+\item[{\large\tt ZAXIS\_SEDIMENT\_BOTTOM\_TA}]  Bottom Of Thermally Active Sediment Layer
+\item[{\large\tt ZAXIS\_SEDIMENT\_BOTTOM\_TW}]  Bottom Of Sediment Layer Penetrated By Thermal Wave
+\item[{\large\tt ZAXIS\_ZAXIS\_MIX\_LAYER          }]  Mixing Layer
+\item[{\large\tt ZAXIS\_DEPTH\_BELOW\_SEA }]  Depth below sea level in meters
+\item[{\large\tt ZAXIS\_DEPTH\_BELOW\_LAND}]  Depth below land surface in centimeters
+\end{deflist}
+\end{minipage}

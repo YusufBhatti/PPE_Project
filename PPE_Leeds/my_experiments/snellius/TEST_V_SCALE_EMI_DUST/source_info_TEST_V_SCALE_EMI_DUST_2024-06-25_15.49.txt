@@ -1,0 +1,21 @@
+#------------------------------------------------------------
+# Reference of the svn 'base' version of the current code:
+
+Path: /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds
+Working Copy Root Path: /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds
+URL: https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Relative URL: ^/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Repository Root: https://svn.iac.ethz.ch/external/echam-hammoz
+Repository UUID: 5abd231c-38af-11dd-ab7a-a2415d6bb57b
+Revision: 7559
+Node Kind: directory
+Schedule: normal
+Last Changed Author: ybhatti
+Last Changed Rev: 7559
+Last Changed Date: 2024-06-17 16:10:27 +0200 (Mon, 17 Jun 2024)
+
+
+#--------------------------------------------------------------------------
+# List of modified / added / removed files as compared to the svn 'base' version
+# (filtered out from any non-versioned file, which won't anyway be seen in the patch):
+

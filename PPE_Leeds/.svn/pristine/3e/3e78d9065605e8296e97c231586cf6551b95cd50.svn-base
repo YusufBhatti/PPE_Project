@@ -1,0 +1,74 @@
+! radctl.inc
+! 
+!     ------------------------------------------------------------------
+NAMELIST /radctl/ &
+  nmonth,         &! index for annual cycle or perpetual month experiments
+                   !  0      : annual cycle on
+                   !  1 - 12 : perpetual month January - December
+                   !  !!!!!!!! only with PCMDI-Orbit !!!!!!!!!!!!
+  ldiur,          &! true for diurnal cycle on
+  trigrad,        &! frequency of full radiation
+  isolrad,        &! isolrad = 0 : rrtm solar constant
+                   ! isolrad = 1 : dependent spectrally resolved solar constant read from file
+                   ! isolrad = 2 : solar constant
+                   ! isolrad = 3 : constant for amip runs
+                   ! isolrad = 4 : constant for rad.-conv. eq. runs with diurnal cycle
+                   ! isolrad = 5 : constant for rad.-conv. eq. runs without diurnal cycle
+  ih2o,           &! ih2o = 0 : no H2O in radiation computation, i.e.
+                   !            specific humidity = cloud water = cloud ice = 0
+                   ! ih2o = 1 : use prognostic specific humidity, cloud water and cloud ice
+  ico2,           &! ico2 = 0 : no CO2 in radiation computation
+                   ! ico2 = 1 : use prognostic CO2 mass mixing ratio of tracer co2
+                   ! ico2 = 2 : uniform volume mixing ratio co2vmr
+                   ! ico2 = 4 : uniform volume mixing ratio in scenario run (ighg)
+  ich4,           &! ich4 = 0 : no CH4 in radiation computation
+                   ! ich4 = 2 : uniform volume mixing ratio ch4vmr
+                   ! ich4 = 3 : troposphere: ch4vmr; decay with elevation above
+                   ! ich4 = 4 : uniform volume mixing ratio in scenario run (ighg)
+  io3,            &! io3  = 0 : no O3 in radiation computation
+                   ! io3  = 2 : spectral climatology, as in  ECHAM4
+                   ! io3  = 3 : gridpoint climatology from NetCDF file
+                   ! io3  = 4 : gridpoint climatology from IPCC-NetCDF file
+  io2,            &! io2  = 0 : no O2 in radiation computation
+                   ! io2  = 2 : O2    volume mixing ratio o2vmr
+  in2o,           &! in2o = 0 : no N2O in radiation computation
+                   ! in2o = 2 : uniform volume mixing ratio n2ovmr
+                   ! in2o = 3 : troposphere: n2ovmr; decay with elevation above
+                   ! in2o = 4 : uniform volume mixing ratio in scenario run (ighg)
+  icfc,           &! icfc = 0 : no CFCs in radiation computation
+                   ! icfc = 2 : uniform volume mixing ratios cfcvmr(1:2) for :
+                   !               CFC11     CFC12
+                   ! icfc = 4 : uniform volume mixing ratios in scenario run (ighg)
+  ighg,           &! ighg = 0 : no scenario
+                   ! ighg = 1 : scenario A1B
+                   ! ighg = 2 : scenario B1
+                   ! ighg = 3 : scenario A2
+  iaero,          &! iaero= 0 : no aerosols in radiation computation
+                   ! iaero= 1 : transported GADS aerosols
+                   ! iaero= 2 : climatological Tanre aerosols
+                   ! iaero= 3 : transported GADS aerosols + climatological Tanre aerosols
+                   ! iaero= 4 : fixed GADS aerosols + climatological Tanre aerosols
+                   ! iaero= 5 : explicit HAM aerosols
+  fco2,           &! factor for external co2 scenario (ighg=1 and ico2=4)
+  co2vmr,         &! CO2 volume mixing ratio for ico2=2
+  ch4vmr,         &! CH4 volume mixing ratio for ich4=2,3
+  o2vmr,          &! O2  volume mixing ratio for io2=2
+  n2ovmr,         &! N2O volume mixing ratio for in2o=2,3
+  cfcvmr,         &! CFC volume mixing ratios for icfc=2
+  cecc,           &! eccentricity of the earth's orbit
+  cobld,          &! obliquity in degrees
+  clonp,          &! longitude of perihelion measured from vernal equinox
+  yr_perp,        &! year AD for orbit, VSOP87-orbit only
+  lradforcing,    &! switch on/off diagnostic of instantaneous aerosol 
+                   ! solar (lforcing(1)) and thermal (lforcing(2)) radiation forcing 
+  lw_spec_samp,   &! 1 is broadband, 2 is MCSI, 3 and up are teams
+  sw_spec_samp,   &
+  lw_gpts_ts,     &! Number of g-points per time step using MCSI
+  sw_gpts_ts,     &
+  rad_perm,       &! Integer for perturbing random number seeds
+  i_overlap,      &! 1 (1 = max-ran
+  l_do_sep_clear_sky
+                   ! Do separate clear-sky calculations? Alternative is to accumulate clear samples
+!     ------------------------------------------------------------------
+
+

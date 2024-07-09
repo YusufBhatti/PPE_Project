@@ -1,0 +1,29 @@
+The current code is based on the following echam6 version in the ECHAM6 (MPI) repository:
+
+URL: https://svn.zmaw.de/svn/echam6/tags/echam-6.3.02p4
+Relative URL: ^/tags/echam-6.3.02p4
+Repository Root: https://svn.zmaw.de/svn/echam6
+Repository UUID: 2ab4a62a-580c-0410-97ed-a227945b1745
+Revision: 4310
+Node Kind: directory
+Schedule: normal
+Last Changed Author: monika
+Last Changed Rev: 4281
+Last Changed Date: 2016-02-18 10:35:05 +0100 (Thu, 18 Feb 2016)
+
+This version has been mirrored into the HAMMOZ (ETHZ) repository:
+
+URL: https://svn.iac.ethz.ch/external/echam-hammoz/echam6-base/trunk
+Relative URL: ^/echam6-base/trunk
+Repository Root: https://svn.iac.ethz.ch/external/echam-hammoz
+Repository UUID: 5abd231c-38af-11dd-ab7a-a2415d6bb57b
+Revision: 3158
+Node Kind: directory
+Schedule: normal
+Last Changed Author: ferrachs
+Last Changed Rev: 3158
+Last Changed Date: 2016-04-19 16:49:50 +0200 (Tue, 19 Apr 2016)
+
+More infos about what changed in echam6-base in:
+https://svn.iac.ethz.ch/external/echam-hammoz/echam6-base/trunk/echam6_MPI_log.txt
+

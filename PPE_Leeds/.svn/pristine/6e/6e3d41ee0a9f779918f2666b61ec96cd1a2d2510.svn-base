@@ -1,0 +1,37 @@
+
+# There are no separate /scratch and /work file systems.
+# Besides, home directories are not mounted to compute nodes.
+
+DATA_ROOT = /scratch/mpi/$PROJECT_SUBDIR/$USER
+WORK_ROOT = $DATA_ROOT
+MODEL_ROOT = $DATA_ROOT
+
+[namelists]
+  [[namelist.echam]]
+    [[[parctl]]]
+      nprocb = 4
+    [[[runctl]]]
+      nproma = 48
+
+[jobs]
+
+  batch_command = sbatch %x
+  interactive_command = srunjob %x
+
+  [[run_start]]
+   
+    queue = mpi-serial
+
+  [[run]]
+
+    queue = mpi-compute
+    time_limit = 02:30:00
+    nodes = 4
+    tasks_per_node = 16
+
+  [[job1]]
+
+    queue = mpi-serial
+    time_limit = 01:20:00
+    # afterburner is not yet OpenMP enabled # threads_per_task = 12
+
