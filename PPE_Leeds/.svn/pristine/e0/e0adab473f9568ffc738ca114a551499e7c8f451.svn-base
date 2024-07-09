@@ -1,0 +1,44 @@
+# Solaris/Fujitsu
+#------------------------------------------------------------------------
+# Enable CC and F90 only, if not the standard compiler should be used 
+
+ARCH       = solaris
+
+MPIROOT    = /sw/solaris10/mpich2-1.0.5
+MPI_LIB    = -L\$(MPIROOT)/lib -R\$(MPIROOT)/lib -lmpich -lnsl -lsocket -lrt -lnsl -lsocket 
+
+NETCDFROOT = /sw/solaris10/netcdf-3.6.2
+
+#----------------------------------------------------------------------------
+# NAG f95 - does not work currently (July, 2007)
+#
+#CC       = cc 
+#CFLAGS   = -O -g -m64 -xarch=sparcvis2 -xchip=ultra3cu
+#F90      = nagf95
+#FFLAGS   = -O -g -Wc,-m64  -Wc,-xarch=sparcvis2  -Wc,-xchip=ultra3cu
+#F90FLAGS = -C -mismatch -gline -g -maxcontin=512 -fpp -DNAG -Wc,-m64  -Wc,-xarch=sparcvis2  -Wc,-xchip=ultra3cu
+#
+#LIBS     = -L../lib -lsupport -llapack -lblas
+#
+#SRCDIRS  = blas lapack
+#
+#MODOPT   = -I
+#
+#----------------------------------------------------------------------------
+# Sun Compiler Collection
+#
+#CC       = cc
+#CFLAGS   = -O -g -m64 -xarch=sparcvis2 -xchip=ultra3cu 
+#F90      = f95
+#FFLAGS   = -fast -fsimple=1 -g -m64 -xarch=sparcvis2 -xchip=ultra3c  -xchip=ultra3cu  
+#F90FLAGS = -fast -fsimple=1 -g -m64 -xarch=sparcvis2 -xchip=ultra3c  -xchip=ultra3cu  -fpp
+#
+#LIBS     = -L../lib -lsupport -lsunperf
+#
+#SRCDIRS  = 
+#
+#MODOPT   = -M
+#
+#------------------------------------------------------------------------------
+
+DEFOPT   = -D

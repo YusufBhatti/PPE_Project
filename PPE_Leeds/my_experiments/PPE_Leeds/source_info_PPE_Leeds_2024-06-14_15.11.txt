@@ -1,0 +1,64 @@
+#------------------------------------------------------------
+# Reference of the svn 'base' version of the current code:
+
+Path: /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds
+Working Copy Root Path: /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds
+URL: https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Relative URL: ^/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Repository Root: https://svn.iac.ethz.ch/external/echam-hammoz
+Repository UUID: 5abd231c-38af-11dd-ab7a-a2415d6bb57b
+Revision: 7557
+Node Kind: directory
+Schedule: normal
+Last Changed Author: ybhatti
+Last Changed Rev: 7551
+Last Changed Date: 2024-06-05 14:06:43 +0200 (Wed, 05 Jun 2024)
+
+
+#--------------------------------------------------------------------------
+# List of modified / added / removed files as compared to the svn 'base' version
+# (filtered out from any non-versioned file, which won't anyway be seen in the patch):
+
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/Makefile.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/aclocal.m4
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/blas/Makefile.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/config/config.h.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/configure
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/lapack/Makefile.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/src/Makefile.am
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/src/Makefile.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/support/Makefile.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/util/Makefile.in
+M       /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/util/quickplots/Makefile.in
+
+#--------------------------------------------------------------------
+# Patch information:
+
+The unversioned code modifications relative to:
+
+'https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol@7551'
+
+are recorded in the following patch:
+
+'/gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Leeds/patch_PPE_Leeds_2024-06-14_15.11.diff'
+
+You can always restore this particular state of the code with either:
+
+* making a fresh new working copy:
+
+    mkdir [new dir] 
+    cd [new dir]
+    svn co https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol@7551 [my fresh working copy]
+    cd [my fresh working copy]
+    patch -p[num] < /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Leeds/patch_PPE_Leeds_2024-06-14_15.11.diff
+
+,where [num] is the number of '/' in '/gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/' (adjacent slashes are counted as 1, see: man patch).
+
+* or revert to this state directly in /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/:
+
+cd /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds
+svn revert -R *
+svn update -r 7551
+patch -p0 < /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Leeds/patch_PPE_Leeds_2024-06-14_15.11.diff
+
+'!!WARNING!!' In the second option, you will loose any new unversioned modification that you have done since 'Fri Jun 14 15:11:07 CEST 2024'

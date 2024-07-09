@@ -1,0 +1,27 @@
+The \echam{} model is a program for the
+interactive calculation of the general circulation.
+This manual contains a user guide of \echam{}
+(chapter~\ref{capuserguide}) including a 
+description of the compilation procedure on the 
+supercomputer platform \blizzard{} at DKRZ Hamburg
+(section~\ref{seccompiling}), a description of the input namelists
+(section~\ref{secnamelist}), input files
+(section~\ref{secinputfiles}), and ouput files
+(section~\ref{secoutputfiles}), a description of example run scripts
+(section~\ref{secrunscripts}), and postprocessing scripts
+(section~\ref{secpostprocessing}). 
+We restrict our description to the supercomputer platform 
+\blizzard{} at DKRZ in Hamburg. Performing a simulation on other
+computer platforms requires the same input data, but the compiling
+procedure and the 
+directory structure for output in particular, will be
+different.
+
+Chapter~\ref{captechguide} contains a short description of the code of
+\echam{} and is intended to be a guide for people who work with the
+source code of the atmosphere part of \echam. An introduction to the
+\echam--code 
+with explanations will become available in form of a lecture soon (``Using
+and programming \echam{} --- a first introduction''). 
+
+This description is valid for version echam--\echamversion.

@@ -1,0 +1,20 @@
+#! @SHELL@
+set -e
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_exchanger_parallel \
+  -m irecv_send
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_exchanger_parallel \
+  -m irecv_isend
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_exchanger_parallel \
+  -m irecv_isend_packed
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_exchanger_parallel \
+  -m mix_irecv_isend
+#
+# Local Variables:
+# mode: sh
+# End:
+#

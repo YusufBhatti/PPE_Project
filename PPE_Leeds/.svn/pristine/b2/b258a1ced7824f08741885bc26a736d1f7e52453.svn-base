@@ -1,0 +1,287 @@
+#!/bin/sh 
+set -ex
+#
+TYP=$1
+echo $TYP
+#
+NAME=$2
+#
+RES=$3
+#
+#
+echo $RES
+#
+TO=$4
+#
+echo $TO
+#
+WORKDIR=$5
+# 
+echo QUELLE path $QUELLE
+   FIXCODE=/pool/data/ECHAM6/post/FixCodes
+   ERAin=/pool/data/ECHAM6/post/ERAin/T${RES}
+#
+
+   cdo=/client/bin/cdo
+
+#
+ATMmod="${WORKDIR}/ATM_${NAME}"
+ATMera="${ERAin}/T${RES}_ATM_1979_${TO}_$TYP"
+#
+###########################################################################
+# var.txt wird in ATM.gs BOT.gs einglesen
+# number of latitudes
+
+nlat=`cdo griddes $ATMmod| grep ysize | cut -d"=" -f2`
+echo $nlat >>var.txt
+ERATIME="(1979-${TO})"
+echo $ERATIME >>var.txt
+
+
+FORMAT="-f nc -t ${QUELLE}/echam6.varCode"
+LEVELS="100000,92500,85000,77500,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,1000"
+#
+cp var.txt var1.txt
+
+head  var1.txt >var.txt
+date >var1.txt
+cut -c5-11,25-32 var1.txt >datum
+cat datum >>var.txt
+#
+###########################################################################
+# 
+
+#
+set +e
+#
+#----code130--Temperature--850 hPa---
+#
+CODE=130
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+cdo ${FORMAT} -subc,273.15 -sellevel,85000 -selcode,${CODE} $ATMmod  Ubusy_c${CODE}lola.nc
+fi
+#
+#
+#----code130--Temperature-850 hPa- (Model-ERAin)---
+#
+CODE=130
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+cdo ${FORMAT} -sellevel,85000 -selcode,${CODE} $ATMmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -sellevel,85000 -selcode,${CODE} $ATMera busy2.nc
+      cdo sub  busy1.nc busy2.nc  Ubusy_d${CODE}lola.nc
+fi
+fi
+#
+rm -f  busy*
+#
+#
+#------------code156--Geopotential-----500 hPa-----------
+#
+CODE=156
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,0.1 -sellevel,50000 -selcode,${CODE} $ATMmod Ubusy_c${CODE}lola.nc
+fi
+#
+#
+#----code156--Geopotential--500 hPa-- (Model-ERAin)---
+#
+CODE=156
+CODE_ERA=129
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,0.1 -sellevel,50000 -selcode,${CODE}  $ATMmod busy1.nc
+#--------code129 * 1/(10 * 9.81)------------
+   if cdo -s showcode -selcode,${CODE_ERA}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -mulc,0.0102 -sellevel,50000 -selcode,${CODE_ERA} $ATMera busy2.nc
+      cdo sub  busy1.nc busy2.nc  Ubusy_d${CODE}lola.nc
+   fi
+fi
+#
+rm -f  busy*                           
+#
+#----code149---Velocity potential----
+#
+CODE=149
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -divc,1000000 -sellevel,20000 -selcode,${CODE} $ATMmod Ubusy_c${CODE}lola.nc
+fi
+#
+#-------psi---comput-psi--from--code132--zonal
+#
+CODE=132
+VAR=psi
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -r mastrfu  -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMmod busy1.nc
+   cdo -divc,1000000000  busy1.nc  Ubusy_${VAR}.nc
+fi
+#
+rm -f  busy* 
+#
+#
+#----code130--- Temperature---ZONAL-
+#
+CODE=130
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+cdo ${FORMAT} -zonavg -subc,273.15 -sellevel,${LEVELS} -selcode,${CODE} $ATMmod  Ubusy_c${CODE}.nc
+#
+fi
+#
+#
+#
+#----code130--- Temperature- (Model-ERAin)-zonal--
+#
+CODE=130
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo  ${FORMAT} -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo  ${FORMAT} -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+#
+#
+#-----code131---U-----zonal-
+#
+CODE=131
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $ATMmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#-----code131---U--(Model-ERAin)--zonal-
+#
+#
+CODE=131
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $ATMmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+#
+#-----code132---V-----zonal-
+#
+CODE=132
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $ATMmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#-----code132---V--(Model-ERA40)--zonal-
+#
+#
+CODE=132
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $ATMmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+#
+#----code133---Specific humidity---
+#
+CODE=133
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,1000 -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $ATMmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#----code157---Relative humidity-----
+#
+CODE=157
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo -f nc  -mulc,100 -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $ATMmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#-----code157--Relative humidity---(Model-ERAin)---
+#
+#
+CODE=157
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,100 -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $ATMmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+#
+#-----code153---Cloud water---ZONAL---
+#
+CODE=153
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,153  $ATMmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#-----code154---Cloud ice---ZONAL---
+#
+CODE=154
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMmod Ubusy_c${CODE}.nc
+fi
+#
+#-----code153 + code154---Cloud ice + Cloud water --ZONAL----
+#
+CODE=153_154
+if cdo -s showcode -selcode,153  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,153  $ATMmod busy1.nc
+   if cdo -s showcode -selcode,154  $ATMmod > /dev/null
+   then
+      cdo ${FORMAT} -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,154  $ATMmod busy2.nc
+      cdo add busy1.nc busy2.nc Ubusy_c${CODE}.nc
+   fi
+fi
+rm -f  busy* 
+#
+#-----code223---Cloud cover----
+#
+CODE=223
+if cdo -s showcode -selcode,${CODE}  $ATMmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,100 -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $ATMmod Ubusy_c${CODE}.nc
+fi
+
+
+exit
+
+
+
+
+
+
+

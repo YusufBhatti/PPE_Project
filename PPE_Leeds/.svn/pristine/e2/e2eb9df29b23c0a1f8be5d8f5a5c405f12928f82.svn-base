@@ -1,0 +1,660 @@
+The number and names of outputfiles depend on the model
+configuration. Tab.~\ref{taboutputfiles} lists all standard output files
+and gives an overview of the kind of variables being in these
+files. The names of the outputfiles are composed of the experiment
+name {\tt EXPNAME} as it is given by the {\tt out\_expname} variable of the {\tt
+  runctl} namelist (see section~\ref{secrunctl}), a date information
+{\tt DATE} corresponding to the simulation date at which the output file
+was opened and an extension {\tt EXT} that describes the output stream or family
+of output streams written to this file. GRIB format output files do
+not have further extensions, netcdf format output files have the
+additional extension {\tt .nc}. The filename is therefore composed as
+{\tt EXPNAME\_DATE\_EXT[.nc]}.
+
+All the variables that are written to an output file are members of
+so--called streams, a special data structure that allows for standardized
+output. Not all variables of a stream are written to output
+files. Detailed information about all streams and variables are
+written to the standard error output device when \echam{} is started. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}p{9cm}}\hline\hline
+\caption[Output files]{Output files
+  of \echam}\\\hline\label{taboutputfiles}
+\endfirsthead
+\caption[]{Output files --- continued}\\\hline
+\endhead
+\hline\multicolumn{2}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{2}{r}{end of table}
+\endlastfoot
+Extension {\tt EXT} & Content \\\hline
+{\tt cfdiag} & diagnostic of 3--dimensional radiation and convective mass flux\\
+{\tt co2} & diagnostic of CO$_2$ submodel (carbon cycle)\\
+{\tt cosp} & COSP simulator output\\
+{\tt echam} & main echam outputfile comprising several echam streams
+containing 2-- and 3--d atmospheric gridpoint and spectral variables\\
+{\tt forcing} & radiation fluxes and heating rates\\
+{\tt surf} & variables from the surface model JSBACH\\
+{\tt tdiag} & tendency diagnostic\\
+{\tt tracer} & mass mixing ratios of (transported) trace gas species \\
+\hline
+\end{longtable}
+
+The number of variables in each output stream also depend on the model
+configuration. In the case of GRIB output, information about code
+numbers and variables can be found in the respective files {\tt
+  EXPNAME\_DATE\_EXT.codes}. In the case of netcdf output, the
+explanation of the variable can be found inside the netcdf files.
+Some of the variables are mean values over the output interval, some
+are in spectral space, others in grid point space.
+We give tables of outputvariables of the most important output files only.
+
+\subsection{Output file {\tt echam}}
+
+The {\tt echam} output file combines the variables of several output
+streams (g3b, gl, and sp) and contains the main prognostic and
+diagonstic \echam{} 
+output variables describing the dynamic state of the atmosphere.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}rccccp{5cm}}\hline\hline
+\caption[Output file {\tt echam}]{Output
+    file {\tt echam}. The type of the output fields can be
+g (instantaneous grid point variable), \gm{} (mean value over the
+output interval of grid point variable), s (spectral space
+variable). The dimension is either 2d (variable depends on
+longitudes and latitudes only), 3d (variable depends on longitudes,
+latitudes, and levels).}\\\hline\label{taboutputecham}
+\endfirsthead
+\caption[]{Output file {\tt echam} --- continued}\\\hline
+\endhead
+\hline\multicolumn{7}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{7}{r}{end of table}
+\endlastfoot
+Name          &    Code & Type & Unit & Dimension & Stream & Explanation \\\hline
+{\tt abso4}   &    235  & \gm  & kg/m$^2$&2d   &  g3b   &
+anthropogenic sulfur burden\\
+{\tt aclcac}  &    223  & \gm  & ---    & 3d   &  g3b   & cloud cover\\
+{\tt aclcov}  &    164  & \gm  & ---    & 2d   &  g3b   & total cloud
+cover \\
+{\tt ahfcon}  &    208  & \gm  & W/m$^2$& 2d   &  g3b   & conductive heat
+flux through ice\\
+{\tt ahfice}  &    125  & g    & W/m$^2$& 2d   &  g3b   & conductive heat
+flux \\
+{\tt ahfl}    &    147  & \gm  & W/m$^2$& 2d   &  g3b   & latent heat
+flux\\
+{\tt ahfliac} &    110  & \gm  & W/m$^2$& 2d   &  g3b   & latent heat
+flux over ice\\
+{\tt ahfllac} &    112  & \gm  & W/m$^2$& 2d   &  g3b   & latent heat
+flux over land\\
+{\tt ahflwac} &    111  & \gm & W/m$^2$& 2d   &  g3b   & latent heat
+flux over water\\
+{\tt ahfres}  &    209  & \gm  & W/m$^2$& 2d   &  g3b   & melting of ice\\
+{\tt ahfs}    &    146  & \gm  & W/m$^2$& 2d   &  g3b   & sensible
+heat flux\\
+{\tt ahfsiac} &    119  & \gm  & W/m$^2$& 2d   &  g3b   & sensible heat
+flux over ice\\
+{\tt ahfslac} &    121  & \gm  & W/m$^2$& 2d   &  g3b   & sensible heat
+flux over land\\
+{\tt ahfswac} &    120  & \gm  & W/m$^2$& 2d   &  g3b   & sensible heat
+flux over water\\
+{\tt albedo}  &    175  & g    & ---    & 2d   &  g3b   & surface albedo\\
+{\tt albedo\_nir} & 101 & g    & --- &  2d    &  g3b   & surface
+albedo for near infrared radiation range \\
+{\tt albedo\_nir\_dif} & 82 & g & --- &  2d    &  g3b   & surface
+albedo for near infrared radiation range, diffuse \\
+{\tt albedo\_nir\_dir} & 80 & g & --- &  2d    &  g3b   & surface
+albedo for near infrared radiation range, direct \\
+{\tt albedo\_vis} & 100 & g    & ---  &  2d    &  g3b   & surface
+albedo for visible radiation range\\
+{\tt albedo\_vis\_dif} & 81 & g & --- &  2d    &  g3b   & surface
+albedo for visible radiation range, diffuse \\
+{\tt albedo\_vis\_dir} & 79 & g & --- &  2d    &  g3b   & surface
+albedo for visible radiation range, direct \\
+{\tt alsobs}  & 72      & g    & ---  &  2d    &  g3b   & albedo of
+bare ice and snow without melt ponds \\
+{\tt alsoi}   & 122     & g    & ---  &  2d    &  g3b   & albedo of
+ice \\
+{\tt alsol}   & 124     & g    & ---  &  2d    &  g3b   & albedo of
+land\\
+{\tt alsom}   & 71      & g    & ---  &  2d    &  g3b   & albedo of
+melt ponds \\
+{\tt alsow}   & 123     & g    & ---  &  2d    &  g3b   & albedo of
+water \\
+{\tt ameltdepth}&77     & g    & m    &  2d    &  g3b   & total melt
+pond depth\\
+{\tt ameltfrac}&78      & g    & ---  &  2d    &  g3b   & fractional
+area of melt ponds on sea ice\\
+{\tt amlcorac}& 89      & \gm  &W/m$^2$& 2d    &  g3b   & mixed layer
+flux correction\\
+{\tt ao3}     & 236     & g    & ---  &  3d    &  g3b   & mass mixing
+ratio of IPCC ozone\\
+{\tt apmeb}   & 137     & \gm  &$\rm kg/(m^2s)$&2d& g3b & vertical
+integral tendency of water\\
+{\tt aprc}    & 143     & \gm  &$\rm kg/(m^2s)$&2d& g3b & convective
+precipitation \\
+{\tt aprl}    & 142     & \gm  &$\rm kg/(m^2s)$&2d& g3b & large scale
+precipitation \\
+{\tt aprs}    & 144     & \gm  &$\rm kg/(m^2s)$&2d& g3b & snow fall\\
+{\tt aps}     & 134     & g    & Pa   &  2d    & g3b    & surface
+pressure \\
+{\tt az0i}    & 116     & g    & m    &  2d    & g3b    & roughness
+length over ice \\
+{\tt az0l}    & 118     & g    & m    &  2d    & g3b    & roughness
+length over land \\
+{\tt az0w}    & 117     & g    & m    &  2d    & g3b    & roughness
+length over water \\
+
+{\tt barefrac}& 70      & g    & ---  &  2d    & g3b    & bare ice
+fraction \\
+{\tt dew2}    & 168     & g    & K    &   2d   & g3b    & dew point
+temperature at 2m above surface\\
+{\tt evap}    & 182     & \gm  &$\rm kg/(m^2s)$&2d& g3b & evaporation\\
+{\tt evapiac} & 113     & \gm  &$\rm kg/(m^2s)$&2d& g3b & evaporation
+over ice\\
+{\tt evaplac} & 115     & \gm  &$\rm kg/(m^2s)$&2d& g3b & evaporation
+over land\\
+{\tt evapwac} & 114     & \gm  &$\rm kg/(m^2s)$&2d& g3b & evaporation
+over water\\
+{\tt fage}    & 68      & g    & ---  &  2d    & g3b    & aging factor
+of snow on ice\\
+{\tt friac}   & 97      & \gm  & ---  &  2d    & g3b    & ice cover
+fraction of grid box \\
+{\tt geosp}   & 129     & g    &$\rm m^2/s^2$&2d& g3b   & surface
+geopotential (orography)\\
+{\tt glac}    & 232     & g    & ---  &  2d    &  g3b   & fraction of
+land covered by glaciers\\
+{\tt gld}     & 213     & g    & m    &  2d    &  g3b   & glacier depth\\
+{\tt lsp}     & 152     & s    & ---  &  2d    &  sp    & nat.~logarithm of
+surface pressure\\
+{\tt q}       & 133     & g    & ---  &  3d    &  gl    & specific
+humidity \\
+{\tt qres}    & 126     & g    & W/m$^2$  & 2d &  g3b   & residual
+heat flux for melting sea ice\\
+{\tt qvi}     & 230     & \gm  & kg/m$^2$ & 2d &  g3b   & vertically
+integrated water vapour \\
+{\tt relhum}  & 157     & g    & ---  &  3d    &  g3b   & relative
+humidity\\
+{\tt sd}      & 155     & s    & 1/s  &  3d    &  sp    & divergence
+\\
+{\tt seaice}  & 210     & g    & ---  &  2d    &  g3b   & ice cover
+(fraction of 1-SLM)\\
+{\tt siced}   & 211     & g    & m    &  2d    &  g3b   & ice
+depth\\
+{\tt sicepdi} & 74      & g    & m    &  2d    &  g3b   & ice
+thickness on melt pond\\
+{\tt sicepdw} & 73      & g    & m    &  2d    &  g3b   & melt pond
+depth on sea ice \\
+{\tt sicepres}& 76      & g    & W/m$^2$&2d    &  g3b   & residual
+heat flux \\
+{\tt slf}     & 194     & g    & ---  &  2d    &  g3b   & sea land fraction\\
+{\tt slm}     & 172     & g    & ---  &  2d    &  g3b   & land sea
+mask (1=land, 0=sea/lake) \\
+{\tt sn}      & 141     & g    & m    &  2d    &  g3b   & snow depth\\
+{\tt snc}     & 233     & g    & m    &  2d    &  g3b   & snow depth
+at the canopy\\
+{\tt sni}     & 214     & g    & m    &  2d    &  g3b   & water
+equivalent of snow on ice\\
+{\tt snifrac} & 69      & g    & ---  &  2d    & g3b    & fraction of
+ice covered with snow \\
+{\tt sofliac} & 94      & \gm  & W/m$^2$&2d    &  g3b   & solar
+radiation energy flux over ice\\
+{\tt sofllac} & 96      & \gm  & W/m$^2$&2d    &  g3b   & solar
+radiation energy flux over land\\
+{\tt soflwac} & 95      & \gm  & W/m$^2$&2d    &  g3b   & solar
+radiation energy flux over water\\
+{\tt srad0d}  & 184     & \gm  & W/m$^2$&2d    &  g3b   & incoming solar
+radiation energy flux at top of atmosphere\\
+{\tt srad0u}  & 203     & \gm  & W/m$^2$&2d    &  g3b   & upward solar
+radiation energy flux at top of atmosphere\\
+{\tt srad0}   & 178     & \gm  & W/m$^2$&2d    &  g3b   & net solar
+radiation energy flux at top of atmosphere\\
+{\tt sradl}   & 86      & \gm  & W/m$^2$&2d    &  g3b   & solar
+radiation at 200~hPa\\
+{\tt srads}   & 176     & \gm  & W/m$^2$&2d    &  g3b   & net solar
+radiation energy flux at surface\\
+{\tt sradsu}  & 204     & \gm  & W/m$^2$&2d    &  g3b   & upward solar
+radiation energy flux at surface\\
+{\tt sraf0}   & 187     & \gm  & W/m$^2$&2d    &  g3b   & net solar
+radiation energy flux at top of atmosphere for clear sky conditions\\
+{\tt srafl}   & 88      & \gm  & W/m$^2$&2d    &  g3b   & solar
+radiation energy flux at 200~hPa for clear sky conditions\\
+{\tt srafs}   & 185      & \gm  & W/m$^2$&2d    & g3b    & net solar
+radiation energy flux at surface for clear sky conditions\\
+{\tt st}      & 130     & s    & K    &  3d    &  sp    & temperature \\
+{\tt svo}     & 138     & s    & 1/s  &  3d    &  sp    & vorticity
+\\
+{\tt t2max}   & 201     & g    & K    &  2d    &  g3b   & maximum
+temperature at 2m above surface\\
+{\tt t2min}   & 202     & g    & K    &  2d    &  g3b   & minimum
+temperature at 2m above surface\\
+{\tt temp2}   & 167     & g    & K    &  2d    &  g3b   & temperature
+at 2m above surface\\
+{\tt thvsig}  & 238     & g    & K    &  2d    &  g3b   & standard
+deviation of virtual potential temperature at half level klevm1\\
+{\tt topmax}  & 217     & g    & Pa   &  2d    &  g3b   & pressure of
+height level of convective cloud tops\\
+{\tt tpot}    & 239     & g    & K    &  3d    &  g3b   & potential
+temperature\\ 
+{\tt trad0}   & 179     & \gm  & W/m$^2$&2d    &  g3b   & net thermal
+radiation energy flux at top of atmosphere\\
+{\tt tradl}   & 85      & \gm  & W/m$^2$&2d    &  g3b   & thermal
+radiation energy flux at 200~hPa\\
+{\tt trads}   & 177     & \gm  & W/m$^2$&2d    &  g3b   & net thermal
+radiation energy flux at surface\\
+{\tt tradsu}  & 205     & \gm  & W/m$^2$&2d    &  g3b   & upward thermal
+radiation energy flux at surface\\
+{\tt traf0}   & 188     & \gm  & W/m$^2$&2d    &  g3b   & net thermal
+radiation energy flux at top of atmosphere for clear sky conditions\\
+{\tt trafl}   & 87      & \gm  & W/m$^2$&2d    &  g3b   & thermal
+radiation energy flux at 200~hPa for clear sky conditions\\
+{\tt trafs}   & 186      & \gm  & W/m$^2$&2d    & g3b    & thermal
+radiation energy flux at surface for clear sky conditions\\
+{\tt trfliac} & 91      & \gm  & W/m$^2$&2d    &  g3b   & thermal
+radiation energy flux over ice\\
+{\tt trfllac} & 93      & \gm  & W/m$^2$&2d    &  g3b   & thermal
+radiation energy flux over land\\
+{\tt trflwac} & 92      & \gm  & W/m$^2$&2d    &  g3b   & thermal
+radiation energy flux over water\\
+{\tt tropo}   & 237     & g    & Pa   &  2d    &  g3b   & pressure of
+height level where tropopause is located according to WMO definition\\
+{\tt tsi}     & 102     & g    & K    &  2d    &  g3b   & surface
+temperature of ice\\
+{\tt tsicepdi}& 75      & g    & K    &  2d    &  g3b   & ice
+temperature on frozen melt pond\\
+{\tt tslm1}   & 139     & g    & K    &  2d    &  g3b   & surface
+temperature of land\\
+{\tt tsurf}   & 169     & \gm  & K    &  2d    &  g3b   & surface temperature\\
+{\tt tsw}     & 103     & g    & K    &  2d    &  g3b   & surface
+temperature of water\\
+{\tt u10}     & 165     & g    & m/s  &  2d    &  g3b   & zonal wind
+velocity at 10m above surface \\
+{\tt ustr}    & 180     & \gm  & Pa   &  2d    &  g3b   & zonal wind
+stress \\
+{\tt ustri}   & 104     & g    & Pa   &  2d    &  g3b   & zonal wind
+stress over ice\\
+{\tt ustrl}   & 108     & g    & Pa   &  2d    &  g3b   & zonal wind
+stress over land\\
+{\tt ustrw}   & 106     & g    & Pa   &  2d    &  g3b   & zonal wind
+stress over water\\
+{\tt v10}     & 166     & g    & m/s  &  2d    &  g3b   & meridional wind
+velocity at 10m above surface \\
+{\tt vdis}    & 145     & \gm  & W/m$^2$&2d    &  g3b   & boundary
+layer dissipation\\
+{\tt vdisgw}  & 197     & g    & W/m$^2$&2d    &  g3b   & gravity dissipation\\
+{\tt vstr}    & 181     & \gm  & Pa   &  2d    &  g3b   & meridional wind
+stress \\
+{\tt vstri}   & 105     & g    & Pa   &  2d    &  g3b   & meridional wind
+stress over ice\\
+{\tt vstrl}   & 109     & g    & Pa   &  2d    &  g3b   & meridional wind
+stress over land\\
+{\tt vstrw}   & 107     & g    & Pa   &  2d    &  g3b   & meridional wind
+stress over water\\
+{\tt wimax}   & 216     & g    & m/s  &  2d    &  g3b   & maximum wind
+speed at 10m above surface\\
+{\tt wind10}  & 171     & \gm    & m/s  &  2d    &  g3b   & wind
+velocity at 10m above surface\\
+{\tt wl}      & 193     & g    & m    &  2d    &  g3b   & skin
+reservoir content\\
+{\tt ws}      & 140     & g    & m    &  2d    &  g3b   & soil wetness\\
+{\tt wsmx}    & 229     & g    & m    &  2d    &  g3b   & field
+capacity of soil\\ 
+{\tt xi}      & 154     & g    & ---  &  3d    &  gl    & fractional
+cloud ice \\
+{\tt xivi}    & 150     & \gm  & kg/m$^2$&2d   &  g3b   & vertically
+integrated cloud ice\\
+{\tt xl}      & 153     & g    & ---  &  3d    &  gl    & fractional
+cloud water \\
+{\tt xlvi}    & 231     & \gm  & kg/m$^2$&2d   &  g3b   & vertically
+integrated cloud water \\
+\hline
+\end{longtable}
+
+\subsection{Output file forcing}
+
+The forcing output file contains the instantaneous radiative aerosol
+forcing if it was required by the setting of the corresponding
+namelist parameters (see also Appendix~\ref{cr20100510}). In the table
+of the output variables, we denote 
+the net short wave radiation flux under clear sky
+conditions by $\ftswc$ at the top of any model layer and by $\fbswc$ at
+the bottom of this layer. Similarly, we symbolize the net short wave
+radiation flux under all sky condition at the top of any model layer
+by $\ftswa$ and by $\fbswa$ at its bottom. The corresponding quantities
+for thermal radiation are denoted by $\ftlwc$, $\fblwc$, $\ftlwa$, and
+$\fblwa$, respectively. A superscript 0 is added if these quantities
+are meant for an atmosphere free of aerosols:
+$\ftswco$, $\fbswco$, $\ftswao$, $\fbswao$, 
+$\ftlwco$, $\fblwco$, $\ftlwao$, $\fblwao$.
+With a certain conversion factor $c_{\rm h}$, the heating rates with
+and without aerosols can be obtained from the radiation fluxes. 
+The subscript sw indicates
+quantities calculated for the solar radiation and lw indicates
+quantities calculated for the thermal radiation range:
+
+\begin{eqnarray*}
+T'_{\rm sw}:= (\ftswa-\fbswa)c_{\rm h} \\
+T'_{\rm lw}:=(\ftlwa-\fblwa)c_{\rm h} \\
+{T'}^0_{\rm sw}:= (\ftswao-\fbswao)c_{\rm h} \\
+{T'}^0_{\rm lw}:=(\ftlwao-\fblwao)c_{\rm h} \\
+\end{eqnarray*}     
+
+From these quantities, we obtain the heating rate forcing or heating
+rate anomalies $\Delta
+T'_{\rm sw}$ and $\Delta T'_{\rm lw}$ for solar and thermal radiation:
+
+\begin{eqnarray*}
+\Delta T'_{\rm sw} & := & T'_{\rm sw}-{T'}^0_{\rm sw} \\
+\Delta T'_{\rm lw} & := & T'_{\rm lw}-{T'}^0_{\rm lw}
+\end{eqnarray*}
+
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}rccccp{5cm}}\hline\hline
+\caption[Output file {\tt forcing}]{Output
+    file {\tt forcing}. The type of the output fields can be
+g (instantaneous grid point variable), \gm{} (mean value over the
+output interval of grid point variable), s (spectral space
+variable). The dimension is either 2d (variable depends on
+longitudes and latitudes only), 3d (variable depends on longitudes,
+latitudes, and levels).}\\\hline\label{taboutputforcing}
+\endfirsthead
+\caption[]{Output file {\tt forcing} --- continued}\\\hline
+\endhead
+\hline\multicolumn{7}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{7}{r}{end of table}
+\endlastfoot
+Name          &    Code & Type & Unit & Dimension & Stream & Explanation \\\hline
+{\tt aps} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt d\_aflx\_lw} & 25 & \gm  & W/m$^2$& 3d   & forcing&
+$\ftlwa-\ftlwao$\\
+{\tt d\_aflx\_lwc} & 26 & \gm  & W/m$^2$& 3d   & forcing&
+$\ftlwc-\ftlwco$\\
+{\tt d\_aflx\_sw} & 15 & \gm  & W/m$^2$& 3d   & forcing&
+$\ftswa-\ftswao$\\
+{\tt d\_aflx\_swc} & 16 & \gm  & W/m$^2$& 3d   & forcing&
+$\ftswc-\ftswco$\\
+{\tt FLW\_CLEAR\_SUR}&23& \gm  & W/m$^2$& 2d   & forcing&
+$\fblwc-\fblwco$ at the surface\\
+{\tt FLW\_CLEAR\_TOP}&21& \gm  & W/m$^2$& 2d   & forcing&
+$\ftlwc-\ftlwco$ at the top of the atmosphere\\
+{\tt FLW\_TOTAL\_SUR}&23& \gm  & W/m$^2$& 2d   & forcing&
+$\fblwa-\fblwao$ at the surface\\
+{\tt FLW\_TOTAL\_TOP}&22& \gm  & W/m$^2$& 2d   & forcing&
+$\ftlwa-\ftlwao$ at the top of the atmosphere\\
+{\tt FSW\_CLEAR\_SUR}&13& \gm  & W/m$^2$& 2d   & forcing&
+  $\fbswc-\fbswco$ at the surface \\
+{\tt FSW\_CLEAR\_TOP}&11& \gm  & W/m$^2$& 2d   & forcing&
+  $\ftswc-\ftswco$ at the top of the atmosphere\\
+{\tt FSW\_TOTAL\_SUR}&14& \gm  & W/m$^2$& 2d   & forcing&
+$\fbswa-\fbswao$ at the surface\\
+{\tt FSW\_TOTAL\_TOP}&12& \gm  & W/m$^2$& 2d   & forcing&
+  $\ftswa-\ftswao$ at the top of the atmosphere\\
+{\tt gboxarea} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt geosp} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt lsp} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt netht\_lw}&      27& \gm  & K/d    & 3d   & forcing& $\Delta
+T'_{\rm lw}$\\
+{\tt netht\_sw}&      17& \gm  & K/d    & 3d   & forcing& $\Delta
+T'_{\rm sw}$\\
+\end{longtable}
+
+\subsection{Output files {\tt station}}\label{secdiagoutput}
+
+The output of the CFMIP2 station diagnostic is written to a separate
+file for each station (site). The outputfiles have names {\tt
+  EXPNAME\_DATE\_cfSites{\it xxxx}.nc} where {\it xxxx} is the
+four--digit number of the respective site in the table of K.~Tayler as
+they are defined in the file {\tt pointlocations.txt} (see
+Tab.~\ref{tabdiaginput}). 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}ccccp{4cm}}\hline\hline
+\caption[CFMIP2 output]{Output file for each of the CFMIP2
+  sites. Instantaneous variables are of type~g, variables averaged over
+  time are of type~\gm. Surface variables are marked by 1ds, variables
+  of which the 
+  average of the grid box is given are marked as 1d, column
+  variables are marked as 2d in the ``dimension'' column. The entry in
+  the ``stream''
+  column gives information about the internal \echam{} stream from
+  which
+  the corresponding variable was collected. The
+  original name of this variable is given in
+  parenthesis.}\\\hline\label{taboutputcfmip}   
+\endfirsthead
+\caption[]{CFMIP2 output --- continued}\\\hline
+\endhead
+\hline\multicolumn{6}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{7}{r}{end of table}
+\endlastfoot
+Name          &  Type & Unit & Dimension & Stream & Explanation \\\hline
+{\tt aclcov}  &  \gm  &  --  & 1ds       & g3b ({\tt aclcov}) & total
+cloud cover \\
+{\tt aprl}    &   \gm &  $\rm kg/(m^2s)$ & 1ds & g3b ({\tt aprl}) &
+large scale precipitation \\
+{\tt cct} & g & Pa & 1d & g3b ({\tt topmax}) & pressure of altitude
+level of convective cloud tops \\
+{\tt cl} & g & -- & 2d & g3b ({\tt aclc}) & cloud cover \\
+{\tt cli} & g & -- & 2d & gl ({\tt xi}) & fractional cloud ice \\
+{\tt clivi}   &   \gm & $\rm kg/m^2$ & 1ds & g3b ({\tt xivi}) &
+vertically integrated cloud ice \\
+{\tt clw} & g & -- & 2d & gl ({\tt xl}) & fractional cloud water \\
+{\tt clwvi}   &   \gm & $\rm kg/m^2$ & 1ds & g3b ({\tt xlvi}) &
+vertically integrated cloud water \\
+{\tt dqdt\_cloud} & g & 1/day & 2d & tdiag ({\tt dqdt\_cloud}) &
+tendency of specific humidity due to cloud scheme\\
+{\tt dqdt\_cucall} & g & 1/day & 2d & tdiag ({\tt dqdt\_cucall}) &
+tendency of specific humidity due to convection\\
+{\tt dqdt\_vdiff} & g & 1/day & 2d & tdiag ({\tt dqdt\_vdiff}) &
+tendency of specific humidity due to vertical diffusion\\
+{\tt dtdt\_cucall} & g & K/day & 2d & tdiag ({\tt dtdt\_cucall}) &
+tendency of temperature due to convection\\
+{\tt dtdt\_cloud} & g & K/day & 2d & tdiag ({\tt dtdt\_cloud}) &
+tendency of temperature due to cloud scheme\\
+{\tt dtdt\_hines} & g & K/day & 2d & tdiag ({\tt dtdt\_hines}) &
+tendency of temperature due to gravity waves (Hines parametrization)\\
+{\tt dtdt\_rheat\_lw} & g & K/day & 2d & tdiag ({\tt dtdt\_rheat\_lw}) &
+tendency of temperature due to radiative heating (thermal wavelength bands)\\
+{\tt dtdt\_rheat\_sw} & g & K/day & 2d & tdiag ({\tt dtdt\_rheat\_sw}) &
+tendency of temperature due to radiative heating (solar wavelength bands)\\
+{\tt dtdt\_sso} & g & K/day & 2d & tdiag ({\tt dtdt\_sso}) &
+tendency of temperature due to orographic gravity waves\\
+{\tt dtdt\_vdiff} & g & K/day & 2d & tdiag ({\tt dtdt\_vdiff}) &
+tendency of temperature due to vertical diffusion\\
+{\tt evspsbl} &   \gm &  $\rm kg/(m^2s)$ & 1ds & g3b ({\tt evap}) &
+evaporation from the surface\\
+{\tt geosp} & g & $\rm m^2/s^2$ & 1ds & g3b ({\tt geosp}) & surface
+geopotential (orography) \\
+{\tt hur} & g & -- & 2d & g3b ({\tt relhum}) & relative humidity\\
+{\tt hus}  & g & -- & 2d & gl ({\tt q}) & specific humidity \\
+{\tt mc} & g & $\rm kg/(m^2s)$ & 2d & cfdiag ({\tt imc})& net upward
+convective mass flux \\ 
+{\tt mhfls}   &   \gm &  $\rm W/m^2$&            1ds & g3b ({\tt ahfl}) &
+latent heat flux \\
+{\tt mhfss}   &   \gm &  $\rm W/m^2$&            1ds & g3b ({\tt ahfs}) &
+sensible heat flux \\
+{\tt mrlus}   &   \gm &  $\rm W/m^2$&            1ds & g3b ({\tt tradsu}) &
+upward thermal radiation energy flux at surface \\
+{\tt mrlut}   &   \gm &  $\rm W/m^2$&            1d & g3b ({\tt trad0}) &
+net thermal radiation energy flux at top of atmosphere \\
+{\tt mrlutcs}   &   \gm &  $\rm W/m^2$&            1d & g3b ({\tt traf0}) &
+net thermal radiation energy flux at top of atmosphere for clear sky
+conditions\\ 
+{\tt mrsus}   &   \gm &  $\rm W/m^2$&            1ds & g3b ({\tt sradsu}) &
+upward solar radiation energy flux at surface \\
+{\tt mrsut}   &   \gm &  $\rm W/m^2$&            1d & g3b ({\tt srad0u}) &
+upward solar radiation energy flux at top of atmosphere \\
+{\tt prc}     &   \gm &  $\rm kg/(m^2s)$ & 1ds & g3b ({\tt aprc}) &
+convective precipitation \\
+{\tt prsn}    &   \gm &  $\rm kg/(m^2s)$ & 1ds & g3b ({\tt aprs}) &
+snow fall \\
+{\tt prw}     &   \gm & $\rm kg/m^2$ & 1ds & g3b ({\tt qvi}) &
+vertically integrated water vapour \\
+{\tt ps}      &   g   &  Pa  &     1ds   &   g3b ({\tt aps}) & surface
+pressure\\
+{\tt rld} & g & $\rm W/m^2$& 2d & cfdiag ({\tt irld}) & downward
+energy flux of radiation integrated over thermal wavelength bands \\
+{\tt rldcs} & g & $\rm W/m^2$& 2d & cfdiag ({\tt irldcs}) & downward
+energy flux of radiation integrated over thermal wavelength bands
+under clear sky conditions\\
+{\tt rlu} & g &$\rm W/m^2$& 2d & cfdiag ({\tt irlu}) & upward energy flux of
+radiation integrated over thermal wavelength bands \\
+{\tt rlucs} & g &$\rm W/m^2$& 2d & cfdiag ({\tt irlucs}) & upward
+energy flux of 
+radiation integrated over thermal wavelength bands under clear sky conditions\\
+{\tt rsd} & g & $\rm W/m^2$& 2d & cfdiag ({\tt irsd}) & downward
+energy flux of radiation integrated over solar wavelength bands \\
+{\tt rsdcs} & g & $\rm W/m^2$& 2d & cfdiag ({\tt irsdcs}) & downward
+energy flux of radiation integrated over solar wavelength bands under
+clear sky conditions\\
+{\tt rsdt}   &   \gm & $\rm W/m^2$&     1d   &   g3b ({\tt srad0d}) &
+incoming solar radiation energy flux at top of atmosphere \\
+{\tt rsu} & g &$\rm W/m^2$& 2d & cfdiag ({\tt irsu}) & upward energy flux of
+radiation integrated over solar wavelength bands \\
+{\tt rsucs} & g &$\rm W/m^2$& 2d & cfdiag ({\tt irsucs}) & upward
+energy flux of 
+radiation integrated over solar wavelength bands under clear sky conditions\\
+{\tt sfcWind} &   \gm & m/s  &     1d    &   g3b ({\tt wind10}) & 10
+meter wind\\
+{\tt slm}  & g & -- & 1ds & g3b ({\tt slm}) & land sea mask (1=land,
+0=sea/lake) \\
+{\tt srads}   &   \gm & $\rm W/m^2$&     1ds   &   g3b ({\tt srads}) & net
+solar radiation energy flux at surface \\
+{\tt srafs}   &   \gm & $\rm W/m^2$&     1ds   &   g3b ({\tt srafs}) & net
+solar radiation energy flux at surface for clear sky conditions \\
+{\tt sraf0}   &   \gm & $\rm W/m^2$&     1d   &   g3b ({\tt sraf0}) & net
+solar radiation energy flux at top of atmosphere for clear sky conditions \\
+{\tt ta}      &   g   &  K   &     2d    &   g1a ({\tt tm1})  & temperature
+at time step $t-\Delta t$ (not time filtered?) \\
+{\tt tas}     &   g   &  K   &     1d    &   g3b ({\tt temp2})  & temperature 2m
+above the surface \\
+{\tt tauu}    &   \gm &  m/s &     1d    &   g3b ({\tt ustr})  & zonal
+wind stress\\
+{\tt tauv}    &   \gm &  m/s &     1d    &   g3b ({\tt vstr})  &
+meridional wind stress\\
+{\tt trads}   &   \gm &  $\rm W/m^2$&    1ds   &   g3b ({\tt trads}) & net
+thermal radiation energy flux at surface\\
+{\tt trafs}   &   \gm &  $\rm W/m^2$&    1ds   &   g3b ({\tt trafs}) & net
+thermal radiation energy flux at surface for clear sky conditions\\
+{\tt ts}      &   \gm &  K   &     1ds   &   g3b ({\tt tsurf}) & surface
+  temperature \\
+{\tt ua}     &   g   & m/s  &     2d    &   g2a ({\tt um1}) & 
+zonal wind velocity at time step $t-\Delta t$ (not time filtered?);
+caution: this variable is multiplied by the cosine of the latitudes at
+some points in \echam, but not here\\
+{\tt uas}     &   g   & m/s  &     1d    &   g3b ({\tt u10}) & zonal
+wind velocity 10m above the surface \\
+{\tt va}     &   g   & m/s  &     2d    &   g2a ({\tt vm1}) & 
+meridional wind velocity at time step $t-\Delta t$ (not time filtered?);
+caution: this variable is multiplied by the cosine of the latitudes at
+some points in \echam, but not here\\
+{\tt vas}     &   g   & m/s  &     1d    &   g3b ({\tt v10}) &
+meridional wind velocity 10m above the surface \\
+{\tt wap}     &   g   & Pa/s & 2d & -- & vertical velocity $\omega$ \\
+{\tt zg}      &   g  & $\rm m^2/s^2$ & 2d & -- & geopotential over ground \\
+\end{longtable}
+
+\subsection{Output file tdiag}
+
+Wind, temperature, and moisture tendencies due to
+various processes are collected in this output file. All the
+tendencies are instantaneous 
+values the mean values of which may be calculated during a model run
+using the mean value stream. The actual content of the tdiag output
+file depends on the exact choice of output variables in the {\tt
+  tdiagctl} namelist (see Sec.~\ref{sectdiagctl}).
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}rccccp{5cm}}\hline\hline
+\caption[Output file {\tt tdiag}]{Output file {\tt
+    tdiag}. The type of the output fields can be
+g (instantaneous grid point variable), \gm{} (mean value over the
+output interval of grid point variable), s (spectral space
+variable). The dimension is either 2d (variable depends on
+longitudes and latitudes only), 3d (variable depends on longitudes,
+latitudes, and levels).}\\\hline\label{taboutputtdiag} 
+\endfirsthead
+\caption[]{Output file {\tt tdiag} --- continued}\\\hline
+\endhead
+\hline\multicolumn{7}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{7}{r}{end of table}
+\endlastfoot
+Name          &    Code & Type & Unit & Dimension & Stream & Explanation
+\\\hline
+{\tt aps} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt dqdt\_cloud} &36   & g    & 1/d  & 3d     & tdiag  & $dq/dt$ due
+to processes computed by the subroutine {\tt cloud}\\
+{\tt dqdt\_cucall}&35   & g    & 1/d  & 3d     & tdiag  & $dq/dt$ due
+to processes computed by the subroutine {\tt cucall} (convective clouds)\\
+{\tt dqdt\_vdiff} &31   & g    & 1/d  & 3d     & tdiag  & $dq/dt$ due
+to processes computed by the subroutine {\tt vdiff} (vertical diffusion)\\
+{\tt dtdt\_cloud} &6    & g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to processes computed by the subroutine {\tt cloud}\\
+{\tt dtdt\_cucall}&5    & g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to processes computed by the subroutine {\tt cucall} (convective clouds)\\
+{\tt dtdt\_hines} &3    & g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to processes computed by the Hines gravity wave parametrization\\
+{\tt dtdt\_rheat\_lw}&72& g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to radiative heating caused by radiation in the thermal spectral range\\
+{\tt dtdt\_rheat\_sw}&62& g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to radiative heating caused by radiation in the solar spectral range\\
+{\tt dtdt\_sso}   &4    & g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to gravity wave drag\\
+{\tt dtdt\_vdiff} &1    & g    & K/d  & 3d     & tdiag  & $dT/dt$ due
+to processes computed by the subroutine {\tt vdiff} (vertical diffusion)\\
+{\tt dudt\_cucall}&15   & g    & m/s/d  & 3d     & tdiag  & $du/dt$
+(zonal wind component) due to processes computed by the subroutine
+{\tt cucall} (convective clouds)\\ 
+{\tt dudt\_hines} &13   & g    & m/s/d  & 3d     & tdiag  & $du/dt$
+(zonal wind component) due to processes computed by the Hines gravity
+wave parametrization\\ 
+{\tt dudt\_sso}   &14   & g    & m/s/d  & 3d     & tdiag  & $du/dt$
+(zonal wind component) due to gravity wave drag\\
+{\tt dudt\_vdiff} &11   & g    & m/s/d  & 3d     & tdiag  & $du/dt$
+(zonal wind component) due
+to processes computed by the subroutine {\tt vdiff} (vertical diffusion)\\
+{\tt dvdt\_cucall}&25   & g    & m/s/d  & 3d     & tdiag  & $dv/dt$
+(meridional wind component) due to processes computed by the subroutine
+{\tt cucall} (convective clouds)\\
+{\tt dvdt\_hines} &23   & g    & m/s/d  & 3d     & tdiag  & $dv/dt$
+(zonal wind component) due to processes computed by the Hines gravity
+wave parametrization\\
+{\tt dvdt\_sso}   &24   & g    & m/s/d  & 3d     & tdiag  & $dv/dt$
+(zonal wind component) due to gravity wave drag\\
+{\tt dvdt\_vdiff} &21   & g    & m/s/d  & 3d     & tdiag  & $du/dt$
+(zonal wind component) due
+to processes computed by the subroutine {\tt vdiff} (vertical diffusion)\\
+{\tt dxidt\_cloud} &56   & g    & 1/d  & 3d     & tdiag  & $dx_{\rm
+  i}/dt$ (cloud water ice) due to processes computed by the subroutine
+{\tt cloud}\\
+{\tt dxidt\_vdiff} &51   & g    & 1/d  & 3d     & tdiag  & $dx_{\rm
+  i}/dt$ (cloud water ice) due to processes computed by the subroutine
+{\tt vdiff} (vertical diffusion)\\
+{\tt dxldt\_cloud} &46   & g    & 1/d  & 3d     & tdiag  & $dx_{\rm
+  l}/dt$ (cloud water) due to processes computed by the subroutine
+{\tt cloud}\\
+{\tt dxldt\_vdiff} &41   & g    & 1/d  & 3d     & tdiag  & $dx_{\rm
+  l}/dt$ (cloud water) due to processes computed by the subroutine
+{\tt vdiff} (vertical diffusion)\\
+{\tt gboxarea} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt geosp} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt lsp} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt st} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+{\tt tm1} & \multicolumn{6}{c}{see Tab.~\ref{taboutputecham}}\\
+\end{longtable}

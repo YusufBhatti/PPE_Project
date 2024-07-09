@@ -1,0 +1,44 @@
+This module contains functions to add new variables to a
+variable list and to get information about variables from
+a variable list. To add new variables to a variables list
+one of the following time types must be specified:
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{{\large\tt TSTEP\_CONSTANT \ \ }}
+\item[{\large\tt TSTEP\_CONSTANT }]  For time constant variables
+\item[{\large\tt TSTEP\_INSTANT }]  For time varying variables
+\end{deflist}
+\end{minipage}
+\vspace*{3mm}
+
+The default data type is 16 bit for GRIB and 32 bit for all other file
+format types. To change the data type use one of the following 
+predefined constants:
+
+\vspace*{3mm}
+\hspace*{8mm}\begin{minipage}{15cm}
+\begin{deflist}{{\large\tt DATATYPE\_PACK1 \ \ }}
+\item[{\large\tt DATATYPE\_PACK8}]    8 packed bit (only for GRIB)
+\item[{\large\tt DATATYPE\_PACK16}]  16 packed bit (only for GRIB)
+\item[{\large\tt DATATYPE\_PACK24}]  24 packed bit (only for GRIB)
+\item[{\large\tt DATATYPE\_FLT32}]   32 bit floating point
+\item[{\large\tt DATATYPE\_FLT64}]   64 bit floating point
+\item[{\large\tt DATATYPE\_INT8}]     8 bit integer
+\item[{\large\tt DATATYPE\_INT16}]   16 bit integer
+\item[{\large\tt DATATYPE\_INT32}]   32 bit integer
+\end{deflist}
+\end{minipage}
+%\vspace*{3mm}
+%
+%To define attributes, one of the following data types must be use:
+%
+%\vspace*{3mm}
+%\hspace*{8mm}\begin{minipage}{15cm}
+%\begin{deflist}{{\large\tt DATATYPE\_TXT \ \ }}
+%\item[{\large\tt DATATYPE\_TXT}]   Text
+%\item[{\large\tt DATATYPE\_INT}]   Integer
+%\item[{\large\tt DATATYPE\_FLT}]   Floating point
+%\end{deflist}
+%\end{minipage}
+

@@ -1,0 +1,813 @@
+\section{Large-scale cloud scheme\label{sec:cloud}}\label{c9}
+
+The scheme for the respresentation of stratiform clouds consists of
+prognostic equations for the vapor, liquid, and ice phase,
+respectively, a cloud microphysical scheme (\cite{lohmann96}; with some
+revisions), and a diagnostic cloud cover scheme \cite[]{sundqvist89}. 
+The statistical cloud cover scheme 
+\cite[]{tompkins02} used in ECHAM5 is available on request (see
+\cite{roeckner2003a} for details).
+
+
+\subsection{Governing equations}\label{s9.1}
+
+The governing equations for the grid-cell mean mass mixing ratios of
+water vapor, $\bar{r_{\mathrm{v}}}$, cloud liquid water, $\bar{r_{\mathrm{l}}}$, and
+cloud ice, $\bar{r_{\mathrm{i}}}$, are written in symbolic form as follows
+(units are kgkg$^{-1}$s$^{-1}$)
+
+\begin{multline}
+\frac{\bar{\partial r_{\mathrm{v}}}}{\partial t}
+ = Q_{\mathrm{Tv}}+Q_{\mathrm{evr}}+Q_{\mathrm{evl}}+ Q_{\mathrm{sbs}}+Q_{\mathrm{sbis}}+Q_{\mathrm{sbi}}-Q_{\mathrm{cnd}}
+  -Q_{\mathrm{dep}}-Q_{\mathrm{tbl}}-Q_{\mathrm{tbi}}\label{9.1}
+\end{multline}
+\begin{multline}
+\frac{\bar{\partial r_{\mathrm{l}}}}{\partial t}
+= Q_{\mathrm{Tl}}+Q_{\mathrm{mli}}+Q_{\mathrm{mlis}}+Q_{\mathrm{cnd}}+Q_{\mathrm{tbl}}
+ -Q_{\mathrm{evl}}-Q_{\mathrm{frh}}-Q_{\mathrm{frs}}-Q_{\mathrm{frc}}\\
+ -Q_{\mathrm{aut}}-Q_{\mathrm{racl}}-Q_{\mathrm{sacl}}\label{9.2}
+\end{multline}
+\begin{multline}
+\frac{\bar{\partial r_{\mathrm{i}}}}{\partial t}
+=Q_{\mathrm{Ti}}+Q_{\mathrm{sed}}+Q_{\mathrm{dep}}+Q_{\mathrm{tbi}}
+-Q_{\mathrm{mli}}-Q_{\mathrm{sbi}}+Q_{\mathrm{frh}}+Q_{\mathrm{frs}}+Q_{\mathrm{frc}}
+-Q_{\mathrm{agg}}-Q_{\mathrm{saci}}\label{9.3}
+\end{multline}
+
+with
+\begin{description}
+\item[$Q_{\mathrm{Tv}}$]    Transport of $\overline{r}_{\mathrm{v}}$ by advection ($Q_{\mathrm{Av}}$), diffusion $(Q_{\mathrm{Dv}})$ and changes due to convection
+\item[$Q_{\mathrm{Tl}}$]    Transport of $\overline{r}_{\mathrm{l}}$ by advection $(Q_{\mathrm{Al}})$, diffusion $(Q_{\mathrm{Dl}})$ and convective detrainment $(Q_{\mathrm{Cl}})$
+\item[$Q_{\mathrm{Ti}}$]    Transport of $\overline{r}_{\mathrm{i}}$ by advection $(Q_{\mathrm{Ai}})$, diffusion $(Q_{\mathrm{Di}})$ and convective detrainment $(Q_{\mathrm{Ci}})$
+\item[$Q_{\mathrm{ev} \mathrm{r}}$]  Evaporation of rain falling into the respective layer 
+\item[$Q_{\mathrm{ev} \mathrm{l}}$]  Instantaneous evaporation of $r_{\mathrm{l}}$ transported into the cloud-free part of the grid cell
+\item[$Q_{\mathrm{sbs}}$]   Sublimation of snow
+\item[$Q_{\mathrm{sbis}}$]  Sublimation of $r_{\mathrm{i}}$ in the sedimentation flux 
+\item[$Q_{\mathrm{sbi}}$]   Instantaneous sublimation of $r_{\mathrm{i}}$ transported into  the cloud-free part of the grid cell
+\item[$Q_{\mathrm{cnd}}$]   Condensation of $r_{\mathrm{v}}$ (if $Q_{\mathrm{cnd}}>0$), or evaporation of $r_{\mathrm{l}}$ (if $Q_{\mathrm{cnd}}<0$)
+\item[$Q_{\mathrm{dep}}$]   Deposition of $r_{\mathrm{v}}$ (if $Q_{\mathrm{dep}}>0$), or sublimation of $r_{\mathrm{i}}$ (if $Q_{\mathrm{dep}}<0$)
+\item[$Q_{\mathrm{tbl}}$]   Generation ($Q_{\mathrm{tbl}} >0$) or dissipation ($Q_{\mathrm{tbl}} <0$) of $r_{\mathrm{l}}$ through turbulent fluctuations
+\item[$Q_{\mathrm{tbi}}$]   Generation ($Q_{\mathrm{tbi}} >0$) or dissipation ($Q_{\mathrm{tbi}} <0$) of $r_{\mathrm{i}}$ through turbulent fluctuations
+\item[$Q_{\mathrm{mli}}$]   Instantaneous melting of $r_{\mathrm{i}}$ if the temperature exceeds the freezing point
+\item[$Q_{\mathrm{mlis}}$]  Melting of $r_{\mathrm{i}}$ in the sedimentation flux
+\item[$Q_{\mathrm{frh}}$]   Homogeneous freezing of  $r_{\mathrm{l}}$
+\item[$Q_{\mathrm{frs}}$]   Stochastical and heterogeneous freezing of $r_{\mathrm{l}}$
+\item[$Q_{\mathrm{frc}}$]   Contact freezing of $r_{\mathrm{l}}$
+\item[$Q_{\mathrm{aut}}$]   Autoconversion of $r_{\mathrm{l}}$
+\item[$Q_{\mathrm{racl}}$]  Accretion of $r_{\mathrm{l}}$ by rain
+\item[$Q_{\mathrm{sacl}}$]  Accretion of $r_{\mathrm{l}}$ by snow
+\item[$Q_{\mathrm{sed}}$]   Sedimentation of $\overline{r}_{\mathrm{i}}$, including losses due to $Q_{\mathrm{sbis}}$ and $Q_{\mathrm{mlis}}$
+\item[$Q_{\mathrm{agg}}$]   Aggregation of $r_{\mathrm{i}}$
+\item[$Q_{\mathrm{saci}}$]  Accretion of $r_{\mathrm{i}}$ by snow
+\end{description}
+
+Note that the transport terms as well as the sedimentation of cloud ice
+is calculated from the respective grid-cell mean values (denoted
+by an overbar), while the microphysical processes are calculated
+from in-cloud values (without overbar). The phase changes sketched
+above result in the following temperature change
+
+\begin{equation}
+\left(\dnd{T}{t}\right)_{\mathrm{ph}}=\left(\dnd{T}{t}\right)_{\mathrm{vapor}\leftrightarrow 
+\mathrm{liquid}}+
+\left(\dnd{T}{t}\right)_{\mathrm{vapor} \leftrightarrow 
+\mathrm{solid}}+\left(\dnd{T}{t}\right)_{\mathrm{liquid} \leftrightarrow  \mathrm{solid}}
+\label{9.4}
+\end{equation}
+
+with
+
+\begin{eqnarray}
+\left(\dnd{T}{t}\right)_{\mathrm{vapor} \leftrightarrow
+\mathrm{liquid}}&=&\frac{L_{\mathrm{v}}}{c_{\mathrm{p}}}(Q_{\mathrm{cnd}}+Q_{\mathrm{tbl}}-Q_{\mathrm{evr}}-Q_{\mathrm{evl}})
+\label{9.5}\\
+\left(\dnd{T}{t}\right)_{\mathrm{vapor} \leftrightarrow
+\mathrm{solid}}&=&\frac{L_{\mathrm{s}}}{c_{\mathrm{p}}}(Q_{\mathrm{dep}}+Q_{\mathrm{tbi}}-Q_{\mathrm{sbs}}-Q_{\mathrm{sbi}}-Q_{\mathrm{sbis}})
+\label{9.6}\\
+\left(\dnd{T}{t}\right)_{\mathrm{liquid} \leftrightarrow
+\mathrm{solid}}&=&\frac{L_{\mathrm{f}}}{c_{\mathrm{p}}}(Q_{\mathrm{frh}}+Q_{\mathrm{frs}}+Q_{\mathrm{frc}}+Q_{\mathrm{sacl}}-Q_{\mathrm{mli}}-Q_{\mathrm{mlis}}-Q_{\mathrm{mls}})
+\label{9.7}
+\end{eqnarray}
+
+where $L_{\mathrm{v}}$, $L_{\mathrm{s}}$, $L_{\mathrm{f}}$ is the latent heat of vaporization,
+sublimation, and fusion, respectively, $c_{\mathrm{p}}$ is the specific heat of
+moist air at constant pressure, $Q_{\mathrm{mls}}$ is the melting of snow falling
+into the respective layer, and `solid' refers to both cloud ice
+and snow.
+
+\subsection{Cloud cover}\label{s9.2}\label{sec:cloudcover}
+
+Fractional cloud cover $C$ is parameterized as a non-linear function of grid-mean 
+relative humidity $r$ \cite[]{sundqvist89}. For $r > r_{0}$, where $r_{0} < r_{\mathrm{sat}}$ is a 
+subgrid-scale condensation threshold and $r_{\mathrm{sat}}$ ( =1 in general) is the saturation value, 
+
+\begin{equation}
+C=1-\sqrt{1-C_{0}}
+\label{9.8}
+\end{equation}
+
+\begin{equation}
+C_{0}=\frac{r-r_{0}}{r_{\mathrm{sat}}-r_{0}}
+\label{9.9}
+\end{equation}
+
+and $C = 0$ otherwise. Condensational growth of cloud droplets occurs 
+if $r > r_{0}$. Oppositely, an existing cloud is diluted by evaporation 
+if $r < r_{0}$.
+The condensation threshold $r_{0}$ is specified as a function of height 
+(or pressure), fitted to the results obtained by \cite{xu91} 
+from experiments with a high-resolution cumulus ensemble model, 
+
+\begin{equation}
+r_{0}(p)=r_{0,\mathrm{top}} +(r_{0,\mathrm{surf}}-r_{0,\mathrm{top}}) \e{[1-(p_{\mathrm{s}}/p)^\mathrm{n}]}
+\label{9.10}
+\end{equation}
+
+where $p$ is pressure, $p_{\mathrm{s}}$ is surface pressure, $r_{0,\mathrm{top}} = 0.7$ 
+and $r_{0,\mathrm{surf}} = 0.9$ are the upper and lower values of $r_{0}$, and 
+$n = 4$ is a fitting parameter. The function \eref{9.10} is used for 
+all cloud types except for marine stratus under a low-level inversion. 
+If such an inversion is detected below about 700 hPa, $r_{0}$ is reduced 
+to $0.7$ below the inversion and $r_{\mathrm{sat}} = 0.9$ so that, according to 
+\eref{9.8} and \eref{9.9} $C = 1$ is reached already before the whole layer 
+is saturated. This ad hoc parameter setting allows formation of 
+thin stratus clouds under a subsidence inversion which otherwise 
+would not be captured due to the insufficient vertical resolution 
+of the model. The lack of marine stratus clouds is one of the most 
+persistent problems in GCMs.
+
+
+\subsection{Sedimentation and cloud microphysics}\label{s9.3}
+
+\subsubsection{Condensation/evaporation and deposition/sublimation}\label{su9.3.1}
+
+Condensational growth of cloud droplets $(Q_{\mathrm{cnd}} > 0)$ occurs if the grid-mean 
+relative humidity $r$ exceeds the specified threshold $r_{0}$ so that
+the fractional cloud cover $C > 0$:
+
+\begin{equation}
+Q_{\mathrm{cnd}} = C(\Delta q_{\mathrm{f}} - \Delta q_{\mathrm{s}})
+\label{9.11}
+\end{equation}
+
+where $\Delta q_{\mathrm{f}} > 0$ is the \textit{humidity forcing}, i.e. convergence of
+$q=r_{\mathrm{v}}$ resulting from all previously calculated transport processes 
+(advection, vertical diffusion, convection), and
+ 
+\begin{equation}
+\Delta q_{\mathrm{s}} =  \frac{\left(\Delta T_{\mathrm{f}} + C \frac{L_{\mathrm{v}}}{c_{\mathrm{p}}} \Delta q_{\mathrm{f}} \right)
+\dnd{q_{\mathrm{s}}}{T}}
+{1+C \frac{L_{\mathrm{v}}}{c_{\mathrm{p}}} \dnd{q_{\mathrm{s}}}{T}}
+\label{9.12}
+\end{equation}
+
+is the change of saturation water vapor mixing ratio resulting 
+from all previously calculated processes (temperature advection, 
+adiabatic cooling, radiation, vertical diffusion, convection). 
+Oppositely, dissipation $(Q_{\mathrm{cnd}} < 0)$ of an existing cloud $(C > 0)$
+is caused by moisture divergence $(\Delta q_{\mathrm{f}} < 0)$ and/or
+net heating of the grid-box $(\Delta q_{\mathrm{s}} > 0)$.
+
+Note that humidity changes due to evaporation of rain/cloud water 
+and sublimation of snowfall/cloud ice are not included in
+$\Delta q_{\mathrm{f}}$. These phase changes ($\Delta q_{\mathrm{e}}$) 
+are limited to the clear-sky part 
+of the grid-box and do not affect cloud formation/dissipation at the 
+respective timestep. However, since these processes change the grid-mean 
+humidity, they are able to modify the cloud cover and, hence, the 
+amount of condensation at the next timestep. 
+
+The total changes per timestep of humidity and temperature are given by 
+
+\begin{equation}
+\Delta q =  \Delta q_{\mathrm{f}} + (1-C) \Delta q_{\mathrm{e}} - Q_{\mathrm{cnd}}
+\label{9.13}
+\end{equation}
+
+\begin{equation}
+\Delta T = \Delta T_{\mathrm{f}} + \frac{L_{\mathrm{v}}}{c_{\mathrm{p}}} Q_{\mathrm{cnd}}
+\label{9.14}
+\end{equation}
+
+Depositional growth ($Q_{\mathrm{dep}}>0$) and sublimation ($Q_{\mathrm{dep}}<0$) of cloud 
+ice is calculated in a 
+way analogous to condensation/evaporation if one of the 
+following conditions apply
+
+\begin{enumerate}
+\renewcommand{\labelenumi}{(\roman{enumi})}
+\item  $T<-35$\grad$\;$  or
+\item  $T< 0$\grad$\;$   and $x_{\mathrm{i}} >$ threshold value $\gamma_{\mathrm{thr}}$  
+where $x_{\mathrm{i}}$ is the in-cloud ice water mixing ratio
+\renewcommand{\labelenumi}{\arabic{enumi}}
+\end{enumerate}
+with $Q_{\mathrm{cnd}}$ and $L_{\mathrm{v}}$ in Eqs. \eref{9.11} - \eref{9.14} replaced by
+$Q_{\mathrm{dep}}$ and $L_{\mathrm{s}}$, respectively.
+
+Condition (ii) can be considered as a simple parameterization 
+of the Bergeron-Findeisen process describing the fact that the 
+equilibrium vapor pressure over water is greater than the saturation 
+vapor pressure over ice, at the same temperature. Therefore, 
+in mixed phase clouds, the water droplets tend to move to the lower 
+pressure over the ice. The vapor will be condensed and freeze onto 
+the ice crystal, causing it to grow larger.
+
+
+\subsubsection{Sedimentation of cloud ice}\label{su9.3.2}
+
+Sedimentation of cloud ice is formally treated like
+vertical advection, i.e. the algorithm is applied to grid-cell mean
+values so that the flux divergence is given by
+
+\begin{equation}
+\left(\dnd{\overline{r}_{\mathrm{i}}}{t}\right)_{\mathrm{sed}}=\frac{1}{\rho}\dnd{\overline{F}_{\mathrm{i}}}{z}
+=\frac{1}{\rho}
+\dnd{\left(\rho\overline{v}_{\mathrm{i}}\overline{r}_{\mathrm{i}}\right)}{z}\label{9.15}
+\end{equation}
+
+where the fall
+velocity is parameterized as $\overline{v}_{\mathrm{i}}=\alpha \left(\rho
+\overline{r}_{\mathrm{i}}\right)^{\beta}$ with $\alpha = 3.29$ and $\beta = 
+0.16$ \cite[]{heymsfield90}. Equation \eref{9.15} can be expressed in
+discrete form as
+
+\begin{equation}
+Q_{\mathrm{sed}}\equiv\left(\dnd{\overline{r}_{\mathrm{i}}}{t}\right)_{\mathrm{sed}}\approx\frac{1}{\rho\Delta 
+z}
+\left(\overline{F}_{\mathrm{i}}^{\mathrm{top}}-\rho \overline{v}_{\mathrm{i}}
+\overline{r}_{\mathrm{i}}\right)
+\label{9.16}
+\end{equation}
+
+where $\overline{F}_{\mathrm{i}}^{\mathrm{top}}$ is the incoming sedimentation flux
+which has already been subject to sublimation and melting. By keeping
+$\overline{F}_{\mathrm{i}}^{\mathrm{top}}$ as well as $\overline{v}_{\mathrm{i}}$ constant during
+a time step interval, \eref{9.16} can be solved analytically
+(\cite{rotstayn97}; see also section \ref{su9.3.8}). The flux leaving the
+respective layer, $\overline{F}_{\mathrm{i}}^{\mathrm{bot}}$, is obtained by integrating
+\eref{9.16} over the layer, giving
+
+
+\begin{equation}
+\overline{F}_{\mathrm{i}}^{\mathrm{bot}}=\overline{F}_{\mathrm{i}}^{\mathrm{top}}-\rho\Delta z Q_{\mathrm{sed}}.
+\label{9.17}
+\end{equation}
+
+As the integration proceeds from the top of the model down to the
+surface, the flux at the bottom of a layer can be used as incoming
+flux for the layer beneath. In the lowest model layer $(k = N)$, the
+flux $\overline{F}_{\mathrm{i}}^{\mathrm{bot}}(k=N)\equiv\overline{F}_{\mathrm{i}}(p_{\mathrm{s}})$,
+representing the ice sedimentation at the surface, where $p_{\mathrm{s}}$ is
+surface pressure, is added to the snow flux according to \eref{9.40}.
+
+
+
+\subsubsection{Freezing of cloud liquid water and melting of cloud
+ice}\label{su9.3.3}
+
+At temperatures $T < -35$\grad, the total amount of cloud liquid water
+freezes homogeneously and instantaneously, during one time step
+$\Delta t$, to cloud ice \cite{levkov92} so that
+
+\begin{equation}
+Q_{\mathrm{frh}}=\frac{\overline{r}_{\mathrm{l}}}{\Delta t}.
+\label{9.18}
+\end{equation}
+
+For stochastical and heterogeneous freezing in the temperature range
+-35\grad $\;\le T < $ 0\grad, we use the extrapolated equation by
+\cite{bigg53} down to the cloud droplet size \cite[]{levkov92,murakami90}.
+
+\begin{equation}
+Q_{\mathrm{frs}} = C a_{1} \{
+                     \exp [b_{1}(T_{0}-T)]-1
+                  \}
+\frac{\rho r^2_{\mathrm{l}}}{\rho_{\mathrm{w}}N_{\mathrm{l}}}
+\label{9.19}
+\end{equation}
+
+where the constants $a_{1}= 100$ m$^3$s$^{-1}$ and $b_{1}$=0.66
+K$^{-1}$ are taken from laboratory experiments, $T_{0}$ = 273.15 K is
+the freezing point, $\rho_{\mathrm{w}}$ = 1000 kgm$^{-3}$ is the density of
+water, $\rho$ the air density, $T$ the grid-cell mean temperature,
+$r_{\mathrm{l}}$ the in-cloud liquid water mixing ratio, $N_{\mathrm{l}}$ is the cloud
+droplet number concentration, and $C$ the fractional cloud cover.
+$N_{\mathrm{l}}$ is prescribed within the
+atmospheric boundary layer ($= 220 \cdot 10^6$ m$^{-3}$ over land and
+80 $\cdot$ 10$^6$ m$^{-3}$ over sea, respectively). Above the boundary
+layer, $N_{\mathrm{l}}$ decreases exponentially to 50 m$^{-3}$ in the upper
+troposphere over both land and ocean.
+
+Brownian diffusion contact nucleation results
+from random collisions of aerosol particles with supercooled cloud
+droplets. It may be written as (e.g. \cite{levkov92})
+
+\begin{equation}
+Q_{\mathrm{frc}}=C m_{\mathrm{io}}F_{1}DF_{\mathrm{ar}}
+\label{9.20}
+\end{equation}
+
+where $m_{\mathrm{io}}$ = 10$^{-12}$ kg is the initial mass of a nucleated ice
+crystal, $DF_{\mathrm{ar}}$ = 1.4 $\cdot$ 10$^{-8}$ m$^{-2}$s$^{-1}$ the
+aerosol diffusivity \cite[]{pruppacher78}, and $F_{1}=(4\pi
+R_{\mathrm{vl}}N_{\mathrm{l}}N_{\mathrm{a}})/\rho$. The concentration of active contact nuclei is
+approximated as $N_{\mathrm{a}}=\max [N_{\mathrm{a}0}(T_{0}-T-3), 0]$, with $N_{\mathrm{a}0}$ = 2
+$\cdot$ 10$^5$ m$^{-3}$, and the mean volume droplet radius, $R_{\mathrm{vl}}$,
+is obtained from
+
+\begin{equation}
+\frac{4}{3}\pi R^3_{\mathrm{vl}}N_{\mathrm{l}}\rho_{\mathrm{w}}=r_{\mathrm{l}}\rho.
+\label{9.21}
+\end{equation}
+
+Following \cite{levkov92}, cloud ice is assumed to melt completely
+when $T > T_{0}$, giving
+
+\begin{equation}
+Q_{\mathrm{mli}}=\frac{\overline{r}_{\mathrm{i}}}{\Delta t}.
+\label{9.22}
+\end{equation}
+
+\subsubsection{Precipitation formation in warm clouds, cold
+clouds and in mixed-phase clouds}\label{su9.3.4}
+
+In warm clouds ($T > 0$\grad) and also in mixed phase clouds (-35\grad
+$\; \le T < 0$\grad), the cloud liquid water content can be diminished
+by autoconversion of cloud droplets, $Q_{\mathrm{aut}}$, growth of rain drops
+by accretion of cloud droplets, $Q_{\mathrm{racl}}$, and growth of snow
+crystals by accretion of cloud droplets, $Q_{\mathrm{sacl}}$.  The
+autoconversion rate is derived from the stochastic collection equation
+which describes the time evolution of a droplet spectrum changing by
+collisions among droplets of different size \cite[]{beheng94} which
+gives
+
+
+\begin{equation}
+Q_{\mathrm{aut}}=C
+\gamma_{1}\left[a_{2}n^{-b_{2}}\left(10^{-6}N_{\mathrm{l}}\right)^{-b_{3}}\left(10^{-3}\rho 
+r_{\mathrm{l}}\right)^{b_{4}}\right]/\rho
+\label{9.23}
+\end{equation}
+
+
+where $a_{2} = 6\cdot 10^{28}$, $n=10$ is the width
+parameter of the initial droplet spectrum described by a gamma
+distribution, $b_{2}= 1.7$, $b_{3} = 3.3$,  $b_{4} = 4.7$, and
+$\gamma_{1}$ is a tunable
+parameter which determines the efficiency of the autoconversion
+process and, hence, cloud lifetime.
+
+Raindrops, once formed,
+continue to grow by accretion of cloud droplets. The accretion rate
+is derived from the stochastic collection equation \cite[]{beheng94}
+
+\begin{equation}
+Q_{\mathrm{racl}}=\min (C, C_{\mathrm{pr}}) a_{3}r_{\mathrm{l}}\rho r_{\mathrm{rain}}+\gamma_{2}\rho
+Q_{\mathrm{aut}}\Delta t
+\label{9.24}
+\end{equation}
+
+where $r_{\mathrm{rain}}$ is the mass mixing ratio of rain falling into a
+fraction $C_{\mathrm{pr}}$ of the respective grid-cell, and $a_{3} = 6$
+m$^3$kg$^{-1}$s$^{-1}$.  The second term in the bracket is the local
+rainwater production during a time step by autoconversion, and
+$\gamma_{2}$ is a tunable parameter. The remaining precipitation
+process occurring in the cloud liquid water equation, $Q_{\mathrm{sacl}}$, will
+be discussed below together with the analogous process for cloud ice,
+$Q_{\mathrm{saci}}$.
+
+The
+conversion rate from cloud ice to snow by aggregation of ice
+crystals has been adopted from \cite{levkov92}, based on the
+work of \cite{murakami90}
+
+\begin{equation}
+Q_{\mathrm{agg}}= C \gamma_{3}\frac{\rho 
+r^2_{\mathrm{i}}a_{4}E_{\mathrm{ii}}X\left(\frac{\rho_{0}}{\rho}\right)^{1/3}}
+{-2\rho_{\mathrm{i}}\log\left(\frac{R_{\mathrm{vi}}}{R_{\mathrm{s}0}}\right)^3}
+\label{9.25}
+\end{equation}
+
+where $a_{4} = 700$ s$^{-1}$ is an empirical constant, $E_{\mathrm{ii}}=0.1$ is
+the collection efficiency between ice crystals, $X = 0.25$ is the
+dispersion of the fall velocity spectrum of cloud ice, $\rho_{0} =
+1.3$ kgm$^{-3}$ is a reference density of air, $\rho_{\mathrm{i}} = 500$
+kgm$^{-3}$ is the density of cloud ice, $R_{\mathrm{vi}}$ is the mean volume
+ice crystal radius, $R_{\mathrm{s}0} = 10^{-4}$ m is the smallest radius of a
+particle in the snow class, and $\gamma_{3}$ is a tunable
+parameter. From simultaneous measurements of $\rho r_{\mathrm{i}}$, $R_{\mathrm{vi}}$
+and the effective radius of ice crystals, $R_{\mathrm{ei}}$, Moss (1996;
+personal communication) derived the following relationships
+
+\begin{align}
+R_{\mathrm{ei}}&= a_{5}\left(10^{3}\rho r_{\mathrm{i}}\right)^{b_5}\label{9.26}\\
+R_{\mathrm{ei}}^3&= R_{\mathrm{vi}}^3 \left( a_{6}+b_{6}R_{\mathrm{vi}}^3\right)\label{9.27}
+\end{align}
+
+with $R_{\mathrm{ei}}$, $R_{\mathrm{vi}}$ in $\mu$m, $a_5 = 83.8$, $b_5 = 0.216$, $a_6 =
+1.61$, $b_6 = 3.56 \cdot 10^{-4}$, so that after solving for
+\eref{9.27}
+
+\begin{equation}
+R_{\mathrm{vi}}[m]=10^{-6} \left(\sqrt{2809
+R_{\mathrm{ei}}^3+5113188}-2261\right)^{1/3}.
+\label{9.28}
+\end{equation}
+
+
+The accretional growth of snow through riming and collecting of ice
+crystals is based on \cite{lin83} and \cite{levkov92}.  Snow crystals
+are assumed to be exponentially distributed \cite[]{gunn58}
+
+\begin{equation}
+n_{\mathrm{s}}(D_{\mathrm{s}})=n_{0s}\exp (-\lambda_{\mathrm{s}}D_{\mathrm{s}})
+\label{9.29}
+\end{equation}
+
+where $n_{\mathrm{s}}(D_{\mathrm{s}})$ is the concentration of
+particles of diameters $D_{\mathrm{s}}$ per unit size interval, $D_{\mathrm{s}}$ is the
+diameter of the snow particle, $n_{0\mathrm{s}} = 3 \cdot 10^6$ m$^{-4}$ is 
+the intercept
+parameter obtained from measurements \cite[]{gunn58},
+and $\lambda_{\mathrm{s}}$ is the slope of the particle size distribution and is
+written as \cite[]{potter91}
+
+\begin{equation}
+\lambda_{\mathrm{s}}=\left(\frac{\pi\rho_{\mathrm{s}}n_{0\mathrm{s}}}{\rho r_{\mathrm{snow}}}\right)^{1/4}
+\label{9.30}
+\end{equation}
+
+where $\rho_{\mathrm{s}} =100$ kgm$^{-3}$ is the bulk
+density of snow and $r_{\mathrm{snow}}$ is the mass mixing ratio of snow. Snow
+crystals settle through a population of supercooled cloud
+droplets, colliding and coalescing with them (riming). The rate of
+change in the snow mixing ratio is based on geometric sweep-out
+concept integrated over the size distribution \eref{9.29}
+
+\begin{equation}
+Q_{\mathrm{sacl}}=\min(C, C_{\mathrm{pr}})\gamma_{4}\frac{\pi
+E_{\mathrm{sl}}n_{0\mathrm{s}}k_{\mathrm{s}}r_{\mathrm{l}}\Gamma(3+b_{7})}{4\lambda_{\mathrm{s}}^{3+b_{7}}}\left(\frac{\rho_{0}}{\rho}\right)^{1/2}
+\label{9.31}
+\end{equation}
+
+
+where $k_{\mathrm{s}} = 4.83$ m$^2$s$^{-1}$, $b_{7}= 0.25$, $E_{\mathrm{sl}} = 1$ is 
+the collection efficiency of
+snow for cloud droplets \cite[]{lin83} and $\gamma_{4}$ is a tunable
+parameter. The accretion rate of ice crystals by snow is similar
+to \eref{9.31} and is expressed as
+
+\begin{equation}
+Q_{\mathrm{saci}}=\min(C, C_{\mathrm{pr}})
+\frac{\pi E_{\mathrm{si}}n_{0\mathrm{s}}k_{s}r_{\mathrm{i}}\Gamma(3+b_{7})}
+{4\lambda_{\mathrm{s}}^{3+b_{7}}}
+\left(\frac{\rho_{0}}{\rho}\right)^{1/2}
+\label{9.32}
+\end{equation}
+
+where the collection efficiency of snow for cloud ice is assumed to be
+temperature dependent according to $E_{\mathrm{si}} =\exp [-a_{7}(T_{0}-T)]$
+with $a_{7} = 0.025$. Note that $r_{\mathrm{i}} = 0$ for $T > T_{0}$
+(c.f.,\eref{9.22}) so that $Q_{\mathrm{saci}} = 0$ in this case. Analogous to
+\eref{9.24}, $\rho r_{\mathrm{snow}}$ used in \eref{9.31} and \eref{9.32}
+through \eref{9.30} consists of two parts. The first one is a
+contribution from the snow flux into the respective grid-cell (c.f.,
+section \ref{su9.3.7}), and the second one, $\gamma_{2}\rho Q_{\mathrm{agg}}
+\Delta t$, is due to local snow generation through aggregation of
+ice crystals \eref{9.25}.
+
+\subsubsection{Evaporation of rain and
+sublimation of snow and ice}\label{su9.3.5}
+
+The evaporation of rain is obtained by integration of the evaporation
+for a single rain drop of diameter $D_{\mathrm{r}}$ over the Marshall-Palmer
+distribution \cite[]{marshall48}. The rate of change can then be
+expressed as
+
+\begin{equation}
+Q_{evr}=C_{\mathrm{pr}}
+\frac{2\pi n_{0\mathrm{r}}S_{\mathrm{l}}}{\rho(A'+B')}\left[
+\frac{a_{8}}{\lambda^2_{\mathrm{r}}}+\frac{b_{8}S^{1/3}_{\mathrm{c}}}{\lambda_{\mathrm{r}}^{\delta_{\mathrm{r}}/2}}\Gamma\left(\frac{\delta_{\mathrm{r}}}{2}\right)\left(
+\frac{k_{\mathrm{r}}\rho}{\mu}\right)^{1/2}\left(
+\frac{\rho_{0}}{\rho}\right)^{1/4}
+\right]
+\label{9.33}
+\end{equation}
+
+where $A'=L^2_{\mathrm{v}}/(K_{\mathrm{a}}R_{\mathrm{v}}T^2)$, $B'=1/(\rho r_{\mathrm{sl}}D_{\mathrm{v}})$,
+$K_{\mathrm{a}}$ is the thermal conductivity of air, $R_{\mathrm{v}}$ is the gas constant for
+water vapor, $D_{\mathrm{v}}$ is the diffusivity of vapor in the air, $n_{0\mathrm{r}} =
+8 \cdot 10^6$ m$^{-4}$ is the intercept parameter, $r_{\mathrm{sl}}$ is the 
+saturation water
+vapor mixing ratio with respect to liquid water, $S_{\mathrm{l}} = 1 - r_{\mathrm{v}}/r_{\mathrm{sl}}$
+is the respective sub-saturation, $S_{\mathrm{c}} = \mu/(\rho D_{\mathrm{v}})$ is the Schmidt
+number, $\mu$ is the dynamic viscosity of air, $\delta_{\mathrm{r}} = 5.5$,
+$a_{8} = 0.78$, $b_{8} = 0.31$, $k_{\mathrm{r}} = 141.4$ m$^2$s$^{-1}$, and 
+the slope of the size distribution
+is defined as
+
+\begin{equation}
+\lambda_{\mathrm{r}}=\left(\frac{\pi\rho_{\mathrm{w}}n_{0\mathrm{r}}}{\rho r_{\mathrm{rain}}}\right)^{1/4}.
+\label{9.34}
+\end{equation}
+
+Instead of \eref{9.33} we use a simplified form
+obtained after minor simplifications and evaluation of parameters
+after \cite{rotstayn97}
+
+
+\begin{equation}
+Q_{\mathrm{evr}}=C_{\mathrm{pr}}
+\frac{a_{9}S_{\mathrm{l}}}{\rho^{1/2}(A'+B')}\left(\frac{P_{\mathrm{r}}}{C_{\mathrm{pr}}}\right)^{b_{9}}
+\label{9.35}
+\end{equation}
+
+
+where $P_{\mathrm{r}}$ is the rain flux [kgm$^{-2}$s$^{-1}$], $a_{9} = 870$ and
+$b_{9} = 0.61$.
+
+Analogously, the sublimation of snow is obtained by integrating the 
+sublimation for a
+single particle of diameter $D_{\mathrm{s}}$ over the Gunn-Marshall distribution
+\eref{9.29}. The time rate of change can then be expressed as
+
+
+\begin{equation}
+Q_{\mathrm{sbs}} =C_{\mathrm{pr}}
+\frac{2\pi n_{0\mathrm{s}}S_{\mathrm{i}}}{\rho(A''+B'')}
+\left[\frac{a_{8}}{\lambda_{\mathrm{s}}^2}+
+\frac{b_{8}S^{1/3}_{\mathrm{c}}}{\lambda_{\mathrm{s}}^{\delta_{\mathrm{s}}/2}}\Gamma\left(\frac{\delta_{\mathrm{s}}}{2}\right)\left(
+\frac{k_{\mathrm{s}}\rho}{\mu}\right)^{1/2}\left(
+\frac{\rho_{0}}{\rho}\right)^{1/4}\right],
+\label{9.36}
+\end{equation}
+
+where $A''=L_{\mathrm{s}}^{2}/K_{\mathrm{a}}R_{\mathrm{v}}T^2)$, $B''=1/(\rho_{\mathrm{si}}D_{\mathrm{v}})$,
+$r_{\mathrm{si}}$ is the saturation water vapor mixing ratio with respect to
+ice, $S_{\mathrm{i}} = 1 - r_{\mathrm{v}}/r_{\mathrm{si}}$ is the respective sub-saturation,
+$\delta_{\mathrm{s}}= 5.25$ and $k_{\mathrm{s}}= 4.83$ m$^2$s$^{-1}$
+\cite[]{levkov92}. The expression \eref{9.36} is used for sublimation
+of both snowfall, $Q_{\mathrm{sbs}}$, and falling ice, $Q_{\mathrm{sbis}}$. Note that in
+$Q_{\mathrm{sbis}}$ the slope parameter $\lambda_{\mathrm{s}}$ \eref{9.30} includes the
+ice mixing ratio, $r_{\mathrm{ised}}$, instead of $r_{\mathrm{snow}}$ (see section
+\ref{su9.3.7}).
+
+\subsubsection{Precipitation}\label{su9.3.6}
+
+The total amount of
+non-convective precipitation at a certain pressure level, $p$, is
+obtained by integrating the relevant processes from the top of the
+model $(p = 0)$ to the respective pressure level. The fluxes of rain
+and snow [kgm$^{-2}$s$^{-1}$] can then be expressed as
+
+\begin{align}
+P_{\mathrm{rain}}(p)&=\frac{1}{g}\int_{0}^p\left(Q_{\mathrm{aut}}+Q_{\mathrm{racl}}-Q_{\mathrm{evr}}+Q_{\mathrm{mls}}\right)dp
+\label{9.37}\\
+P_{\mathrm{snow}}(p)&=\frac{1}{g}\int_{0}^p\left(Q_{\mathrm{agg}}+Q_{\mathrm{sacl}}+Q_{\mathrm{saci}}-Q_{\mathrm{sbs}}-Q_{\mathrm{mls}}\right)dp
+\label{9.38}
+\end{align}
+
+with the snow melt, $Q_{\mathrm{mls}}$, defined in \eref{9.43}. The
+sedimentation (see section \ref{su9.3.2}) is given by
+
+\begin{equation}
+\bar{F}_{\mathrm{i}}(p)=-\frac{1}{g}\int_{0}^p Q_{\mathrm{sed}} dp \ge 0
+\label{9.39}
+\end{equation}
+
+where $Q_{\mathrm{sed}}$ includes the effects of sublimation $Q_{\mathrm{sbis}}$, and
+melting, $Q_{\mathrm{mlis}}$. At the surface ($p = p_{\mathrm{s}}$), the sedimentation
+is added to the snow fall so that the total snow flux is given by
+
+\begin{equation}
+P_{\mathrm{snow}}(p_{\mathrm{s}})=\frac{1}{g}\int_{0}^{p_{\mathrm{s}}}\left(Q_{\mathrm{agg}}+Q_{\mathrm{sacl}}+Q_{\mathrm{saci}}-Q_{\mathrm{sbs}}-Q_{\mathrm{mls}}\right) 
+dp+
+\bar{F}_{\mathrm{i}}(p_{\mathrm{s}}).
+\label{9.40}
+\end{equation}
+
+Melting of falling ice and
+snow is calculated from the heat budget in case the air temperature
+exceeds the freezing point. The excess heat in the respective model
+layer with pressure thickness, $\Delta p$, is then used for melting all or
+part of the snow and/or ice sedimentation according to
+
+\begin{equation}
+\frac{c_{\mathrm{p}}\left(\tilde{T}-T_{0}\right)}{\Delta t}\frac{\Delta
+p}{g}=\max (L_{\mathrm{f}}\hat{M},0)
+\label{9.41}
+\end{equation}
+
+where  $\tilde{T}$
+includes all processes except melting, and $\hat{M}$ is the preliminary amount of melting. The actual amount of melting depends not only on the
+excess heat, according to \eref{9.41}, but also on the available snow
+fall, $P_{\mathrm{snow}}$, and/or incoming sedimentation flux, 
+$\bar{F}_{\mathrm{i}}^{\mathrm{top}}$:
+
+\begin{eqnarray}
+M_{\mathrm{snow}}&=&min(P_{\mathrm{snow}},\hat{M}) \label{9.42a}\\
+M_{\mathrm{ice}}&=&min( \bar{F}_{\mathrm{i}}^{\mathrm{top}},\hat{M})
+\label{9.42b}
+\end{eqnarray}
+
+The temperature change associated
+with melting (c.f., \eref{9.7}) can be written as
+
+\begin{equation}
+\left(\dnd{T}{t}\right)_{\mathrm{melt}}=-\frac{L_{\mathrm{f}}}{c_{\mathrm{p}}}(Q_{\mathrm{mls}}+Q_{\mathrm{mlis}})
+\label{9.43}
+\end{equation}
+
+
+with $Q_{\mathrm{mls}}\equiv M_{\mathrm{snow}}\cdot g/\Delta p$ and $Q_{\mathrm{mlis}}\equiv
+M_{\mathrm{ice}}\cdot g/\Delta p$.
+
+The precipitation fluxes \eref{9.37} -
+\eref{9.40} represent grid-cell averages, while the accretion processes
+\eref{9.24}, \eref{9.31} and \eref{9.32} as well as evaporation of 
+rain \eref{9.35} and
+sublimation of snow \eref{9.36} depend on the fractional area, $C_{\mathrm{pr}}$, of a
+grid-cell covered with precipitation. Our approach for estimating
+$C_{\mathrm{pr}}$ is a slight modification of that employed by \cite{tiedtke93},
+as defined in \cite{jakob99}
+
+\begin{equation}
+C_{\mathrm{pr}}^k=\max
+\left(\hat{C}_{\mathrm{pr}}, \frac{C^k\Delta Pr^k +\hat{C}_{\mathrm{pr}}Pr^{k-1}}{\Delta
+Pr^k + Pr^{k-1}}\right)
+\label{9.44}
+\end{equation}
+
+
+where $Pr^{k-1}$ is the total
+precipitation flux, $P_{\mathrm{rain}} + P_{\mathrm{snow}}$, at model level $k - 1$, 
+$\Delta Pr^k$ is the
+amount of precipitation produced locally in the layer beneath, $C^k$
+is the fractional cloud cover in layer $k$ and
+
+\begin{equation}
+\hat{C}_{\mathrm{pr}}=
+\left(
+\begin{array}{c}
+C^k\mbox{ for }\left(\Delta P r^k\ge Pr^{k-1}\right)\\
+C^{k-1}_{\mathrm{pr}} \mbox{ for }\left(\Delta P r^k < Pr^{k-1}\right)
+\end{array}
+\right).\label{9.45}
+\end{equation}
+
+According to \eref{9.44} and \eref{9.45}, the
+vertical profile of $C_{\mathrm{pr}}$ is related to the profiles of both
+fractional cloud cover and precipitation. In case the local
+precipitation production exceeds the incoming flux, the
+precipitation fraction is given by $C^{k}_{\mathrm{pr}}=C^{k}$. Note also that
+$C^{k}_{\mathrm{pr}} =0$ for $\Delta Pr^k + Pr^{k-1}=0$.
+
+\subsubsection{Mixing ratios of rain, falling ice and snow\label{su9.3.7}}
+
+The mass mixing ratio
+of rain, $r_{\mathrm{rain}}$, is related to the rain flux by
+
+\begin{equation}
+\rho r_{\mathrm{rain}}=P_{\mathrm{rain}}/(C_{\mathrm{pr}}v_{\mathrm{r}})
+\label{9.46}
+\end{equation}
+
+where $P_{\mathrm{rain}}/C_{\mathrm{pr}}$ is the rain flux within the fraction of the 
+grid-cell covered
+with rain, and $v_{\mathrm{r}}$ is the mass-weighted fall velocity of rain drops
+parameterized according to \cite{kessler69}
+
+\begin{equation}
+v_{\mathrm{r}}=a_{10}\left(\frac{\rho r_{\mathrm{rain}}}{n_{0\mathrm{r}}}\right)^{1/8} 
+\left(\frac{\rho_{0}}{\rho}\right)^{1/2}
+\label{9.47}
+\end{equation}
+
+with the intercept
+parameter $n_{0\mathrm{r}} = 8 \cdot 10^6$ m$^{-4}$ and $ a_{10} = 90.8$. By using
+\eref{9.47} in \eref{9.46}
+we obtain
+
+
+
+\begin{equation}
+\rho r_{\mathrm{rain}}=\left(\frac{P_{\mathrm{rain}}}{C_{\mathrm{pr}} 
+a_{10}(n_{0\mathrm{r}})^{-1/8}\sqrt{\rho_{0}/\rho}}\right)^{8/9}.
+\label{9.48}
+\end{equation}
+
+
+According to \eref{9.15}, the mass mixing ratio of falling ice can be 
+obtained from
+
+\begin{equation}
+r_{\mathrm{ised}}=\overline{F}^{\mathrm{top}}_{\mathrm{i}}/(\rho v_{\mathrm{i}})
+\label{9.49}
+\end{equation}
+
+where $v_{\mathrm{i}}$ is
+the fall velocity of cloud ice, $\overline{F}^{\mathrm{top}}_{\mathrm{i}}$is the 
+grid-cell mean sedimentation
+flux and $v_{\mathrm{i}}$ parameterized as in \eref{9.15} by employing the 
+\cite{heymsfield90} approach
+
+\begin{equation}
+v_{\mathrm{i}}=a_{11}(\rho r_{\mathrm{ised}})^{b_{10}}\label{9.50}
+\end{equation}
+
+
+with $a_{11}= 3.29$ and $b_{10}= 0.16$. By using \eref{9.50} in
+\eref{9.49} we obtain
+
+\begin{equation}
+\rho
+r_{\mathrm{ised}}=\left(\frac{\overline{F}^{\mathrm{top}}_{\mathrm{i}}}{a_{11}}\right)^{1/(1+b_{10})}.\label{9.51}
+\end{equation}
+
+Analogously, the mass mixing ratio of snow within the fraction 
+$C_{\mathrm{pr}}$ of the grid-cell
+covered with snow is obtained from the snow fall rate according to
+
+
+\begin{equation}
+\rho r_{\mathrm{snow}}=\left(\frac{P_{\mathrm{snow}}}{C_{\mathrm{pr}} 
+a_{11}}\right)^{1/(1+b_{10})}.\label{9.52}
+\end{equation}
+
+\subsubsection{Solution method and parameter choice}\label{su9.3.8}
+
+
+The cloud microphysical terms are solved in a
+split manner, i.e. sequentially. In the following, a subscript $n$
+denotes the value of a variable before application of the
+respective process, while $n+1$ denotes the updated value after
+application of the process. A major part of the microphysics is
+solved analytically ($Q_{\mathrm{frs}}$, $Q_{\mathrm{aut}}$, $Q_{\mathrm{agg}}$, $Q_{\mathrm{racl}}$, 
+$Q_{\mathrm{sacl}}$, and
+$Q_{\mathrm{saci}}$), and these terms can formally be written as
+
+\begin{equation}
+\dnd{\Psi}{t}=-F_{\Psi}\Psi^z\label{9.53}
+\end{equation}
+
+where $F_{\Psi}>0$  is
+kept constant during the respective time interval, $\Delta t$, and $z
+\ge 1$.
+In the linear case, i.e. for all accretion processes ($Q_{\mathrm{racl}}$, $Q_{\mathrm{sacl}}$,
+$Q_{\mathrm{saci}}$), the solution of \eref{9.53} is given by
+
+\begin{equation}
+\Psi_{\mathrm{n+1}}=\Psi_{\mathrm{n}} \exp (-F_{\Psi}\Delta t).
+\label{9.54}
+\end{equation}
+
+For $ z > 1$, i.e. for
+$Q_{\mathrm{frs}} (z = 2)$, $Q_{\mathrm{aut}} (z = 4.7)$ and $Q_{\mathrm{agg}} (z = 2)$, the 
+solution of \eref{9.53}
+is given by
+
+\begin{equation}
+\Psi_{\mathrm{n+1}}=\Psi_{\mathrm{n}}\left[1+F_{\Psi}\Delta
+t(z-1)\Psi_{\mathrm{n}}^{\mathrm{z-1}}\right]^{1/(1-z)}.
+\label{9.55}
+\end{equation}
+
+
+An analytical solution can also be obtained for
+the ice sedimentation equation \eref{9.16}
+which can be written in the form
+
+\begin{equation}
+\dnd{\Psi}{t}=A-B\Psi\label{9.56}
+\end{equation}
+
+
+where $A$ and $B$ are constants. The solution after one time step interval,
+$\Delta t$, is given
+by
+
+\begin{equation}
+\Psi_{\mathrm{n+1}}=\Psi_{\mathrm{n}}\exp (-B\Delta t)+\frac{A}{B} [1-\exp (-B\Delta t)].
+\label{9.57}
+\end{equation}
+
+
+In the sedimentation equation,  $\overline{F}^{\mathrm{top}}_{\mathrm{i}}$ is included 
+in $A$, while
+the fall velocity $v_{\mathrm{i}}$ is included in $B$. Both are assumed constant
+during the respective time step interval.
+
+The microphysics scheme includes a large number of parameters,
+$(a_{1}, a_{2}, ... , a_{11})$ and $(b_{1}, b_{2}, ... , b_{10})$,
+which are kept constant as part of the parameterizations. On the other
+hand, ($\gamma_{1}$, $\gamma_{2}$, $\gamma_{3}$, $\gamma_{4}$), in
+\eref{9.23}, \eref{9.24}, \eref{9.25}, and \eref{9.31}, respectively,
+are used as `tuning' parameters. This can be justified to some extent
+because these parameterizations are based on detailed microphysical
+models and cannot be applied to large-scale models without
+adjustment.
+The following values are used in \echam: $\gamma_{1}$ =
+15; $0 \le \gamma_{2} \le 0.5$ depending on model resolution;
+$\gamma_{3}$ = 95; $\gamma_{4}$ = 0.1; $\gamma_{\mathrm{thr}} = 5 \cdot
+10^{-7}$ kgkg$^{-1}$.
+

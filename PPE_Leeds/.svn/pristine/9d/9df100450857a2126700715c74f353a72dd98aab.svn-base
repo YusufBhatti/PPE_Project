@@ -1,0 +1,18 @@
+#! /bin/tcsh
+
+epstopdf dec_1870-2150.ps
+epstopdf dec_1978-1996.ps
+epstopdf dis_1870-2150.ps
+epstopdf dis_1978-1996.ps
+epstopdf ga_1870-2150.ps
+epstopdf ga_1978-1996.ps
+epstopdf ra_1870-2150.ps
+epstopdf ra_1978-1996.ps
+
+epstopdf eccentricity.eps
+epstopdf obliquity.eps
+epstopdf precession.eps
+
+epstopdf product.eps
+epstopdf pentagonal.eps
+epstopdf triangular.eps

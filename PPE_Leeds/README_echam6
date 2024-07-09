@@ -1,0 +1,124 @@
+%-------------------------------------------------------------------------------------------------------------------
+Preliminary note from S. Ferrachat (2016-03):
+
+The following lines correspond to the original README file that is contained in the echam6 base code that what used to build this echam-hammoz version. It is kept as reference only.
+
+%-------------------------------------------------------------------------------------------------------------------
+
+
+Readme - 2014-09-09
+
+  !----------------------------------------------------------------------------------
+  ! Copyright 2014 by Max Planck Institute for Meteorology
+  !
+  ! This software can be used only under the conditions of the
+  ! "MPI-M Software Licence Agreement" v2, see
+  ! http://www.mpimet.mpg.de/fileadmin/models/MPIESM/mpi-m_sla_201202.pdf
+  !
+  ! The "MPI-M Software Licence Agreement", the information about
+  ! accessing and contributing to the MPI-M models and the data
+  ! necessary to use them are available at:
+  !
+  ! http://www.mpimet.mpg.de/en/science/models/model-distribution/mpi-esm-users-forum
+  !
+  ! The ECHAM6 web page for developers (login required) is at:
+  !
+  ! https://code.zmaw.de/projects/echam
+  !
+  !----------------------------------------------------------------------------------
+
+This is a new major release of ECHAM6, "echam-6.3.00"
+=====================================================
+
+INSTALLATION
+------------
+
+ECHAM6 is doing IO for the initial and restart files based on UCAR's 
+netCDF (see http://www.unidata.ucar.edu/packages/netcdf).  Take care 
+that you use the right setup for your Fortran compiler when installing 
+netCDF.
+
+Configuration files for a number of operating systems and/or compilers
+are provided in the config directory. Please check your system's
+configuration file and edit it according to your needs.
+
+In the machine specific mh-'file' you have to set the variable NETCDFROOT 
+to the netCDF root directory on your machine.
+
+For use of the parallelized version you have to set the MPIROOT path
+and the MPI-LIB libary information in the respective mh-'file' which enables a 
+compilation with MPI.
+
+For postprocessing of the ECHAM6 code you need the afterburner software
+package. For dokumentation and download of the latest revision see
+https://code.zmaw.de/projects/afterburner
+In case of questions contact Uwe Schulzweida (uwe.schulzweida@mpimet.mpg.de).
+
+
+COMPILING AND RUNNING
+---------------------
+
+To compile and run echam6, and to generate overview plots for your results,
+cd to 'run' and follow the instructions given in 'README.txt'.
+
+Also see the comprehensive information on the usage of echam6 in
+'doc/echam/echam6_userguide.pdf'
+
+
+ADDITIONAL INFORMATION
+----------------------
+
+Bug reports/info/comments to: monika.esch@mpimet.mpg.de
+
+Fitness of the code
+-------------------
+echam-6.3.00 contains the ECHAM6 atmospheric model and the JSBACH land vegetation model.
+
+echam-6.3.00 has been tested to compile and run on "blizzard" (xlf13.1.0.8) and "thunder" 
+(intel) at DKRZ.  Tests on the PC (parallel, nproma, rerun, submodel off) were passed.
+
+ECHAM6 has been used at two resolutions:
+- T63L47 in the AMIP-LR configuration
+- T31L31 in AMIP configuration
+Model has also been run in coupled mode (T63L47/GR15L40).
+
+
+SVN references:
+- tags/echam-6.3.00   = revision r3713 on trunk/echam-dev
+
+Changes with respect to version "echam-6.2.01"
+-----------------------------------------------------------
+- Merge of parallel I/O.
+- Several bugfixes.
+- Add lines concerning Copyright/License-Agreement to all echam routines.
+- Activate meltponds. 
+- Clean up code, setting of masks for mo_surface.
+- Update and clean up of scripting (incl. plotscripts).
+- Add updates to do RCE experiments.
+- Improvement of debug stream.
+- Added energy budget calculation and moistening diagnostics.
+- Move HD-Model from ECHAM to JSBACH.
+- Set parameters for T63, T31 and T127.
+- Add age-of-air-tracer submodel.
+- Update to jsbach up to cosmos-landveg revision 7222, adding bug fixes 
+  r7274 (mo_soil), r7296 (mo_dynveg) and r7303 (bug fix for echam runs with 
+  yasso); but removing r6836 (changes of roughness length).
+  lctlib version 6931 has to be used with these changes.
+- Disabled use of OpenMP options on blizzard as model is not reliably
+  reproducable with OpenMP.
+
+Known issues
+------------
+- reruns are probably not correctly implemented if submodels are involved.
+- In initialization runs, the first time step of mean value streams is not
+  the same as the mean of instantaneous values written at every time step
+
+Release plan
+------------
+- Minor patches for tuning adjustments, optimizations and scripting are
+  possible.
+
+- No further releases for ECHAM are planned.
+
+----------------------------------------------------------------------------
+

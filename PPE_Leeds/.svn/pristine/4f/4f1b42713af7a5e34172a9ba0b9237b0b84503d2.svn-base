@@ -1,0 +1,201 @@
+#!/bin/sh 
+set -ex
+#
+TYP=$1
+echo $TYP
+#
+ANAME=$2
+#
+BNAME=$3
+#
+WORKDIR=$4
+#
+# 
+   echo QUELLE path $QUELLE
+   FIXCODE=/pool/data/ECHAM6/post/FixCodes
+#
+
+   cdo=/client/bin/cdo
+
+#
+BOTa="${WORKDIR}/BOT_${ANAME}"
+BOTb="${WORKDIR}/BOT_${BNAME}"
+#
+###########################################################################
+# var.txt wird in ATM.gs BOT.gs einglesen
+# number of latitudes
+
+nlat=`cdo griddes $BOTa| grep ysize | cut -d"=" -f2`
+echo $nlat >>var.txt
+
+FORMAT="-f nc -t ${QUELLE}/echam6.varCode"
+#
+cp var.txt var1.txt
+head  var1.txt >var.txt
+date >var1.txt
+cut -c5-11,25-32 var1.txt >datum
+cat datum >>var.txt
+#
+###########################################################################
+# 
+#
+set +e
+
+#
+#----code151---Sea level pressure----
+#
+CODE=151
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ${FORMAT} sub  -mulc,0.01 -selcode,${CODE} $BOTa \
+          -mulc,0.01 -selcode,${CODE} $BOTb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#----code164---Total cloud cover-------------------
+#
+CODE=164
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ${FORMAT} sub  -mulc,100. -smooth9 -selcode,${CODE} $BOTa \
+          -mulc,100. -smooth9 -selcode,${CODE} $BOTb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#----code167---2m Temperature-----
+#
+CODE=167
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ${FORMAT} sub -selcode,${CODE} $BOTa \
+          -selcode,${CODE} $BOTb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#----code169---Sea surface temperature---
+#
+CODE=169
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ${FORMAT} sub -selcode,${CODE} $BOTa \
+          -selcode,${CODE} $BOTb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#----code180 Zonal wind stress-----
+#
+CODE=180
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ifnotthen F_LAND -mulc,1000. -selcode,${CODE} $BOTa busy1
+     cdo ifnotthen F_LAND -mulc,1000. -selcode,${CODE} $BOTb busy2
+     cdo ${FORMAT} sub busy1 busy2 Ubusy_d${CODE}.nc
+   fi
+fi
+rm -f  busy*
+#
+#----code4--- Total precipitation----
+#
+CODE=4
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,86400 -selcode,${CODE} $BOTa \
+          -mulc,86400 -selcode,${CODE} $BOTb Ubusy_d${CODE}.nc
+   fi
+else
+########### if code 4 doesn't exits ===> code142 + code143 ##########
+   if  cdo -s showcode -selcode,142  $BOTa > /dev/null 
+   then
+     if  cdo -s showcode -selcode,142  $BOTb > /dev/null ;then
+       if  cdo -s showcode -selcode,143 $BOTa > /dev/null 
+       then
+         if  cdo -s showcode -selcode,143 $BOTb > /dev/null ;then
+           cdo -mulc,86400 -add -selcode,142 $BOTa \
+                -selcode,143 $BOTa busya
+           cdo -mulc,86400 -add -selcode,142 $BOTb \
+                 -selcode,143 $BOTb busyb
+           cdo ${FORMAT} -chname,var142,var4 -chcode,142,4 \
+                -sub busya busyb Ubusy_d${CODE}.nc
+         fi
+       fi
+     fi
+   fi
+fi
+#
+rm -f  busy*
+#
+#----code231+code150---Liquid water + ice content----
+#
+#
+CODES=231_150
+if  cdo -s showcode -selcode,150  $BOTa > /dev/null 
+then
+  if  cdo -s showcode -selcode,150  $BOTb > /dev/null ;then
+    if  cdo -s showcode -selcode,231 $BOTa > /dev/null 
+    then
+      if  cdo -s showcode -selcode,231 $BOTb > /dev/null ;then
+       cdo add -selcode,231 $BOTa \
+            -selcode,150 $BOTa busya
+       cdo add -selcode,231 $BOTb \
+            -selcode,150 $BOTb busyb
+       cdo ${FORMAT} -smooth9 -mulc,1000.   \
+            -sub busya busyb Ubusy_d${CODES}.nc
+      fi
+    fi
+  fi
+fi
+rm -f  busy*
+#
+#----code230 -- Column water vapour --
+#
+CODE=230
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+     cdo ${FORMAT} sub -selcode,${CODE} $BOTa \
+          -selcode,${CODE} $BOTb Ubusy_d${CODE}.nc
+   fi
+fi
+rm -f  busy*
+#
+#----code140/code229 --only land----Ws/Wsmax ---
+#
+CODE=140
+CODE2=229
+if  cdo -s showcode -selcode,${CODE}  $BOTa > /dev/null 
+then
+  if  cdo -s showcode -selcode,${CODE}  $BOTb > /dev/null ;then
+    if  cdo -s showcode -selcode,${CODE2} $BOTa > /dev/null 
+    then
+      if  cdo -s showcode -selcode,${CODE2} $BOTb > /dev/null ;then
+       cdo ${FORMAT} -mulc,100 -selcode,${CODE} $BOTa busy1.nc
+       cdo ${FORMAT} -selcode,${CODE2} $BOTa busy2.nc
+#------only land
+       cdo -setctomiss,0 -mul busy1.nc F_LAND busy1a.nc
+       cdo -setctomiss,0 -mul busy2.nc F_LAND busy2a.nc
+       cdo -div busy1a.nc busy2a.nc  busya.nc
+       rm busy1*.nc  busy2*.nc 
+       cdo ${FORMAT} -mulc,100 -selcode,${CODE} $BOTb busy1.nc
+       cdo ${FORMAT} -selcode,${CODE2} $BOTb busy2.nc
+#------only land
+       cdo -setctomiss,0 -mul busy1.nc F_LAND busy1a.nc
+       cdo -setctomiss,0 -mul busy2.nc F_LAND busy2a.nc
+       cdo -div busy1a.nc busy2a.nc  busyb.nc
+       cdo sub busya.nc busyb.nc Ubusy_d${CODE}.nc
+      fi
+    fi
+  fi
+fi
+rm -f  busy*
+exit
+
+
+
+
+

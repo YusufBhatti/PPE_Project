@@ -1,0 +1,18 @@
+_____
+Using configuration for machine: snellius
+
+WARNING: Missing /gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/jobscript_toolkit_ancillaries/set_auxiliary_file_names.sh. This typically happens when using an obsolete model version.
+No pb, using a fallback script (/home/ybhatti/yusufb/MODEL_INPUT/jobscript_toolkit-1.3/legacy/set_auxiliary_file_names.sh)...
+
+
+_____
+Checking variables from the settings file...
+
+ERROR: main_jobscript is not defined.
+
+
+Please set 'main_jobscript' in your settings file.
+Exiting with code 1...
+
+Note that the execution of jobsubm.sh has been logged into: log_tmp.txt
+

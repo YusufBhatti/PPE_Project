@@ -1,0 +1,557 @@
+\section{Introduction}\label{sA.1}
+
+To derive the governing equations given by
+\eref{(2.2.1)}--\eref{(2.2.7)} and \eref{(2.2.12)}--\eref{(2.2.15)},
+we take start from the unparameterized equations for a mixture of dry
+air, water vapour, liquid water and ice, and work for convenience in a
+Cartesian coordinate system. An individual component is denoted by a
+subscript $i$, where $i = d, v, l,$ or $i$ for dry air, water vapour,
+liquid water or ice, respectively. The specific mass of component $k$,
+denoted by $q_k$, is defined by
+
+\begin{equation}
+\label{A.1.1}
+q_k = \frac{m_k}{m} = \frac{\rho_k}{\rho}
+\end{equation}
+
+where
+
+\begin{tabular}{lp{10cm}}
+$m_k$ & is the mass of component of $k$ in a small
+material volume moving with
+the local velocity of the atmosphere, \\
+$m =\sum m_k$ &is the total mass of the material volume, \\
+$\rho_k$& is the density of component  $k$, and \\
+$\rho = \sum \rho_k$ &is the density of the atmosphere.
+\end{tabular}
+
+The rate of change of $m_k$ is denoted by $\dot{m}_k$. This change
+occurs because of
+
+\renewcommand{\labelenumi}{\alph{enumi}.}
+\begin{enumerate}
+\item\label{a} internal phase changes,
+\item\label{b} rainfall, snowfall, and surface exchanges.
+\end{enumerate}
+
+The rate of change due to (a) alone is denoted by
+$\dot{m}_{ki}$, and that due to (b) by $\dot{m}_{ke}$. Then
+
+\begin{eqnarray}
+\label{A.1.2}\dot{m}_k & = & \dot{m}_{ki} + \dot{m}_{ke} \\
+\label{A.1.3}\dot{m}_{di} & = & \dot{m}_{de} = 0
+\end{eqnarray}
+
+\begin{equation}
+\label{A.1.4}\sum_i  \dot{m}_{ki} = 0
+\end{equation}
+
+The rate of change of total mass is given by
+
+\begin{equation}
+\label{A.1.5}\dot{m} = \sum_i  \dot{m}_k = \sum_i \dot{m}_{ke}
+\end{equation}
+
+The rate of change of density of component $k$ satisfies the equation
+
+\begin{equation}
+\label{A.1.6}\dot{\rho}_{k}=\frac{\rho}{m}{\dot{m}_{k}}
+\end{equation}
+
+provided (as is reasonable) volume changes due to precipitation or
+phase changes are neglected. The net rate of change of density,
+$\dot{\rho}$, is
+then given by
+
+\begin{equation}
+\label{A.1.7}\dot{\rho}=\frac{\rho}{m}\sum_{k}\dot{m}_{k}=\frac{\rho}{m}\dot{m}
+\end{equation}
+
+
+
+\section{The advective form of the unparameterized equations}\label{sA.2}
+\subsection{The material derivative}\label{suA.2.1}
+
+The material derivative is denoted by $\frac{d}{dt}$.
+Its definition is
+
+\begin{equation}
+\label{A.2.1.1}
+\frac{d}{dt}\equiv \dnd{}{t}+\vec{v} \cdot\nabla
+\end{equation}
+
+where $\vec{v}$ here denotes the three-dimensional velocity vector,
+and $\nabla$ the ususal three-dimensional vector operator. Horizontal vectors
+and operators will subsequently be denoted by a subscript $h$.
+
+\subsection{The equation of state}\label{suA.2.2}
+
+We consider a volume $V$ of atmosphere, of
+which dry air and water vapour occupy a volume $V_{d+v}$. The equations of
+state for dry air and water vapour are
+
+\begin{equation}
+\label{A.2.2.1}
+p_{d}V_{d+v}=m_{d}R_{d}T
+\end{equation}
+
+and
+
+\begin{equation}
+\label{A.2.2.2}
+p_{v}V_{d+v}=m_{v}R_{v}T
+\end{equation}
+
+
+where $ p_{d}$ and $ p_{v}$ are partial pressures. Dalton's Law then 
+shows that the
+total pressure $ p $ is given from \ref{A.2.2.2} by
+
+\begin{equation}
+\label{A.2.2.3}
+p=\frac{m_{d}R_{d}T + m_{v}R_{v}T}{V_{d+v}}.
+\end{equation}
+
+Introducing the specific volumes of liquid water $ v_{l}$, and ice $ v_{i}$,
+
+\begin{equation}
+\label{A.2.2.4}V_{d+v}=V-m_{l}v_{l}-m_{i}v_{i}=\frac{m}{\rho}(1-\rho
+(q_{l}v_{l}+q_{i}v_{i}))
+\end{equation}
+
+and \ref{A.2.2.3} becomes
+
+\begin{equation}
+\label{A.2.2.5}
+p=\rho T \frac{R_{d}q_{d} + R_{v}q_{v}}{1-\rho
+(q_{l}v_{l}+q_{i}v_{i})}.
+\end{equation}
+
+
+or
+
+\begin{equation}
+\label{A.2.2.6}
+p=\rho T R_{d} \frac{1+\left(\frac{1}{\epsilon}-1\right)q_{v} - q_{l}-q_{i}}
+{1-\rho (q_{l}v_{l}+q_{i}v_{i})}.
+\end{equation}
+
+where
+
+\begin{equation}
+\label{A.2.2.7}
+\epsilon=R_{d}/R_{v}
+\end{equation}
+
+\subsection{Mass conservation}\label{suA.2.3}
+
+  Conservation of mass for element $k$
+leads to the equation
+
+\begin{equation}
+\label{A.2.3.1}
+\frac{d\rho_{k}}{dt}+\rho_{k}(\nabla\cdot \vec{v})=\dot{\rho}_{k}=
+\frac{\rho\dot{m}_{k}}{m}
+\end{equation}
+
+Summing over $k$ then gives
+
+\begin{equation}
+\label{A.2.3.2}
+\frac{d\rho}{dt}+\rho(\nabla\cdot \vec{v})=\frac{\rho\dot{m}}{m}=
+\dot{\rho}
+\end{equation}
+
+In addition, by definition
+
+\begin{equation}
+\label{A.2.3.3}
+\frac{dm_{k}}{dt}=\dot{m}_{k}
+\end{equation}
+
+which gives
+
+\begin{equation}
+\label{A.2.3.4}
+\frac{dq_{k}}{dt}=\frac{\dot{m}_{k}}{m}-\frac{m_{k}\dot{m}}{m^2}=\frac{1}{m}
+(\dot{m}_{k}-q_{k}\dot{m})
+\end{equation}
+
+\subsection{The velocity equation}\label{suA.2.4}
+
+The advective form of the
+equations for the horizontal components of velocity is unaltered by
+mass changes. The horizontal velocity components thus satisfy the
+equation
+
+\begin{equation}
+\label{A.2.4.1}
+\frac{d \vec{v}_{h}}{dt}=-\frac{1}{\rho}\nabla_{h}p-2 (\vec{\Omega} \times
+\vec{v}_{h})_h
+\end{equation}
+
+where $\vec{\Omega}$ is the earth's rotation vector. Changes due to
+molecular stresses are neglected.
+
+\subsection{The thermodynamic equation}\label{suA.2.5}
+
+As discussed by Dufour
+and Van Mieghem (1975, Eq. 5.21), the first law of thermodynamics may
+be written
+
+\begin{equation}
+\label{A.2.5.1}
+\delta Q +\alpha dp=d_{i}H=d_{i}\left(\sum m_{k}h_{k}\right)
+\end{equation}
+
+where the $h_{k}$ are specific enthalpies, $\alpha=1/\rho$ is the 
+specific volume
+and the subscript $i $ denotes changes independent of the mass changes due
+to precipitation. As molecular diffusion is neglected, $\delta Q$ 
+represents the
+heat received by the atmospheric element due to radiation and to heat
+exchange with falling rain or snow.
+
+Under the usual assumptions of perfect gas behaviour for dry air and
+water vapour, and neglect of variations of the specific enthalpies of
+water and ice with pressure, we can write
+
+\begin{equation}
+\label{A.2.5.2}
+h_{k}=h_{k}^0+C_{pk}T
+\end{equation}
+
+and \eref{A.2.5.1} becomes
+
+\begin{equation}
+\label{A.2.5.3}
+mC_{p}dT=\alpha dp +
+\delta Q -\sum_{k}h_{k}d_{i}m_{k}
+\end{equation}
+
+where
+
+\begin{equation}
+\label{A.2.5.4}
+C_{p}=\sum_{k} C_{pk}q_{k}
+\end{equation}
+
+Thus considering a material volume of the atmosphere, we obtain the
+thermodynamic equation
+
+\begin{equation}
+\label{A.2.5.5}
+C_{p}\frac{dT}{dt}=\frac{1}{\rho}\frac{dp}{dt} +Q_{R}+Q_{M}-\sum_{k}
+h_{k}\frac{\dot{m}_{ki}}{m}
+\end{equation}
+
+where $Q_{R}$ and $Q_{M}$ are the heating rates due to respectively
+radiation and the heat transferred from falling rain or snow.
+
+\section{The flux forms of the equations}\label{sA.3}
+
+It is convenient to define the differential operator $\frac{D}{Dt}$ by
+
+\begin{equation}
+\label{A.3.1}
+\frac{DX}{Dt}=\frac{dX}{dt}+X(\nabla \cdot \vec{v})=\dnd{X}{t}+\nabla \cdot (X \vec{v})
+\end{equation}
+
+Note that
+
+\begin{equation}
+\label{A.3.2}
+\rho=\frac{dx}{dt}=\frac{D\rho x}{Dt} \mbox{ if } \dot{\rho} =0
+\end{equation}
+
+Equations \eref{A.2.3.4}, \eref{A.2.4.1} and \eref{A.2.5.5} may then be
+written
+
+\begin{eqnarray}
+\label{A.3.3}
+\frac{D\rho}{Dt}&=&\frac{\rho}{m}\dot{m}=\dot{\rho}\\
+\label{A.3.4}
+\frac{D\rho q_{k}}{Dt}&=&\frac{\rho}{m}\dot{m}_{k}=\dot{\rho}_{k}\\
+\label{A.3.5}
+\frac{D\rho 
+\vec{v}_{h}}{Dt}&=&\dot{\rho}\vec{v}_{h}-\nabla_{h}p-2\rho(\vec{\Omega} 
+\times \vec{v}_{h})_{h}\\
+\label{A.3.6}
+C_{p}\frac{D\rho 
+T}{Dt}&=&C_{p}\dot{\rho}T+\frac{dp}{dt}+\rho(Q_{R}+Q_{M})-\rho\sum_{k}
+h_{k}\frac{\dot{m}_{ki}}{m}
+\end{eqnarray}
+
+ From the definition \eref{A.2.5.4} of $C_{p}$ we obtain
+
+\begin{equation}
+\label{A.3.7}
+\frac{DC_{p}\rho T}{DT}=
+C_{p}\frac{D\rho T}{DT}+\rho T\frac{d}{dt}\sum_{k}C_{pk}q_{k}
+\end{equation}
+
+and using \eref{A.2.5.4} and \eref{A.3.6} gives
+
+\begin{equation}
+\begin{split}
+\label{A.3.8}
+\frac{DC_{p} \rho
+T}{Dt}=C_{p}\dot{\rho}T+\frac{dp}{dt}&+\rho\left(Q_{R}+Q_{M}\right)-\rho\sum_{k} 
+\left(h_{k}^0+C_{pk}T\right)\frac{\dot{m}_{ki}}{m}\\&+\rho T \sum_{k}
+C_{pk}\left(\frac{\dot{m}_{k}}{m}-\frac{q_{k}\dot{m}}{m}\right)
+\end{split}
+\end{equation}
+
+Using \eref{A.1.2}, \eref{A.1.7} and \eref{A.2.5.4}, we obtain from
+\eref{A.3.8}:
+
+\begin{equation}
+\label{A.3.9}
+\frac{DC_{p} \rho 
+T}{Dt}=\frac{dp}{dt}+\rho\left(Q_{R}+Q_{M}\right)-\rho\sum_{k}
+h^0_{k}\frac{\dot{m}_{ki}}{m}+\rho
+T\sum_{k}C_{pk}\frac{\dot{m}_{ke}}{m}
+\end{equation}
+
+\section{The introduction of diffusive fluxes}\label{sA.4}
+
+We now introduce
+a separation of dependent variables into components that will be
+explicitly resolved in the model and components the effect of which
+will require parameterization.
+
+If the bar operator represents an average over unresolved scales in
+space and time, then we write:
+
+\begin{eqnarray*}
+X&=&\ovl{X}+X' \mbox{ with } \ovl{X}' = 0\\
+\mbox{ and }X&=&\ovl{\ovl{X}}+X'' \mbox{ with } \ovl{\ovl{X}}''= 0\\
+\mbox{ where }\ovl{\ovl{X}}&=&\frac{\ovl{\rho X}}{\ovl{\rho}} \mbox{
+is a mass weighted average}.
+\end{eqnarray*}
+
+It follows that
+
+\begin{eqnarray*}
+\frac{\ovl{\ovl{D}}\ovl{\rho}\ovl{\ovl{X}}}{Dt}&=&\frac{\ovl{D\rho
+X}}{Dt}-(\nabla \cdot \ovl{\rho \vec{v}''X''})\\
+\frac{\ovl{\ovl{d}}\ovl{X}}{dt}&=&\frac{\ovl{d
+X}}{dt}-\left(\ovl{\vec{v}'' \cdot \nabla X}\right)\\
+\ovl{\rho} XY&=&\ovl{\rho XY} = \ovl{\rho}\ovl{\ovl{X}}\,\ovl{\ovl{Y}}+
+\ovl{\rho X''Y''}
+\end{eqnarray*}
+
+Using these results, equations \eref{A.3.2} - \eref{A.3.4} and 
+\eref{A.3.8} become
+
+\begin{eqnarray}
+\frac{\ovl{\ovl{D}}\ovl{\rho}}{Dt}&=&\ovl{\dot{\rho}}=\ovl{\rho}
+\left(\frac{\ovl{\ovl{\dot{m}}}}{m}\right)
+\label{A.4.1}\\
+\frac{\ovl{\ovl{D}}\ovl{\rho}\,\ovl{\ovl{q_{k}}}}{Dt}&=&\ovl{\dot{\rho}_{k}}-
+\left(\nabla \cdot
+\overline{\rho\vec{v}''q_{k}''}\right)=\ovl{\rho}\left(
+\frac{\ovl{\ovl{\dot{m}_{k}}}}{m}\right)-
+\left(\nabla\cdot\overline{\rho\vec{v}''p_{k}''}\right)
+\label{A.4.2}\\
+\frac{\ovl{\ovl{D}}\ovl{\rho}\ovl{\ovl{\vec{v}_{h}}}}{Dt}&=&\ovl{\dot{\rho}\vec{v}_{h}}-
+\nabla_{h}\ovl{p}-2\ovl{\rho}\left(\vec{\Omega} \times
+\ovl{\ovl{\vec{v}_{h}}}\right)_{h}-\left(\nabla \cdot
+\overline{\rho\vec{v}''\vec{v}''_{h}}\right)\label{A.4.3}\\
+&=&\ovl{\rho}\left(\frac{\ovl{\ovl{\dot{m}}}}{m}\right)\ovl{\ovl{\vec{v}_{h}}}-\nabla_{h}
+\ovl{\rho}-2\ovl{\rho}\left(\vec{\Omega} \times \ovl{\ovl{\vec{v}_{h}}}\right)_{h}
+-\left(\nabla \cdot \overline{\rho\vec{v}''\vec{v}''_{h}}\right)
+-\ovl{\rho\left(
+\frac{\dot{m}}{m}\right)''\vec{v}''_{h}}\nonumber
+\end{eqnarray}
+
+and
+
+\begin{eqnarray}
+\frac{\ovl{\ovl{D}}}{Dt}\left(\ovl{\rho}\ovl{\ovl{C_{p}}}\,\ovl{\ovl{T}}+
+\ovl{\rho C_{p}''T''}\right)&=&\frac{\ovl{\ovl{d}}\ovl{p}}{dt}+
+\ovl{\rho}\left(\ovl{\ovl{Q_{R}}}
++\ovl{\ovl{Q_{M}}}\right)
+-\ovl{\rho}\sum_{k}
+h_{k}^0\left(\frac{\ovl{\ovl{\dot{m}_{ki}}}}{m}\right)\nonumber\\
+&+&\ovl{\rho}\ovl{\ovl{T}}\sum_{k}C_{pk}\left(\frac{\ovl{\ovl{\dot{m}_{ke}}}}{m}\right)
++\ovl{\vec{v}'' \cdot \nabla p}-
+\left(\nabla \cdot \ovl{\rho\vec{v}''C_{p}T''}\right)\label{A.4.4}\\
+&+&\sum_{k} C_{pk}\ovl{\rho T''\left( \frac{\dot{m}_{ke}}{m} 
+\right)''}\nonumber
+\end{eqnarray}
+
+
+The equation of state \ref{A.2.2.5} gives
+
+\begin{equation}
+p=\rho RT\label{A.4.5}
+\end{equation}
+
+
+where $R=(R_{d}q_{d}+R_{v}q_{v})/\{1-\rho (q_{l}v_{l}+q_{i}v_{i})\}$
+
+whence
+
+\begin{equation}
+\ovl{\rho}= \ovl{\rho RT}= \ovl{\rho}\ovl{\ovl{R}}\,\ovl{\ovl{T}}+
+\ovl{\rho R''T''}\label{A.4.6}
+\end{equation}
+
+Using $\ovl{\ovl{C_{p}}}=\sum C_{pk}\ovl{\ovl{q_{k}}}$, \eref{A.4.2}
+and \eref{A.4.4} may be written
+
+\begin{eqnarray}
+\ovl{\ovl{C_{p}}} \frac{\ovl{\ovl{D}}\ovl{\rho}\ovl{\ovl{T}}}{Dt}&=&
+\frac{\ovl{\ovl{d}}\ovl{p}}{dt}+\ovl{\rho}
+\left(\ovl{\ovl{Q_{R}}}+\ovl{\ovl{Q_{M}}}\right)-\ovl{\rho}\sum_{k}\ovl{\ovl{h_{k}}}
+\left(\frac{\ovl{\ovl{\dot{m}_{ki}}}}{m}\right)+\ovl{\rho}\ovl{\ovl{C_p}}\,
+\ovl{\ovl{T}}\left(\frac{\ovl{\ovl{\dot{m}}}}{m}\right)\nonumber\\
+&+&\ovl{\vec{v}'' \nabla p}-\nabla \cdot
+\ovl{\rho\vec{v}''(C_{p}T)''}+\ovl{\ovl{T}}\sum_{k}C_{pk}\nabla \cdot
+\ovl{\rho\vec{v}''q_{k}''}\\
+&-&\frac{\ovl{\ovl{D}}}{Dt} (\ovl{\rho C_{p}''T'')}+\sum_{k}C_{pk}
+\ovl{\rho T''\left(\frac{\dot{m}_{ke}}{m}\right)}\nonumber
+\end{eqnarray}
+
+
+\section{Approximations and definitions}\label{sA.5}
+
+At this stage, we make two
+approximations. The first is to neglect the higher-order correlations
+
+\begin{equation*}
+\ovl{\rho
+T''\left(\frac{\dot{m}_{ke}}{m}\right)''},\quad\frac{\ovl{\ovl{D}}}{Dt}
+\ovl{\left(\rho C_{p}''T''\right)}, \quad \ovl{\rho T'' R''}\mbox{
+and } \ovl{\rho\left(\frac{\dot{m}}{m}\right)''\vec{v}_{h}}.
+\end{equation*}
+
+This is equivalent to assuming higher-order terms are important only
+when eddy velocities and derivatives are involved. The second is to
+neglect the term in the equation of state, or equivalently to neglect
+the volume occupied by liquid water and ice compared with that
+occupied by dry air and water vapour.
+
+In addition we introduce the following notation:
+\begin{enumerate}
+\item The vertical flux of a variable $X$, $\ovl{\rho w''X''}$, is
+denoted by $J_{X}$. Here $w$ is the
+vertical velocity component.
+
+\item The term $\ovl{v''\cdot \nabla p}$ is added to the term
+$\dnd{}{z} \ovl{\rho w''(C_{p}T)''}$ and the resulting sum is
+expressed as the derivative $\dnd{J_{S}}{z}$ of the vertical flux of
+dry static
+energy, plus a term which is written $\ovl{\rho} \ovl{\ovl{Q_{D}}}$ 
+and regarded as representing
+unorgnized transfers between enthalpy and sub-grid scale kinetic
+energy. The latter is parameterized by the heating implied by the
+dissipation of kinetic energy due to the parameterized vertical
+momentum fluxes $J_{\vec{v}_{h}}$.
+
+\item The net effect of horizontal fluxes is represented only
+by their contribution $K_{X}$ to the tendency of variable $X$.
+
+\item The term $-\ovl{\rho} \sum_{k}
+\ovl{\ovl{h_{k}}}\left(\frac{\ovl{\ovl{\dot{m}_{ki}}}}{m}\right)$ representing
+the latent heat release associated with
+internal phase changes is written $\rho\ovl{\ovl{Q_{L}}}$
+\end{enumerate}
+
+\section{Return to the advective form}\label{sA.6}
+
+With the above approximations and definitions, we obtain from the
+equations of Appendix \ref{sA.4}, on dropping the bar operators
+
+\begin{equation}
+\frac{d\rho}{dt}+\rho\nabla\cdot\vec{v}=\rho\frac{\dot{m}}{m}\label{A.6.1}
+\end{equation}
+
+\begin{equation}
+\frac{dq_{k}}{dt}=S_{q_{k}}-\frac{1}{\rho}\dnd{J_{q_{k}}}{z}+K_{q_{k}}\label{A.6.2}
+\end{equation}
+
+\begin{equation}
+\frac{d\vec{v}_{h}}{dt}=-\frac{1}{\rho}\nabla_{h}p-2\left(\vec{\Omega}\times
+\vec{v}_{h}\right)_{h}-\frac{1}{\rho}\dnd{J_{\vec{v}_{h}}}{z}+K_{\vec{v}_{h}}\label{A.6.3}
+\end{equation}
+
+
+\begin{equation}
+\frac{dT}{dt}=\frac{1}{\rho 
+C_{p}}\frac{dp}{dt}+\frac{1}{C_{p}}\left(Q_{R}+Q_{L}
++Q_{M}+Q_{D}-\frac{1}{\rho}\left[\dnd{J_{S}}{z}-T\sum_{k}C_{pk}\dnd{J_{q_{k}}}{z}
+\right ]\right)+K_{T}\label{A.6.4}
+\end{equation}
+
+where
+
+\begin{equation}
+S_{q_{k}}=\frac{\dot{m}_{k}}{m}-q_{k}\frac{\dot{m}}{m}\label{A.6.5}.
+\end{equation}
+
+In addition we have the equation of state
+
+\begin{equation}
+p=\rho T\left(R_{d}q_{d}+R_{v}q_{v}\right)\label{A.6.6}.
+\end{equation}
+
+and the hydrostatic equation
+
+\begin{equation}
+\dnd{p}{z}=-g\rho\label{A.6.7}.
+\end{equation}
+
+\section{The model equations}\label{sA.7}
+
+The model equations \eref{(2.2.1)}--\eref{(2.2.7)} and
+\eref{(2.2.12)}--\eref{(2.2.15)} are finally obtained by neglecting
+density changes due to precipitation or evaporation, setting
+$\dot{m}=0$ in \eref{A.6.1}. This approximation is traditionally made,
+although it is open to question.
+
+In addition, $Q_{M}$ is set to zero, an approximation of the same
+order as the assumption of no variation of latent heat with
+temperature that is made in the parameterizations.
+
+The governing equations are
+
+\begin{eqnarray}
+\frac{d\vec{v}_{h}}{dt}
+&=&-\frac{1}{\rho}\nabla_{h}p-2\left(\vec{\Omega}\times\vec{v_{h}}\right)_{h}-
+\frac{1}{\rho}\dnd{J_{\vec{v}_{h}}}{z}+K_{\vec{v}_{h}}\label{A.7.1}\\
+\frac{dT}{dt}
+&=&\frac{R_{d}T_{v}}{pC_{p}}\frac{dp}{dt}+\frac{1}{C_{p}}\left(Q_{R}+
+Q_{L}+Q_{D}-\frac{1}{\rho}\left[\dnd{J_{s}}{z}-C_{pd}T(\delta
+-1)\dnd{J_{q_{v}}}{z}\right]\right)+K_{T}\label{A.7.2}\\
+\frac{dq_{i}}{dt}
+&=&S_{q_{i}}-\frac{1}{\rho}\dnd{J_{q_{i}}}{z}\label{A.7.3}\\
+p&=&\rho R_{d}T_{v}\label{A.7.5}\\
+\dnd{p}{z}&=&-g\rho\label{A.7.6}
+\end{eqnarray}
+
+with
+
+\begin{equation}
+T_{v}=T\left(1+\left(\frac{1}{\epsilon}-1\right)q_{v}\right)\label{A.7.7}
+\end{equation}
+
+In this case
+
+\begin{equation*}
+C_{p}=C_{pd}\left(1-q_{v}\right)+C_{pv}q
+\end{equation*}
+which is written
+
+\begin{equation}
+C_{p}=C_{pd}\left(1+\left(\delta -1\right)q_{v}\right)\label{A.7.8}
+\end{equation}
+
+where $\delta=\frac{C_{pv}}{C_{pd}}$.
+
+The model equations then follow from a change from $z$ -
+to $\eta$-coordinates, the formalism for which is given by Kasahara (1974),
+and from rewriting the adiabatic terms in their usual form for a
+spherical geometry.
+

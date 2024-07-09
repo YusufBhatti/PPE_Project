@@ -1,0 +1,1535 @@
+\subsection{Introduction}
+
+\echam{} allows the implementation of so--called submodels. A submodel
+can describe any additional physical processes that will either be linked in
+a one--way coupling to echam or a two--way coupling. A one--way
+coupling in this context means that the additional physical processes
+are such that they need input from the \echam{} base model but do not
+change the general circulation. One could also say that the results of
+such a model are derived from the \echam{} base model in a
+``diagnostic'' way. If the base model is linked by a two--way coupling
+to a submodel, the submodel interacts with \echam{} and modifies the
+general circulation. An example for the one--way coupling would be
+diagnostic chemistry implemented in such a way that the chemical
+species are transported by the winds given by \echam{} and the
+chemical reactions are driven by the pressure, temperature, humidity
+and radiation simulated by \echam. Nevertheless, the concentration of
+the chemical species would not be allowed to influence these
+quantities. A two--way coupling would be introduced if the
+concentration of the chemical species influences the radiation by
+absorption of radiation for example. 
+
+The implementation of such submodels needs an interface to the submodel
+that provides a certain set of variables to the submodel routines.
+In fact, the submodel interface is a collection of dummy subroutines
+in \echam{} inside which the special 
+subroutines of a submodel can be called. These special subroutines
+will not be a part of \echam{} but will perform all submodel specific tasks
+as the solution of the chemical kinetic equations for example.
+In addition to this submodel interface, many submodels need the
+introduction of tracers that are transported with the air flow like
+water waper is transported. These tracers are often associated with
+certain chemical species having specific physico--chemical
+properties. In general, it may occur that a certain species is
+represented by several tracers (e.g.~various CO tracers depending on
+the region of emission of CO, so--called ``tagged'' tracers) so that
+every tracer has the same physico--chemical properties. Conceptually,
+it is better to separate the tracer properties from a list of
+physico--chemical species properties so that this information is
+present only once in the program. This avoids inconsistent definition
+of species properties and is therefore more user friendly. This
+separation is not yet finished in the current \echam{} version and the
+species data structure will therefore not be described here although
+it is present. As soon as this species concept has settled, this
+description will be added.
+
+\subsection{Submodel Interface}
+
+The submodel interface consists of the subroutines listed in
+Tab.~\ref{tabsubmodeli} that are all collected in module {\tt mo\_submodel\_interface.f90}. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}p{4cm}p{7.0cm}}
+\hline\hline\caption[Submodel interface]{Submodel interface
+ subroutines. The subroutines are listed in the same order as they are
+ called in \echam.}\\\hline\label{tabsubmodeli}
+\endfirsthead
+\caption[]{{\tt Submodel interface} --- continued}\\\hline
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+
+Subroutine & Called in & Explanation \\\hline
+{\tt init\_subm} & {\tt initialize.f90} & Initialization of
+submodel. This comprises reading of specific submodel data. However,
+this is not the right place to read gridded fields.\\
+{\tt init\_subm\_memory} & {\tt init\_memory} of {\tt
+  mo\_memory\_streams.f90} & Allocation of memory for submodel either
+in streams or 2-- and 3--dimensional fields.\\
+{\tt stepon\_subm} & {\tt stepon.f90} & Called at the beginning of a
+new time step. Good for reading data at
+regular time intervals.\\
+{\tt physc\_subm\_1} & {\tt physc.f90} & Call in the ``physics'' part
+of calculation. The ``physics'' processes are processes in one column
+over a grid cell. This subroutine is called before the radiation
+calculation.\\
+{\tt radiation\_subm\_1} & {\tt rrtm\_interface} of {\tt
+  mo\_radiation.f90} & Submodels can modify the optical properties of
+the atmosphere here. It is called before the radiation fluxes are
+calculated. \\
+{\tt radiation\_subm\_2} & {\tt rrtm\_interface} of {\tt
+  mo\_radiation.f90} & Good for radiation diagnostics performed by
+submodels.\\ 
+{\tt vdiff\_subm} & {\tt vdiff.f90} & In this subroutine, net surface 
+fluxes can be calculated that will be used as boundary 
+conditions in the vertical diffusion equation. Good for surface
+emission fluxes and dry deposition fluxes. \\
+{\tt rad\_heat\_subm} & {\tt radheat.f90} & Diagnostic of heating
+rates. \\
+{\tt physc\_subm\_2} & {\tt physc.f90} & First interface that is good
+for calculation of 
+physical processes of submodels like chemical kinetics or aerosol
+physics. It is called before cloud physics but after {\tt vdiff} and {\tt radheat}\\
+{\tt cuflx\_subm} & {\tt cuflux.f90} & Submodels can interfere with
+convection here. E.g.~wet deposition of convective clouds has to be
+implemented here.\\
+{\tt cloud\_subm} & {\tt cloud.f90} & Implement interaction between
+cloud physics and submodels here. E.g.~ ``wet chemistry'' should be
+implemented here. Wet deposition of large scale precipitation has to
+be implemented here.\\
+{\tt physc\_subm\_3} & {\tt physc.f90} & Second interface that is good
+for calculation of 
+physical processes of submodels like chemical kinetics or aerosol
+physics. It is called after cloud physics. \\
+{\tt physc\_subm\_4} & {\tt physc.f90} & This is the right place for
+submodel diagnostics after all physics processes are calculated.\\
+{\tt free\_subm\_memory} & {\tt free\_memory} of {\tt
+  mo\_memory\_streams.f90} & Deallocation of allocated submodel memory
+here is mandatory, otherwise the internal rerun process will fail. In
+addition, it is very important to set back all submodel switches to
+their default values. In particular switches that indicate that
+certain fields are allocated or certain data are read.\\
+\end{longtable}
+
+Inside these interface routines, the submodel specific routines should
+be called. These calls have to be implemented all into {\tt
+  mo\_submodel\_interface.f90} and the calls have to be effective if
+and only if the respective submodel is switched on. Since {\tt
+  mo\_submodel\_interface.f90} is part of the \echam{} code but the
+submodel routines are not, the calls should be switched off/on by
+compiler directives. In that case, the calls can be included in the
+standard version of {\tt
+  mo\_submodel\_interface.f90}. Neither an extra version of this module has
+to be kept by the submodel users nor any update has to be done ``by
+hand''. 
+
+The parameter lists of the submodel interface routines are described
+in the following subsections.
+
+\subsubsection{Interface of {\tt init\_subm}}
+
+\begin{lstlisting}[caption=init\_subm]
+SUBROUTINE init_subm
+\end{lstlisting}
+
+This subroutine has no parameter list.\vspace{1cm}
+
+\subsubsection{Interface of {\tt init\_subm\_memory}}
+
+\begin{lstlisting}[caption=init\_subm\_memory]
+SUBROUTINE init_subm_memory
+\end{lstlisting}
+
+This subroutine has no parameter list. In general, the fields
+allocated here belong to the submodel. Since the submodel is supposed to be
+organized in modules, global submodel fields should be defined as
+module variables and can be brought to any submodel subroutine by use
+statements. Streams are easily accessible by their
+names. Nevertheless, subroutines of the kind {\tt get\_stream} or {\tt
+  get\_stream\_element} are slow and should not be used
+repeatedly. Instead, pointers to the stream elements can be stored as
+global submodel variables and used later in the program.\vspace{1cm}
+
+\subsubsection{Interface of {\tt stepon\_subm}}
+
+\begin{lstlisting}[caption=stepon\_subm]
+SUBROUTINE stepon_subm (current_date, next_date)
+  TYPE(time_days)     :: current_date
+  TYPE(time_days)     :: next_date
+\end{lstlisting}
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt stepon\_subm}]{Parameter list
+  of arguments passed to {\tt stepon\_subm}}\\\hline\label{tabpstepon_subm}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt stepon\_subm}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt current\_date} & {\tt time\_days} &  & time and date of current
+time step\\
+{\tt next\_date} & {\tt time\_days} &  & time and date of prognostic time step  
+\end{longtable}
+
+\subsubsection{Interface of {\tt physc\_subm\_1}}
+
+\begin{lstlisting}[caption=physc\_subm\_1]
+SUBROUTINE physc_subm_1 (kproma, kbdim, klev, &
+                         klevp1, ktrac, krow, &
+                         papm1,  paphm1,      &
+                         ptm1,   ptte,        &
+                         pxtm1,  pxtte,       &  
+                         pqm1,   pqte          ) 
+  INTEGER,  INTENT(in)    :: kproma 
+  INTEGER,  INTENT(in)    :: kbdim
+  INTEGER,  INTENT(in)    :: klev 
+  INTEGER,  INTENT(in)    :: klevp1
+  INTEGER,  INTENT(in)    :: ktrac 
+  INTEGER,  INTENT(in)    :: krow  
+  REAL(dp), INTENT(in)    :: papm1 (kbdim,klev)
+  REAL(dp), INTENT(in)    :: paphm1(kbdim,klevp1)
+  REAL(dp), INTENT(in)    :: ptm1  (kbdim,klev)
+  REAL(dp), INTENT(in)    :: ptte  (kbdim,klev)
+  REAL(dp), INTENT(inout) :: pxtm1 (kbdim,klev,ktrac)
+  REAL(dp), INTENT(inout) :: pxtte (kbdim,klev,ktrac)
+  REAL(dp), INTENT(in)    :: pqm1  (kbdim,klev)
+  REAL(dp), INTENT(in)    :: pqte  (kbdim,klev)
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt physc\_subm\_1}]{Parameter list
+  of arguments passed to {\tt physc\_subm\_1}}\\\hline\label{tabpphysc_subm_1}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt physc\_subm\_1}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt klevp1} &  integer & in & number of layers plus one \\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt papm1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t-\Delta t$\\
+{\tt paphm1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at time step $t-\Delta t$\\
+{\tt ptm1(kbdim,klev)} & double prec. & in & temperature at center of
+model layers at time step $t-\Delta t$\\
+{\tt ptte(kbdim,klev)}& double prec. & in & temperature tendency at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine\\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & inout & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+{\tt pxtte(kbdim,klev,ktrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pqm1(kbdim,klev)} & double prec. & in & specific humidity (with
+respect to dry air) at
+center of model layers at time step $t-\Delta t$ \\
+{\tt pqte(kbdim,klev)} & double prec. & in & tendency of specific
+humidity (with respect to dry air) at center of model layers
+accumulated over all processes of actual time 
+step until call of this subroutine \\
+\end{longtable}
+
+\subsubsection{Interface of {\tt radiation\_subm\_1}}
+
+\begin{lstlisting}[caption=radiation\_subm\_1]
+SUBROUTINE radiation_subm_1 &
+   (kproma           ,kbdim            ,klev         ,krow  ,&
+    ktrac            ,kaero            ,kpband       ,kb_sw ,&
+    aer_tau_sw_vr    ,aer_piz_sw_vr    ,aer_cg_sw_vr        ,&
+    aer_tau_lw_vr                                           ,&
+    ppd_hl           ,pxtm1                                  )
+  INTEGER, INTENT(in) :: kproma
+  INTEGER, INTENT(in) :: kbdim 
+  INTEGER, INTENT(in) :: klev  
+  INTEGER, INTENT(in) :: krow  
+  INTEGER, INTENT(in) :: ktrac 
+  INTEGER, INTENT(in) :: kaero 
+  INTEGER, INTENT(in) :: kpband
+  INTEGER, INTENT(in) :: kb_sw 
+  REAL(dp), INTENT(inout) :: aer_tau_sw_vr(kbdim,klev,kb_sw), &
+                             aer_piz_sw_vr(kbdim,klev,kb_sw), &
+                             aer_cg_sw_vr(kbdim,klev,kb_sw),  &
+                             aer_tau_lw_vr(kbdim,klev,kpband),&
+  REAL(dp), INTENT(in):: ppd_hl(kbdim,klev)     
+  REAL(dp), INTENT(in):: pxtm1(kbdim,klev,ktrac)
+\end{lstlisting}
+
+\begin{longtable}{p{4.5cm}@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt radiation\_subm\_1}]{Parameter list
+  of arguments passed to {\tt radiation\_subm\_1}}\\\hline\label{tabpradiation_subm_1}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt radiation\_subm\_1}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt krow} &  integer & in & index number of block of geographical 
+longitudes\\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt kaero} & integer & in & switch for aerosol radiation coupling\\
+{\tt kpband} & integer & in & number of bands in the thermal radiation
+wavelength range \\
+{\tt kb\_sw} & integer & in & number of bands in the solar radiation
+wavelength range \\
+{\tt aer\_tau\_sw\_vr (kbdim,klev,kb\_sw)} & double prec. & inout &
+aerosol optical depth of model layers for solar radiation wavelength
+bands. Here, the model layers are ordered from the Earth's surface (level
+index 1) to the
+top of the atmosphere (level index {\tt klev}) as indicated by
+{\tt \_vr} $=$ vertically reversed\\
+{\tt aer\_piz\_sw\_vr (kbdim,klev,kb\_sw)} & double prec. & inout &
+aerosol single scattering albedo for solar radiation wavelength
+bands. Here, the model layers are ordered from the Earth's surface (level
+index 1) to the
+top of the atmosphere (level index {\tt klev}) as indicated by
+{\tt \_vr} $=$ vertically reversed\\
+{\tt aer\_cg\_sw\_vr (kbdim,klev,kb\_sw)} & double prec. & inout &
+aerosol asymmetry factor for solar radiation wavelength
+bands. Here, the model layers are ordered from the Earth's surface (level
+index 1) to the
+top of the atmosphere (level index {\tt klev}) as indicated by
+{\tt \_vr} $=$ vertically reversed\\
+{\tt aer\_tau\_lw\_vr (kbdim,klev,kpband)} & double prec. & inout &
+aerosol optical depth of model layers for thermal radiation wavelength
+bands. Here, the model layers are ordered from the Earth's surface (level
+index 1) to the
+top of the atmosphere (level index {\tt klev}) as indicated by
+{\tt \_vr} $=$ vertically reversed\\
+{\tt ppd\_hl(kbdim,klev)} & double prec. & in & absolute value of dry
+air pressure difference between upper and lower limit of model layers
+at time $t-\Delta t$\\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & in & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+\end{longtable}
+
+\subsubsection{Interface of {\tt radiation\_subm\_2}}
+
+\begin{lstlisting}[caption=radiation\_subm\_2]
+SUBROUTINE radiation_subm_2(kproma, kbdim, krow, klev, &
+                            ktrac, kaero,              &
+                            pxtm1                      )
+  INTEGER,  INTENT(in) :: kproma
+  INTEGER,  INTENT(in) :: kbdim 
+  INTEGER,  INTENT(in) :: krow  
+  INTEGER,  INTENT(in) :: klev  
+  INTEGER,  INTENT(in) :: ktrac 
+  INTEGER,  INTENT(in) :: kaero 
+  REAL(dp), INTENT(in) :: pxtm1 (kbdim,klev,ktrac)
+\end{lstlisting}
+
+\begin{longtable}{p{4.5cm}@{\extracolsep\fill}llp{6.7cm}}
+\hline\hline\caption[Parameters of {\tt radiation\_subm\_2}]{Parameter list
+  of arguments passed to {\tt radiation\_subm\_2}}\\\hline\label{tabpradiation_subm_2}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt radiation\_subm\_2}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt krow} &  integer & in & index number of block of geographical\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt kaero} & integer & in & switch for aerosol radiation coupling\\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & in & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+\end{longtable}
+
+
+\subsubsection{Interface of {\tt vdiff\_subm}}
+
+\begin{lstlisting}[caption=vdiff\_subm]
+SUBROUTINE vdiff_subm(kproma, kbdim,  klev,   klevp1,        &
+                      ktrac,  krow,                          &
+                      ptm1,   pum1,   pvm1,   pqm1,          &
+                      papm1,  paphm1, paphp1, pgeom1, ptslm1,&
+                      pxtm1,  pseaice,pforest,               &
+                      pfrl,   pfrw,   pfri,   pcvs,   pcvw,  &
+                      pvgrat, ptsw,   ptsi,                  &
+                      pu10,   pv10,                          &
+                      paz0,   paz0l,  paz0w,  paz0i,         &
+                      pcfm,   pcfnc,  pepdu2, pkap,          &
+                      pri,    ptvir1, ptvl,                  &
+                      psrfl,  pcdn,  pqss,   pvlt,           &
+                      loland,                                &
+                      pxtte,  pxtems,                        &
+                      pxlm1,  pxim1                          )
+  INTEGER,  INTENT(in) :: kproma
+  INTEGER,  INTENT(in) :: kbdim                      
+  INTEGER,  INTENT(in) :: klev                       
+  INTEGER,  INTENT(in) :: klevp1                     
+  INTEGER,  INTENT(in) :: ktrac                      
+  INTEGER,  INTENT(in) :: krow                       
+  REAL(dp), INTENT(in) :: ptm1     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pum1     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pvm1     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pqm1     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: papm1    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: paphm1   (kbdim,klev+1)    
+  REAL(dp), INTENT(in) :: paphp1   (kbdim,klev+1)    
+  REAL(dp), INTENT(in) :: pgeom1   (kbdim,klev)      
+  REAL(dp), INTENT(in) :: ptslm1   (kbdim)           
+  REAL(dp), INTENT(inout) :: pxtm1    (kbdim,klev,ktrac)
+  REAL(dp), INTENT(in) :: pseaice  (kbdim)         
+  REAL(dp), INTENT(in) :: pforest  (kbdim)         
+  REAL(dp), INTENT(in) :: pfrl     (kbdim)         
+  REAL(dp), INTENT(in) :: pfrw     (kbdim)         
+  REAL(dp), INTENT(in) :: pfri     (kbdim)         
+  REAL(dp), INTENT(in) :: pcvs     (kbdim)         
+  REAL(dp), INTENT(in) :: pcvw     (kbdim)         
+  REAL(dp), INTENT(in) :: pvgrat   (kbdim)         
+  REAL(dp), INTENT(in) :: ptsw     (kbdim)         
+  REAL(dp), INTENT(in) :: ptsi     (kbdim)         
+  REAL(dp), INTENT(in) :: pu10     (kbdim)         
+  REAL(dp), INTENT(in) :: pv10     (kbdim)         
+  REAL(dp), INTENT(in) :: paz0     (kbdim)         
+  REAL(dp), INTENT(in) :: paz0l    (kbdim)         
+  REAL(dp), INTENT(in) :: paz0w    (kbdim)         
+  REAL(dp), INTENT(in) :: paz0i    (kbdim)         
+  REAL(dp), INTENT(in) :: pcfm     (kbdim,klev)    
+  REAL(dp), INTENT(in) :: pcfnc    (kbdim)         
+  REAL(dp), INTENT(in) :: pepdu2                   
+  REAL(dp), INTENT(in) :: pkap                     
+  REAL(dp), INTENT(in) :: pri      (kbdim)         
+  REAL(dp), INTENT(in) :: ptvir1   (kbdim,klev)    
+  REAL(dp), INTENT(in) :: ptvl     (kbdim)         
+  REAL(dp), INTENT(in) :: psrfl    (kbdim)         
+  REAL(dp), INTENT(in) :: pcdn     (kbdim)         
+  REAL(dp), INTENT(in) :: pqss     (kbdim,klev)    
+  REAL(dp), INTENT(in) :: pvlt     (kbdim)         
+  LOGICAL,  INTENT(in) :: loland   (kbdim)         
+  REAL(dp), INTENT(inout) :: pxtte    (kbdim,klev,ktrac)
+  REAL(dp), INTENT(inout) :: pxtems   (kbdim,ktrac)     
+  REAL(dp), INTENT(in) :: pxlm1    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pxim1    (kbdim,klev)      
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt vdiff\_subm}]{Parameter list
+  of arguments passed to {\tt vdiff\_subm}}\\\hline\label{tabpvdiff_subm}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt vdiff\_subm}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt klevp1} &  integer & in & number of layers plus one \\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt ptm1(kbdim,klev)} & double prec. & in & temperature at center of
+model layers at time step $t-\Delta t$\\
+{\tt pum1(kbdim,klev)} & double prec. & in & zonal wind component at
+center of model layers at time step $t-\Delta t$ \\
+{\tt pvm1(kbdim,klev)} & double prec. & in & meridional wind component at
+center of model layers at time step $t-\Delta t$ \\
+{\tt pqm1(kbdim,klev)} & double prec. & in & specific humidity (with
+respect to dry air) at
+center of model layers at time step $t-\Delta t$ \\
+{\tt papm1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t-\Delta t$\\
+{\tt paphm1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at time step $t-\Delta t$\\
+{\tt paphp1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at prognostic time step $t+\Delta t$\\
+{\tt pgeom1(kbdim,klev)} & double prec. & in & geopotential at center
+of model layers at time step $t-\Delta t$\\
+{\tt ptslm1(kbdim)} & double prec. & in & surface temperature at time
+step $t-\Delta t$ \\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & inout & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+{\tt pseaice(kbdim)} & double prec. & in & sea ice fraction \\
+{\tt pforest(kbdim)} & double prec. & in & forest fraction \\
+{\tt pfrl(kbdim)} & double prec. & in & land fraction \\
+{\tt pfrw(kbdim)} & double prec. & in & surface water fraction \\
+{\tt pfri(kbdim)} & double prec. & in & surface ice fraction \\
+{\tt pcvs(kbdim)} & double prec. & in & snow cover fraction \\
+{\tt pcvw(kbdim)} & double prec. & in & wet skin fraction \\
+{\tt pvgrat(kbdim)} & double prec. & in & vegetation ratio \\
+{\tt ptsw(kbdim)} & double prec. & in & surface temperature over water \\
+{\tt ptsi(kbdim)} & double prec. & in & surface temperature over ice\\
+{\tt pu10(kbdim)} & double prec. & in & zonal wind component 10~m
+above the surface \\
+{\tt pv10(kbdim)} & double prec. & in & meridional wind component 10~m
+above the surface \\
+{\tt paz0(kbdim)} & double prec. & in & roughness length \\
+{\tt paz0l(kbdim)} & double prec. & in & roughness length over land \\
+{\tt paz0w(kbdim)} & double prec. & in & roughness length over water \\
+{\tt paz0i(kbdim)} & double prec. & in & roughness length over ice\\
+{\tt pcfm(kbdim,klev)} & double prec. & in & stability dependent
+momentum transfer coefficient at center of model layers \\
+{\tt pcfnc(kbdim)} & double prec. & in & function of heat transfer
+coefficient; not set? \\
+{\tt pepdu2} & double prec. & in & a constant set in {\tt
+  vdiff.f90}. It is used e.g.~in {\tt mo\_surface\_land} as the allowed
+minimum of the square of the absolute wind velocity\\
+{\tt pkap} & double prec. & in & von Karman constant\\
+{\tt pri(kbdim)} & double prec. & in & Richardson number for moist air\\
+{\tt ptvir1(kbdim,klev)} & double prec. & in & potential density temperature \\
+{\tt ptvl(kbdim)} & double prec. & in & virtual temperature over land \\
+{\tt psrfl(kbdim)} & double prec. & in & net surface solar radiation
+flux at time (?) $t$ \\
+{\tt pcdn(kbdim)} & double prec. & in & heat transfer coefficient averaged over land, water and ice cover fraction of a grid box \\
+{\tt pqss(kbdim,klev)} & double prec. & in  & specific humidity at
+which the air is saturated at time (?) $t$ \\
+{\tt pvlt(kbdim)} & double prec. & in & obsolete, will be removed \\
+{\tt loland(kbdim)} & double prec. & in & logical land mask including
+glaciers \\
+{\tt pxtte(kbdim,klev,ktrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pxtems(kbdim,ktrac)} & double prec. & inout & surface emission
+flux \\
+{\tt pxlm1} & double prec. & in & cloud liquid water content at center
+of model layers at time step $t-\Delta t$ \\
+{\tt pxim1} & double prec. & in & cloud water ice content at center
+of model layers at time step $t-\Delta t$ \\
+\end{longtable}
+
+
+
+
+
+\subsubsection{Interface of {\tt rad\_heat\_subm}}
+
+\begin{lstlisting}[caption=rad\_heat\_subm]
+SUBROUTINE radheat_subm
+   (kproma       ,kbdim           ,klev             ,&
+    klevp1       ,krow            ,pconvfact        ,&
+    pflxs        ,pflxt)
+
+  INTEGER, INTENT(in)  :: kproma     
+  INTEGER, INTENT(in)  :: kbdim      
+  INTEGER, INTENT(in)  :: klev       
+  INTEGER, INTENT(in)  :: klevp1     
+  INTEGER, INTENT(in)  :: krow       
+  REAL(dp), INTENT(in) :: pconvfact(kbdim,klev) 
+  REAL(dp), INTENT(in) :: pflxs(kbdim,klevp1), pflxt(kbdim,klevp1) 
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt rad\_heat\_subm}]{Parameter list
+  of arguments passed to {\tt rad\_heat\_subm}}\\\hline\label{tabrad_heat_subm}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt rad\_heat\_subm}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt klevp1} &  integer & in & number of layers plus one \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt pconvfact(kbdim,klevp1)} & double prec. & in & conversion factor
+for conversion of energy flux differences between upper and lower
+layer boundary to heating rate of the air in this layer. The factor is
+calculated for the time at time step $t-\Delta t$.\\
+{\tt pflxs(kbdim,klevp1)} & double prec. & in & net energy flux of solar
+radiation integrated over all solar radiation bands at the layer
+interfaces for time $t$\\
+{\tt pflxt(kbdim,klevp1)} & double prec. & in & net energy flux of thermal
+radiation integrated over all thermal radiation bands at the layer
+interfaces for time $t$\\
+\end{longtable}
+
+\subsubsection{Interface of {\tt physc\_subm\_2}}
+
+\begin{lstlisting}[caption=physc\_subm\_2]
+SUBROUTINE physc_subm_2                               &
+          (kproma, kbdim, klev,  klevp1, ktrac, krow, &
+           itrpwmo, itrpwmop1,                        &
+           paphm1, papm1, paphp1, papp1,              &
+           ptm1,   ptte,  ptsurf,                     &
+           pqm1,   pqte,  pxlm1, pxlte, pxim1, pxite, &
+           pxtm1,  pxtte,                             &
+           paclc,  ppbl,                              &
+           loland, loglac                            )   
+  INTEGER, INTENT(in)  :: kproma                     
+  INTEGER, INTENT(in)  :: kbdim                      
+  INTEGER, INTENT(in)  :: klev                       
+  INTEGER, INTENT(in)  :: klevp1                     
+  INTEGER, INTENT(in)  :: ktrac                      
+  INTEGER,  INTENT(in) :: krow                       
+  INTEGER,  INTENT(in) :: itrpwmo  (kbdim)           
+  INTEGER,  INTENT(in) :: itrpwmop1(kbdim)           
+
+  REAL(dp), INTENT(in) :: paphm1   (kbdim,klev+1)    
+  REAL(dp), INTENT(in) :: papm1    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: paphp1   (kbdim,klev+1)    
+  REAL(dp), INTENT(in) :: papp1    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: ptm1     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: ptte     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: ptsurf   (kbdim)           
+  REAL(dp), INTENT(in) :: pqm1     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pqte     (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pxlm1    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pxlte    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pxim1    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: pxite    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: paclc    (kbdim,klev)      
+  REAL(dp), INTENT(in) :: ppbl     (kbdim)           
+  REAL(dp), INTENT(inout) :: pxtm1 (kbdim,klev,ktrac)
+  REAL(dp), INTENT(inout) :: pxtte (kbdim,klev,ktrac)
+  LOGICAL,  INTENT(in) :: loland   (kbdim)           
+  LOGICAL,  INTENT(in) :: loglac   (kbdim)           
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt physc\_subm\_2}]{Parameter list
+  of arguments passed to {\tt physc\_subm\_2}}\\\hline\label{tabphysc_subm_2}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt physc\_subm\_2}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt klevp1} &  integer & in & number of layers plus one \\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt itrpwmo(kbdim)} & integer & in & index of model level at which
+meteorological tropopause was detected at time $t$ \\
+{\tt itrpwmop1(kbdim)} & integer & in & index of model level at which
+meteorological tropopause was detected plus 1 at time $t$ \\
+{\tt paphm1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at time step $t-\Delta t$\\
+{\tt papm1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t-\Delta t$\\
+{\tt paphp1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at prognostic time step $t+\Delta t$\\
+{\tt papp1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t+\Delta t$\\
+{\tt ptm1(kbdim,klev)} & double prec. & in & temperature at center of
+model layers at time step $t-\Delta t$\\
+{\tt ptte(kbdim,klev)}& double prec. & in & temperature tendency at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine\\
+{\tt ptsurf(kbdim)} & double prec. & in & surface temperature at time
+step $t$\\
+{\tt pqm1(kbdim,klev)} & double prec. & in & specific humidity (with
+respect to dry air) at
+center of model layers at time step $t-\Delta t$ \\
+{\tt pqte(kbdim,klev)} & double prec. & in & tendency of specific
+humidity (with respect to dry air) at center of model layers
+accumulated over all processes of actual time 
+step until call of this subroutine \\
+{\tt pxlm1} & double prec. & in & cloud liquid water content at center
+of model layers at time step $t-\Delta t$ \\
+{\tt pxlte} & double prec. & in & cloud liquid water tendency at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pxim1} & double prec. & in & cloud water ice content at center
+of model layers at time step $t-\Delta t$ \\
+{\tt pxite} & double prec. & in & cloud water ice tendency at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & inout & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+{\tt pxtte(kbdim,klev,ktrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt paclc(kbdim,klev)} & double prec. & in & cloud fraction at center
+of model layers at time step $t$ \\
+{\tt ppbl(kbdim)} & double prec. & in & model layer index of geometrically
+highest model layer of planetary boundary layer converted to a real
+number at time $t$\\
+{\tt loland(kbdim)} & double prec. & in & logical land mask including
+glaciers \\
+{\tt loglac(kbdim)} & double prec. & in & logical glacier mask \\
+\end{longtable}
+
+\subsubsection{Interface of {\tt cuflx\_subm}}
+
+\begin{lstlisting}[caption=cuflx\_subm]
+SUBROUTINE cuflx_subm(kbdim,  kproma,  klev,    ktop,   krow, &
+                      pxtenh, pxtu,    prhou,                 &
+                      pmfu,   pmfuxt,                         &
+                      pmlwc,  pmiwc,   pmratepr,pmrateps,     &
+                      pfrain, pfsnow,  pfevapr, pfsubls,      &
+                      paclc,  pmsnowacl,                      &
+                      ptu,    pdpg,                           &
+                      pxtte                                   )
+  INTEGER, INTENT(in)     :: kbdim, kproma, klev, ktop, &
+                             krow
+  REAL(dp), INTENT(in)    :: pdpg(kbdim,klev),          &
+                             pmratepr(kbdim,klev),      &
+                             pmrateps(kbdim,klev),      &
+                             pmsnowacl(kbdim,klev),     &
+                             ptu(kbdim,klev),           &
+                             pfrain(kbdim,klev),        &
+                             pfsnow(kbdim,klev),        &
+                             pfevapr(kbdim,klev),       &
+                             pfsubls(kbdim,klev),       &
+                             pmfu(kbdim,klev),          &
+                             paclc(kbdim,klev),         &
+                             prhou(kbdim,klev)           
+  REAL(dp), INTENT(inout) :: pxtte(kbdim,klev,ntrac),   &
+                             pmlwc(kbdim,klev),         &
+                             pmiwc(kbdim,klev),         &
+                             pxtenh(kbdim,klev,ntrac),  &
+                             pxtu(kbdim,klev,ntrac),    &
+                             pmfuxt(kbdim,klev,ntrac)
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt cuflx\_subm}]{Parameter list
+  of arguments passed to {\tt cuflx\_subm}}\\\hline\label{tabcuflx_subm}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt cuflx\_subm}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt ktop} & integer & in & Could be the minimum model layer index of
+cloud top layers over one block. In fact, it is set to 1 in {\tt
+  cuflx} \\
+{\tt pxtenh(kbdim,klev,ntrac)} & double prec. & inout & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t+\Delta t$ \\
+{\tt pxtu(kbdim,klev,ntrac)} & double prec. & inout & tracer mass
+mixing ratio with respect to cloud water at center of model layers in
+the liquid or solid cloud water phase at 
+time step $t+\Delta t$ \\
+{\tt prhou(kbdim,klev)} & double prec. & in & dry air density at center of
+model layers at time step $t+\Delta t$ \\
+{\tt pmfu(kbdim,klev)} & double prec. & in & convective air mass flux
+at center of model layers at time $t$ \\
+{\tt pmfuxt(kbdim,klev,ntrac)} & double prec. & inout & net tracer
+mass flux due to convective transport and wet deposition at center of
+model layers at time step $t+\Delta t$ on exit (in mass mixing ratio
+per time)\\
+{\tt pmlwc(kbdim,klev)} & double prec. & inout & liquid water content
+(mass of liquid water per mass of dry air)
+at center of model layers at time $t+\Delta t$ on exit \\
+{\tt pmiwc(kbdim,klev)} & double prec. & inout & ice water content
+(mass of water ice per mass of dry air)
+at center of model layers at time $t+\Delta t$ on exit \\
+{\tt pmratepr(kbdim,klev)} & double prec. & in & rain formation rate 
+in mass water per mass dry air converted to rain at center of model
+layers at time step $t$\\
+{\tt pmrateps(kbdim,klev)} & double prec. & in & ice formation rate 
+in mass water per mass dry air converted to snow at center of model
+layers at time step $t$\\
+{\tt pfrain(kbdim,klev)} & double prec. & in & rain flux at centers of
+model layers per grid box area at time $t$, evaporation not taken into account \\
+{\tt pfsnow(kbdim,klev)} & double prec. & in & snow flux at centers of
+model layers per grid box area at time $t$, evaporation not taken into account \\
+{\tt pfevapr(kbdim,klev)} & double prec. & in & evaporation of rain at
+centers of model layers per grid box area at time $t$ \\
+{\tt pfsubls(kbdim,klev)} & double prec. & in & sublimation of snow at
+centers of model layers per grid box area at time $t$ \\
+{\tt paclc(kbdim,klev)} & double prec. & in & cloud cover at center of
+model layer at time step $t$\\
+{\tt pmsnowaclc(kbdim,klev)} & double prec. & in & accretion rate of
+snow at center of
+model layer at time step $t$\\
+{\tt ptu(kbdim,klev)} & double prec. & in & temperature at center of
+model layer at time step $t-\Delta t$\\
+{\tt pdpg(kbdim,klev)} & double prec. & in & geopotential height at
+center of model level \\
+{\tt pxtte(kbdim,klev,ktrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+\end{longtable}
+
+\subsubsection{Interface of {\tt cloud\_subm}}
+
+\begin{lstlisting}[caption=cloud\_subm]
+SUBROUTINE cloud_subm(                                   &
+           kproma,     kbdim,      klev,       ktop,     &
+           krow,                                         &
+           pmlwc,      pmiwc,      pmratepr,   pmrateps, &
+           pfrain,     pfsnow,     pfevapr,    pfsubls,  &
+           pmsnowacl,  paclc,      ptm1,       ptte,     &
+           pxtm1,      pxtte,      paphp1,     papp1,    &
+           prhop1,     pclcpre)
+
+  INTEGER,  INTENT(in)    :: kproma                      
+  INTEGER,  INTENT(in)    :: kbdim                       
+  INTEGER,  INTENT(in)    :: klev                        
+  INTEGER,  INTENT(in)    :: ktop                        
+  INTEGER,  INTENT(in)    :: krow                        
+  REAL(dp), INTENT(in)    :: pclcpre  (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: pfrain   (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: pfsnow   (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: pfevapr  (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: pfsubls  (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: pmsnowacl(kbdim,klev)       
+  REAL(dp), INTENT(in)    :: ptm1     (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: ptte     (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: prhop1   (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: papp1    (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: paphp1   (kbdim,klev+1)     
+  REAL(dp), INTENT(inout) :: paclc    (kbdim,klev)       
+  REAL(dp), INTENT(inout) :: pmlwc    (kbdim,klev)       
+  REAL(dp), INTENT(inout) :: pmiwc    (kbdim,klev)       
+  REAL(dp), INTENT(inout) :: pmratepr (kbdim,klev)       
+  REAL(dp), INTENT(inout) :: pmrateps (kbdim,klev)       
+  REAL(dp), INTENT(in)    :: pxtm1    (kbdim,klev,ntrac) 
+  REAL(dp), INTENT(inout) :: pxtte    (kbdim,klev,ntrac) 
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt cloud\_subm}]{Parameter list
+  of arguments passed to {\tt cloud\_subm}}\\\hline\label{tabcloud_subm}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt cloud\_subm}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt ktop} & integer & in & Could be the minimum model layer index of
+cloud top layers over one block. In fact, it is set to 1 in {\tt
+  cuflx} \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt pmlwc(kbdim,klev)} & double prec. & inout & liquid water content
+(mass of liquid water per mass of dry air)
+at center of model layers at time $t+\Delta t$ on exit \\
+{\tt pmiwc(kbdim,klev)} & double prec. & inout & ice water content
+(mass of water ice per mass of dry air)
+at center of model layers at time $t+\Delta t$ on exit \\
+{\tt pmratepr(kbdim,klev)} & double prec. & inout & rain formation rate 
+in mass water per mass dry air converted to rain at center of model
+layers at time step $t$\\
+{\tt pmrateps(kbdim,klev)} & double prec. & inout & ice formation rate 
+in mass water per mass dry air converted to snow at center of model
+layers at time step $t$\\
+{\tt pfrain(kbdim,klev)} & double prec. & in & rain flux at centers of
+model layers per grid box area at time $t$, evaporation not taken into account \\
+{\tt pfsnow(kbdim,klev)} & double prec. & in & snow flux at centers of
+model layers per grid box area at time $t$, evaporation not taken into account \\
+{\tt pfevapr(kbdim,klev)} & double prec. & in & evaporation of rain at
+centers of model layers per grid box area at time $t$ \\
+{\tt pfsubls(kbdim,klev)} & double prec. & in & sublimation of snow at
+centers of model layers per grid box area at time $t$ \\
+{\tt pmsnowaclc(kbdim,klev)} & double prec. & in & accretion rate of
+snow at center of
+model layer at time step $t$\\
+{\tt paclc(kbdim,klev)} & double prec. & inout & cloud cover at center of
+model layer at time step $t$\\
+{\tt ptm1(kbdim,klev)} & double prec. & in & temperature at center of
+model layers at time step $t-\Delta t$\\
+{\tt ptte(kbdim,klev)}& double prec. & in & temperature tendency at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine\\
+{\tt pxtm1(kbdim,klev,ntrac)} & double prec. & in & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+{\tt pxtte(kbdim,klev,ntrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt paphp1(kbdim,klev+1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at prognostic time step $t+\Delta t$\\
+{\tt papp1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t+\Delta t$\\
+{\tt prhop1(kbdim,klev)} & double prec. & in & dry air density at center of
+model layers at time step $t+\Delta t$ \\
+{\tt pclcpre(kbdim,klev)} & double prec. & in & fraction of grid box
+covered by precipitation at time step $t$ \\
+\end{longtable}
+
+\subsubsection{Interface of {\tt physc\_subm\_3}}
+
+\begin{lstlisting}[caption=physc\_subm\_3]
+SUBROUTINE physc_subm_3                               &
+          (kproma, kbdim, klev,  klevp1, ktrac, krow, &
+           paphm1, papm1, paphp1, papp1,              &
+           ptm1,   ptte,  ptsurf,                     &
+           pqm1,   pqte,                              &
+           pxlm1,  pxlte, pxim1, pxite,               &
+           pxtm1,  pxtte,                             &
+           pgeom1, pgeohm1,                           &
+           paclc,                                     &
+           ppbl,   pvervel,                           &
+           loland, loglac                             )
+  INTEGER,  INTENT(in)    :: kproma                   
+  INTEGER,  INTENT(in)    :: kbdim                    
+  INTEGER,  INTENT(in)    :: klev                     
+  INTEGER,  INTENT(in)    :: klevp1                   
+  INTEGER,  INTENT(in)    :: ktrac                    
+  INTEGER,  INTENT(in)    :: krow                     
+  REAL(dp), INTENT(in)    :: paphm1   (kbdim,klevp1)  
+  REAL(dp), INTENT(in)    :: papm1    (kbdim,klev)    
+  REAL(dp), INTENT(in)    :: paphp1   (kbdim,klevp1)  
+  REAL(dp), INTENT(in)    :: papp1    (kbdim,klev)    
+  REAL(dp), INTENT(in)    :: ptm1     (kbdim,klev)    
+  REAL(dp), INTENT(inout) :: ptte     (kbdim,klev)    
+  REAL(dp), INTENT(in)    :: ptsurf   (kbdim)         
+  REAL(dp), INTENT(in)    :: pqm1     (kbdim,klev)    
+  REAL(dp), INTENT(inout) :: pqte     (kbdim,klev)    
+  REAL(dp), INTENT(in)    :: pxlm1    (kbdim,klev)    
+  REAL(dp), INTENT(inout) :: pxlte    (kbdim,klev)    
+  REAL(dp), INTENT(in)    :: pxim1    (kbdim,klev)   
+  REAL(dp), INTENT(inout) :: pxite    (kbdim,klev)   
+  REAL(dp), INTENT(inout) :: pxtm1    (kbdim,klev,ktrac)
+  REAL(dp), INTENT(inout) :: pxtte    (kbdim,klev,ktrac)
+  REAL(dp), INTENT(in)    :: pgeom1   (kbdim,klev)      
+  REAL(dp), INTENT(in)    :: pgeohm1  (kbdim,klevp1)    
+  REAL(dp), INTENT(in)    :: paclc    (kbdim,klev)      
+  REAL(dp), INTENT(in)    :: ppbl     (kbdim)           
+  REAL(dp), INTENT(in)    :: pvervel  (kbdim,klev)      
+  LOGICAL,  INTENT(in)    :: loland   (kbdim)           
+  LOGICAL,  INTENT(in)    :: loglac   (kbdim)           
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt physc\_subm\_3}]{Parameter list
+  of arguments passed to {\tt physc\_subm\_3}}\\\hline\label{tabphysc_subm_3}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt physc\_subm\_3}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt klevp1} &  integer & in & number of layers plus one \\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt paphm1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at time step $t-\Delta t$\\
+{\tt papm1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t-\Delta t$\\
+{\tt paphp1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at prognostic time step $t+\Delta t$\\
+{\tt papp1(kbdim,klev)} & double prec. & in & pressure of dry air at center of model
+layers at time step $t+\Delta t$\\
+{\tt ptm1(kbdim,klev)} & double prec. & in & temperature at center of
+model layers at time step $t-\Delta t$\\
+{\tt ptte(kbdim,klev)}& double prec. & inout & temperature tendency at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine\\
+{\tt ptsurf(kbdim)} & double prec. & in & surface temperature at time
+step $t$\\
+{\tt pqm1(kbdim,klev)} & double prec. & in & specific humidity (with
+respect to dry air) at
+center of model layers at time step $t-\Delta t$ \\
+{\tt pqte(kbdim,klev)} & double prec. & inout & tendency of specific
+humidity (with respect to dry air) at center of model layers
+accumulated over all processes of actual time 
+step until call of this subroutine \\
+{\tt pxlm1} & double prec. & in & cloud liquid water content (mass of
+liquid water per mass of dry air) at center
+of model layers at time step $t-\Delta t$ \\
+{\tt pxlte} & double prec. & inout & cloud liquid water tendency
+(rate of change of mass of liquid water per mass of dry air) at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pxim1} & double prec. & in & cloud water ice content (mass of
+water ice per mass of dry air) at center
+of model layers at time step $t-\Delta t$ \\
+{\tt pxite} & double prec. & inout & cloud water ice tendency (rate of
+change of mass of ice water per mass of dry air) at
+center of model layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & inout & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+{\tt pxtte(kbdim,klev,ktrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+{\tt pgeom1(kbdim,klev)} & double prec. & in & geopotential at center
+of model layers at time step $t-\Delta t$\\
+{\tt pgeohm1(kbdim,klevp1)} & double prec. & in & geopotential at
+interfaces between model layers at time step $t-\Delta t$\\
+{\tt paclc(kbdim,klev)} & double prec. & in & cloud cover at center of
+model layer at time step $t$\\
+{\tt ppbl(kbdim)} & double prec. & in & model layer index of geometrically
+highest model layer of planetary boundary layer converted to a real
+number at time $t$\\
+{\tt pvervel(kbdim,klev)} & double prec. & in & large scale vertical
+velocity at model center at time step $t$ \\
+{\tt loland(kbdim)} & double prec. & in & logical land mask including
+glaciers \\
+{\tt loglac(kbdim)} & double prec. & in & logical glacier mask \\
+\end{longtable}
+
+\subsubsection{Interface of {\tt physc\_subm\_4}}
+
+\begin{lstlisting}[caption=physc\_subm\_4]
+SUBROUTINE physc_subm_4 (kproma,  kbdim,   klev,            &
+                         klevp1,  ktrac,   krow,            &
+                         paphm1,  pfrl,    pfrw,            &
+                         pfri,    loland,  pxtm1,           &
+                         pxtte)
+  INTEGER, INTENT(in)   :: kproma, kbdim, klev, klevp1, ktrac, krow
+  REAL(dp), INTENT(in)  :: paphm1(kbdim,klevp1), &
+                           pfrl(kproma),         &
+                           pfrw(kproma),         &
+                           pfri(kproma),         &
+                           pxtm1(kbdim,klev,ktrac)
+  REAL(dp), INTENT(inout)::pxtte(kbdim,klev,ktrac)
+  LOGICAL, INTENT(in)   :: loland(kproma)         
+\end{lstlisting}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{7.0cm}}
+\hline\hline\caption[Parameters of {\tt physc\_subm\_4}]{Parameter list
+  of arguments passed to {\tt
+    physc\_subm\_4}}\\\hline\label{tabphysc_subm_4}
+\endfirsthead
+\caption[]{{\tt Parameters of {\tt physc\_subm\_4}} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+name & type & intent & description \\\hline
+{\tt kproma} & integer & in & actual length of
+block of geographical longitudes (one longitude block can contain grid
+cells of various geographical latitudes)\\
+{\tt kbdim} &  integer & in & maximum length of block of
+geographical longitudes (one longitude block can contain grid cells of
+various geographical latitudes)\\
+{\tt klev} &  integer & in & number of model levels (layers)\\
+{\tt klevp1} &  integer & in & number of layers plus one \\
+{\tt ktrac} &  integer & in & number of tracers \\
+{\tt krow} &  integer & in & index number of block of geographical
+longitudes\\ 
+{\tt paphm1(kbdim,klevp1)} & double prec. & in & pressure of dry air at
+interfaces between model layers at time step $t-\Delta t$\\
+{\tt pfrl(kbdim)} & double prec. & in & land fraction \\
+{\tt pfrw(kbdim)} & double prec. & in & surface water fraction \\
+{\tt pfri(kbdim)} & double prec. & in & surface ice fraction \\
+{\tt loland(kbdim)} & double prec. & in & logical land mask including
+glaciers \\
+{\tt pxtm1(kbdim,klev,ktrac)} & double prec. & in & tracer mass or
+molar mixing ratio with respect to dry air at center of model layers at
+time step $t-\Delta t$\\
+{\tt pxtte(kbdim,klev,ktrac)} & double prec. & inout & tendency of tracer
+mass or molar mixing ratio with respect to dry air at center of model
+layers accumulated over all processes of actual time
+step until call of this subroutine \\
+\end{longtable}
+
+\subsubsection{Interface of {\tt free\_subm\_memory}}
+
+\begin{lstlisting}[caption=free\_subm\_memory]
+  SUBROUTINE free_subm_memory
+\end{lstlisting}
+
+This subroutine has no parameter list.
+
+\subsection{Tracer interface}
+
+Tracer fields are constituents transported with the flow of air in the
+atmospheric model. In addition to the transport, they are subject to
+several processes such as convection, diffusion, emission, deposition
+and chemical conversion. Horizontal and vertical transport is carried
+out by the atmospheric model and some standard processes can be
+performed by the atmospheric model as well. Other processes which are
+specific for the tracer must be calculated by the sub--model. The
+tracer interface is a collection of subroutines that allow the
+definition and handling of a data structure containing information
+about tracers. This information comprises the 3--dimensional mass or
+volume mixing ratio of the tracers but also variables that determine
+the transport and physical properties of each individual tracer.
+
+Tracers within \echam{} are represented by a 4--dimensional array (the
+three spatial dimensions are supplemented by the tracer index) but 
+pointers to individual
+tracers can be obtained so that 
+details of implementation of the data structure remains hidden.  A one
+dimensional array of a derived data type holds the
+meta--information. In the restart file the tracers are identified by
+name, so that restarts can be continued with different sets of tracers
+if required. Reading and writing of the tracers to the rerun file and
+to the output stream is based on the output stream and memory buffer
+facilities described in section~\ref{secstreams}.
+
+\subsubsection{Request a new tracer}
+
+A new tracer with name {\tt 'A'} is requested from a module with name
+{\tt 'my\_module'} by a call to the routine {\tt
+  new\_tracer}\index{tracers!new\_tracer} of {\tt 
+  mo\_tracer.f90}\index{tracers!mo\_tracer}: 
+ 
+{\tt call new\_tracer ('A', 'my\_module', idx)}
+
+Tracer properties are specified by optional arguments of the {\tt
+  new\_tracer} subroutine. The interface is as
+follows: 
+
+{\small
+\begin{tabular}{|lllclp{5cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt SUBROUTINE new\_tracer}&
+\multicolumn{4}{p{10cm}|}
+{\tt name, modulename [,spid] [,subname] [,trtype] [,idx]
+[,nwrite] [,longname] [,units] [,moleweight]
+[,code] [,table] [,bits]  [,nbudget] [,burdenid]
+[,ninit] [,vini]  [,nrerun] [,nint]
+[,ntran] [,nfixtyp] [,nvdiff] [,nconv]
+[,nwetdep] [,ndrydep]  [,nsedi] [,nemis]
+[,tdecay]  [,nphase]  [,nsoluble] [,mode]  [,myflag]
+[,ierr])}\\
+\hline
+name&type&intent&default&function$^*$&description\\
+\hline
+\multicolumn{6}{|l|}{\bf identification of the tracer :}\\
+name          &character(len=*) &in & &es & name of the tracer\\
+modulename    &character(len=*) &in & &es & name of the module 
+                                          requesting the tracer\\
+{[spid]}      &integer          &in & &es & species index \\
+{[subname]}   &character(len=*) &in & &es & optional for 'colored' tracers\\
+{[trtype]}    &integer          &in & &es & tracer type \\
+{[idx]}       &integer          &out& &es & index of the tracer\\
+\hline
+\multicolumn{6}{|l|}{\bf postprocessing output :}\\
+{[nwrite]}    &integer          &in & {\tt ON}& p & flag to print the tracer\\
+{[longname]}  &character(len=*) &in &     " " & p & long name\\
+{[units]}     &character(len=*) &in &     " " & p & physical units\\
+{[moleweight]}&real             &in &      0. & p & molecular weight\\
+{[code]}      &integer          &in &       0 & p & GRIB code\\
+{[table]}     &integer          &in &     131 & p & GRIB table\\
+{[bits]}      &integer          &in &      16 & p & number of GRIB
+                                                    encoding bits\\
+{[nbudget]}   &integer          &in &{\tt OFF}&ep\%& budget flag\\
+{[burdenid]}  &integer          &in &         &e\%& burden diagnostics number\\
+\hline
+\multicolumn{6}{|l|}{\bf initialization and rerun :}\\
+{[ninit]}     &integer          &in &{\tt RESTART+}&e& initialization flag\\
+              &                 &   &{\tt CONSTANT}& & \\
+{[vini]}      &real             &in &            0.&e& initialization value\\
+{[nrerun]}    &integer          &in &     {\tt ON} &e& restart flag\\
+\hline
+\multicolumn{6}{|l|}{\bf transport and other processes :}\\ 
+{[nint]}      &integer          &in &     &e& integration flag \\
+{[ntran]}     &integer          &in &{\tt TRANSPORT}&e\%& transport switch\\
+{[nfixtyp]}   &integer          &in & 1 & e\% & type of mass fixer\\
+{[nvdiff]}    &integer          &in &{\tt ON}& e & vertical diffusion flag\\
+{[nconv]}     &integer          &in &{\tt ON}& e & convection flag\\
+{[nwetdep]}   &integer          &in &{\tt OFF}& e & wet deposition flag\\
+{[ndrydep]}   &integer          &in &{\tt OFF}& e\% & dry deposition flag\\
+{[nsedi]}     &integer          &in &{\tt OFF}& e\% & sedimentation flag\\
+{[nemis]}     &integer          &in &{\tt OFF}& e\% & surface emission flag\\
+{[tdecay]}    &real             &in & 0.& e   & exponential decay time\\
+\hline
+\multicolumn{6}{|l|}{\bf attributes interpreted by the submodel :}\\
+{[nphase]}    &integer          &in & 0         &s& phase indicator\\
+{[nsoluble]}  &integer          &in &           &s& solubility flag \\
+{[mode]}      &integer          &in & 0         &s& mode indicator\\
+{[myflag(:)]} &type(t\_flag)    &in &('',0.)    &s& user defined flags\\
+\hline
+\multicolumn{6}{|l|}{\bf miscellaneous arguments :}\\
+{[ierr]}      &integer          &out&{\tt OK=0} &s& error return value\\
+\hline
+\multicolumn{6}{p{15cm}}
+{$^*$ attributes interpreted by ECHAM (e), by the submodel (s),
+by the postprocessing module (p), not yet implemented (\%).}\\
+\end{tabular}}
+
+In general, integer values are chosen to represent the flags in order
+to allow different choices:
+
+\hspace*{2ex} 0: {\tt OFF}\\
+\hspace*{2ex} 1: {\tt ON}, standard action\\
+\hspace*{2ex} 2: {\tt\dots}, alternative action\\
+\hspace*{2ex} \dots\\
+\hspace*{2ex} {\tt tag}: specific action performed by the sub-model.
+
+Small numbers indicate that some kind of standard action shall be
+performed by ECHAM. Higher {\tt tag} values indicate that the process
+will be handled by the submodel.
+For the following actual arguments, valid values are defined by
+parameter statements (see {\tt mo\_tracdef.f90}\index{tracers!mo\_tracdef}):
+
+{\small
+\begin{tabular*}{\textwidth}{|l@{\extracolsep\fill}p{10cm}p{4cm}|}
+\hline
+argument&values&description\\
+\hline
+        &{\tt OK, OFF, ON}                              & universal values\\
+ntran   &{\tt NO\_ADVECTION, SEMI\_LAGRANGIAN, SPITFIRE, TPCORE}    & transport flag\\
+ninit   &{\tt INITIAL, RESTART, CONSTANT, PERIODIC}            & initialization flag\\
+nsoluble&{\tt SOLUBLE, INSOLUBLE}                   & soluble flag\\
+nphase  &{\tt GAS, AEROSOL, GAS\_OR\_AEROSOL, AEROSOLMASS,
+  AEROSOLNUMBER, UNDEFINED}                & phase indicator\\
+code    &{\tt AUTO}                                & automatically
+                                                     chose unique GRIB code\\
+ierr    &{\tt OK,NAME\_USED,NAME\_MISS,TABLE\_FULL}& error return
+value (cannot be used currently)\\
+\hline
+\end{tabular*}}
+
+\paragraph{Tracer properties: Identification of the tracer and sub-model.}
+
+Each tracer is identified by a unique {\tt name} and optionally by a
+{\tt subname} in case of colored tracers. In the postprocessing file
+colored tracers appear with the name {\tt name\_subname}. Values of
+optional arguments provided for the corresponding non--colored tracer
+(without argument {\tt subname}) are used for the colored tracer
+as well (despite the GRIB code number).
+
+The sub--model identifies itself by a unique character string {\tt
+modulename}. {\tt idx} is the index of the new tracer in the global
+arrays {\tt XT}, {\tt XTM1}, {\tt trlist}.
+
+\paragraph{Tracer properties: Postprocessing flags.}
+
+The flag {\tt nwrite} (default {\tt ON}) determines, whether the
+tracer is written to the standard output stream. A separate file with
+name {\tt STANDARDFILENAME\_tracer} for GRIB, or {\tt
+STANDARDFILENAME\_tracer.nc} for NetCDF format, is written. The default
+file format GRIB can be changed to NetCDF by setting {\tt
+trac\_filetype=2} in the namelist {\tt runctl} (see
+Tab.~\ref{tabrunctl} of section~\ref{secrunctl}).
+
+If present, the attributes {\tt longname}, {\tt units} and {\tt
+moleweight} are written to the NetCDF file.
+
+Within GRIB files, fields are identified by a GRIB code number which
+must be given as argument {\tt code}. Note that codes 129 and 152
+should not be used because they are attributed to surface pressure and
+geopotential height. A
+predefined value {\tt AUTO} is accepted indicating automatic
+generation of unique GRIB code numbers.  For GRIB files, a code file
+{\tt STANDARDFILENAME\_tracer.codes} is written to associate code
+numbers with tracer names.  For the tracers, a default GRIB table
+number 131 is chosen for tracer output. By default, 16 bits are used
+for encoding in GRIB format.
+ 
+\paragraph{Tracer properties: Initialization and rerun.}
+
+The {\tt nrerun} flag (default={\tt ON}) indicates, whether the tracer
+variable shall be read and written from/to the rerun file. The tracers
+are identified by name in the rerun (NetCDF) file, so that they can be
+read selectively.  The initialization flag {\tt ninit} is used to
+specify the initialization procedure in more detail: Valid values are
+one of INITIAL (read from initial file, this must be done by the
+submodel), RESTART (read from restart file), CONSTANT (set to the
+initial value {\tt vini}) or a combination (e.g. RESTART+CONSTANT) to
+indicate that the quantity is read from the restart file in case of a
+rerun but set to a predefined value otherwise.
+
+\paragraph{Tracer properties: Transport and other processes.}
+
+Tracer transport and the impact of certain other processes is
+calculated by ECHAM. The flags {\tt nint}, {\tt ntran}, {\tt nfixtyp}, {\tt
+nvdiff}, {\tt nconv}, {\tt nwetdep}, {\tt nsedi}, {\tt ndrydep}, {\tt nemis}, {\tt
+tdecay} are meant to switch {\tt ON} or {\tt OFF} the
+respective processes (not fully implemented currently).
+
+A value of {\tt tdecay}$\ne 0$ leads to an exponential decay of the
+tracer with time.
+
+\paragraph{Tracer properties: Attributes interpreted by the submodel.}
+
+%{[henry]}     &real             &in &$10.^{-10}$&s& Henry coefficient.\\
+%{[dryreac]}   &real             &in & 0.        &s& reactivity coefficient.\\
+%{[nsoluble]}  &integer          &in &{\tt INSOLUBLE}&s& soluble flag.\\
+%{[nphase]}    &integer          &in & 0         &s& phase indicator.\\
+%{[mode]}      &integer          &in & 0         &s& mode indicator.\\
+%{[myflag(:)]} &type(t\_flag)    &in &('',0.)    &s& user defined flags.\\
+
+
+The following flags are not used by ECHAM. They are reserved to be
+used by the sub-models: {\tt nphase}, {\tt nsoluble}, {\tt mode} and {\tt
+  myflag}.  
+{\tt myflag} is
+an array of pairs of character strings and real values.
+
+\subsubsection{Access to tracers with {\tt get\_tracer}}
+
+The routine {\tt get\_tracer}\index{tracers!get\_tracer} returns the
+references to tracers 
+already defined.\\
+
+Example:
+\begin{lstlisting}[caption=get\_tracer]
+  CALL get_tracer ('SO2',idx=index,modulename=modulename)
+  IF (ierr==0) THEN
+    PRINT *, 'Using tracer SO2 from module',modulename
+  ELSE
+    ! eg. read constant tracer field
+    ...
+  ENDIF
+\end{lstlisting}
+
+The interface of subroutine {\tt get\_tracer} is:
+
+{\small
+\begin{tabular}{|lllp{6cm}|}
+\hline
+\multicolumn{2}{|l}
+{\tt SUBROUTINE get\_tracer}&
+\multicolumn{2}{p{10cm}|}{\tt 
+(name [,subname] [,modulename] [,idx] [,pxt] [,pxtm1] [,ierr])}\\
+\hline
+name&type&intent&description\\
+name            &character(len=*) &in      & name of the tracer\\
+{[subname]}     &character(len=*) &in      & subname of the tracer\\
+{[modulename]}  &character(len=*) &out     & name of requesting module\\
+{[idx]}         &integer          &out     & index of the tracer\\
+{[pxt(:,:,:)]}  &real             &pointer & pointer to the tracer field\\
+{[pxtm1(:,:,:)]}&real             &pointer & pointer to the tracer field 
+                                             at previous time step\\
+{[ierr]}        &integer          &out     & error return value (0=OK,
+                                             1=tracer not defined)\\
+\hline
+\end{tabular}}
+
+If the optional parameter {\tt ierr} is not given and the tracer is
+not defined the program will abort.  Note that references ({\tt pxt,
+pxtm1}) to the allocated memory cannot be obtained before all tracers
+are defined and the respective memory is allocated in the last step of
+tracer definition.
+
+\subsubsection {Tracer list data type}
+
+Summary information on the tracers is stored in a global variable {\tt
+trlist}\index{tracers!trlist}. 
+Attributes of individual tracers are stored in the component
+array {\tt trlist\% ti(:)}. The definitions of the respective data
+types {\tt t\_trlist}\index{tracers!t\_trlist} 
+and {\tt t\_trinfo}\index{tracers!t\_trinfo} are given below:
+\begin{lstlisting}[caption=t\_trlist]
+!
+! Basic data type definition for tracer info list
+!
+TYPE t_trlist
+  !
+  ! global tracer list information
+  !
+  INTEGER         :: ntrac        ! number of tracers specified
+  INTEGER         :: anyfixtyp    ! mass fixer types used
+  INTEGER         :: anywetdep    ! wet deposition requested
+                                  ! for any tracer
+  INTEGER         :: anydrydep    ! wet deposition requested 
+                                  ! for any tracer
+  INTEGER         :: anysedi      ! sedimentation  requested 
+                                  ! for any tracer
+  INTEGER         :: anysemis     ! surface emission flag 
+                                  ! for any tracer
+  INTEGER         :: anyconv      ! convection flag
+  INTEGER         :: anyvdiff     ! vertical diffusion flag
+  INTEGER         :: anyconvmassfix  ! 
+  INTEGER         :: nadvec       ! number of advected tracers
+  LOGICAL         :: oldrestart   ! true to read old restart format
+  !
+  ! individual information for each tracer
+  !
+  TYPE (t_trinfo) :: ti  (jptrac) ! Individual settings 
+                                  !for each tracer
+  !
+  ! reference to memory buffer info
+  !
+  TYPE (t_p_mi)   :: mi  (jptrac) ! memory buffer information 
+                                  !for each tracer
+  TYPE (memory_info), POINTER :: mixt   ! memory buffer 
+                                        ! information for XT
+  TYPE (memory_info), POINTER :: mixtm1 ! memory buffer 
+                                        ! information for XTM1
+END TYPE t_trlist
+\end{lstlisting}
+%
+The component {\tt ntrac}\index{tracers!ntrac}\index{ntrac} 
+gives the total number of tracers handled by
+the model. The components {\tt any\dots} are derived by a bitwise {\tt
+OR} of the corresponding individual tracer flags. Individual flags are
+stored in component {\tt ti} of type {\tt
+  t\_trinfo}\index{tracers!t\_trinfo}. 
+They reflect the
+values of the arguments passed to subroutine {\tt
+  new\_tracer}\index{tracers!new\_tracer}.
+%
+\begin{lstlisting}[caption={\tt t\_trinfo}]
+TYPE t_trinfo
+  !
+  ! identification of transported quantity
+  !
+  CHARACTER(len=ln) :: basename   ! name (instead of xt..)
+  CHARACTER(len=ln) :: subname    ! optional for 
+                                  !'colored' tracer
+  CHARACTER(len=ln) :: fullname   ! name_subname
+  CHARACTER(len=ln) :: modulename ! name of requesting 
+                                  ! sub-model
+  CHARACTER(len=ln) :: units      ! units
+  CHARACTER(len=ll) :: longname   ! long name
+  CHARACTER(len=ll) :: standardname   ! CF standard name
+  INTEGER           :: trtype ! type of tracer: 
+                              ! 0=undef., 1=prescribed, 
+                              ! 2=diagnostic (no transport),
+                              ! 3=prognostic (transported)
+  INTEGER           :: spid   ! species id (index in 
+                              ! speclist) where physical/chem.
+                              ! properties are defined 
+  INTEGER           :: nphase ! phase (1=GAS, 2=AEROSOLMASS, 
+                              ! 3=AEROSOLNUMBER,...)
+  INTEGER           :: mode   ! aerosol mode or bin number
+  REAL(dp)          :: moleweight ! molecular mass (copied 
+                        ! from species upon initialisation)
+  ! Requested resources ...
+  ! 
+  INTEGER    :: burdenid   ! index in burden diagnostics
+  !
+  ! Requested resources ...
+  !
+  INTEGER  :: nbudget    ! calculate budgets (default 0)
+  INTEGER  :: ntran      ! perform transport (default 1)
+  INTEGER  :: nfixtyp    ! type of mass fixer (default 1)
+  INTEGER  :: nconvmassfix ! use xt_conv_massfix in cumastr
+  INTEGER  :: nvdiff     ! vertical diffusion flag  
+                         ! (default 1)
+  INTEGER  :: nconv      ! convection flag (default 1)
+  INTEGER  :: ndrydep    ! dry deposition flag: 
+                         ! 0=no drydep, 
+                         ! 1=prescribed vd,
+                         ! 2=Ganzeveld 
+  INTEGER  :: nwetdep    ! wet deposition flag (default 0)
+  INTEGER  :: nsedi      ! sedimentation flag (default 0)
+  REAL     :: tdecay     ! decay time (exponential) 
+                         ! (default 0.sec)
+  INTEGER  :: nemis  ! surface emission flag (default 0)
+  !
+  ! initialization and restart
+  !
+  INTEGER  :: ninit  ! initialization request flag
+  INTEGER  :: nrerun ! rerun flag
+  REAL     :: vini   ! initialization value (default 0.)
+  INTEGER  :: init   ! initialisation method actually used 
+  !
+  ! Flags used for postprocessing
+  !
+  INTEGER  :: nwrite   ! write flag (default 1)
+  INTEGER  :: code     ! tracer code (default 235...)
+  INTEGER  :: table    ! tracer code table (default 0)
+  INTEGER  :: gribbits ! bits for encoding (default 16)
+  INTEGER  :: nint     ! integration (accumulation) 
+                       ! flag  (default 1)  
+  !
+  ! Flags to be used by chemistry or tracer modules
+  !
+  INTEGER         :: nsoluble   ! soluble flag (default 0)
+  TYPE(t_flag)    :: myflag (nf)! user defined flag
+  type(time_days) :: tupdatel   ! last update time
+  type(time_days) :: tupdaten   ! next update time
+  !
+END TYPE t_trinfo
+\end{lstlisting}
+%
+
+The data type {\tt t\_flag} is defined as follows:
+%
+\begin{lstlisting}[caption=data type {\tt t\_flag}]
+  TYPE t_flag
+    CHARACTER(len=lf) :: c      ! character string
+    REAL              :: v      ! value
+  END TYPE t_flag
+\end{lstlisting}
+%
+The lengths of the character string components are\index{string lengths}:
+%
+\begin{lstlisting}[caption=Length of strings]
+  INTEGER, PARAMETER :: ln =  24 ! length of name 
+                                 ! (char) components
+  INTEGER, PARAMETER :: ll = 256 ! length of 
+                                 ! longname component
+  INTEGER, PARAMETER :: lf =   8 ! length of flag 
+                                 ! character string
+  INTEGER, PARAMETER :: nf =  10 ! number of user 
+                                 ! defined flags
+  INTEGER, PARAMETER :: ns =  20 ! max number of submodels
+\end{lstlisting}

@@ -1,0 +1,147 @@
+#!/bin/sh 
+set -ex
+#
+TYP=$1
+echo $TYP
+#
+NAME=$2
+#
+RES=$3
+#
+echo $RES
+#
+TO=$4
+#
+LEV=$5
+#
+echo $LEV
+#
+WORKDIR=$6
+echo $WORKDIR
+#
+#
+echo QUELLE path $QUELLE 
+   FIXCODE=/pool/data/ECHAM6/post/FixCodes
+   ERAin=/pool/data/ECHAM6/post/ERAin/T${RES}
+#
+
+   cdo=/client/bin/cdo
+
+#
+LOGmod="${WORKDIR}/LOG_${NAME}"
+
+ATMera="${ERAin}/T${RES}L${LEV}_1979_${TO}_$TYP"
+#
+###########################################################################
+# var.txt wird in ATM.gs BOT.gs einglesen
+# number of latitudes
+
+nlat=`cdo griddes $LOGmod| grep ysize | cut -d"=" -f2`
+echo $nlat >>var.txt
+ERATIME="(1979-${TO})"
+echo $ERATIME >>var.txt
+
+FORMAT="-f nc -t ${QUELLE}/echam6.varCode"
+if [ "$LEV" = "47" ]
+then
+LEVELS="100900,99500,97100,93900,90200,86100,81700,77200,72500,67900,63300,58800,54300,49900,45700,41600,37700,33900,30402,27015,23833,20867,18116,15578,13239,11066,9102,7406,5964,4752,3743,2914,2235,1685,1245,901,637,440,296,193,122,74,43,23,11,4,1"
+eraLEV="100900,99500,97100,93900,90200,86100,81700,77200,72500,67900,63300,58800,54300,49900,45700,41600,37700,33900,30402,27015,23833,20867,18116,15578,13239,11066,9102,7406,5964,4752,3743,2914,2235,1685,1245,901,637,440,296,193,122,74,43,23,11"
+elif [ "$LEV" = "95" ]
+then
+LEVELS="100900,99500,97100,93900,90200,86100,81700,77200,72500,67900,63300,58800,54300,50000,45900,42000,38400,35100,32034,29200,26603,24228,22061,20086,18286,16646,15153,13792,12554,11428,10401,9465,8612,7835,7127,6481,5892,5355,4866,4420,4013,3643,3305,2997,2717,2461,2228,2015,1821,1645,1484,1337,1204,1083,973,873,783,701,628,561,501,447,398,354,314,279,247,219,193,170,150,132,116,101,88,77,67,58,50,43,36,31,26,22,18,15,12,10,8,7,5,4,3,2,1"
+eraLEV="100900,99500,97100,93900,90200,86100,81700,77200,72500,67900,63300,58800,54300,50000,45900,42000,38400,35100,32034,29200,26603,24228,22061,20086,18286,16646,15153,13792,12554,11428,10401,9465,8612,7835,7127,6481,5892,5355,4866,4420,4013,3643,3305,2997,2717,2461,2228,2015,1821,1645,1484,1337,1204,1083,973,873,783,701,628,561,501,447,398,354,314,279,247,219,193,170,150,132,116,101,88,77,67,58,50,43,36,31,26,22,18,15,12,10"
+fi
+#
+cp var.txt var1.txt
+
+head  var1.txt >var.txt
+date >var1.txt
+cut -c5-11,25-32 var1.txt >datum
+cat datum >>var.txt
+#
+###########################################################################
+# 
+#
+#----code130--- Temperature---ZONAL-
+#
+CODE=130
+if cdo -s showcode -selcode,${CODE}  $LOGmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg  -sellevel,${LEVELS} -selcode,${CODE} $LOGmod  Ubusy_c${CODE}.nc
+fi
+#
+#
+#-----code131---U-----zonal-
+#
+CODE=131
+if cdo -s showcode -selcode,${CODE}  $LOGmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $LOGmod Ubusy_c${CODE}.nc
+fi
+# 
+#
+#-----code132---V-----zonal-
+#
+CODE=132
+if cdo -s showcode -selcode,${CODE}  $LOGmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg -sellevel,${LEVELS} -selcode,${CODE}  $LOGmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#----code130--- Temperature- (Model-ERAin)-zonal--
+#
+CODE=130
+if cdo -s showcode -selcode,${CODE}  $LOGmod > /dev/null
+then
+   cdo  ${FORMAT} -zonavg -sellevel,${eraLEV} -selcode,${CODE} $LOGmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo  ${FORMAT} -sellevel,${eraLEV} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+#
+#
+#-----code131---U--(Model-ERAin)--zonal-
+#
+#
+CODE=131
+if cdo -s showcode -selcode,${CODE}  $LOGmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg  -sellevel,${eraLEV} -selcode,${CODE} $LOGmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -sellevel,${eraLEV} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+#
+#-----code132---V--(Model-ERAin)--zonal-
+#
+#
+CODE=132
+if cdo -s showcode -selcode,${CODE}  $LOGmod > /dev/null
+then
+   cdo ${FORMAT} -zonavg  -sellevel,${eraLEV} -selcode,${CODE} $LOGmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $ATMera > /dev/null
+   then
+      cdo ${FORMAT} -sellevel,${eraLEV} -selcode,${CODE} $ATMera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+#
+rm -f  busy* 
+
+exit
+
+
+
+
+
+
+

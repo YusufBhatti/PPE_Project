@@ -1,0 +1,25 @@
+# 
+# Performs an ECHAM reference simulation for one year.
+#
+# This is an example for a very simple setup, only changing 
+# model location and accounting information
+#
+
+EXP_TYPE = amip-LR
+
+ENVIRONMENT = mistral
+
+MODEL_SUBDIR = echam-dev
+
+ACCOUNT = mh0081
+
+DATA_ROOT =  /work/$PROJECT_SUBDIR/$USER
+WORK_ROOT = /scratch/m/$USER
+
+[namelists]
+
+  [[namelist.echam]]
+
+    [[[runctl]]]
+      dt_stop = split_date(1980-01-01 00:00:00)
+

@@ -1,0 +1,200 @@
+\subsection{Single column model (SCM)}\label{secscm}
+\echam{} is a general circulation model that simulates the
+transport of air masses, energy, and trace gases like water vapour
+inside these air 
+masses by advection, convection, and small scale turbulence 
+(eddies) represented by diffusion equations. Furthermore, all
+relevant physics like radiation, cloud and precipitation formation, and
+surface processes are included. In some cases, it is difficult to
+separate local effects from large scale dynamics, e.g. the direct influence
+of radiation on cloud formation may be obscured by advection of energy
+from neighbouring columns.
+In these cases, the analysis of physics processes in one
+single isolated column of the model can shed light on the mutual
+relationships of these processes. The analysis of the behaviour of
+model physics in one column can help us to develop new
+parameterisations and is the natural test bed for physics
+parameterisations. Furthermore, a single column may be
+considered as a very primitive model of the atmosphere of the earth
+represented by the processes in one single ``average'' column. It may be
+instructive to investigate extreme scenarios like a very hot climate
+and the behaviour of the physics implemented in \echam{} under such
+conditions in a ``single column version'' of \echam. 
+
+\subsubsection{Initial conditions and forcing data for the single column
+  model}\label{secforcing} 
+
+Similar to a general circulation model, the single column model 
+needs initial 
+conditions as starting point of time integration. Furthermore, it is
+possible to relax the trajectory of certain variables towards a given
+trajectory of these variables or to prescribe tendencies for certain
+variables. All input data i.e.~initial conditions and externally
+prescribed trajectory and tendency data are read from one single ``forcing''
+file the name of 
+which can be set in the {\tt columnctl} namelist file. 
+
+The geographical location of the column on the globe is given by its
+geographical longitude and latitude described by the variables {\tt lon}, {\tt 
+  lat} in the forcing file. The single column model reads the
+longitude and latitude from this file, they cannot be set in the namelist.
+Since the single column model applies the 2d land sea mask and surface
+properties to the geographical location of the column, the surface
+properties are implicitly determined by the longitude and latitude of
+the column. Furthermore, all geographically dependent quantities like
+the diurnal cycle, solar irradiation, greenhouse 
+gas or aerosol mixing ratios, and sea surface temperature are
+automatically calculated for this special geographical location or
+extracted from the respective \echam{} input files.
+
+Examples for forcing files can be found in {\tt /pool/data/ECHAM6/SCM}.
+
+\paragraph{Initial condition variables, trajectory variables, and
+  tendency variables in the forcing file}
+
+The forcing file contains the variables listed in the first column of
+Tab.~\ref{tabiniscm} 
+describing at the same time the
+initial state and a trajectory of that state. The first time step of
+these variables is used as the initial state.
+The first column gives the names under which the
+variables appear in 
+the forcing file. Furthermore, the corresponding tendencies of these
+variables may also be present. The names of the corresponding
+tendencies are listed 
+in the second column of Tab.~\ref{tabiniscm}. 
+All variables depend on the dimensions time [and levels] {\tt
+  (time[,nlev])}. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}llp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Initial conditions SCM]
+{Variables describing the initial state, its trajectory, and
+  tendencies in the forcing file. As initial conditions, 
+  the first time step of the variables listed in the first column of
+  the table are used. The
+dimensions of each variable are reported in the third column of the
+table. The mode in the last column of the table is
+marked ``essential'' if the 
+variable must be present as initial condition or optional if the
+variable can be set to zero at the initial state.}\\\hline\label{tabiniscm}
+\endfirsthead
+\caption[]{Initial conditions SCM --- continued}\\\hline
+\endhead
+\hline\multicolumn{5}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+variable & tendency & dimension & explanation & mode \\\hline
+{\tt t} & {\tt ddt\_t} & {\tt (time,lev)} & temperature in the column
+& essential \\ 
+{\tt u} & {\tt ddt\_u} & {\tt (time,lev)} & wind in $\vec{u}$
+direction & essential \\ 
+{\tt v} & {\tt ddt\_v} & {\tt (time,lev)} & wind in $\vec{v}$
+direction & essential \\ 
+{\tt q} & {\tt ddt\_q} & {\tt (time,lev)} & specific humidity & essential \\
+{\tt ps} & --- & {\tt (time)} & surface pressure & essential \\
+{\tt xl} & {\tt ddt\_ql} & {\tt (time,lev)} & liquid water content & optional \\
+{\tt xi} & {\tt ddt\_qi} & {\tt (time,lev)} & ice water content & optional \\
+\hline
+\end{longtable}
+
+As mentioned above, it is possible to relax the state variables listed
+in Tab.~\ref{tabiniscm} 
+towards some
+given trajectory.
+The relaxation is performed
+in the following way: Let $X^{\rm (f)}_t$ be the value of a quantity
+$X$ at time $t$ to which the original prediction $X_t$ of this quantity for
+time $t$ has to be relaxed. Let $\tau>0$ be a relaxation time and
+$\Delta t>0$ the integration time step. Then,
+the new prediction $\tilde{X}_t$ at time $t$ is given by:
+
+\begin{equation}\label{eqrelaxation}
+\tilde{X}_t:= \begin{cases}
+X_t+(X^{\rm (f)}_t-X_t)\frac{\Delta
+  t}{\tau} & \mbox{for}\quad \tau>\Delta t \\
+X^{\rm (f)}_t\ &\mbox{for}\quad \tau\le\Delta t
+\end{cases}
+\end{equation}
+
+In addition to the application of a trajectory until it ends,
+the same given trajectory may be repetitively applied (``cycled''),
+e.g.~a diurnal cycle may be applied over and over again. The
+prescribed trajectory can be given at any regular time intervals and
+is interpolated to the actual model time steps. 
+
+When one applies the relaxation method to certain variables, the trajectory of
+the respective variables will be 
+restricted to a neighbourhood of the given trajectory. There is a second
+method to influence the trajectory: Instead of the internally
+produced tendencies (internal tendencies) resulting from the physics
+processes in the respective 
+column, tendencies originating from 3d large scale dynamics (external
+tendencies) may be
+used or added to the internally produced tendency. In general, if any
+external tendencies are provided, the single column
+model simply replaces the internal tendencies by the external
+tendencies with one exeption: If vertical pressure velocity or divergence is
+prescribed from an external data set (see Sec.~\ref{secvarfor}), the external
+tendencies of {\tt t}, {\tt u}, {\tt v}, {\tt q}, {\tt ql}, {\tt qi}
+are added to the internal tendencies.
+Tendencies can be
+used for all variables of Tab.~\ref{tabiniscm} except for the surface
+pressure. Since the mass of dry air in the column is considered to be
+constant in time, the surface pressure can not change.
+
+The various forcing options described above for the variables of
+Tab.~\ref{tabiniscm} are coded in an ``option'' array of three integer numbers
+$\{i_\Delta,\tau,i_{\rm cycle}\}$. To each variable such an option
+array is assigned. The first element $i_\Delta$ is
+equal to~0 if no external tendencies are used for the respective
+variable, i.e.~the variable is only changed due to physics processes in the
+column. If $i_\Delta=1$, the external tendencies are applied according
+to the rule above. The second element $\tau$ of the option array is
+the relaxation time in seconds. The third element $i_{\rm cycle}$ has
+to be set to~1 if cycling of the external trajectory is desired, it
+has to be set to~0 if the trajectory is not cycled.
+
+\paragraph{Forcing by prescribing values of certain
+  variables}\label{secvarfor}
+Up to now, we described how to influence the trajectory of the state
+variables listed in Tab.~\ref{tabiniscm}.
+Furthermore, there is a set of variables the values of which can or can not be
+externally prescribed. These variables are listed in
+Tab.~\ref{tabextvar}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}}
+\hline\hline\caption[Boundary condition variables]{Boundary condition
+  variables}\\\hline\label{tabextvar} 
+\endfirsthead
+\caption[]{{\tt boundary condition variables} --- continued}\\\hline
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+variable & dimension & explanation \\\hline
+{\tt ts} & {\tt (time)} & surface temperature \\
+{\tt div} & {\tt (time,lev)} & divergence of the wind field \\
+{\tt omega} & {\tt (time,lev)} & vertical pressure velocity \\
+\hline
+\end{longtable}
+
+For the variables listed in Tab.~\ref{tabextvar} the ``option'' array
+consists of two elements $\{i_{\rm set},i_{\rm cycle}\}$. If the first
+element $i_{\rm set}=0$, the variable is allowed to change freely,
+whereas $i_{\rm set}=1$ means that the corresponding variable is set
+to the value given by the external data set. The second element
+$i_{\rm cycle}$ determines whether ($i_{\rm cycle}=1$) or not ($i_{\rm
+  cycle}=0$) cyclic interpolation with respect to time of the external
+data set is required.
+
+\subsubsection{Namelist columnctl}
+
+The namelist is described in Sec.~\ref{seccolumnctl}.

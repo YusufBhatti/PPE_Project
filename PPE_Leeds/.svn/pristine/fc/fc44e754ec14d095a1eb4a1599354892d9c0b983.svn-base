@@ -1,0 +1,66 @@
+%\documentclass[10pt,letterpaper,twoside]{article}
+%\usepackage{times,amsmath,graphicx,longtable,multicol,natbib}
+%\begin{document}
+
+\section{Model resolutions and resolution-dependent parameters\label{sec:paraX}}\label{cXX}
+
+ECHAM 6.0 contains several poorly constrained parameters relating to orographic and non-orographic gravity wave drag, clouds, convection and horizontal diffusion adjusted, or tuned, to yield an acceptable climate and a sufficiently stable model execution. Some of these parameters are adjusted individually for each horizontal and/or vertical discretization of the model. The ECHAM 6.0 model was rigorously tested to run coupled to the MPIOM ocean model in two resolutions, and in atmosphere-only mode in one higher resolution. Additionally, the model can be run in a set of lower and one higher resolutions for testing purposes.
+
+
+\subsection{Available model resolutions}
+
+For coupled simulations T63L47 was used with the MPIOM GR15 (1.5 degree) ocean resolution in MPI-ESM-LR. T63L95 was used with a higher resolved MPIOM TP04 ocean grid (0.4 degree) in MPI-ESM-MR. For both these setups, spun-up ocean initial states exist from the control simulations submitted to the CMIP5 archive. The model was also tested in atmosphere-only mode with satisfactory results at T127L95. The former model is designated MPI-ESM-HR in the CMIP5 archive. Correspondingly spun-up ocean initial state is not available for these resolution. See table for an overview:
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|l|l|l}
+\hline\noalign{\smallskip}
+ECHAM 6.0 & MPIOM &  Status, tested for: & CMIP5 designator  \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+T63L47 & GR15 & Coupled and Uncoupled & MPI-ESM-LR \\
+T63L95 & TP04 & Coupled and Uncoupled & MPI-ESM-MR \\
+T127L95 & N/A & Atmosphere-only & MPI-ESM-HR \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+%It is further possible to run the model in different resolutions, T31L19, T31L31, T31L39, T42L19 and T255L199 for testing purposes. These resolutions have not undergone rigorous testing and it is not %recommended to use them for scientific purposes. We shall therefore not deal with these below.
+
+\subsection{Resolution-dependent parameters}
+
+The parameters that are resolution dependent for maintaining the radiation balance and, thereby, the global mean temperature for the supported resolutions are Cloud mass-flux above the level of non-buoyancy (CMFCTOP), and the Conversion rate from cloud water to rain in convective clouds (CPRCON). See \cite{tiedtke89} for details. The parameter settings are given in the table.
+
+The extra-tropical northern hemisphere tropospheric winds are tuned using orographic wave drag. This is done adjusting the orographic gravity wave drag strength, GKDRAG and GKWAKE, which we tend to set equal. The largest sub-grid scale orographic peaks must exceed the mean topography by GPICMEA, while the sub-grid scale orography standard deviation must exceed GSTD, before the scheme is activated. For details see \cite{lott99}. Resolution-dependent parameters are given in the table.
+
+Non-orographic wave drag is modeled using a fixed background wave source field. The strength a meridional shape of the source field is adjusted to yield a good representation of the stratospheric circulation and variability, in particular the quasi-biennial oscillation. If LRMSCON\_LAT is set to .true. the source field is latitude-dependent. At latitudes equator-ward of +/- LAT\_RMSCON\_LO = 5 degrees the source strength is RMSCON\_LO, and at latitudes poleward of +/- LAT\_RMSCON\_HI = 10 degrees the strength is set to RMSCON\_HI, which is 1.0 for all resolutions. Between these latitudes the strength is interpolated. The parameters may be controlled at runtime through the 'gwsctl' namelist, and their default values for the supported resolutions are given in the Table:
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{l|l|ccc}
+\hline\noalign{\smallskip}
+Parameter & Subroutine & T63L47 & T63L95 & T127L95\\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+CMFCTOP & mo\_cumulus\_flux & 0.21 & 0.23 & 0.205 \\
+CPRCON & mo\_cumulus\_flux & $2.0\cdot10^{-4}$ & $2.0\cdot10^{-4}$ & $1.3\cdot10^{-4}$ \\
+GKDRAG & mo\_ssodrag & 0.50 & 0.25 & 0.50  \\
+GKWAKE & mo\_ssodrag & 0.50 & 0.25 & 0.50  \\
+GPICMEA & mo\_ssodrag & 400 m & 400 m & 200 m \\
+GSTD & mo\_ssodrag & 100 m & 100 m & 50 m  \\
+RMSCON\_LO & setgws & 1.2 & 1.2 & 1.05  \\
+%RMSCON\_HI & setgws & 1.0 & 1.0 & 1.0 &  1.0 \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+
+
+
+\subsection{Code implementation}\label{sec.codeimplementation}
+
+The resolution-dependent parameters are hard-coded into several subroutines. Thereby, the model configures itself when it is executed at a certain resolution. That also means that it requires code-modifications to run the model in a different resolution than those that are implemented. Some of the affected subroutines are listed in the Table. Each subroutine contains a series of IF- or CASE-statements that configures the model according to horizontal and/or vertical resolution. If a resolution is not supported by the code, execution will typically finish with an error message: 'Truncation not supported'.
+
+In addition to the parameters treated here for the supported resolutions, a number of parameters vary among the unsupported resolutions, and the settings of these have not been evaluated. These pertain to snow and ice albedos (mo\_surface\_ice.f90), cloud optical properties (mo\_newcld\_optics.f90) and cloud microphysics (mo\_cloud.f90). Horizontal diffusion and sponge-layer parameters are also set for each resolution in mo\_hdiff.f90 and in setdyn.f90, while the time-step length needs to be set in mo\_time\_control.f90. See chapter \ref{sec:dyncore} for details.
+
+
+
