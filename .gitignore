@@ -1,17 +1,11 @@
 *~
 *#
 
-*.o
-*.mod
-
 # /
 /autom4te.cache
 /config.status
 /Makefile
 /build_echam6.sh
-
-# /bin/
-/bin*/echam6
 
 # /config/
 /config/config.h
@@ -27,7 +21,11 @@
 # /experiments/
 /my_experiments/
 
-# /lib/
+# binaries
+/bin
+/lib
+*.o
+*.mod
 *.a
 *.so
 
