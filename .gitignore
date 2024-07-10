@@ -4,12 +4,13 @@
 # /
 autom4te.cache*
 config.status
-Makefile*
+Makefile
 build_echam6.sh
 
 # /config/
 /config/config.*
 /config/stamp-h1
+config.*
 
 # /contrib/
 /contrib/generate-scripts/*thunder*
