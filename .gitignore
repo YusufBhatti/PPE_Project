@@ -24,12 +24,14 @@ config.*
 
 # binaries
 /bin
-/lib*
+/lib/*.a
 *.o
 *.mod
 *.a
 *.so
-
+*.lo
+.libs _libs
+./so_locations
 # log
 *.log
 
