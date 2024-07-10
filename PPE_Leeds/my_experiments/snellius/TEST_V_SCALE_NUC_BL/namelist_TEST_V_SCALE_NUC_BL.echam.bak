@@ -88,7 +88,7 @@
  ndg_file_nc    = "ndg%y4%m2.nc"
 /
 &HAMMOZ_PERTURBATIONS
-  scale_nuc_bl     = 100 ! V_SCALE_NUC_BL
+  scale_nuc_bl     = 10000 ! V_SCALE_NUC_BL
   scale_nuc_ft     = 1 ! V_SCALE_NUC_FT
   scale_emi_cmr_ff = 1 ! V_SCALE_EMI_CMR_FF
   scale_emi_cmr_bb = 1 ! V_SCALE_EMI_CMR_BB
