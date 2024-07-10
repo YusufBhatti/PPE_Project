@@ -6,35 +6,46 @@ autom4te.cache*
 config.status
 Makefile
 build_echam6.sh
-
+blas/*.lo
+blas/*libblas.la
+blas/.libs
+libtool
 # /config/
-/config/config.*
-/config/stamp-h1
+config/config.*
+*stamp-h*
 config.*
-
+.libs
+table*
 # /contrib/
-/contrib/generate-scripts/*thunder*
+contrib/generate-scripts/*thunder*
 
 # /src/
-/src/*.mod
-/src/*.lst
+src/*.mod
+src/*.lst
 
 # /experiments/
-/my_experiments/
+my_experiments/
 
 # binaries
-/bin
-/lib/*.a
+bin/*
+lib
 *.o
 *.mod
 *.a
 *.so
 *.lo
 .libs _libs
-./so_locations
+*.la
+*.am.old
+*echam6
+#./so_locations
 # log
 *.log
-
+version.c
 # swap
 *.swp
 
+RUNDIR/
+compile_and_generate.sh
+echam6.3-ham2.3-moz1.0/
+PPE_Aerosol/
