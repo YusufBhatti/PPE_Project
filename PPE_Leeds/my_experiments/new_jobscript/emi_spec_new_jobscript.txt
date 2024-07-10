@@ -45,33 +45,37 @@
 #
 
 # Agricultural:
-AGR=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_agr,  EF_LONLAT,  surface
-# Agricultural waste burning:
-AWB=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_awb,  EF_LONLAT,  surface
+AGR=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_agr,      EF_LONLAT, surface
 # Aircraft:
-AIRC=EF_FILE,     accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_aircraft_%Y4_%T0.nc,      emiss_air,  EF_3D,      volume
+AIRC=EF_FILE,     accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_aircraft_%Y4_%T0.nc,      emiss_air,      EF_3D,     volume
+# Agricultural waste burning:
+AWB=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_awb,      EF_LONLAT, surface
 # Biogenic:
-BIOGENIC=EF_FILE, aerocom_II/%T0/2000/emiss_aerocom_%C0_monthly_2000_%T0.nc,                           emiss_biogenic,  EF_LONLAT, EF_IGNOREYEAR, surface
+BIOGENIC=EF_MODULE, surface
 # Domestic:
-DOM=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_dom,  EF_LONLAT,  surface
+DOM=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_dom,      EF_LONLAT, surface
 # Energy:
-ENE=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ene,  EF_LONLAT, level50m
+ENE=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ene,      EF_LONLAT, level50m
 # Forest fire:
-FFIRE=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_biomassburning_%Y4_%T0.nc,emiss_for,  EF_LONLAT, fire
+FFIRE=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_biomassburning_%Y4_%T0.nc,emiss_for,      EF_LONLAT, fire
 # Grass fire:
-GFIRE=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_biomassburning_%Y4_%T0.nc,emiss_gra,  EF_LONLAT, fire
+GFIRE=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_biomassburning_%Y4_%T0.nc,emiss_gra,      EF_LONLAT, fire
 # Industry:
-IND=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ind,  EF_LONLAT,  surface
+IND=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ind,      EF_LONLAT, surface
+# Oceanic emissions from GEIA/POET
+OCEAN=EF_FILE,    POET/%T0/POET_oceanic_%C0_1990_22725_%T0.nc, POET, EF_LONLAT, EF_IGNOREYEAR, surface
 # Ships:
-SHIPS=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_ships_%Y4_%T0.nc,         emiss_shp,  EF_LONLAT,  level50m
+SHIPS=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_ships_%Y4_%T0.nc,         emiss_shp,      EF_LONLAT, level50m
 # Solvent:
-SLV=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_slv,  EF_LONLAT,  surface
+SLV=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_slv,      EF_LONLAT, surface
 # Terrestrial:
-TERR=EF_FILE,     aerocom_II/%T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc,                                      DMS_terr,  EF_LONLAT, EF_IGNOREYEAR, surface
+# This may become obsolete -- see https://redmine.hammoz.ethz.ch/issues/378
+# sschr: emissions from this sector are set to zero (see matrix) -- emissions are taken from interactive MEGAN module
+TERR=EF_FILE,     aerocom_II/%T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc,                                DMS_terr,       EF_LONLAT, EF_IGNOREYEAR, surface
 # Transport:
-TRA=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_tra,  EF_LONLAT,  surface
+TRA=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_tra,      EF_LONLAT, surface
 # Waste:
-WST=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_wst,  EF_LONLAT,  surface
+WST=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_wst,      EF_LONLAT, surface
 
 # Dust:
 DUST=EF_MODULE,    surface

@@ -710,11 +710,13 @@ SUBROUTINE nucl_vehkamaeki(kproma, kbdim,   klev,        & ! ECHAM5 dimensions
     
     REAL(dp) :: ppfr(kbdim,klev)     ! Aerosol formation rate (cm-3 s-1)
     REAL(dp) :: pns(kbdim,klev)      ! Number of H2SO4 molecules in the newly formed aerosol particles
+    REAL(dp) :: mean_pforest
     
     !
     ! Local variables:
     !
-    
+
+   
     INTEGER :: jk,jl
     
     ! Activation nucleation (Kulmala et al., ACP 2006), parameterized by
@@ -730,7 +732,10 @@ SUBROUTINE nucl_vehkamaeki(kproma, kbdim,   klev,        & ! ECHAM5 dimensions
       ENDDO
       ! In the boundary layer:
       DO jk = int(ppbl(jl)), klev
-      !        IF (lo_hammoz_perturbations) THEN
+      !  mean_pforest = SUM(pforest(jl)) / REAL(SIZE(pforest(jl)), dp)     
+        PRINT *, 'Mean of pforest:', pforest(jl)
+
+     !        IF (lo_hammoz_perturbations) THEN
 	pns(jl,jk)  = 1.0_dp
         ppfr(jl,jk) = 1.0E-6_dp*ph2so4(jl,jk)*pforest(jl)
 !	ppfr(jl,jk) = 1.0E-6_dp*ph2so4(jl,jk)

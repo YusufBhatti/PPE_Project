@@ -68,7 +68,9 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=31                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+no_cycles=31                   # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+                              # this number needs to be determined by evaluating the time it takes to calculate one month
+                              # and by matching this with the wallclock limit on your system!
 init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
