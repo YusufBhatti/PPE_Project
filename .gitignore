@@ -2,13 +2,13 @@
 *#
 
 # /
-/autom4te.cache
-/config.status
-/Makefile
-/build_echam6.sh
+autom4te.cache*
+config.status
+Makefile*
+build_echam6.sh
 
 # /config/
-/config/config.h
+/config/config.*
 /config/stamp-h1
 
 # /contrib/
@@ -23,7 +23,7 @@
 
 # binaries
 /bin
-/lib
+/lib*
 *.o
 *.mod
 *.a
