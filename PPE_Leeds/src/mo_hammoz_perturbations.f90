@@ -63,7 +63,7 @@ MODULE mo_hammoz_perturbations
             KK_exponent, KK_LWP_exponent, scale_activation, scale_accretion, &
             scale_solar_const, scale_emi_bf, oc_rad_ni, pH_pert, du_rad_ni, &
 	    scale_so2_prop, scale_so2_reactions, scale_so2_reactions_AQ, &
-	    scale_dms_reactions, scale_dms_prop, scale_water
+	    scale_dms_reactions, scale_dms_prop, scale_water, scale_RH
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -145,8 +145,6 @@ MODULE mo_hammoz_perturbations
 
   REAL(dp)    :: scale_so4_coating = 1.0_dp  ! Scale the coating thickness of SO4 required to 'age' particles (move them
                                              !  from insoluble to soluble modes)
-  REAL(dp)    :: pH_pert = 1.0_dp  ! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by 0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
-
   REAL(dp)    :: scale_intra_mode_coagulation = 1.0_dp,  & ! Scale the diagonal elements of the coagulation kernel matrix
                  scale_inter_mode_coagulation = 1.0_dp     ! Scale the off-diagonal elements of the coagulation kernel matrix
 
@@ -154,8 +152,9 @@ MODULE mo_hammoz_perturbations
                  KK_LWP_exponent = 2.47_dp, &  ! The LWP exponent in the KK autoconversion scheme.
                  scale_activation = 1.0_dp, & ! Scale the number of ARG activated particles
                  scale_accretion = 1.0_dp,   &! Scale the accretion (tendency?)
-                 scale_water = 1.0_dp     ! Scale the aerosol water uptake
-
+                 scale_RH = 1.0_dp,     &! Scale the aerosol water uptake
+                 scale_water = 1.0_dp,     &! Scale the aerosol water uptake
+		 pH_pert = 1.0_dp     ! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by   0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
   REAL(dp)    :: scale_solar_const = 1.0  ! Scale the (AMIP) solar constant (equally across bands)
 
 CONTAINS
@@ -284,6 +283,7 @@ CONTAINS
        CALL p_bcast (scale_activation, p_io)
        CALL p_bcast (scale_accretion, p_io)
        CALL p_bcast (scale_water, p_io)
+       CALL p_bcast (scale_RH, p_io)
        ! SO2 chemistry
        CALL p_bcast (scale_so2_prop,        p_io)
        CALL p_bcast (scale_so2_reactions,        p_io)
@@ -380,7 +380,7 @@ CONTAINS
     CALL print_value('The KK exponent', KK_exponent)
     CALL print_value('The LWP KK exponent', KK_LWP_exponent)
     CALL print_value('The scaling of accretion', scale_accretion)
-    CALL print_value('The aerosol water uptake', scale_water)
+    CALL print_value('The aerosol water uptake', scale_RH)
 
     CALL message('', '---')
     CALL print_value('The scaling of the (AMIP) solar constant', scale_solar_const)

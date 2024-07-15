@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name="normal_run"
 #SBATCH --nodes=1
-#SBATCH --ntasks=60
-#SBATCH --time=25:00:00
-#SBATCH --partition rome
+#SBATCH --ntasks=40
+#SBATCH --time=20:00:00
+#SBATCH --partition genoa
 ###SBATCH --output=slurm_normal_run_%j.txt
 ###SBATCH --error=slurm_normal_run_%j.txt
 #SBATCH --output=/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/normal_run/normal_run.out
 #SBATCH --error=/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/normal_run/normal_run.err
-#SBATCH --account="srsei8447"
+#SBATCH --account="srsei9480"
 #!/bin/bash -l
 
 set -eu 
@@ -38,7 +38,7 @@ export MPICH_UNEX_BUFFER_SIZE=
 cd /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/normal_run/
 
 set +e
-mpiexec -n 60 ./echam6
+mpiexec -n 40 ./echam6
 
 status_echam="$?"
 #
@@ -73,7 +73,7 @@ if $flag_p_proc ; then # this submits a job to be executed on the p-proc machine
 #                       --time=24:00:00 \
 #                       --output=/gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/my_experiments/snellius/normal_run/slurm_p-proc_%j.txt \
 #                       --error=/gpfs/work3/0/prjs0937/yusufb/Branches/PPE_Leeds/my_experiments/snellius/normal_run/slurm_p-proc_%j.txt \
-#                       --account="srsei8447" \
+#                       --account="srsei9480" \
 #                       --export=ALL \
 #                             /path/to/some/post-processing script
 
@@ -84,7 +84,7 @@ if $flag_p_proc ; then # this submits a job to be executed on the p-proc machine
                        --time=24:00:00 \
                        --output=/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/normal_run/normal_run.out \
                        --error=/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/normal_run/normal_run.err \
-                       --account="srsei8447" \
+                       --account="srsei9480" \
                        --export=ALL \
                              /path/to/some/post-processing script
 

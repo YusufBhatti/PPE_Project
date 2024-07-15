@@ -3,7 +3,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=40
 #SBATCH --time=20:00:00
-#SBATCH --partition rome
+#SBATCH --partition genoa
 ###SBATCH --output=slurm_TEST_V_SCALE_CLOUD_PH_%j.txt
 ###SBATCH --error=slurm_TEST_V_SCALE_CLOUD_PH_%j.txt
 #SBATCH --output=/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/TEST_V_SCALE_CLOUD_PH/TEST_V_SCALE_CLOUD_PH.out

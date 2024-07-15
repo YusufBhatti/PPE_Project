@@ -47,7 +47,7 @@
 #----------------------------------------------
 
 input_basepath="/home/ybhatti/yusufb/MODEL_INPUT/${input_files_version}" # where all input files except nudging data is to be found
-nudg_basepath="/home/ybhatti/yusufb/MODEL_INPUT/Nudging_tmp" # where all nudging data is to be found
+nudg_basepath="/home/ybhatti/yusufb/MODEL_INPUT/Nudging" # where all nudging data is to be found
 
 #--------------------------------------------------
 # You shouldn't need to modify the following
@@ -873,7 +873,7 @@ if $flag_nudg ; then
           previous_prefix=$prefix
        fi
 
-       nudg_name="${prefix}${hres}${vres}_${idate}"
+       nudg_name="${prefix}_${hres}${vres}_${idate}"
 
        #-- make the links:
        for ext in ${exts[*]} ; do

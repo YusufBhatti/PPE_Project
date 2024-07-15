@@ -1,9 +1,8 @@
 &PARCTL
- nproca = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
- nprocb = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+   nproca=20,
+   nprocb=2,
 /
 &RUNCTL 
- nproma         = 16
  lresume        = .false.,
  lmidatm        = .true.
  out_datapath   = "/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/new_jobscript/"
@@ -29,8 +28,8 @@
  lmoz             = .false.
  lhammoz          = .false.
  lburden          = .true.
- emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
- emi_scenario     = "ssp245"
+ emi_basepath     =  "/v0003/emissions_inventories/"
+ emi_scenario     = "RCP45"
 /
 &SUBMDIAGCTL
  vphysc_lpost     = .true.

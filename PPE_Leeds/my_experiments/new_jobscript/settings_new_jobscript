@@ -78,8 +78,8 @@ init_restart_flag=.false.     # echam restart flag at launch of this job
 date_start="2006,04,01,0,0,0"
 date_stop="2006,04,04,1,0,0"
 
-input_files_version="v0006_input/v0006"
-scenario="ssp245"              # in case it is relevant for the given setup (using either variable GHG's
+input_files_version="v0003"
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
                               # ozone or climatologic aerosols, AND the experiment's time range 
                               # overlaps with [2009,2100]), choose here the scenario you'd like
                               # (RCP45, XXX, all case insensitive)
