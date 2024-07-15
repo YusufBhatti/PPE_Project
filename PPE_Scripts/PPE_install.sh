@@ -1,9 +1,9 @@
 #!/bin/bash --login
 #PBS -N PPE_test_install
 #PBS -l walltime=00:10:00
-#PBS -l select=1:ncpus=128
+#PBS -l select=1:ncpus=20
 #PBS -j oe
-#PBS -A srsei8447 
+#PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
 
 #--- comments -------------------------------------------------------
@@ -41,9 +41,9 @@
 # 2024/06
 #--------------------------------------------------------------------
 #--- run directory for ECHAM-HAM ------------------------------------
-rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
+rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/"
 cwd=${PWD}/
-DIR='PPE_Debug'
+DIR='PPE_Test'
 #module purge
 source activate master
 #module load netCDF-Fortran/4.5.3-gompi-2021a
@@ -56,7 +56,7 @@ PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}
 sed -i "s|^PPEdir=.*|PPEdir='${PPEdir}'|" PPE_batch.sh 
 
-mkdir $PPEdir
+#mkdir $PPEdir
 cd $PPEdir
 echo 'Starting PPE_install script' >$PPElog
 
@@ -124,3 +124,4 @@ done < "$PPEvalues"
 mv $PPEtmp $PPEvalues 
 
 echo 'Finishing PPE_install script' >>$PPElog
+cd $cwd

@@ -44,14 +44,14 @@ make_source_backup=true   # set to true if you want to keep records of the curre
 #------------------------------------------------------------------------------------------------------
 #-- Compute settings for machine: snellius (linux_debain)
 
-queue_name="rome"                         # queue name to use on current batch system
+queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
 ncpus=40
 walltime="20:00:00"
 nproma=16                               # vector length (don't modify if you don't know about it)
-account="srsei8447"
+account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/${exp}/"
+exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Test/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -178,7 +178,6 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  ndg_file_nc    = "ndg%y4%m2.nc"
 /
 &HAMMOZ_PERTURBATIONS
-  scale_nuc_bl     = V_SCALE_NUC_BL   ! V_SCALE_NUC_BL
   scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
   scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF
   scale_emi_cmr_bb = V_SCALE_EMI_CMR_BB   ! V_SCALE_EMI_CMR_BB
@@ -195,15 +194,14 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC
   scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
   scale_wetdep_ic = V_SCALE_WETDEP_IC     ! V_SCALE_WETDEP_IC
-  scale_wetdep_ic_bc_only = V_SCALE_WETDEP_IC_BC_ONLY  ! V_SCALE_WETDEP_IC_BC_ONLY
   scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
-  scale_wetdep_bc_bc_only = V_SCALE_WETDEP_BC_BC_ONLY  ! V_SCALE_WETDEP_BC_BC_ONLY
   bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
   du_rad_ni = V_SCALE_DU_RAD_NI  ! V_SCALE_DU_RAD_NI
   pH_PERT = V_SCALE_PH_PERT  ! V_SCALE_PH_PERT 
   scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
-  scale_vertical_velocity = V_SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
-  scale_water = V_SCALE_WATER ! V_SCALE_WATER
+  scale_kappa_ss = V_SCALE_KAPPA_SS ! V_SCALE_KAPPA_SS
+  scale_kappa_so4 = V_SCALE_KAPPA_SO4 ! V_SCALE_KAPPA_SO4
+
 /
 EOF
 
