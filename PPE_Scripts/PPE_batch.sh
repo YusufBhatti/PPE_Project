@@ -1,10 +1,10 @@
 #!/bin/bash --login
 #PBS -N PPE_test_run
-#PBS -q rome
+#PBS -q genoa
 #PBS -l walltime=25:00:00
 #PBS -l select=2:ncpus=60
 #PBS -j oe
-#PBS -A srsei8447 
+#PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
 #PBS -m ae
 
@@ -49,8 +49,8 @@
 # Before execution, adapt:
 # PBS -l walltime=00:10:00            # estimated time required by this job
 # PBS -l select=4                     # nexp_maxrunning * nr of nodes
-# PBS -A n02-NEL013746                # account on ARCHER
-# PBS -M schutgens@physics.ox.ac.uk   # your email addres
+# PBS -A
+# PBS -M 
 # nexp_maxrunning=2                   # Maximum number of experiments run concurrently
 # nexp_maxran=8                       # Maximum number of experiments run by this batch job
 # rundir=".."                         # directory where you store your experimental setup
@@ -60,17 +60,17 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=2  # Maximum number of experiments run concurrently
-nexp_maxran=22      # Maximum number of experiments run by this batch job
+nexp_maxrunning=3  # Maximum number of experiments run concurrently
+nexp_maxran=23      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
-PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/PPE_Debug/'
-PPElog=$cwd'PPE_exp4_log.txt'
-PPEtmp=$cwd'PPE_exp4_tmp.txt'
+PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Test/'
+PPElog=$cwd'PPE_test_log.txt'
+PPEtmp=$cwd'PPE_test_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 

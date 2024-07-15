@@ -18,9 +18,9 @@ tail -n +2 "$input_file" | while IFS= read -r line; do
     param_values=($line)
 
     # Set the first three values to 0.75, 0.17, and 0.08
-    param_values[1]=0.75
-    param_values[2]=0.17
-    param_values[3]=0.08
+    param_values[1]=1
+    #param_values[2]=0.17
+    #param_values[3]=0.08
 
     # Iterate over the header variables (starting from index 1 to skip the first column)
     for ((i = 1; i < ${#header_array[@]}; i++)); do
@@ -34,7 +34,7 @@ tail -n +2 "$input_file" | while IFS= read -r line; do
         new_param_values[i]="4"
 
         # Set all other values after the first three variables to 1 if they are not already 4
-        for ((j = 4; j < ${#new_param_values[@]}; j++)); do
+        for ((j = 0 ; j < ${#new_param_values[@]}; j++)); do
             if [[ "${new_param_values[j]}" != "4" ]]; then
                 new_param_values[j]="1"
             fi
@@ -59,7 +59,7 @@ tail -n +2 "$input_file" | while IFS= read -r line; do
         echo "$new_line" >> "$output_file"
 
         # Stop the iteration if the new experiment name is TEST_V_SCALE_WETDEP_IC_BC_ONLY
-        if [ "$new_exp_name" == "TEST_V_SCALE_WETDEP_IC_BC_ONLY" ]; then
+        if [ "$new_exp_name" == "TEST_V_SCALE_WATER" ]; then
             exit 0
         fi
     done
