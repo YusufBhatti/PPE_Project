@@ -1,10 +1,10 @@
 &PARCTL
    nproca=20,
-   nprocb=3,
+   nprocb=2,
 /
 &RUNCTL 
  lresume        = .false.,
- lmidatm        = .false.
+ lmidatm        = .true.
  out_datapath   = "/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/normal_run/"
  out_expname    = "normal_run"
  out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
@@ -76,11 +76,11 @@
  lnudgdbx        = .false.
  lnudgini        = .false.
  nudglmin        = 1
- nudglmax        = 31
+ nudglmax        = 47
  nudgsmin        = 0
  nudgsmax        = 63
  lnudgimp        = .true.
- nudgt           = 31*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
+ nudgt           = 47*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
  ltintlin        = .false.
  ldamplin        = .true.
  nudgdamp        = 1.

@@ -930,7 +930,7 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
   USE mo_ham_kappa 
  ! YAB adding perturbing code 
   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_water
+                                     scale_RH
 
   IMPLICIT NONE
   
@@ -965,6 +965,7 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
   REAL(dp) :: zTrange, zRHrange, zKrange, zRDrange
   REAL(dp) :: ztsteps, zrhsteps, zksteps, zrdsteps
   REAL(dp) :: zt1, zrh1, zk1, zr1, zr2, zr3
+  REAL(dp) :: prelhuma ! YAB
 
   LOGICAL  :: ll1(kbdim,klev) 
 
@@ -990,8 +991,7 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
   zrhsteps = REAL((N_rh-1),dp)                 ! number of steps on the RH axis 
   zksteps = REAL((N_kappa-1),dp)               ! number of steps on the kappa axis  
   zrdsteps = REAL((N_Rd-1),dp)                 ! number of steps on the radius axis
-
-  !---since temperature and RH are independent of mode and species we can
+ !---since temperature and RH are independent of mode and species we can
   !   calculate the coordinate value for the lookup table just once
   !   rather than per mode, so we do this for the first loop iteration only
   DO jk=1,klev
@@ -1008,7 +1008,13 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
   IF (lut_kappa_version == 1) THEN
      DO jk=1,klev
         DO jl=1,kproma
-           zrh1 = MAX(prelhum(jl,jk), rh_min)       ! limit to at least RH_min
+	   prelhuma = prelhum(jl,jk)
+ ! YAB perturbing prelhum for it's input into the RH
+  	   IF (lo_hammoz_perturbations) THEN
+	     prelhuma = prelhuma * scale_RH
+	   ENDIF
+
+           zrh1 = MAX(prelhuma, rh_min)       ! limit to at least RH_min
            zrh1 = MIN(zrh1, rh_max)                 ! limit to at most T_max
            ix_rh(jl,jk) = 1 + NINT(zrhsteps*(zrh1-rh_min)/zRHrange) ! linear interpolation from actual
                                                                     ! RH to lookup table entry
@@ -1018,7 +1024,7 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
      DO jk=1,klev
         DO jl=1,kproma
            ix_rh(jl,jk) = CEILING( &                ! see redmine #260
-                          (LOG(1._dp-(1._dp-rh_step_compress)*(prelhum(jl,jk)-rh_min)*inv_rh_init_step)) &
+                          (LOG(1._dp-(1._dp-rh_step_compress)*(prelhuma-rh_min)*inv_rh_init_step)) &
                           / log_rh_step_compress )
            ix_rh(jl,jk) = MAX(ix_rh(jl,jk),1)
            ix_rh(jl,jk) = MIN(ix_rh(jl,jk),N_rh)
@@ -1118,10 +1124,10 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
                
               !---get the growth factor
               zgf = gf(ix_rd, ix_t(jl,jk), ix_rh(jl,jk), ix_k)
-	      ! YAB aerosol water uptake scaling
-	      IF (lo_hammoz_perturbations) THEN
-	      	zgf = zgf * scale_water
-	      ENDIF
+!	      ! YAB aerosol water uptake scaling
+!	      IF (lo_hammoz_perturbations) THEN
+!	      	zgf = zgf * scale_water
+!	      ENDIF
               !---wet radius = dryradius * growth factor
               zm6rp_tmp(jl,jk) = zm6dry_safe(jl,jk) * zgf
                

@@ -381,7 +381,7 @@ MODULE mo_hammoz_het_tropo_rates
                           R_HO2  = 0.082057_dp        ! Universal gas constant [atmLmol-1k-1]
 
   REAL(dp)             :: beta, alpha, gamma_n2o5(plonl,plev,NAERO_SPEC),gamma_ho2(plonl,plev,NAERO_SPEC), &
-                          gamma_hno3(plonl,plev,NAERO_SPEC),gamma_o3(plonl,plev,NAERO_SPEC), ztotal_mass(plonl,plev), relhum_dust, scale_pH,&
+                          gamma_hno3(plonl,plev,NAERO_SPEC),gamma_o3(plonl,plev,NAERO_SPEC), ztotal_mass(plonl,plev), relhum_dust,&
                           var, r_p(plonl,plev), pH, H_HO2_eff, k_eff
   INTEGER              :: jk, jl, jt, ibc
 
@@ -523,11 +523,14 @@ MODULE mo_hammoz_het_tropo_rates
  
     gamma = 0.0_dp
     H_HO2_eff = 0.0_dp
-    pH = 1.e-5_dp ! Assume a pH value of 5
-    !! pH perturbation ( * 10 = 
+
+! YAB pH perturbation
     IF (lo_hammoz_perturbations) THEN
-!	scale_pH = pH_pert / pH
-	pH = pH * scale_pH
+    !       scale_pH = pH_pert / pH
+       pH = 1.e-5_dp * pH_pert
+    ELSE
+      pH = 1.e-5_dp ! Assume a pH value of 5
+ 
     ENDIF
 
     k_eff = (8.6e-5_dp + (2.1e-5_dp/pH)*1.e8_dp)/(1. + (2.1e-5_dp/pH)) ![1/(M s)]
@@ -667,6 +670,7 @@ MODULE mo_hammoz_het_tropo_rates
   USE mo_exception,     ONLY : message_text, finish
   USE mo_memory_g3b,    ONLY: relhum
   !USE mo_debugs,        ONLY: ddf01,ddf02,ddf03,ddf04,ddf05
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, pH_pert
 
   ! determine reaction probabilities
 
@@ -686,7 +690,15 @@ MODULE mo_hammoz_het_tropo_rates
   ! Initialization
   gamma = 0.0_dp
   H_HO2_eff = 0.0_dp
-  pH = 1.e-5_dp ! Assume a pH value of 5
+  ! YAB pH perturbation
+  IF (lo_hammoz_perturbations) THEN
+  !       scale_pH = pH_pert / pH
+     pH = 1.e-5_dp * pH_pert
+  ELSE
+    pH = 1.e-5_dp ! Assume a pH value of 5
+
+  ENDIF
+
   k_eff = (8.6e-5_dp + (2.1e-5_dp/pH)*1.e8_dp)/(1. + (2.1e-5_dp/pH)) ![1/(M s)]
 
     ! reaction probability on cloud droplets Thornton et. al 2008

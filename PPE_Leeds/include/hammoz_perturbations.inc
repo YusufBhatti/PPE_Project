@@ -91,5 +91,6 @@ NAMELIST /hammoz_perturbations/ &
   scale_so2_reactions_AQ, &
   scale_dms_reactions, &
   scale_dms_prop, &
-  scale_water
+  scale_water, &
+  scale_RH
 

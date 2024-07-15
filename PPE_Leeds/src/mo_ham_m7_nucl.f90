@@ -733,7 +733,7 @@ SUBROUTINE nucl_vehkamaeki(kproma, kbdim,   klev,        & ! ECHAM5 dimensions
       ! In the boundary layer:
       DO jk = int(ppbl(jl)), klev
       !  mean_pforest = SUM(pforest(jl)) / REAL(SIZE(pforest(jl)), dp)     
-        PRINT *, 'Mean of pforest:', pforest(jl)
+    !    PRINT *, 'Mean of pforest:', pforest(jl)
 
      !        IF (lo_hammoz_perturbations) THEN
 	pns(jl,jk)  = 1.0_dp

@@ -44,12 +44,12 @@ make_source_backup=false   # set to true if you want to keep records of the curr
 #------------------------------------------------------------------------------------------------------
 #-- Compute settings for machine: snellius (linux_debain)
 
-queue_name="rome"                         # queue name to use on current batch system
+queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
-ncpus=60
-walltime="25:00:00"
+ncpus=40                                # total number of cpus
+walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
-account="srsei8447"
+account="srsei9480"
 email="y.bhatti@sron.nl"
 exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/DEBUG/${exp}/"
 
@@ -64,7 +64,7 @@ model_bin=${model_dir}/bin/echam6                 # model bin name
 emissions_spec=${script_dir}/emi_spec_${exp}.txt  # name of your exp emi_spec file to copy to $exp_dir
 
 hres="T63"                    # horizontal spectral truncation
-vres="L31"                    # vertical resolution
+vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
@@ -94,7 +94,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &RUNCTL 
  nproma         = ${nproma}
  lresume        = $init_restart_flag,
- lmidatm        = .false.
+ lmidatm        = .true.
  out_datapath   = "$exp_dir"
  out_expname    = "$exp"
  out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;

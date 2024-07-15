@@ -103,7 +103,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'days','last',0
- trigfiles      = 1,'days','first',0
+ trigfiles      = 1,'months','first',0
  putrerun       = 1,'month','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.

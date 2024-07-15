@@ -44,7 +44,7 @@ make_source_backup=false   # set to true if you want to keep records of the curr
 #------------------------------------------------------------------------------------------------------
 #-- Compute settings for machine: snellius (linux_debain)
 
-queue_name="rome"                         # queue name to use on current batch system
+queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
 ncpus=40                                # total number of cpus
 walltime="20:00:00"                     # job estimated runtime

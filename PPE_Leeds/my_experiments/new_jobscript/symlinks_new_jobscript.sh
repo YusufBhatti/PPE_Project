@@ -873,7 +873,7 @@ if $flag_nudg ; then
           previous_prefix=$prefix
        fi
 
-       nudg_name="${prefix}${hres}${vres}_${idate}"
+       nudg_name="${prefix}_${hres}${vres}_${idate}"
 
        #-- make the links:
        for ext in ${exts[*]} ; do
