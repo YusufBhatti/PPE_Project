@@ -65,7 +65,6 @@ NAMELIST /hammoz_perturbations/ &
   scale_wetdep_ic_bc_only,  & ! Scale factor for in-cloud wet deposition of BC (independantly of the above scalings)
   scale_wetdep_bc_bc_only,  & ! Scale factor for below-cloud wet deposition of BC (independantly of the above scalings)
 !  scale_sed
-  pH_pert,        	    & ! Scale the cloud-water pH
 !--- Ageing:
   scale_so4_coating,        & ! Scale the coating thickness of SO4 required to 'age' particles
   scale_intra_mode_coagulation,   & ! Scale the diagonal elements of the coagulation kernel matrix
@@ -85,12 +84,9 @@ NAMELIST /hammoz_perturbations/ &
   scale_activation,         & ! Scale the number of ARG activated particles
   scale_accretion,          & ! Scale the accretion
   scale_solar_const,        & ! scale the solar constant (equally across all bands)
-
-  scale_so2_prop, &
   scale_so2_reactions, &
-  scale_so2_reactions_AQ, &
-  scale_dms_reactions, &
-  scale_dms_prop, &
   scale_water, &
-  scale_RH
-
+  scale_RH,    &
+  pH_pert,     & ! Scale the cloud-water pH
+  scale_kappa_ss, &
+  scale_kappa_so4

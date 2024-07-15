@@ -62,8 +62,8 @@ MODULE mo_hammoz_perturbations
             scale_intra_mode_coagulation, scale_inter_mode_coagulation, &
             KK_exponent, KK_LWP_exponent, scale_activation, scale_accretion, &
             scale_solar_const, scale_emi_bf, oc_rad_ni, pH_pert, du_rad_ni, &
-	    scale_so2_prop, scale_so2_reactions, scale_so2_reactions_AQ, &
-	    scale_dms_reactions, scale_dms_prop, scale_water, scale_RH
+	    scale_so2_reactions, scale_water, scale_RH, scale_kappa_ss,&
+	    scale_kappa_so4
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -112,11 +112,7 @@ MODULE mo_hammoz_perturbations
                  scale_emi_ssa = 1.0_dp,     &! Scale factor for SSA emissions
                  scale_emi_du = 1.0_dp,    &! Scale factor for dust emissions
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
-                 scale_so2_prop = 1.0_dp,    &! Scale factor for ANTH SO2 emissions
-                 scale_so2_reactions = 1.0_dp,    &! Scale factor for ANTH SO2 emissions
-                 scale_so2_reactions_AQ = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
-                 scale_dms_reactions = 1.0_dp,    &! Scale factor for ANTH SO2 emissions
-                 scale_dms_prop = 1.0_dp    ! Scale factor for ANTH SO2 emissions
+                 scale_so2_reactions = 1.0_dp    ! Scale factor for all SO2 reactions
 
   REAL(dp)    :: emi_prim_so4_frac = 0.025_dp,    & ! Absolute fraction of SO2 emitted as primary SO4
                  emi_prim_so4_cmr  = 0.0075E-3_dp   ! Absolute count median radius of primary SO4 particles [m]
@@ -154,7 +150,10 @@ MODULE mo_hammoz_perturbations
                  scale_accretion = 1.0_dp,   &! Scale the accretion (tendency?)
                  scale_RH = 1.0_dp,     &! Scale the aerosol water uptake
                  scale_water = 1.0_dp,     &! Scale the aerosol water uptake
-		 pH_pert = 1.0_dp     ! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by   0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
+                 pH_pert = 1.0_dp,      &! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by   0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
+                 scale_kappa_ss = 1.0_dp, &
+                 scale_kappa_so4 = 1.0_dp
+
   REAL(dp)    :: scale_solar_const = 1.0  ! Scale the (AMIP) solar constant (equally across bands)
 
 CONTAINS
@@ -284,12 +283,10 @@ CONTAINS
        CALL p_bcast (scale_accretion, p_io)
        CALL p_bcast (scale_water, p_io)
        CALL p_bcast (scale_RH, p_io)
+       CALL p_bcast (scale_kappa_ss, p_io)
+       CALL p_bcast (scale_kappa_so4, p_io)
        ! SO2 chemistry
-       CALL p_bcast (scale_so2_prop,        p_io)
        CALL p_bcast (scale_so2_reactions,        p_io)
-       CALL p_bcast (scale_so2_reactions_AQ,        p_io)
-       CALL p_bcast (scale_dms_reactions,        p_io)
-       CALL p_bcast (scale_dms_prop,        p_io)
 
 
     END IF
@@ -555,7 +552,7 @@ CONTAINS
       ENDDO
     ENDDO
 
-!    --- Anthropogenic SO2:
+!    -- Anthropogenic SO2: YAB
 
     nsec=SIZE(sectors_so2)
     DO isec=1, nsec

@@ -528,8 +528,8 @@ MODULE mo_hammoz_het_tropo_rates
     IF (lo_hammoz_perturbations) THEN
     !       scale_pH = pH_pert / pH
        pH = 1.e-5_dp * pH_pert
-    ELSE
-      pH = 1.e-5_dp ! Assume a pH value of 5
+!    ELSE
+!      pH = 1.e-5_dp ! Assume a pH value of 5
  
     ENDIF
 
@@ -694,8 +694,8 @@ MODULE mo_hammoz_het_tropo_rates
   IF (lo_hammoz_perturbations) THEN
   !       scale_pH = pH_pert / pH
      pH = 1.e-5_dp * pH_pert
-  ELSE
-    pH = 1.e-5_dp ! Assume a pH value of 5
+!  ELSE
+!    pH = 1.e-5_dp ! Assume a pH value of 5
 
   ENDIF
 
