@@ -99,7 +99,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
                                    d_prod_ms4cs
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions_AQ, scale_so2_prop, scale_so2_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
   
   IMPLICIT NONE
 
@@ -426,11 +426,6 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
            !    heterogeneous chemistry to sulfate, i.e. d(SO4):
 !gf           zdso4(jl,jk)=zdso2tot
            zdso4(jl,jk)=zdso2tot*(mw_so4/mw_so2) !YAB 
-           IF (lo_hammoz_perturbations) THEN
-
-           	zdso4(jl,jk) = zdso4(jl,jk) * scale_so2_prop  !YAB 
-
-           ENDIF
 
            !--- Liquid fraction of the total SO2:
 
@@ -616,7 +611,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
                                     d_prod_so4_so2_oh,  & 
                                     d_prod_h2so4
   USE mo_exception,          ONLY: finish
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_dms_reactions, scale_dms_prop, scale_so2_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
 
  
   IMPLICIT NONE
@@ -863,33 +858,14 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               !--- ztoso2 is the fraction of DMS oxidized to SO2:
               !
            ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2)
-	   ! YAB fraction of DMS oxidized to SO2 PERTURB
-           IF (lo_hammoz_perturbations) THEN
-
-	           ztoso2 = ztoso2 * scale_dms_prop
-
-           ENDIF
 
            zdms2so2oh = zdms*ztoso2*zconv_dms_so2       !>>dod bugfix(#49) <<dod
-
-           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB
-
-	           zdms2so2oh = zdms2so2oh * scale_so2_reactions       !>>dod bugfix(#49) <<dod
-
-           ENDIF
 
            pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2oh
 
            !--- (1-ztoso2) is converted to MSA and assumed to occur as sulfate:
 
            zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4
-
-           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB
-
-	           zdms2so4 = zdms2so4  * scale_so2_reactions
-
-           ENDIF
-
 
            pxtte(jl,jk,idt_so4)=pxtte(jl,jk,idt_so4)+zdms2so4
 

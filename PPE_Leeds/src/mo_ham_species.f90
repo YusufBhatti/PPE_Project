@@ -142,7 +142,9 @@ MODULE mo_ham_species
 !gf
   USE mo_ham,             ONLY: mw_so2, mw_so4, mw_dms
 !gf
-
+! YAB
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_kappa_ss, scale_kappa_so4
+! YAB
   IMPLICIT NONE
 
   !--- executable procedure ----
@@ -310,7 +312,7 @@ MODULE mo_ham_species
                       lelectrolyte = .TRUE.,             &
                       nion         = 2,                  &
                       osm          = 1._dp,              &
-                      kappa        = 0.60_dp,            &
+                      kappa        = 0.60_dp * scale_kappa_so4,            &
                       lburden      = .TRUE.,             &
                       idx          = id_so4              )
 !<<DT
@@ -396,7 +398,7 @@ MODULE mo_ham_species
                       lelectrolyte = .TRUE.,              &
                       nion         = 2,                   &
                       osm          = 1._dp,               & 
-                      kappa        = 1._dp,               &    !>>dod<<
+                      kappa        = 1._dp * scale_kappa_ss,               &    !>>dod<<
                       ldrydep      = .TRUE.,              &
                       lwetdep      = .TRUE.,              &   
                       idx          = id_ss                   )

@@ -1008,13 +1008,13 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
   IF (lut_kappa_version == 1) THEN
      DO jk=1,klev
         DO jl=1,kproma
-	   prelhuma = prelhum(jl,jk)
+	   !prelhuma = prelhum(jl,jk)
  ! YAB perturbing prelhum for it's input into the RH
-  	   IF (lo_hammoz_perturbations) THEN
-	     prelhuma = prelhuma * scale_RH
-	   ENDIF
+  	   !IF (lo_hammoz_perturbations) THEN
+	   !  prelhuma = prelhuma * scale_RH
+	   !ENDIF
 
-           zrh1 = MAX(prelhuma, rh_min)       ! limit to at least RH_min
+           zrh1 = MAX(prelhum(jl,jk), rh_min)       ! limit to at least RH_min
            zrh1 = MIN(zrh1, rh_max)                 ! limit to at most T_max
            ix_rh(jl,jk) = 1 + NINT(zrhsteps*(zrh1-rh_min)/zRHrange) ! linear interpolation from actual
                                                                     ! RH to lookup table entry
@@ -1024,7 +1024,7 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
      DO jk=1,klev
         DO jl=1,kproma
            ix_rh(jl,jk) = CEILING( &                ! see redmine #260
-                          (LOG(1._dp-(1._dp-rh_step_compress)*(prelhuma-rh_min)*inv_rh_init_step)) &
+                          (LOG(1._dp-(1._dp-rh_step_compress)*(prelhum(jl,jk)-rh_min)*inv_rh_init_step)) &
                           / log_rh_step_compress )
            ix_rh(jl,jk) = MAX(ix_rh(jl,jk),1)
            ix_rh(jl,jk) = MIN(ix_rh(jl,jk),N_rh)
