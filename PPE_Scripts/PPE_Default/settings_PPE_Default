@@ -194,11 +194,11 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
   scale_wetdep_ic = V_SCALE_WETDEP_IC     ! V_SCALE_WETDEP_IC
   scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
-  bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
-  du_rad_ni = V_SCALE_DU_RAD_NI  ! V_SCALE_DU_RAD_NI
+  bc_rad_ni 	  = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
+  du_rad_ni  	  = V_SCALE_DU_RAD_NI  ! V_SCALE_DU_RAD_NI
   scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
-  scale_kappa_ss = SCALE_KAPPA_SS ! SCALE_KAPPA_SS
-  scale_kappa_so4 = SCALE_KAPPA_SO4 ! SCALE_KAPPA_SO4
+  scale_kappa_ss   = V_SCALE_KAPPA_SS ! V_SCALE_KAPPA_SS
+  scale_kappa_so4  = V_SCALE_KAPPA_SO4 ! V_SCALE_KAPPA_SO4
   pH_pert          = V_SCALE_PH_PERT ! V_SCALE_PH_PERT
   scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO2_REACTIONS
 
