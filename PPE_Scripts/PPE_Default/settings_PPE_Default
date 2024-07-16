@@ -33,7 +33,7 @@ exp="PPE_Default"
 script_dir="/home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default/"
 echam_jobscript=${script_dir}/echam_jobscript_${exp}.sh # echam batch job script name
 
-make_source_backup=true   # set to true if you want to keep records of the current state of your code
+make_source_backup=false   # set to true if you want to keep records of the current state of your code
                           # it will create a text file named "source_info_[exp]_YYYY-MM-DD_HH.mm.txt"
                           # where you'll find all details (base version number, differences to base version
                           # and how to restore your code in future)
@@ -46,12 +46,12 @@ make_source_backup=true   # set to true if you want to keep records of the curre
 
 queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
-ncpus=40
-walltime="20:00:00"
+ncpus=40                                # total number of cpus
+walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Test/${exp}/"
+exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_TEST/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -103,8 +103,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'days','last',0
- trigfiles      = 1,'months','first',0
- putrerun       = 1,'month','last',0
+ trigfiles      = 1,'days','first',0
+ putrerun       = 4,'days','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
@@ -187,9 +187,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_emi_bf     = V_SCALE_EMI_BF  ! V_SCALE_EMI_BF
   scale_emi_dms    = V_SCALE_EMI_DMS  ! V_SCALE_EMI_DMS
   scale_emi_ssa    = V_SCALE_EMI_SSA  ! V_SCALE_EMI_SSA
-  scale_emi_du    = V_SCALE_EMI_DUST  ! V_SCALE_EMI_DUST
-  scale_emi_so2    = V_SCALE_EMI_ANTH_SO2  ! V_SCALE_EMI_ANTH_SO2
-  scale_so2_reactions = V_SCALE_SO2_REACTIONS  ! V_SCALE_SO2_REACTIONS
+  scale_emi_so2    = V_SCALE_EMI_ANTH_SO2 ! V_SCALE_EMI_ANTH_SO2
+  scale_emi_du     = V_SCALE_EMI_DUST ! V_SCALE_EMI_DUST
   scale_drydep_ait = V_SCALE_DRYDEP_AIT   ! V_SCALE_DRYDEP_AIT
   scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC
   scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
@@ -197,10 +196,11 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
   bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
   du_rad_ni = V_SCALE_DU_RAD_NI  ! V_SCALE_DU_RAD_NI
-  pH_PERT = V_SCALE_PH_PERT  ! V_SCALE_PH_PERT 
   scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
-  scale_kappa_ss = V_SCALE_KAPPA_SS ! V_SCALE_KAPPA_SS
-  scale_kappa_so4 = V_SCALE_KAPPA_SO4 ! V_SCALE_KAPPA_SO4
+  scale_kappa_ss = SCALE_KAPPA_SS ! SCALE_KAPPA_SS
+  scale_kappa_so4 = SCALE_KAPPA_SO4 ! SCALE_KAPPA_SO4
+  pH_pert          = V_SCALE_PH_PERT ! V_SCALE_PH_PERT
+  scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO2_REACTIONS
 
 /
 EOF
