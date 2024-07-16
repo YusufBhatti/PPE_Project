@@ -1,7 +1,7 @@
 #!/bin/bash --login
 #PBS -N PPE_test_install
-#PBS -l walltime=00:10:00
-#PBS -l select=1:ncpus=20
+#PBS -l walltime=00:20:00
+#PBS -l select=2:ncpus=80
 #PBS -j oe
 #PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
@@ -124,4 +124,4 @@ done < "$PPEvalues"
 mv $PPEtmp $PPEvalues 
 
 echo 'Finishing PPE_install script' >>$PPElog
-cd $cwd
+#cd $cwd
