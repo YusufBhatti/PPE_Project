@@ -43,6 +43,7 @@ lib
 # log
 *.log
 version.c
+.ipynb_checkpoints
 # swap
 *.swp
 # Files to ignore
