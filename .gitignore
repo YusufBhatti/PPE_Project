@@ -24,8 +24,9 @@ src/*.mod
 src/*.lst
 
 # /experiments/
-my_experiments/*
-
+my_experiments
+*.sh.*
+*log.txt
 # binaries
 bin/*
 lib
@@ -44,7 +45,7 @@ lib
 version.c
 # swap
 *.swp
-
+# Files to ignore
 RUNDIR/
 compile_and_generate.sh
 echam6.3-ham2.3-moz1.0/

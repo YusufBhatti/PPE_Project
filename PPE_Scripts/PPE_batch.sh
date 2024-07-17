@@ -131,13 +131,13 @@ while [ "$nexp_ran" -lt "$nexp_maxran" ] && [ "$batch_finished" == 0 ]; do
 	echo $nexp_running >>$PPElog
 
       fi # nexp_running < nexp_maxrunning
-      echo 'THIS IS FOR FI #1' >>$PPElog
+    #  echo 'THIS IS FOR FI #1' >>$PPElog
     fi # running == 0
-    echo 'THIS IS FOR FI #2' >>$PPElog
+   # echo 'THIS IS FOR FI #2' >>$PPElog
 
     if [ "$expid" != 0 ]; then
       echo "$expid ${param_values[*]} $installed $running $ended" >>$PPEtmp
-      echo 'THIS IS CHANGING RUNNING INSTALLED NUMBERS' >>$PPElog
+      #echo 'THIS IS CHANGING RUNNING INSTALLED NUMBERS' >>$PPElog
 
     fi
 
