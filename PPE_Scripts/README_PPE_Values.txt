@@ -1,5 +1,5 @@
 Setting up directories and files:
-rundir="/home/ybhatti/yusufb/PPE_Echam/perturbations_6.3/my_experiments": Defines the main directory where the experiments are located.
+rundir="/home/ybhatti/yusufb/Branches/Perturbed_Model_Dir/my_experiments": Defines the main directory where the experiments are located.
 
 PPEdir=$rundir'/snellius/original/PPE_script_test/': Defines the directory where the PPE scripts are located.
 PPElog=$PPEdir'PPE_exp4_log.txt': Specifies the log file path for recording the script's output.

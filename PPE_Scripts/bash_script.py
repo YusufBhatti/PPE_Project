@@ -54,7 +54,7 @@ with open(output_file, 'w') as f_out:
                 scale_factor = Parameter_values(header_array[i])
                 for r in range(0,len(scale_factor)):
                     # Create a new experiment name based on the header variable
-                    new_exp_name = f"TEST_{header_array[i]}_{r+1}"
+                    new_exp_name = f"PPE_{header_array[i]}_{r+1}"
 
                     # Copy the current param_values array
                     new_param_values = param_values[:]
