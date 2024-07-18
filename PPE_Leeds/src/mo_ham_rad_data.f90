@@ -174,7 +174,7 @@ CONTAINS
     USE mo_ham,  ONLY: naerorad, nrad, nham_subm, HAM_M7, HAM_SALSA
     !>>dwp Added perturbed physics setup:
     USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                       bc_rad_ni, oc_rad_ni, du_rad_ni
+                                       bc_rad_ni, du_rad_ni
     !<<dwp ! YAB added oc and du
 
 
@@ -187,7 +187,7 @@ CONTAINS
     INTEGER :: itable
 
     REAL(dp) :: scale_bc_rad_ni
-    REAL(dp) :: scale_oc_rad_ni ! YAB added
+!    REAL(dp) :: scale_oc_rad_ni ! YAB added
     REAL(dp) :: scale_du_rad_ni ! YAB added
 
     !--- Initialize wavelength settings

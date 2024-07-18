@@ -61,8 +61,8 @@ MODULE mo_cuascent
     &                                 cminbuoy, cmaxbuoy
   USE mo_cuadjust,             ONLY : cuadjtq
   !>>dwp Added perturbed physics setup:
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_tr_entrainment
+!  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+!                                     scale_tr_entrainment
   !<<dwp
 
 
@@ -426,11 +426,11 @@ CONTAINS
           ! Entrainment = Ambient tracer mmr * (downdraft mf entrainment +
           ! updraft mf entrainment)
           zxteen=pxtenh(jl,jk+1,jt)*(zdmfen(jl)+zoentr(jl,jk))
-          !>> dwp perturb aerosol entrainment
-          IF (lo_hammoz_perturbations) THEN
-              zxteen = zxteen * scale_tr_entrainment
-          ENDIF
-          !<< dwp 
+!          !>> dwp perturb aerosol entrainment
+!          IF (lo_hammoz_perturbations) THEN
+!              zxteen = zxteen * scale_tr_entrainment
+!          ENDIF
+!          !<< dwp 
           ! Detrainment = In-cloud tracer mmr * (downdraft mf detrainment +
           ! updraft mf detrainment)
           zxtude=pxtu(jl,jk+1,jt)*(zdmfde(jl)+zodetr(jl,jk))

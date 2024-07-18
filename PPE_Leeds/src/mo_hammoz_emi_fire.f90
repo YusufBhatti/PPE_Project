@@ -58,11 +58,11 @@ MODULE mo_hammoz_emi_fire
   USE mo_vphysc,           ONLY: vphysc
   USE mo_control,          ONLY: vct, nvclev
   !>>dwp Added perturbed physics setup:
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     prop_fire_in_pbl_p1, &
-                                     prop_fire_in_pbl_p2, &
-                                     prop_fire_in_pbl 
-  !<<dwp
+!  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+!                                     prop_fire_in_pbl_p1, &
+!                                     prop_fire_in_pbl_p2, &
+!                                     prop_fire_in_pbl 
+!  !<<dwp
 
 
   INTEGER, INTENT(in)     :: kproma
@@ -106,15 +106,15 @@ MODULE mo_hammoz_emi_fire
 
   !>> dwp add perturbations in the proportion of fire emitted above and below
   !       the PBL
-  IF (lo_hammoz_perturbations) THEN
-    zfrac_abv1 = prop_fire_in_pbl_p1
-    zfrac_abv2 = prop_fire_in_pbl_p2
-    zfrac_blw = prop_fire_in_pbl
-  ELSE
-    zfrac_abv1 = 0.17_dp
-    zfrac_abv2 = 0.08_dp
-    zfrac_blw = 0.75_dp
-  ENDIF
+!  IF (lo_hammoz_perturbations) THEN
+!    zfrac_abv1 = prop_fire_in_pbl_p1
+!    zfrac_abv2 = prop_fire_in_pbl_p2
+!    zfrac_blw = prop_fire_in_pbl
+!  ELSE
+  zfrac_abv1 = 0.17_dp
+  zfrac_abv2 = 0.08_dp
+  zfrac_blw = 0.75_dp
+  !ENDIF
  
   zbc2d_abv1(1:kproma)=zfrac_abv1*zbc2d(1:kproma)
   zbc2d_abv2(1:kproma)=zfrac_abv2*zbc2d(1:kproma)

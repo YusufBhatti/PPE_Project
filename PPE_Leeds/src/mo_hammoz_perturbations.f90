@@ -50,20 +50,14 @@ MODULE mo_hammoz_perturbations
             init_hammoz_emi_perturbations, &
             scale_nuc_bl, scale_nuc_ft, &
             scale_emi_cmr_ff, scale_emi_cmr_bb, scale_emi_cmr_bf, &
-            scale_emi_bc, scale_emi_dms, &
-            scale_drydep_ait, scale_drydep_acc, scale_drydep_coa, &
-            emi_prim_so4_frac, emi_prim_so4_cmr, &
-            scale_wetdep_ic, scale_wetdep_ic_bc_only, &
-            scale_wetdep_bc, scale_wetdep_bc_bc_only, &
-            bc_rad_ni, &
-            prop_fire_in_pbl_p1, prop_fire_in_pbl_p2, prop_fire_in_pbl, &
+            scale_emi_bc, scale_emi_dms, scale_emi_bf, &
+	    scale_drydep_ait, scale_drydep_acc, scale_drydep_coa, &
+            scale_wetdep_ic, scale_wetdep_bc, & 
+            bc_rad_ni, du_rad_ni, &
             scale_so4_coating, &
-            scale_tr_entrainment, scale_vertical_velocity, &
-            scale_intra_mode_coagulation, scale_inter_mode_coagulation, &
-            KK_exponent, KK_LWP_exponent, scale_activation, scale_accretion, &
-            scale_solar_const, scale_emi_bf, oc_rad_ni, pH_pert, du_rad_ni, &
-	    scale_so2_reactions, scale_water, scale_RH, scale_kappa_ss,&
-	    scale_kappa_so4
+            pH_pert, &
+	    scale_so2_reactions, &
+            scale_kappa_ss, scale_kappa_so4
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -114,43 +108,38 @@ MODULE mo_hammoz_perturbations
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
                  scale_so2_reactions = 1.0_dp    ! Scale factor for all SO2 reactions
 
-  REAL(dp)    :: emi_prim_so4_frac = 0.025_dp,    & ! Absolute fraction of SO2 emitted as primary SO4
-                 emi_prim_so4_cmr  = 0.0075E-3_dp   ! Absolute count median radius of primary SO4 particles [m]
+  !REAL(dp)    :: emi_prim_so4_cmr  = 0.0075E-3_dp   ! Absolute count median radius of primary SO4 particles [m]
 
   REAL(dp)    :: scale_drydep_ait = 1.0_dp, & ! Scale factor for dry deposition of Aitken modes
                  scale_drydep_acc = 1.0_dp, & ! Scale factor for dry deposition of accumulation modes
                  scale_drydep_coa = 1.0_dp    ! Scale factor for dry deposition of coarse modes
 
   REAL(dp)    :: scale_wetdep_ic = 1.0_dp, & ! Scale factor for in-cloud wet deposition
-                 scale_wetdep_bc = 1.0_dp, & ! Scale factor for below-cloud wet deposition
-                 scale_wetdep_ic_bc_only = 1.0_dp, & ! Scale factor for in-cloud wet deposition of BC (independantly of the above scalings)
-                 scale_wetdep_bc_bc_only = 1.0_dp    ! Scale factor for below-cloud wet deposition of BC (independantly of the above scalings)
+                 scale_wetdep_bc = 1.0_dp  ! Scale factor for below-cloud wet deposition
+  !               scale_wetdep_ic_bc_only = 1.0_dp, & ! Scale factor for in-cloud wet deposition of BC (independantly of the above scalings)
+ !                scale_wetdep_bc_bc_only = 1.0_dp    ! Scale factor for below-cloud wet deposition of BC (independantly of the above scalings)
 
-  REAL(dp)    :: scale_tr_entrainment = 1.0_dp, & ! Scale aerosol entrainment rate
-                 scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
+ ! REAL(dp)    :: scale_tr_entrainment = 1.0_dp, & ! Scale aerosol entrainment rate
+ !                scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
 
-  REAL(dp)    :: bc_rad_ni = 0.71_dp  ! Absolute value of imaginary part of the refractive index (for BC) at 550 nm (default)
-  REAL(dp)    :: oc_rad_ni = 0.0055_dp  ! Absolute value of imaginary part of the refractive index (for OC) at 550 nm (default)
-
-  REAL(dp)    :: du_rad_ni = 0.001_dp  ! Absolute value of imaginary part of the refractive index (for DUST) at 550 nm (default)
+  REAL(dp)    :: bc_rad_ni = 0.71_dp,  &! Absolute value of imaginary part of the refractive index (for BC) at 550 nm (defaul
+                 du_rad_ni = 0.001_dp  ! Absolute value of imaginary part of the refractive index (for DUST) at 550 nm (default)
 
 
-  REAL(dp)    :: prop_fire_in_pbl_p1 = 0.17_dp, & ! The proportion of (G/F)FIRE tracer emitted into the layer imediately above the PBL (PBL+1)
-                 prop_fire_in_pbl_p2 = 0.08_dp, & ! The proportion of (G/F)FIRE tracer emitted into PBL+2
-                 prop_fire_in_pbl = 0.75_dp       ! The proportion of (G/F)FIRE tracer emitted into the PBL
-
+!  REAL(dp)    :: prop_fire_in_pbl_p1 = 0.17_dp, & ! The proportion of (G/F)FIRE tracer emitted into the layer imediately above the PBL (PBL+1)
+!                 prop_fire_in_pbl_p2 = 0.08_dp, & ! The proportion of (G/F)FIRE tracer emitted into PBL+2
+!                 prop_fire_in_pbl = 0.75_dp       ! The proportion of (G/F)FIRE tracer emitted into the PBL
+!
   REAL(dp)    :: scale_so4_coating = 1.0_dp  ! Scale the coating thickness of SO4 required to 'age' particles (move them
                                              !  from insoluble to soluble modes)
-  REAL(dp)    :: scale_intra_mode_coagulation = 1.0_dp,  & ! Scale the diagonal elements of the coagulation kernel matrix
-                 scale_inter_mode_coagulation = 1.0_dp     ! Scale the off-diagonal elements of the coagulation kernel matrix
+!  REAL(dp)    :: scale_intra_mode_coagulation = 1.0_dp,  & ! Scale the diagonal elements of the coagulation kernel matrix
+!                 scale_inter_mode_coagulation = 1.0_dp     ! Scale the off-diagonal elements of the coagulation kernel matrix
 
-  REAL(dp)    :: KK_exponent = -1.79_dp, & ! The exponent to use in the KK autoconversion scheme
-                 KK_LWP_exponent = 2.47_dp, &  ! The LWP exponent in the KK autoconversion scheme.
-                 scale_activation = 1.0_dp, & ! Scale the number of ARG activated particles
-                 scale_accretion = 1.0_dp,   &! Scale the accretion (tendency?)
-                 scale_RH = 1.0_dp,     &! Scale the aerosol water uptake
-                 scale_water = 1.0_dp,     &! Scale the aerosol water uptake
-                 pH_pert = 1.0_dp,      &! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by   0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
+!  REAL(dp)    ::! KK_exponent = -1.79_dp, & ! The exponent to use in the KK autoconversion scheme
+!                 KK_LWP_exponent = 2.47_dp, &  ! The LWP exponent in the KK autoconversion scheme.
+                ! scale_activation = 1.0_dp, & ! Scale the number of ARG activated particles
+                ! scale_accretion = 1.0_dp,   &! Scale the accretion (tendency?)
+  REAL(dp)    :: pH_pert = 1.0_dp,      &! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by   0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
                  scale_kappa_ss = 1.0_dp, &
                  scale_kappa_so4 = 1.0_dp
 
@@ -253,36 +242,36 @@ CONTAINS
        CALL p_bcast (scale_emi_ssa,        p_io)
        CALL p_bcast (scale_emi_du,        p_io)
        CALL p_bcast (scale_emi_so2,        p_io)
-       CALL p_bcast (emi_prim_so4_frac,    p_io)
-       CALL p_bcast (emi_prim_so4_cmr,    p_io)
+!       CALL p_bcast (emi_prim_so4_frac,    p_io)
+!       CALL p_bcast (emi_prim_so4_cmr,    p_io)
        CALL p_bcast (scale_drydep_ait,     p_io)
        CALL p_bcast (scale_drydep_acc,     p_io)
        CALL p_bcast (scale_drydep_coa,     p_io)
        CALL p_bcast (scale_wetdep_ic,      p_io)
        CALL p_bcast (scale_wetdep_bc,      p_io)
-       CALL p_bcast (scale_wetdep_ic_bc_only,    p_io)
-       CALL p_bcast (scale_wetdep_bc_bc_only,     p_io)
+     !  CALL p_bcast (scale_wetdep_ic_bc_only,    p_io)
+     !  CALL p_bcast (scale_wetdep_bc_bc_only,     p_io)
        CALL p_bcast (bc_rad_ni,      p_io)
-       CALL p_bcast (oc_rad_ni,      p_io) 
+     !  CALL p_bcast (oc_rad_ni,      p_io) 
        CALL p_bcast (du_rad_ni,      p_io) 
-       CALL p_bcast (prop_fire_in_pbl_p1,  p_io)
-       CALL p_bcast (prop_fire_in_pbl_p2,  p_io)
-       CALL p_bcast (prop_fire_in_pbl,     p_io)
+     !  CALL p_bcast (prop_fire_in_pbl_p1,  p_io)
+     !  CALL p_bcast (prop_fire_in_pbl_p2,  p_io)
+     !  CALL p_bcast (prop_fire_in_pbl,     p_io)
        CALL p_bcast (scale_so4_coating,    p_io)
        CALL p_bcast (pH_pert,      p_io)       
-       CALL p_bcast (scale_tr_entrainment, p_io)
-       CALL p_bcast (scale_vertical_velocity, p_io)
-       CALL p_bcast (scale_intra_mode_coagulation, p_io)
-       CALL p_bcast (scale_inter_mode_coagulation, p_io)
+    !   CALL p_bcast (scale_tr_entrainment, p_io)
+    !   CALL p_bcast (scale_vertical_velocity, p_io)
+    !   CALL p_bcast (scale_intra_mode_coagulation, p_io)
+    !   CALL p_bcast (scale_inter_mode_coagulation, p_io)
        ! Solar constant
        CALL p_bcast (scale_solar_const, p_io)
        ! Cloud params
-       CALL p_bcast (KK_exponent, p_io)
-       CALL p_bcast (KK_LWP_exponent, p_io)
-       CALL p_bcast (scale_activation, p_io)
-       CALL p_bcast (scale_accretion, p_io)
-       CALL p_bcast (scale_water, p_io)
-       CALL p_bcast (scale_RH, p_io)
+   !    CALL p_bcast (KK_exponent, p_io)
+   !    CALL p_bcast (KK_LWP_exponent, p_io)
+   !    CALL p_bcast (scale_activation, p_io)
+   !    CALL p_bcast (scale_accretion, p_io)
+   !    CALL p_bcast (scale_water, p_io)
+ !      CALL p_bcast (scale_RH, p_io)
        CALL p_bcast (scale_kappa_ss, p_io)
        CALL p_bcast (scale_kappa_so4, p_io)
        ! SO2 chemistry
@@ -294,11 +283,11 @@ CONTAINS
     !---------------------------------------------------------------------------------------------------
     !--- 3) Consistency and dependency checks:
 
-    fire_prop_tot = prop_fire_in_pbl_p1 + prop_fire_in_pbl_p2 + prop_fire_in_pbl
-    IF (ABS(fire_prop_tot - 1.0_dp) > 0.01) THEN
-        WRITE(message_text,'(a,f6.3)') 'Total proportion of fire emissions emitted /= 1.0, total = ', fire_prop_tot
-        CALL finish('setham', message_text)
-    ENDIF
+!    fire_prop_tot = prop_fire_in_pbl_p1 + prop_fire_in_pbl_p2 + prop_fire_in_pbl
+!    IF (ABS(fire_prop_tot - 1.0_dp) > 0.01) THEN
+!        WRITE(message_text,'(a,f6.3)') 'Total proportion of fire emissions emitted /= 1.0, total = ', fire_prop_tot
+!        CALL finish('setham', message_text)
+!    ENDIF
     !--- 4) Write out parameter settings
 
     csubmname = 'UNKNOWN'
@@ -320,8 +309,8 @@ CONTAINS
     CALL print_value('Emission radius scaling factor (scale_emi_cmr_bf)', scale_emi_cmr_bf)
 
     CALL message('','---')
-    CALL print_value('Emission of primary SO4 - fraction of SO2 emitted as SO4', emi_prim_so4_frac)
-    CALL print_value('Emission of primary SO4 - radius of emitted SO4         ', emi_prim_so4_cmr)
+   ! CALL print_value('Emission of primary SO4 - fraction of SO2 emitted as SO4', emi_prim_so4_frac)
+   ! CALL print_value('Emission of primary SO4 - radius of emitted SO4         ', emi_prim_so4_cmr)
 
     CALL message('','---')
     CALL print_value('Emission scaling factor (scale_emi_ff)', scale_emi_ff)
@@ -345,39 +334,40 @@ CONTAINS
     CALL message('','---')
     CALL print_value('Wet deposition scaling factor, in-cloud (scale_wetdet_ic)', scale_wetdep_ic)
     CALL print_value('Wet deposition scaling factor, below-cloud (scale_wetdep_bc)', scale_wetdep_bc)
-    CALL print_value('Wet deposition scaling factor, in-cloud BC (scale_wetdep_ic_bc_only)', scale_wetdep_ic_bc_only)
-    CALL print_value('Wet deposition scaling factor, below-cloud BC (scale_wetdep_bc_bc_only)', scale_wetdep_bc_bc_only)
+   ! CALL print_value('Wet deposition scaling factor, in-cloud BC (scale_wetdep_ic_bc_only)', scale_wetdep_ic_bc_only)
+   ! CALL print_value('Wet deposition scaling factor, below-cloud BC (scale_wetdep_bc_bc_only)', scale_wetdep_bc_bc_only)
 
-    CALL message('','---')
-    CALL print_value('Entrainment of tracer mass flux scaling factor (scale_tr_entrainment)', scale_tr_entrainment)
-    CALL print_value('Vertical velocity scaling factor (scale_vertical_velocity)', scale_vertical_velocity)
+  !  CALL message('','---')
+  !  CALL print_value('Entrainment of tracer mass flux scaling factor (scale_tr_entrainment)', scale_tr_entrainment)
+  !  CALL print_value('Vertical velocity scaling factor (scale_vertical_velocity)', scale_vertical_velocity)
 
     CALL message('', '---')
     CALL print_value('BC imaginary refractive index (bc_rad_ni)', bc_rad_ni)
-    CALL print_value('BC imaginary refractive index (oc_rad_ni)', oc_rad_ni)
+  !  CALL print_value('BC imaginary refractive index (oc_rad_ni)', oc_rad_ni)
     CALL print_value('BC imaginary refractive index (du_rad_ni)', du_rad_ni)
 
-    CALL message('', '---')
-    CALL print_value('The proportion of (G/F)FIRE tracer emitted into the layer &
-    &imediately above the PBL (PBL+1) (prop_fire_in_pbl_p1)', prop_fire_in_pbl_p1)
-    CALL print_value('The proportion of (G/F)FIRE tracer emitted into PBL+2 (prop_fire_in_pbl_p2)', prop_fire_in_pbl_p2)
-    CALL print_value('The proportion of (G/F)FIRE tracer emitted into the PBL (prop_fire_in_pbl)', prop_fire_in_pbl)
+!    CALL message('', '---')
+!    CALL print_value('The proportion of (G/F)FIRE tracer emitted into the layer &
+ !   &imediately above the PBL (PBL+1) (prop_fire_in_pbl_p1)', prop_fire_in_pbl_p1)
+ !   CALL print_value('The proportion of (G/F)FIRE tracer emitted into PBL+2 (prop_fire_in_pbl_p2)', prop_fire_in_pbl_p2)
+  !  CALL print_value('The proportion of (G/F)FIRE tracer emitted into the PBL (prop_fire_in_pbl)', prop_fire_in_pbl)
 
     CALL message('', '---')
     CALL print_value('The scaling of SO4 layer thickness cutoff (scale_so4_coating)', scale_so4_coating)
-    CALL print_value('The asbolute value of cloud water pH (pH_pert)', pH_pert)
+    CALL print_value('The absolute value of cloud water pH (pH_pert)', pH_pert * 1.e-5_dp)
 
-    CALL print_value('The scaling of intra-mode coagulation (scale_intra_mode_coagulation)', scale_intra_mode_coagulation)
-    CALL print_value('The scaling of inter-mode coagulation (scale_inter_mode_coagulation)', scale_inter_mode_coagulation)
+!    CALL print_value('The scaling of intra-mode coagulation (scale_intra_mode_coagulation)', scale_intra_mode_coagulation)
+ 
+!CALL print_value('The scaling of inter-mode coagulation (scale_inter_mode_coagulation)', scale_inter_mode_coagulation)
 
     CALL message('', '---')
-    CALL print_value('The scaling of ARG activation', scale_activation)
-    CALL message('hammoz_perturbations', 'Be careful - the below perturbations are only applied &
-    &for the KK scheme (nauto=2)')
-    CALL print_value('The KK exponent', KK_exponent)
-    CALL print_value('The LWP KK exponent', KK_LWP_exponent)
-    CALL print_value('The scaling of accretion', scale_accretion)
-    CALL print_value('The aerosol water uptake', scale_RH)
+ !   CALL print_value('The scaling of ARG activation', scale_activation)
+ !   CALL message('hammoz_perturbations', 'Be careful - the below perturbations are only applied &
+ !   &for the KK scheme (nauto=2)')
+ !   CALL print_value('The KK exponent', KK_exponent)
+ !   CALL print_value('The LWP KK exponent', KK_LWP_exponent)
+ !   CALL print_value('The scaling of accretion', scale_accretion)
+ !   CALL print_value('The aerosol water uptake', scale_RH)
 
     CALL message('', '---')
     CALL print_value('The scaling of the (AMIP) solar constant', scale_solar_const)
@@ -563,6 +553,21 @@ CONTAINS
       CALL message('', ematrix%em_sectors(ind)%es_sectorname )
       DO i=1, nvars
         CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+      ENDDO
+    ENDDO
+
+   !    --- SSA:
+
+    DO ind=1, maxsectors
+!       Find any sectors that are type SSA since it can change for different emissions datasets
+      nvars=ematrix%em_sectors(ind)%es_nvars
+      DO i=1, nvars
+        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "SS") THEN
+          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_ssa
+          CALL message('hammoz_perturbations','SEASALT Emissions scale factor for sector:')
+          CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+          CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+        END IF
       ENDDO
     ENDDO
 
