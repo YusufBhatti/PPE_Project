@@ -929,8 +929,8 @@ SUBROUTINE m7_kappa(kproma, kbdim, klev, krow, prelhum, paernl, pttn, ptp1, &
 
   USE mo_ham_kappa 
  ! YAB adding perturbing code 
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_RH
+!  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+!                                     scale_RH
 
   IMPLICIT NONE
   
@@ -2516,10 +2516,10 @@ SUBROUTINE m7_dnum(kproma, kbdim,  klev,   krow,  &
   USE mo_control,    ONLY: ltimer
   USE mo_hammoz_timer, ONLY: timer_start, timer_stop, timer_ham_m7_coaset, timer_ham_m7_delcoa
   !<<dod
-  !>>dwp Added perturbed physics setup:
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_intra_mode_coagulation, &
-                                     scale_inter_mode_coagulation 
+!  !>>dwp Added perturbed physics setup:
+!  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+!                                     scale_intra_mode_coagulation, &
+!                                     scale_inter_mode_coagulation 
   !<<dwp
 
 
@@ -2609,10 +2609,10 @@ SUBROUTINE m7_dnum(kproma, kbdim,  klev,   krow,  &
                              papp1,  pm6rp, prhop, zcom          )
 
   !>>dwp Adding perturbed physics scaling for the coagulation kernel
-  IF (lo_hammoz_perturbations) THEN
-      zcom(:, :, coag_diagonal) = zcom(:, :, coag_diagonal) * scale_intra_mode_coagulation
-      zcom(:, :, coag_off_diagonal) = zcom(:, :, coag_off_diagonal) * scale_inter_mode_coagulation
-  END IF
+!  IF (lo_hammoz_perturbations) THEN
+!      zcom(:, :, coag_diagonal) = zcom(:, :, coag_diagonal) * scale_intra_mode_coagulation
+!      zcom(:, :, coag_off_diagonal) = zcom(:, :, coag_off_diagonal) * scale_inter_mode_coagulation
+!  END IF
   !<<dwp
 
   !>>dod timers

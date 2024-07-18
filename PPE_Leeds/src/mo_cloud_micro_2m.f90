@@ -183,7 +183,7 @@ USE mo_memory_g3b,         ONLY: orostd,oromea,orogam,orothe, &
                                  oropic,oroval,orosig
 #ifdef HAMMOZ
 USE mo_orocirrus,          ONLY: orocirrus_w, orocirrus_cc
-USE mo_hammoz_perturbations, ONLY: scale_activation, lo_hammoz_perturbations
+USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations
 #endif
 
 USE mo_boundary_condition, ONLY: bc_find, bc_apply
@@ -748,7 +748,7 @@ USE mo_time_control,       ONLY: lstart, lresume
 
   !>DWP add direct perturbation to activated CDNC
   if (lo_hammoz_perturbations) &
-    zcdncact(1:kproma, :) = zcdncact(1:kproma, :) * scale_activation
+    zcdncact(1:kproma, :) = zcdncact(1:kproma, :) * 1.0_dp
   !<DWP
 
   ll1_2d(1:kproma,:) = ( ibas(1:kproma,:) > 0 )                               .AND. & !cloud base lev
@@ -2930,7 +2930,7 @@ SUBROUTINE precip_formation_warm( &
               pmratepr, prpr, prprn, pracl, praut )
 !<<DN AeroCom
 
-  USE mo_hammoz_perturbations,       ONLY : KK_exponent, lo_hammoz_perturbations,  scale_accretion, KK_LWP_exponent
+  USE mo_hammoz_perturbations,       ONLY : lo_hammoz_perturbations
 !DN --> SF ToDo: divide into two subroutines: one for Khairoutdinov and Kogan, 2000; and one for Beheng (1994)
 !DN --> SF ToDo: autoconversion and accretion cloud be separated as well
 
@@ -2969,13 +2969,13 @@ SUBROUTINE precip_formation_warm( &
   IF (nauto == 2) THEN
 !          Autoconversion rate from Khairoutdinov and Kogan, 2000
 
-     ztmp1(1:kproma) = ccraut*1350._dp*(1.e-6_dp*pcdnc(1:kproma))**(KK_exponent)
-     ztmp1(1:kproma) = ccraut*1350._dp*(1.e-6_dp*pcdnc(1:kproma))**(KK_exponent)
+     ztmp1(1:kproma) = ccraut*1350._dp*(1.e-6_dp*pcdnc(1:kproma))**(-1.79_dp)
+!     ztmp1(1:kproma) = ccraut*1350._dp*(1.e-6_dp*pcdnc(1:kproma))**(KK_exponent)
 
-     IF (lo_hammoz_perturbations) THEN
-       exm1_1 = KK_LWP_exponent - 1.0_dp
-       exp_1  = -1._dp / exm1_1
-     END IF
+!     IF (lo_hammoz_perturbations) THEN
+!       exm1_1 = KK_LWP_exponent - 1.0_dp
+!       exp_1  = -1._dp / exm1_1
+!     END IF
 
      ztmp1(1:kproma) = pxlb(1:kproma) * (  1._dp &
                                         - (1._dp + ztmst*exm1_1*ztmp1(1:kproma)*pxlb(1:kproma)**exm1_1)**exp_1)
@@ -2991,9 +2991,9 @@ SUBROUTINE precip_formation_warm( &
 !--- zrac2 is formed by accretion with newly formed rain inside the grid box
 
      ztmp1(1:kproma) = -3.7_dp*ztmst*pxrp1(1:kproma)
-     ! >DWP Scale accretion formed by rain from above (before time integrating)
-     IF (lo_hammoz_perturbations) &
-        ztmp1(1:kproma) = ztmp1(1:kproma) * scale_accretion
+!     ! >DWP Scale accretion formed by rain from above (before time integrating)
+!     IF (lo_hammoz_perturbations) &
+!        ztmp1(1:kproma) = ztmp1(1:kproma) * 1.0_dp
      ztmp1(1:kproma) = EXP(ztmp1(1:kproma))
      ztmp1(1:kproma) = pxlb(1:kproma)*(1._dp-ztmp1(1:kproma))
      zrac1(1:kproma) = MERGE(ztmp1(1:kproma), 0._dp, ld_prcp_warm(1:kproma))
@@ -3003,7 +3003,7 @@ SUBROUTINE precip_formation_warm( &
      ztmp1(1:kproma) = -3.7_dp*ztmst*pauloc(1:kproma)*prho(1:kproma)*zraut(1:kproma)
      ! >DWP Scale accretion formed by rain inside the gridbox (before time integrating)
      IF (lo_hammoz_perturbations) &
-         ztmp1(1:kproma) = ztmp1(1:kproma) * scale_accretion
+         ztmp1(1:kproma) = ztmp1(1:kproma) * 1.0_dp 
      ztmp1(1:kproma) = MERGE(ztmp1(1:kproma), 0._dp, ld_prcp_warm(1:kproma))
      ztmp1(1:kproma) = pxlb(1:kproma)*(1._dp-EXP(ztmp1(1:kproma)))
      zrac2(1:kproma) = MERGE(ztmp1(1:kproma), 0._dp, ld_prcp_warm(1:kproma))

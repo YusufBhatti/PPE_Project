@@ -122,7 +122,6 @@ MODULE mo_ham_wetdep
   !>>dwp Added perturbed physics setup:
   USE mo_tracdef,       ONLY: trlist
   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_wetdep_bc_bc_only, &
                                      scale_wetdep_bc 
   !<<dwp
   !>>DN
@@ -467,11 +466,11 @@ MODULE mo_ham_wetdep
      !>>dwp Adding perturbed physics scaling for below-cloud scavenging:
      IF (lo_hammoz_perturbations) THEN 
         ! Scale the BC separately
-        IF (trlist%ti(kt)%basename == "BC") THEN
-           zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:) * scale_wetdep_bc_bc_only
-           zdxtcolr(1:kproma,:) = zdxtcolr(1:kproma,:) * scale_wetdep_bc_bc_only
-           zdxtcols(1:kproma,:) = zdxtcols(1:kproma,:) * scale_wetdep_bc_bc_only
-        ENDIF
+!        IF (trlist%ti(kt)%basename == "BC") THEN
+!           zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:) * scale_wetdep_bc_bc_only
+!           zdxtcolr(1:kproma,:) = zdxtcolr(1:kproma,:) * scale_wetdep_bc_bc_only
+!           zdxtcols(1:kproma,:) = zdxtcols(1:kproma,:) * scale_wetdep_bc_bc_only
+!        ENDIF
 
         ! Scale everything (including BC)
         zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:) * scale_wetdep_bc
@@ -549,7 +548,6 @@ MODULE mo_ham_wetdep
     !>>dwp Added perturbed physics setup:
     USE mo_tracdef,       ONLY: trlist
     USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_wetdep_ic_bc_only, &
                                      scale_wetdep_ic 
     !<<dwp
 
@@ -611,11 +609,11 @@ MODULE mo_ham_wetdep
        ! Scale the tendency rather than the fraction
 
        ! Scale the BC separately
-       IF (trlist%ti(kt)%basename == "BC") THEN
-          pdxt(1:kproma,:) = pdxt(1:kproma,:) * scale_wetdep_ic_bc_only
-          pdxt_imp(1:kproma,:) = pdxt_imp(1:kproma,:) * scale_wetdep_ic_bc_only
-          pdxt_nuc(1:kproma,:) = pdxt_nuc(1:kproma,:) * scale_wetdep_ic_bc_only
-       ENDIF
+!       IF (trlist%ti(kt)%basename == "BC") THEN
+!          pdxt(1:kproma,:) = pdxt(1:kproma,:) * scale_wetdep_ic_bc_only
+!          pdxt_imp(1:kproma,:) = pdxt_imp(1:kproma,:) * scale_wetdep_ic_bc_only
+!          pdxt_nuc(1:kproma,:) = pdxt_nuc(1:kproma,:) * scale_wetdep_ic_bc_only
+!       ENDIF
 
        ! Scale everything (including BC)
        pdxt(1:kproma,:) = pdxt(1:kproma,:) * scale_wetdep_ic
