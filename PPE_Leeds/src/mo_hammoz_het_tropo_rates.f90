@@ -364,6 +364,7 @@ MODULE mo_hammoz_het_tropo_rates
   USE mo_memory_g3b,    ONLY: relhum
   !USE mo_debugs,        ONLY: ddf01,ddf02,ddf03,ddf04,ddf05
   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, pH_pert
+  USE mo_submodel,            ONLY: print_value
 
   ! determine reaction probabilities
 
@@ -525,13 +526,15 @@ MODULE mo_hammoz_het_tropo_rates
     H_HO2_eff = 0.0_dp
 
 ! YAB pH perturbation
-    IF (lo_hammoz_perturbations) THEN
-    !       scale_pH = pH_pert / pH
-       pH = 1.e-5_dp * pH_pert
+    !IF (lo_hammoz_perturbations) THEN
+    !       scale_pH = pH_pert )/ pH
+    pH = 1.e-10_dp! pH_pert
+     !  PRINT *,'pH is', pH
 !    ELSE
 !      pH = 1.e-5_dp ! Assume a pH value of 5
  
-    ENDIF
+    !ENDIF
+    PRINT *,'pH is', pH
 
     k_eff = (8.6e-5_dp + (2.1e-5_dp/pH)*1.e8_dp)/(1. + (2.1e-5_dp/pH)) ![1/(M s)]
 
@@ -671,6 +674,7 @@ MODULE mo_hammoz_het_tropo_rates
   USE mo_memory_g3b,    ONLY: relhum
   !USE mo_debugs,        ONLY: ddf01,ddf02,ddf03,ddf04,ddf05
   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, pH_pert
+  USE mo_submodel,            ONLY: print_value
 
   ! determine reaction probabilities
 
@@ -691,13 +695,14 @@ MODULE mo_hammoz_het_tropo_rates
   gamma = 0.0_dp
   H_HO2_eff = 0.0_dp
   ! YAB pH perturbation
-  IF (lo_hammoz_perturbations) THEN
+!  IF (lo_hammoz_perturbations) THEN
   !       scale_pH = pH_pert / pH
-     pH = 1.e-5_dp * pH_pert
-!  ELSE
+  pH = 1.e-10_dp !* 0.000001_dp! pH_pert
+       PRINT *,'pH2 is', pH
 !    pH = 1.e-5_dp ! Assume a pH value of 5
 
-  ENDIF
+!  ENDIF
+  PRINT *,'pH2 is', pH
 
   k_eff = (8.6e-5_dp + (2.1e-5_dp/pH)*1.e8_dp)/(1. + (2.1e-5_dp/pH)) ![1/(M s)]
 

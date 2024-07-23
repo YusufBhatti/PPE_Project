@@ -49,14 +49,14 @@ MODULE mo_hammoz_perturbations
   PUBLIC :: init_hammoz_perturbations, lo_hammoz_perturbations, &
             init_hammoz_emi_perturbations, &
             scale_nuc_bl, scale_nuc_ft, &
-            scale_emi_cmr_ff, scale_emi_cmr_bb, scale_emi_cmr_bf, &
+            scale_emi_cmr_ff, scale_emi_cmr_bb, scale_emi_cmr_bf, emi_prim_so4_cmr, &
             scale_emi_bc, scale_emi_dms, scale_emi_bf, &
 	    scale_drydep_ait, scale_drydep_acc, scale_drydep_coa, &
             scale_wetdep_ic, scale_wetdep_bc, & 
             bc_rad_ni, du_rad_ni, &
             scale_so4_coating, &
             pH_pert, &
-	    scale_so2_reactions, &
+	    scale_so2_reactions, emi_prim_so4_frac, &
             scale_kappa_ss, scale_kappa_so4
 
 
@@ -108,7 +108,8 @@ MODULE mo_hammoz_perturbations
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
                  scale_so2_reactions = 1.0_dp    ! Scale factor for all SO2 reactions
 
-  !REAL(dp)    :: emi_prim_so4_cmr  = 0.0075E-3_dp   ! Absolute count median radius of primary SO4 particles [m]
+  REAL(dp)    :: emi_prim_so4_frac = 0.025_dp,    & ! Absolute fraction of SO2 emitted as primary SO4
+                 emi_prim_so4_cmr  = 0.0075E-3_dp   ! Absolute count median radius of primary SO4 particles [m]
 
   REAL(dp)    :: scale_drydep_ait = 1.0_dp, & ! Scale factor for dry deposition of Aitken modes
                  scale_drydep_acc = 1.0_dp, & ! Scale factor for dry deposition of accumulation modes
@@ -139,7 +140,7 @@ MODULE mo_hammoz_perturbations
 !                 KK_LWP_exponent = 2.47_dp, &  ! The LWP exponent in the KK autoconversion scheme.
                 ! scale_activation = 1.0_dp, & ! Scale the number of ARG activated particles
                 ! scale_accretion = 1.0_dp,   &! Scale the accretion (tendency?)
-  REAL(dp)    :: pH_pert = 1.0_dp,      &! Absolute pH value (Normally is 5 (1.e-5_d) - need to be scaled by   0.1 for pH of 6, 0.01 = 7, 10 = 4, * 5 = 4.5
+  REAL(dp)    :: pH_pert = 2.5e-06_dp,      &! Absolute pH value (Normally is (2.5e-06_dp) - need to be scaled by   1e-07 for pH of 6, * 3.13e-05_dp = 4.5 
                  scale_kappa_ss = 1.0_dp, &
                  scale_kappa_so4 = 1.0_dp
 
@@ -242,8 +243,8 @@ CONTAINS
        CALL p_bcast (scale_emi_ssa,        p_io)
        CALL p_bcast (scale_emi_du,        p_io)
        CALL p_bcast (scale_emi_so2,        p_io)
-!       CALL p_bcast (emi_prim_so4_frac,    p_io)
-!       CALL p_bcast (emi_prim_so4_cmr,    p_io)
+       CALL p_bcast (emi_prim_so4_frac,    p_io)
+       CALL p_bcast (emi_prim_so4_cmr,    p_io)
        CALL p_bcast (scale_drydep_ait,     p_io)
        CALL p_bcast (scale_drydep_acc,     p_io)
        CALL p_bcast (scale_drydep_coa,     p_io)
@@ -309,8 +310,8 @@ CONTAINS
     CALL print_value('Emission radius scaling factor (scale_emi_cmr_bf)', scale_emi_cmr_bf)
 
     CALL message('','---')
-   ! CALL print_value('Emission of primary SO4 - fraction of SO2 emitted as SO4', emi_prim_so4_frac)
-   ! CALL print_value('Emission of primary SO4 - radius of emitted SO4         ', emi_prim_so4_cmr)
+    CALL print_value('Emission of primary SO4 - fraction of SO2 emitted as SO4', emi_prim_so4_frac)
+    CALL print_value('Emission of primary SO4 - radius of emitted SO4         ', emi_prim_so4_cmr)
 
     CALL message('','---')
     CALL print_value('Emission scaling factor (scale_emi_ff)', scale_emi_ff)

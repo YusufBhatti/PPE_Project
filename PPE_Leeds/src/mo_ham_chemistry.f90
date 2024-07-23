@@ -99,7 +99,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
                                    d_prod_ms4cs
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, pH_pert
   
   IMPLICIT NONE
 
@@ -201,7 +201,11 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
   zmolgh2o2=34.01474_dp
   zmolgair=28.84_dp
   zmolgw=18.015_dp
-  zhpbase=2.5e-06_dp
+  IF (lo_hammoz_perturbations) THEN
+      zhpbase = pH_pert 
+  ENDIF
+ 
+  !zhpbase=2.5e-06_dp
   ze1k=1.1e-02_dp
   ze1h=2300._dp
   ze3k=1.2e-02_dp
