@@ -5,6 +5,7 @@ from subprocess import run
 from os import rename
 from re import search
 import numpy as np
+import pandas as pd
 parameters_file = "LHC_Parameters.txt"
 with open(parameters_file, 'r') as file:
     column_count = len(file.readline().strip().split())
@@ -111,6 +112,33 @@ def check_column_duplicates(file_path):
             print(f"No duplicate values found in {header_array[col_index]} columns")
             pass
 
+def txt_to_csv(input_file_path, output_file_path):
+    """
+    Converts a space-separated text file into a CSV file.
+
+    Parameters:
+    input_file_path (str): Path to the input text file.
+    output_file_path (str): Path to the output CSV file.
+    """
+    # Read the data from the text file
+    with open(input_file_path, 'r') as file:
+        lines = file.readlines()
+    
+    # Extract the header and data
+    header = lines[0].strip().split()
+    data = [line.strip().split() for line in lines[1:]]
+    
+    # Create a DataFrame
+    df = pd.DataFrame(data, columns=header)
+    
+    # Remove the last three columns
+    df = df.iloc[:, :-3]
+    
+    # Save the DataFrame to a CSV file
+    df.to_csv(output_file_path, index=False)
+    
+    print(f"Data has been successfully converted and saved to {output_file_path}")
+
 # Replace 'parameters_file' with the path to your .txt file
 
 print(f"Now we will check if any rows contain duplicates in the PPE values generated")
@@ -118,7 +146,10 @@ print(f"Now we will check if any rows contain duplicates in the PPE values gener
 parameters_file = "/home/ybhatti/yusufb/Branches/PPE_Scripts/PPE_values.txt"
 check_column_duplicates(parameters_file)
 
-
+# Define the path to the input and output files
+input_file_path = 'PPE_values.txt'
+output_file_path = 'PPE_values.csv'
+txt_to_csv(input_file_path, output_file_path)
 #############################
 """ This following script is just when you want all values to be '1' except for the perturbed parameter"""
 #############################
