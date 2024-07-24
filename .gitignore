@@ -24,7 +24,8 @@ src/*.mod
 src/*.lst
 
 # /experiments/
-my_experiments
+my_experiments/
+my_experiments/*/*/*
 *.sh.*
 *log.txt
 # binaries

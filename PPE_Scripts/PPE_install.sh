@@ -43,7 +43,7 @@
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/"
 cwd=${PWD}/
-DIR='PPE_Test'
+DIR='PPE_Init'
 #module purge
 source activate master
 #module load netCDF-Fortran/4.5.3-gompi-2021a
@@ -56,7 +56,7 @@ PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}
 sed -i "s|^PPEdir=.*|PPEdir='${PPEdir}'|" PPE_batch.sh 
 
-#mkdir $PPEdir
+mkdir $PPEdir
 cd $PPEdir
 echo 'Starting PPE_install script' >$PPElog
 

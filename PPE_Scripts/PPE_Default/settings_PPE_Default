@@ -51,7 +51,7 @@ walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_TEST/${exp}/"
+exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Init/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -104,7 +104,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_stop        = $date_stop
  putdata        = 1,'days','last',0
  trigfiles      = 1,'days','first',0
- putrerun       = 4,'days','last',0
+ putrerun       = 6,'days','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
