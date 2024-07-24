@@ -120,7 +120,7 @@ check_column_duplicates(parameters_file)
 
 
 #############################
-""" This script is just when you want all values to be '1' except for the perturbed parameter"""
+""" This following script is just when you want all values to be '1' except for the perturbed parameter"""
 #############################
 
 # #%time
