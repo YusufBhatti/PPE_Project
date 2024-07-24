@@ -60,15 +60,15 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=3  # Maximum number of experiments run concurrently
-nexp_maxran=23      # Maximum number of experiments run by this batch job
+nexp_maxrunning=2  # Maximum number of experiments run concurrently
+nexp_maxran=10      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
-PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Test/'
+PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Init/'
 PPElog=$cwd'PPE_test_log.txt'
 PPEtmp=$cwd'PPE_test_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'

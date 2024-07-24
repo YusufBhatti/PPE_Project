@@ -20,10 +20,7 @@ with open(parameters_file, 'r') as f_params:
         #print(count)
 
         parts = line.strip().split()
-      #  if header_array == parts[0]:
-        parameter_name = 'TEST'
         scaling_factors = list(map(float, parts[:]))
-       # for i in range(0, line_count):
         Array[i,:] = scaling_factors
 
 
@@ -43,7 +40,7 @@ with open(output_file, 'w') as f_out:
                 parts = line.strip().split()
                 param_values = line.strip().split()
                 # Create a new experiment name based on the header variable
-                new_exp_name = f"PPE_TEST_{i+1}"
+                new_exp_name = f"PPE_ENS_{i+1}"
                 # Copy the current param_values array
                # new_param_values = param_values[:]
                 # Set the corresponding value to 4 for the current variable
