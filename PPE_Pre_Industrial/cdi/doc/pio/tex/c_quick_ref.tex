@@ -1,0 +1,161 @@
+\chapter*{Quick Reference}
+\addcontentsline{toc}{chapter}{Quick Reference}
+
+This appendix provide a brief listing of the C language bindings of the
+CDI library routines:
+
+\section*{\tt \htmlref{cdiPioCSRBalanced}{cdiPioCSRBalanced}}
+
+\begin{verbatim}
+    int cdiPioCSRBalanced (MPI_Comm commSuper, int IOMode, int nProcsIO);
+\end{verbatim}
+
+return role codes appropriate to use \textit{nProcsIO}
+tasks distributed on evenly spaced ranks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioCSRFirstN}{cdiPioCSRFirstN}}
+
+\begin{verbatim}
+    int cdiPioCSRFirstN (MPI_Comm commSuper, int IOMode, int nProcsIO);
+\end{verbatim}
+
+return role codes appropriate to use the first
+\textit{nProcsIO} tasks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioCSRLastN}{cdiPioCSRLastN}}
+
+\begin{verbatim}
+    int cdiPioCSRLastN (MPI_Comm commSuper, int IOMode, int nProcsIO);
+\end{verbatim}
+
+return role codes appropriate to use the last
+\textit{nProcsIO} tasks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioConfCreate}{cdiPioConfCreate}}
+
+\begin{verbatim}
+    int cdiPioConfCreate ();
+\end{verbatim}
+
+create new configuration object and return its handle.
+
+
+\section*{\tt \htmlref{cdiPioConfDestroy}{cdiPioConfDestroy}}
+
+\begin{verbatim}
+    void cdiPioConfDestroy (int confResH);
+\end{verbatim}
+
+delete configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfGetCSRole}{cdiPioConfGetCSRole}}
+
+\begin{verbatim}
+    int cdiPioConfGetCSRole (int confResH);
+\end{verbatim}
+
+query role attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfGetIOMode}{cdiPioConfGetIOMode}}
+
+\begin{verbatim}
+    int cdiPioConfGetIOMode (int confResH);
+\end{verbatim}
+
+query IOMode attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfGetPartInflate}{cdiPioConfGetPartInflate}}
+
+\begin{verbatim}
+    float cdiPioConfGetPartInflate (int confResH);
+\end{verbatim}
+
+query partition imbalance attribute of
+configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetCSRole}{cdiPioConfSetCSRole}}
+
+\begin{verbatim}
+    void cdiPioConfSetCSRole (int confResH, int CSRole);
+\end{verbatim}
+
+set role attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetIOMode}{cdiPioConfSetIOMode}}
+
+\begin{verbatim}
+    void cdiPioConfSetIOMode (int confResH, int IOMode);
+\end{verbatim}
+
+set IOMode attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetPartInflate}{cdiPioConfSetPartInflate}}
+
+\begin{verbatim}
+    void cdiPioConfSetPartInflate (int confResH, float partInflate);
+\end{verbatim}
+
+set partition imbalance attribute of
+configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetPostCommSetupActions}{cdiPioConfSetPostCommSetupActions}}
+
+\begin{verbatim}
+    void cdiPioConfSetPostCommSetupActions (int confResH,
+                                            void (*postCommSetupActions)(void));
+\end{verbatim}
+
+set function to be called after
+setup of client/server communications of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
+
+\begin{verbatim}
+    MPI_Comm cdiPioInit (MPI_Comm commSuper, int confResH, int *pioNamespace);
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+
+\section*{\tt \htmlref{cdiPioNoPostCommSetup}{cdiPioNoPostCommSetup}}
+
+\begin{verbatim}
+    void cdiPioNoPostCommSetup ();
+\end{verbatim}
+
+Dummy function to use as argument to pioInit
+if no actions are necessary after I/O servers initialize communication.
+
+
+\section*{\tt \htmlref{cdiPioStr2IOMode}{cdiPioStr2IOMode}}
+
+\begin{verbatim}
+    int cdiPioStr2IOMode (const char *modeStr);
+\end{verbatim}
+
+return integer code corresponding to string
+representation of mode or -1 if no match was found.
+
+
+\section*{\tt \htmlref{pioInit}{pioInit}}
+
+\begin{verbatim}
+    MPI_Comm pioInit (MPI_Comm commSuper, int nProcsIO, int IOMode,
+                      int *pioNamespace, float partInflate,
+                      void (*postCommSetupActions)(void));
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+

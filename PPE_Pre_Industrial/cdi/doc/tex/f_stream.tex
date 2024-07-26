@@ -1,0 +1,509 @@
+
+
+\subsection{Create a new dataset: {\tt streamOpenWrite}}
+\index{streamOpenWrite}
+\label{streamOpenWrite}
+
+The function {\tt streamOpenWrite} creates a new datset.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenWrite(CHARACTER*(*) path, INTEGER filetype)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt filetype\ }
+\item[{\tt path}]
+The name of the new dataset.
+\item[{\tt filetype}]
+The type of the file format, one of the set of predefined {\CDI} file format types.
+                     The valid {\CDI} file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_GRB2}, {\tt FILETYPE\_NC},
+                     {\tt FILETYPE\_NC2}, {\tt FILETYPE\_NC4}, {\tt FILETYPE\_NC4C}, {\tt FILETYPE\_SRV},
+                     {\tt FILETYPE\_EXT} and {\tt FILETYPE\_IEG}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+Upon successful completion {\tt streamOpenWrite} returns an identifier to the
+open stream. Otherwise, a negative number with the error status is returned.
+
+
+\subsubsection*{Errors}
+
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt CDI\_EUFILETYPE\ }
+\item[{\tt CDI\_ESYSTEM}]
+Operating system error.
+\item[{\tt CDI\_EINVAL}]
+Invalid argument.
+\item[{\tt CDI\_EUFILETYPE}]
+Unsupported file type.
+\item[{\tt CDI\_ELIBNAVAIL}]
+Library support not compiled in.
+\end{deflist}
+\end{minipage}
+
+
+\subsubsection*{Example}
+
+Here is an example using {\tt streamOpenWrite} to create a new netCDF file named {\tt foo.nc} for writing:
+
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    INCLUDE 'cdi.h'
+       ...
+    INTEGER streamID
+       ...
+    streamID = streamOpenWrite("foo.nc", FILETYPE_NC)
+    IF ( streamID .LT. 0 ) CALL handle_error(streamID)
+       ...
+\end{lstlisting}
+
+
+\subsection{Open a dataset for reading: {\tt streamOpenRead}}
+\index{streamOpenRead}
+\label{streamOpenRead}
+
+The function {\tt streamOpenRead} opens an existing dataset for reading.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenRead(CHARACTER*(*) path)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt path\ }
+\item[{\tt path}]
+The name of the dataset to be read.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+Upon successful completion {\tt streamOpenRead} returns an identifier to the
+open stream. Otherwise, a negative number with the error status is returned.
+
+
+\subsubsection*{Errors}
+
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt CDI\_EUFILETYPE\ }
+\item[{\tt CDI\_ESYSTEM}]
+Operating system error.
+\item[{\tt CDI\_EINVAL}]
+Invalid argument.
+\item[{\tt CDI\_EUFILETYPE}]
+Unsupported file type.
+\item[{\tt CDI\_ELIBNAVAIL}]
+Library support not compiled in.
+\end{deflist}
+\end{minipage}
+
+
+\subsubsection*{Example}
+
+Here is an example using {\tt streamOpenRead} to open an existing netCDF
+file named {\tt foo.nc} for reading:
+
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    INCLUDE 'cdi.h'
+       ...
+    INTEGER streamID
+       ...
+    streamID = streamOpenRead("foo.nc")
+    IF ( streamID .LT. 0 ) CALL handle_error(streamID)
+       ...
+\end{lstlisting}
+
+
+\subsection{Close an open dataset: {\tt streamClose}}
+\index{streamClose}
+\label{streamClose}
+
+The function {\tt streamClose} closes an open dataset.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamClose(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the filetype: {\tt streamInqFiletype}}
+\index{streamInqFiletype}
+\label{streamInqFiletype}
+
+The function {\tt streamInqFiletype} returns the filetype of a stream.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqFiletype(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt streamInqFiletype} returns the type of the file format,
+one of the set of predefined {\CDI} file format types.
+The valid {\CDI} file format types are {\tt FILETYPE\_GRB}, {\tt FILETYPE\_GRB2}, {\tt FILETYPE\_NC}, {\tt FILETYPE\_NC2},
+{\tt FILETYPE\_NC4}, {\tt FILETYPE\_NC4C}, {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} and {\tt FILETYPE\_IEG}.
+
+
+
+\subsection{Define the byte order: {\tt streamDefByteorder}}
+\index{streamDefByteorder}
+\label{streamDefByteorder}
+
+The function {\tt streamDefByteorder} defines the byte order of a binary dataset
+with the file format type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamDefByteorder(INTEGER streamID, INTEGER byteorder)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt byteorder\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt byteorder}]
+The byte order of a dataset, one of the {\CDI} constants {\tt CDI\_BIGENDIAN} and
+                     {\tt CDI\_LITTLEENDIAN}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the byte order: {\tt streamInqByteorder}}
+\index{streamInqByteorder}
+\label{streamInqByteorder}
+
+The function {\tt streamInqByteorder} returns the byte order of a binary dataset
+with the file format type {\tt FILETYPE\_SRV}, {\tt FILETYPE\_EXT} or {\tt FILETYPE\_IEG}.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqByteorder(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt streamInqByteorder} returns the type of the byte order.
+The valid {\CDI} byte order types are {\tt CDI\_BIGENDIAN} and {\tt CDI\_LITTLEENDIAN}
+
+
+
+\subsection{Define the variable list: {\tt streamDefVlist}}
+\index{streamDefVlist}
+\label{streamDefVlist}
+
+The function {\tt streamDefVlist} defines the variable list of a stream.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamDefVlist(INTEGER streamID, INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the variable list: {\tt streamInqVlist}}
+\index{streamInqVlist}
+\label{streamInqVlist}
+
+The function {\tt streamInqVlist} returns the variable list of a stream.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqVlist(INTEGER streamID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt streamInqVlist} returns an identifier to the variable list.
+
+
+
+\subsection{Define time step: {\tt streamDefTimestep}}
+\index{streamDefTimestep}
+\label{streamDefTimestep}
+
+The function {\tt streamDefTimestep} defines the time step of a stream.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamDefTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt tsID}]
+Timestep identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt streamDefTimestep} returns the number of records of the time step.
+
+
+
+\subsection{Get time step: {\tt streamInqTimestep}}
+\index{streamInqTimestep}
+\label{streamInqTimestep}
+
+The function {\tt streamInqTimestep} returns the time step of a stream.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION streamInqTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}} or {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt tsID}]
+Timestep identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt streamInqTimestep} returns the number of records of the time step.
+
+
+
+\subsection{Write a variable: {\tt streamWriteVar}}
+\index{streamWriteVar}
+\label{streamWriteVar}
+
+The function streamWriteVar writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                              INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt data}]
+Pointer to a block of double precision floating point data values to be written.
+\item[{\tt nmiss}]
+Number of missing values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Write a variable: {\tt streamWriteVarF}}
+\index{streamWriteVarF}
+\label{streamWriteVarF}
+
+The function streamWriteVarF writes the values of one time step of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+Only support for netCDF was implemented in this function.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, REAL*4 data, 
+                               INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt data}]
+Pointer to a block of single precision floating point data values to be written.
+\item[{\tt nmiss}]
+Number of missing values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Read a variable: {\tt streamReadVar}}
+\index{streamReadVar}
+\label{streamReadVar}
+
+The function streamReadVar reads all the values of one time step of a variable
+from an open dataset.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamReadVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                             INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt data}]
+Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+\item[{\tt nmiss}]
+Number of missing values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Write a horizontal slice of a variable: {\tt streamWriteVarSlice}}
+\index{streamWriteVarSlice}
+\label{streamWriteVarSlice}
+
+The function streamWriteVarSlice writes the values of a horizontal slice of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                   REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt levelID}]
+Level identifier.
+\item[{\tt data}]
+Pointer to a block of double precision floating point data values to be written.
+\item[{\tt nmiss}]
+Number of missing values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Write a horizontal slice of a variable: {\tt streamWriteVarSliceF}}
+\index{streamWriteVarSliceF}
+\label{streamWriteVarSliceF}
+
+The function streamWriteVarSliceF writes the values of a horizontal slice of a variable to an open dataset.
+The values are converted to the external data type of the variable, if necessary.
+Only support for netCDF was implemented in this function.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSliceF(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                    REAL*4 data, INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenWrite}{streamOpenWrite}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt levelID}]
+Level identifier.
+\item[{\tt data}]
+Pointer to a block of single precision floating point data values to be written.
+\item[{\tt nmiss}]
+Number of missing values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Read a horizontal slice of a variable: {\tt streamReadVarSlice}}
+\index{streamReadVarSlice}
+\label{streamReadVarSlice}
+
+The function streamReadVarSlice reads all the values of a horizontal slice of a variable
+from an open dataset.
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE streamReadVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                  REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt streamID\ }
+\item[{\tt streamID}]
+Stream ID, from a previous call to {\htmlref{\tt streamOpenRead}{streamOpenRead}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt levelID}]
+Level identifier.
+\item[{\tt data}]
+Pointer to the location into which the data values are read.
+                     The caller must allocate space for the returned values.
+\item[{\tt nmiss}]
+Number of missing values.
+
+\end{deflist}
+\end{minipage}

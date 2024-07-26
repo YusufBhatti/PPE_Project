@@ -1,0 +1,2491 @@
+\subsection{Input namelists in file {\tt namelist.echam}}
+  In Fortran, you can provide the values of input variables that are
+  organized in
+  namelists, specifying name and value of each variable. Several
+  namelists are used to specify the input of \echam. Some of the
+  namelists are for the atmospheric part and have to be written into
+  the file {\tt namelist.echam}, others determine input variables of
+  the land surface model JSBACH and have to be written into {\tt
+    namelist.jsbach}. The atmospheric part can accept the following
+  namelists in {\tt namelist.echam} (alphabetical order):
+
+\begin{description}
+  \item[{\tt cfdiagctl}:] \index{namelists!cfdiagctl}CFMIP2 station
+    diagnostics. 
+  \item[{\tt co2ctl}:] \index{namelists!co2ctl}interactive CO$_2$
+    budget calculation. 
+  \item[{\tt columnctl}:] \index{namelists!columnctl}single column model. 
+  \item[{\tt cospctl}:] \index{namelists!cospctl}controls the COSP
+    satellite simulator 
+  \item[{\tt cospofflctl}:] \index{namelists!cospofflctl}namelist
+    group for offline COSP 
+    calculation. Offline means that data from files are read and no
+    simulation of the general circulation takes place.
+  \item[{\tt debugsctl}:] \index{namelists!debugsctl}creates a stream
+    for grid point variables 
+    that can be written to output easily (for debugging).
+  \item[{\tt dyctl}:] \index{namelists!dynctl}parameters for
+    atmosphere dynamics. 
+  \item[{\tt ensctl}:] \index{namelists!ensctl}generate forecast ensembles.
+  \item[{\tt gwsctl}:] \index{namelists!gwsctl}gravity wave parameterisation.
+  \item[{\tt hratesctl}:] \index{namelists!hratesctl}diagnostic of
+    heating rates. 
+  \item[{\tt mvstreamctl}:] \index{namelists!mvstreamctl}variables
+    controlling output of mean 
+    values.
+  \item[{\tt ndgctl}:] \index{namelists!ndgctl}variables which are
+    related to the nudging of 
+    the model, i.e.~to the relaxation method constraining the
+    meteorological variables divergence, 
+    vorticity, temperature and pressure to externally given values.
+  \item[{\tt new\_tracer}:] \index{namelists!new\_tracer}new tracers
+    can be introduced by the use of 
+    this namelist group.
+  \item[{\tt nmictl}:] \index{namelists!nmictl}normal mode analysis of waves.
+  \item[{\tt parctl}:] \index{namelists!parctl}parameters concerning
+    the parallel 
+    configuration of model. 
+  \item[{\tt physctl}:] \index{namelists!physctl}variables related to
+    the physics calculation 
+    like switching on/off radiation, diffusion,
+  convection, surface exchange, \dots
+  \item[{\tt radctl}:] \index{namelists!radctl}variables for
+    controlling the radiation calculation. 
+  \item[{\tt runctl}:] \index{namelists!runctl}contains variables
+    concerning the start and the end 
+  of a simulation.
+  \item[{\tt set\_stream}:] \index{namelists!set\_stream}set the
+    properties of an existing stream 
+    by this namelist
+  \item[{\tt set\_stream\_element}:]
+    \index{namelists!set\_stream\_element}set stream element
+    properties of 
+    an existing stream element by namelist.
+  \item[{\tt set\_tracer}:] \index{namelists!set\_tracer}this namelist
+    group helps to set tracer 
+    properties if they are created by some (sub)model.
+  \item[{\tt stationctl}:] \index{namelists!stationctl}high frequency
+    output at the location of 
+    various sites including profiles.
+  \item[{\tt submdiagctl}:] \index{namelists!submdiagctl}submodel diagnostics.
+  \item[{\tt submodelctl}:] \index{namelists!submodelctl}namelists for
+    registration of submodels in 
+    \echam.
+  \item[{\tt tdiagctl}:] \index{namelists!tdiagctl}tendency diagnostic.
+\end{description}
+
+The syntax for each namelist in {\tt namelist.echam} is
+\index{namelist syntax}:
+\begin{lstlisting}[caption= namelist syntax]
+  & <namelist name>
+    <varname> = <value>
+  /
+\end{lstlisting}
+
+{\bf Remark:} The mere presence of a certain variable in a certain
+namelist does not mean that the action associated with this variable
+really works properly or works at all.
+
+Variables describing repeated events have a special format (type
+``special'' in the 
+following tables\index{special format}): \newline
+{\tt \{interval\}, \{unit\}, \{adjustment\}, \{offset\}}\newline
+where {\tt \{interval\}} is a positive integer number, {\tt \{unit\}}
+is one of {\tt 'steps'}, {\tt 'seconds'}, {\tt 'minutes'}, {\tt
+  'hours'}, {\tt 'days'}, {\tt 'months'}, {\tt 'years'}, {\tt \{adjustment\}} is
+one of {\tt 'first'}, {\tt 'last'}, {\tt 'exact'}, {\tt 'off'}, and {\tt
+  \{offset\}} is an integer number giving the offset with respect to
+the initial date of the simulation in seconds. A detailed description
+of the control of time events can be found in the 
+lecture ``Using and programming \echam{} --- a first introduction''
+by S.~Rast. The variable list is given in
+alphabetical order even if the most important variables are not at the
+first place in this case.
+
+\subsubsection{Namelist {\tt cfdiagctl}\index{namelists!cfdiagctl}}\label{seccfdiagctl}
+
+This namelists contains only one parameter to switch on or off the
+CFMIP2 diagnostics of 3--dimensional fluxes.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt cfdiagctl}]{Namelist
+  {\tt cfdiagctl}}\\\hline\label{tabcfdiagctl}
+\endfirsthead
+\caption[]{{\tt cfdiagctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt locfdiag}\index{namelist variables!locfdiag} & logical & switches on/off CFMIP2 diagnostic output of
+convective mass flux and 3-D radiation fluxes & {\tt .FALSE.} \\\hline
+\end{longtable}
+\subsubsection{Namelist {\tt co2ctl}\index{namelists!co2ctl}}\label{secco2ctl}
+
+This namelist controls the behaviour of the CO$_2$ submodel. This
+submodel is not a simple submodel like the transport of some gas phase
+species would be because the CO$_2$ module interacts with the JSBACH
+surface and vegetation model. In this namelist, the behaviour of the
+CO$_2$ submodel in the atmosphere simulated by \echam{} and the
+interaction with the ocean and soil simulated by JSBACH can be controlled.
+
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt co2ctl}]{Namelist
+  {\tt co2ctl}}\\\hline\label{tabco2ctl}
+\endfirsthead
+\caption[]{{\tt co2ctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt lco2\_flxcor}\index{namelist variables!lco2\_flxcor} 
+& logical & switches on/off flux correction for
+  exact mass balance & {\tt .TRUE.} \\
+{\tt lco2\_mixpbl}\index{namelist variables!lco2\_mixpbl}
+ & logical & switches on/off CO$_2$ mixing in
+  planetary boundary layer & {\tt .TRUE.} \\
+{\tt lco2\_2perc}\index{namelist variables!lco2\_2perc} 
+& logical & switches on/off limitation of relative CO$_2$
+  tendency to 2\% & {\tt .FALSE.} \\
+{\tt lco2\_emis}\index{namelist variables!lco2\_emis} 
+& logical & switches on/off reading prescribed CO$_2$
+  emissions from a file & {\tt .FALSE.} \\
+{\tt lco2\_clim}\index{namelist variables!lco2\_clim} 
+& logical & switches on/off treating the CO$_2$
+  concentration as a climatological quantity not being transported
+  & {\tt .FALSE.} \\
+{\tt lco2\_scenario}\index{namelist variables!lco2\_scenario} 
+& logical & switches on/off reading CO$_2$
+  concentrations from a certain greenhouse gas scenario
+  & {\tt .FALSE.} but {\tt .TRUE.} if {\tt ighg=1} and {\tt lco2=.FALSE.}\\
+
+\hline 
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt columnctl}\index{namelists!columnctl}}\label{seccolumnctl}
+
+This namelist controls the behaviour of the single column model. A more
+detailed description of the single column model can be found in
+section~\ref{secscm}. Here, we only present the namelist.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt columnctl}]{Namelist
+  {\tt columnctl}}\\\hline\label{tabcolumnctl}
+\endfirsthead
+\caption[]{{\tt columnctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+variable & type & explanation & default \\\hline
+{\tt forcingfile(32)}\index{namelist variables!forcingfile}
+    &character       &name of the forcing file   &   ---   \\ 
+ 
+{\tt mld}\index{namelist variables!mld} 
+ & real & depth of mixed layer in metres & {\tt 10}\\
+{\tt ml\_input}\index{namelist variables!ml\_input}
+ & logical & {\tt ml\_input=.true.}: initial
+temperature of mixed layer ocean is set to the value of the surface
+temperature of the forcing file. {\tt ml\_input=.false.}: the sea
+surface temperature is set to the value
+given in the \echam{} sst file for the respective column & {\tt .false.}\\
+{\tt nfor\_div(2)}\index{namelist variables!nfor\_div}
+       &integer & option array describing the
+treatment of the divergence of the wind field. The option array consists of
+$\{i_{\rm set},i_{\rm cycle}\}$ as described in section~\ref{secforcing}. & {\tt (/0,0/)} \\
+{\tt nfor\_lhf(2)}\index{namelist variables!nfor\_lhf}
+       &integer & option array describing the
+treatment of the latent heat flux. The option array consists of
+$\{i_{\rm set},i_{\rm cycle}\}$ as described in section~\ref{secforcing}. {\bf This option
+  array is not working.} & {\tt (/0,0/)} \\
+{\tt nfor\_omega(2)}\index{namelist variables!nfor\_omega}
+       &integer & option array describing the
+treatment of the pressure velocity. The option array consists of
+$\{i_{\rm set},i_{\rm cycle}\}$ as described in section~\ref{secforcing}. & {\tt (/0,0/)} \\
+{\tt nfor\_q(3)}\index{namelist variables!nfor\_q}
+        &integer   &option array describing the
+treatment of the specific humidity in the column. The option array consists of
+$\{i_\Delta,\tau,i_{\rm cycle}\}$ as described in section~\ref{secforcing}.
+                                 &   {\tt (/0,0,0/)}  \\  
+{\tt nfor\_shf(2)}\index{namelist variables!nfor\_shf}
+       &integer & option array describing the
+treatment of the sensible heat flux. The option array consists of
+$\{i_{\rm set},i_{\rm cycle}\}$ as described in section~\ref{secforcing}. {\bf This option
+  array is not working.} & {\tt (/0,0/)} \\
+{\tt nfor\_t(3)}\index{namelist variables!nfor\_t}
+        &integer   & option array describing the
+treatment of the column temperature. The option array consists of
+$\{i_\Delta,\tau,i_{\rm cycle}\}$ as described in section~\ref{secforcing}. 
+                                 &   {\tt (/0,0,0/)}  \\ 
+{\tt nfor\_ts(2)}\index{namelist variables!nfor\_ts}
+       &integer & option array describing the
+treatment of the surface temperature. The option array consists of
+$\{i_{\rm set},i_{\rm cycle}\}$ as described in section~\ref{secforcing}. & {\tt (/0,0/)} \\
+{\tt nfor\_uv(3)}\index{namelist variables!nfor\_uv}
+       &integer   &option array describing the
+treatment of the wind in $\vec{u}$ and $\vec{v}$ direction. The option array consists of
+$\{i_\Delta,\tau,i_{\rm cycle}\}$ as described in section~\ref{secforcing}. The $\vec{u}$
+and $\vec{v}$ winds can not be treated individually.
+                                 &   {\tt (/0,0,0/)}  \\ 
+{\tt nfor\_uvgeo(2)}\index{namelist variables!nfor\_uvgeo}
+       &integer & option array describing the
+treatment of the geostrophic wind. The option array consists of
+$\{i_{\rm set},i_{\rm cycle}\}$ as described in section~\ref{secforcing}. & {\tt (/0,0/)} \\
+{\tt nfor\_xi(3)}\index{namelist variables!nfor\_xi}
+       &integer   & option array describing the
+treatment of the ice water content. The option array consists of
+$\{i_\Delta,\tau,i_{\rm cycle}\}$ as described in section~\ref{secforcing}.
+                                 &   {\tt (/0,0,0/)}  \\ 
+{\tt nfor\_xl(3)}\index{namelist variables!nfor\_xl}
+       &integer   & option array describing the
+treatment of the liquid water content. The option array consists of
+$\{i_\Delta,\tau,i_{\rm cycle}\}$ as described in section~\ref{secforcing}.
+                                 &   {\tt (/0,0,0/)}  \\ 
+\hline 
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt cospctl}\index{namelists!cospctl}}\label{seccospctl}
+
+This namelist group controls the calculations of the COSP satellite
+simulator.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt cospctl}]{Namelist
+  {\tt cospctl}}\\\hline\label{tabcospctl}
+\endfirsthead
+\caption[]{{\tt cospctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt extra\_output}\index{namelist variables!extra\_output} 
+ & logical & switches on ({\tt extra\_output=.true.}) or off
+({\tt extra\_output=.false.}) additional output & {\tt .false.}\\
+{\tt Lisccp\_sim}\index{namelist variables!Lisccp\_sim}
+ & logical & switches on ({\tt Lisccp\_sim=.true.}) or off
+({\tt Lisccp\_sim=.false.}) the ISCCP simulator & {\tt .true.}\\
+{\tt Llidar\_sim}\index{namelist variables!Llidar\_sim}
+ & logical & switches on ({\tt Llidar\_sim=.true.}) or off
+({\tt Llidar\_sim=.false.}) the COSP LIDAR simulator & {\tt .true.}\\
+{\tt Llidar\_cfad}\index{namelist variables!Llidar\_cfad}
+ & logical & switches on ({\tt Llidar\_cfad=.true.}) or off
+({\tt Llidar\_cfad=.false.}) the output of COSP CFAD Lidar Scattering
+Ratio at 532nm& {\tt .false.}\\
+{\tt locosp}\index{namelist variables!locosp}
+ & logical & switches on ({\tt locosp=.true.}) or off
+({\tt locosp=.false.}) all COSP satellite simulators & {\tt .false.}\\
+{\tt l\_fixed\_ref}\index{namelist variables!l\_fixed\_ref}
+ & logical & switches on ({\tt l\_fixed\_ref=.true.}) or
+off ({\tt l\_fixed\_ref=.false.}) the use of fixed hydrometeor
+diameters for tests & {\tt .false.}\\
+{\tt Ncolumns}\index{namelist variables!Ncolumns}
+ & integer & number of sub--columns used for each
+profile & {\tt 12} \\
+{\tt offl2dout}\index{namelist variables!offl2dout}
+ & integer & extra output for offline tests if {\tt
+  offl2dout$>$0} 
+& {\tt -1} \\
+{\tt use\_netcdf}\index{namelist variables!use\_netcdf}
+ & logical & switches between netcdf format output ({\tt
+  use\_netcdf=.true.}) 
+or GRIB format output ({\tt use\_netcdf=.false.})
+& {\tt .true.}\\
+\hline 
+\end{longtable}
+
+\subsubsection{Namelist {\tt cospofflctl}\index{namelists!cospofflctl}}\label{seccospofflctl}
+
+This namelist group controls the calculations of the COSP satellite
+simulator from echam output without really performing a new simulation
+of the general circulation.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt cospofflctl}]{Namelist
+  {\tt cospofflctl}}\\\hline\label{tabcospofflctl}
+\endfirsthead
+\caption[]{{\tt cospofflctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt locospoffl}\index{namelist variables!locospoffl}
+ & logical & switches on ({\tt locospoffl=.true.}) or off
+({\tt locospoffl=.false.}) the offline COSP satellite simulators &
+{\tt .false.}\\ 
+{\tt offl2dout}\index{namelist variables!offl2dout}
+ & integer & extra output for offline simulators if {\tt
+  offl2dout$>$0} 
+& {\tt -1} \\
+\hline 
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt
+    debugsctl}\index{namelists!debugsctl}}\label{secdebugsctl} 
+
+The debug stream is meant to provide a quick and easy tool to the user of
+\echam{} that allows him to write any 2d-- or 3d--gridpoint variable
+on either layer midpoints or layer interfaces
+to an extra stream for debugging. A detailed description can be found
+in Appendix~\ref{cr20090331}.
+
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt debugsctl}]{Namelist
+  {\tt debugsctl}}\\\hline\label{tabdebugsctl}
+\endfirsthead
+\caption[]{{\tt debugsctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt nddf}\index{namelist variables!nddf}
+ & integer & number of 3d--fields  on full levels (layer midpoints) created in addition to the default
+  fields & {\tt 0} \\
+{\tt nddfh}\index{namelist variables!nddfh} & integer & number of
+3d--fields on half levels (layer interfaces) created in addition to
+the default fields & {\tt 0} \\
+{\tt nzdf}\index{namelist variables!nzdf}
+ & integer & number of 2d--fields created in addition to the default
+  fields & {\tt 0} \\
+{\tt putdebug\_stream}\index{namelist variables!putdebug\_stream}
+ & special & output frequency of debug stream &
+{\tt 6, 'hours', 'first', 0}\\
+\hline 
+\end{longtable}
+
+\subsubsection{Namelist {\tt dynctl}\index{namelists!dynctl}}\label{secdynctl}
+
+With the help of these namelist parameters, the (large
+scale) dynamics of the atmosphere can be controlled.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt dynctl}]{Namelist
+  {\tt dynctl}}\\\hline\label{tabdynctl}
+\endfirsthead
+\caption[]{{\tt dynctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt apsurf}\index{namelist variables!apsurf}
+ & real & fixed global mean of surface pressure
+  in Pa fixing the mass of the dry atmosphere & {\tt 98550.0} \\
+{\tt damhih}\index{namelist variables!damhih}
+ & real & extra diffusion in the middle atmosphere
+& {\tt 1000.} \\
+{\tt dampth}\index{namelist variables!dampth}
+ & real & damping time in hours for the horizontal
+  diffusion of vorticity (linear square Laplacian), divergence, and
+  temperature. Depends on the spectral resolution {\tt nn} & 
+  {\tt nn=31}: {\tt 12.0} \newline
+  {\tt nn=63}: {\tt 7.0} \newline
+  {\tt nn=127}: {\tt 1.5} \newline
+  {\tt nn=255}: {\tt 0.5} \\
+{\tt diagdyn}\index{namelist variables!diagdyn}
+ & special & frequency for diagnostic output of
+  quantities describing the dynamics of the atmosphere & {\tt 5,
+    'days', 'off', 0} \\
+{\tt diagvert}\index{namelist variables!diagvert}
+ & special & frequency for special (all layers)
+  diagnostic output of 
+  quantities describing the dynamics of the atmosphere & {\tt 5,
+    'days', 'off', 0} \\
+{\tt enspodi}\index{namelist variables!enspodi}
+ & real & factor by which upper sponge layer
+  coefficient is increased from one layer to the adjacent layer above
+  & {\tt 1.0}\\ 
+{\tt enstdif}\index{namelist variables!enstdif} 
+& real & factor by which stratospheric horizontal
+  diffusion is increased from one layer to the adjacent layer above &
+  {\tt 1.0} \\
+{\tt eps}\index{namelist variables!eps} & real & coefficient in the Robert--Asselin time
+  filter & {\tt 0.1} \\
+{\tt hdamp}\index{namelist variables!hdamp} & real & damping factor
+for strong stratospheric 
+  damping & {\tt 1.0} \\
+{\tt ldiahdf}\index{namelist variables!ldiahdf}
+ & logical & switches on/off statistical analysis of
+horizontal diffusion & {\tt .FALSE.} \\
+{\tt lumax}\index{namelist variables!lumax}
+ & logical & switches on/off the printing of information
+  on maximum wind speeds & {\tt .FALSE.} \\
+{\tt lzondia}\index{namelist variables!lzondia}
+ & logical & purpose unknown & {\tt .FALSE.} \\
+{\tt nlvspd1}\index{namelist variables!nlvspd1}
+ & integer & model layer index of uppermost layer of
+  upper sponge & {\tt 1} \\
+{\tt nlvspd2}\index{namelist variables!nlvspd2}
+ & integer & model layer index of lowest layer of
+  upper sponge & {\tt 1} \\
+{\tt nlvstd1}\index{namelist variables!nlvstd1}
+ & integer & model layer index of uppermost layer at which
+  stratospheric horizontal diffusion is enhanced & {\tt 1} \\
+{\tt nlvstd2}\index{namelist variables!nlvstd2}
+ & integer & model layer index of lowest layer at which
+  stratospheric horizontal diffusion is enhanced & {\tt 1} \\
+{\tt ntrn(1:nlev)}\index{namelist variables!ntrn}
+ & integer & layer and resolution dependent critical
+  wave numbers for strong stratospheric damping & see {\tt setdyn.f90}
+  \\
+{\tt spdrag}\index{namelist variables!spdrag}
+ & real & coefficient for upper sponge layer in 1/s
+  & {\tt 0.0}, if {\tt lmidatm=.TRUE.}: {$\tt 0.926\times 10^{-4}$} (see
+  Tab.~\ref{tabrunctl} \\
+{\tt vcheck}\index{namelist variables!vcheck}
+ & real & threshold value for check of high
+windspeed in m/s & {\tt 200.0} \newline
+                   if {\tt lmidatm=.TRUE.} (see Tab.~\ref{tabrunctl}:
+                   {\tt 235.0} \\
+{\tt vcrit}\index{namelist variables!vcrit}
+ & real & critical velocity above which horizontal
+  diffusion is enhanced in m/s. Depends on the spectral resolution {\tt
+  nn} & {\tt nn=106}: 68.0 \newline
+        all other {\tt nn}: 85.0 \\
+\hline
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt ensctl}\index{namelists!ensctl}}\label{secensctl}
+
+This namelist controls simulations for ensemble forecasts.
+
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt ensctl}]{Namelist
+  {\tt ensctl}}\\\hline\label{tabensctl}
+\endfirsthead
+\caption[]{{\tt ensctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+
+{\tt ensemble\_member}\index{namelist variables!ensemble\_member}
+ & integer & index of ensemble member between 1
+and {\tt ensemble\_size} & {\tt -1} \\
+{\tt ensemble\_size}\index{namelist variables!ensemble\_size}
+   & integer & number of ensemble members & {\tt -1} \\
+{\tt forecast\_type}\index{namelist variables!forecast\_type}
+   & integer & type of forecast, one of {\tt
+  HR\_CONTROL=0}, {\tt LR\_CONTROL=1}, {\tt NEGATIV\_PERTURBED=2}, {\tt
+  POSITIV\_PERTURBED=3}, {\tt MULTI\_MODEL=4}& {\tt -1}\\
+
+\end{longtable}
+
+\subsubsection{Namelist {\tt gwsctl}\index{namelists!gwsctl}}\label{secgwsctl}
+
+This namelist controls the settings for the gravity wave drag
+parameterization. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}
+\hline\hline\caption[Namelist {\tt gwsctl}]{Namelist
+  {\tt gwsctl}}\\\hline\label{tabgwsctl}
+\endfirsthead
+\caption[]{{\tt gwsctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+
+{\tt emiss\_lev}\index{namelist variables!emiss\_lev}
+ & integer & model layer index counted from the
+  surface at which gravity waves are emitted. This number depends on
+  the vertical resolution and corresponds to a model layer that is at
+  roughly 600~hPa in the standard atmosphere. &
+  {\tt nlev=199}: {\tt 26}\newline
+  all other {\tt nlev}: {\tt 10}\\
+{\tt front\_thres}\index{namelist variables!front\_thres}
+ & real & minimum value of the frontogenesis
+  function for which gravity waves are emitted from fronts in $\rm
+  (K/m)^2/h$ & {\tt 0.12} \\
+{\tt iheatcal}\index{namelist variables!iheatcal}
+ & integer & controls upper atmosphere processes
+  associated with gravity waves: \newline
+  {\tt iheatcal=1}: calculate heating rates and diffusion coefficient
+  in addition to momentum flux deposition\newline
+  {\tt iheatcal=2}: momentum flux deposition only &
+  {\tt 1}\\ 
+{\tt kstar}\index{namelist variables!kstar} & real & typical gravity
+wave horizontal wave 
+  number & {$\tt 5\times10^{-5}$}\\
+{\tt lat\_rmscon\_hi}\index{namelist variables!lat\_rmscon\_hi}
+ & real & latitude above which extratropical
+  gravity wave source is used. Is only relevant if {\tt
+    lrmscon\_lat=.TRUE.} & {\tt 10.0} \\
+{\tt lat\_rmscon\_lo}\index{namelist variables!lat\_rmscon\_lo}
+ & real & latitude below which tropical
+  gravity wave source is used. Is only relevant if {\tt
+    lrmscon\_lat=.TRUE.}. There is a linear interpolation between
+  {\tt lat\_rmscon\_lo} and {\tt lat\_rmscon\_hi} degrees N and S,
+  respectively, between the values given by {\tt rmscon\_lo} (associated
+  with the tropical gravity wave parameterization) and {\tt rmscon\_hi}
+  associated with the extratropical gravity wave parameterization& {\tt 5.0} \\
+{\tt lextro}\index{namelist variables!lextro}
+ & logical & switches on/off the Doppler spreading
+  extrowave parameterization by Hines & {\tt .TRUE.} \\
+{\tt lfront}\index{namelist variables!lfront}
+ & logical & switches on/off gravity waves emerging from
+  fronts and the background. Parameterization by Charron and Manzini &
+  {\tt .FALSE.} \\
+{\tt lozpr}\index{namelist variables!lozpr}
+ & logical & switches on/off the background enhancement of
+  gravity waves associated with precipitation by Manzini et al.. Does
+  not work with \echam. & 
+  {\tt .FALSE.} \\
+{\tt lrmscon\_lat}\index{namelist variables!lrmscon}
+ & logical & switches on/off latitude dependent {\tt
+  rmscon} as defined in {\tt setgws}. Must not be {\tt .TRUE.} if {\tt
+  lfront=.TRUE.} or {\tt lozpr=.TRUE.} & {\tt .FALSE.}\\
+{\tt m\_min}\index{namelist variables!m\_min} & real & minimum bound in vertical wave number &
+  {\tt 0.0}\\
+{\tt pcons}\index{namelist variables!pcons}
+ & real & factor for  background enhancement 
+  associated with precipitation & {\tt 4.75}\\
+{\tt pcrit}\index{namelist variables!pcrit}
+ & real & critical precipitation value above which
+  root mean square gravity wave wind enhancement is applied in mm/d &
+  {\tt 5.0} \\
+{\tt rms\_front}\index{namelist variables!rms\_front}
+ & real & root mean square frontal gravity wave
+  horizontal wave number in 1/m & {\tt 2.0}\\
+{\tt rmscon}\index{namelist variables!rmscon}
+ & real & root mean square gravity wave wind at
+  lowest layer in m/s & {\tt 1.0} \\
+{\tt rmscon\_hi}\index{namelist variables!rmscon\_hi}
+ & real & root mean square gravity wave wind at
+  lowest layer in m/s for extratropical gravity wave source. Is only
+  relevant if {\tt lrmscon\_lat=.TRUE.}& {\tt 1.0} \\
+{\tt rmscon\_lo}\index{namelist variables!rmscon\_lo}
+ & real & root mean square gravity wave wind at
+  lowest layer in m/s for tropical gravity wave source. Is only
+  relevant if {\tt lrmscon\_lat=.TRUE.}. Depends on the spectral
+  resolution {\tt nn} & {\tt nn=31}: {\tt 1.0} \newline
+                        {\tt nn=63}: {\tt 1.2} \newline
+                        {\tt nn=127}: {\tt 1.05} but {\tt 1.1} if {\tt
+                          lcouple=.TRUE.} (see
+                        Tab.~\ref{tabrunctl})\newline
+                        any other {\tt nn}: 1.1 \\ 
+\hline 
+\end{longtable}
+
+
+
+
+\subsubsection{Namelist {\tt hratesctl}\index{namelists!hratesctl}}\label{sechratesctl}
+
+This namelist is obsolete since its functionality is included in {\tt
+  tdiagctl} (see section~\ref{sectdiagctl}).
+
+\subsubsection{Namelist {\tt mvstreamctl}\index{namelists!mvstreamctl}}\label{secmvstreamctl}
+
+Using this namelist, the online calculation of time averages of
+non--accumulated grid point, spectral, and land variables
+of any output stream is possible. If variables are averaged in the
+original stream, they may be referenced in the mean value stream
+For each stream, you can ask for one
+additional stream containing the mean values of a subset of variables
+of this stream. The namelist {\tt mvstreamctl} controls which output
+streams will 
+be doubled. The output of mean values of trace species concentrations
+are written to the output stream {\tt
+  tracerm}. In this new implementation, you are more flexible in terms
+of names of the outputfiles. Furthermore, all variables are now
+collected in the {\tt mvstreamctl} namelist and you do not need to
+specify any further variables in the {\tt mvctl} namelist.
+However, for backwards compatibility reasons, the old method using
+the namelist {\tt mvctl}
+described in section~\ref{secmvctl} still works.
+A thorough documentation describing the numerical method and some
+scientific aspects of the mean value calculation over time is
+presented in Appendix~\ref{cr20100728}.
+
+\begin{footnotesize}
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.2cm}p{3.3cm}}
+\hline\hline\caption[Namelist {\tt mvstreamctl}]{Namelist
+  {\tt mvstreamctl}}\\\hline\label{tabmvstreamctl}
+\endfirsthead
+\caption[]{{\tt mvstreamctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & Type & Explanation & Default \\\hline
+{\tt filetag}\index{namelist variables!filetag}
+ & character(len=7) & The averaged variables of each
+stream listed in {\tt source} will be written to the same 
+outputfile with ending tag {\tt filetag}. If {\tt filetag} is not
+present, the names of the streams are used as filetags and possibly
+more than one file will be created. & {\tt
+  target}  \\
+{\tt interval}\index{namelist variables!interval}
+ & special & time averaging interval & The
+default depends on the setting of {\tt default\_output} in {\tt
+  runctl}:
+For {\tt default\_output= .false.}: {\tt interval=putdata}; for {\tt
+  default\_output= .true.}: 
+{\tt interval= 1,'months','first',0}
+\\
+{\tt meannam(500)}\index{namelist variables!meannam}
+ & character(len=64) & variable names of stream elements
+of which
+time average is desired. If {\tt source} contains more streams than
+one, the program stops if the variables are not contained in every 
+of these streams. In that case, specify {\tt mvstreamctl} for each
+stream separately. Variables that are not either spectral, 2d or 3d
+grid point, or land variables are skipped. 
+If meannam is not specified or equal to $\star$ or {\tt ''},
+all variables of the respective stream(s) are averaged. & 
+{\tt ''} \\ 
+{\tt source}(50)\index{namelist variables!source} & character(len=16) & 
+A mean value stream will be created for each stream listed in {\tt
+  source}. Per default, the names of these replicated streams are 
+  the original names with appended {\tt 'm'}. Furthermore,
+per default corresponding 
+outputfiles with these tags in their names will be created.
+The default can be changed by the use of the {\tt target} and {\tt
+  filetag} namelist 
+variables. 
+& {\tt ''} \\
+{\tt sqrmeannam(500)}\index{namelist variables!sqrmeannam}
+ & character(len=64) & variable names of stream
+elements of
+  which time average of their square is desired. Variables that are
+  averaged over the output interval in the original stream and may
+  only be referenced are excluded. If {\tt
+    sqrmeannam='$\star$'} the mean of the square is calculated of all
+  variables in the stream. Does work with several streams in {\tt
+    source} & {\tt ''} \\
+{\tt target}\index{namelist variables!target} & character(len=16) & 
+If {\tt source} contains a single stream only, you can give a name to the
+corresponding mean value stream by setting {\tt target} to a name of
+your choice. You can also define
+a common ending for all streams in {\tt source}
+by setting {\tt 
+  target=$\ast$<ending>}. In that case, the replicate of each original
+stream 
+will have the name {\tt <name of original stream><ending>}.
+&
+{\tt $\ast$m}\\\hline 
+\multicolumn{4}{c}{variables for backward compatibility} \\\hline
+{\tt m\_stream\_name(1:50)}\index{namelist variables!m\_stream\_name}
+ & character(len=256) & List of names of
+  streams for the elements of which mean values shall be
+  calculated. Note that a maximum of 50 output streams is allowed
+  (including the mean value streams). This variable can still be used
+  together with the {\tt mvctl} namelist but is included only for
+  backward compatibility. Note that you cannot set both variables {\tt
+    source} and {\tt m\_stream\_name} at the same time.& {\tt ''} \\\hline
+\end{longtable}
+
+\end{footnotesize}
+
+{\bf Remarks:}
+
+\begin{description}
+
+
+\item[target]
+
+You may use the renaming of the mean value stream 
+if you want to calculate monthly and daily means of some variables of
+the same source stream in one simulation. If you do not rename at
+least one of
+these streams, there will be a naming conflict since the default would
+be to name both mean value streams after the source stream with an
+appended {\tt 'm'}.
+
+Note: you can specify the {\tt mvstreamctl} namelist several times for
+different (sets of) streams in the same {\tt namelist.echam} input file.
+
+\item[interval]
+
+Because of the time integration scheme used in \echam,
+there is a particular behaviour
+in calculating the mean values. Let's assume that you gave 
+\texttt{interval = 2,'hours','first',0} and that you have a 40 minutes
+time step. 
+This means that you have instantaneous 
+values at 00:00h, 00:40h, 01:20h, 02:00h, 02:40h and
+so forth.
+The above setting of \texttt{interval} now causes a mean value over the values
+at 00:00h, 00:40h, 01:20h for the tracer stream, over the values at 
+00:40h, 01:20h, 02:00h for all other streams. When you specify 
+\texttt{interval = 2,'hours','last',0}, the mean values are taken over values at
+00:40h, 01:20h, 02:00h for the tracer stream and at 01:20h, 02:00h, 02:40h
+for all other streams. This is due to the organization of the time integration
+in \echam. In general, this is not very important for calculating mean values
+over a month or so.
+
+You should also be careful in changing your mean value calculation interval
+in combination with reruns. Assume that you interrupt your model writing 
+rerun files every month but that your mean value interval is 2 months. 
+Then, between two output intervals of your mean values, the rerun file
+for the mean value streams contains the accumulated values of one month,
+this means the sum over the instantaneous values multiplied by the
+time step length.
+If you now decide to change to daily meanvalues for example, the large already
+over one month accumulated value of each variable is taken, further 
+instantaneous values accumulated until the end of a day and then this value
+is devided by the number of seconds of the new mean value calculation interval
+of one day. This means that you will end up with a erroneous much too high 
+resulting ``mean value''.
+
+\end{description}
+
+
+
+{\bf Restrictions:}
+
+\begin{enumerate}
+
+\item In \echam, the current maximum number of streams is 50.
+      Each stream for which you require a mean value calculation is doubled,
+      so that you have two streams for each one in the above \code{source} list:
+      the original one and the mean value stream. Furthermore, only
+      30~different (repeated) events are allowed in \echam. 
+
+\item
+\label{item:applicable_vars}
+
+Variables all have to be on a Gaussian grid or in spectral space,
+either two dimensional or three dimensional, or land (JSBACH) variables.
+If the variables have the
+{\tt laccu} flag set to {\tt .true.} they are only referenced if the output
+interval of the respective mean value stream and the stream of origin
+are identical. Otherwise they will be automatically skipped from the list.
+For variables that have {\tt laccu=.true.} in their original stream,
+no means of the squares can be calculated.
+
+\item
+
+The variable names, full names, and units have to meet
+length restrictions that are somewhat more restrictive than the normal \echam{} 
+restrictions. This is a consequence of the fact that
+new names and units are given to the averaged
+variables. The new names are chosen as follows
+\begin{description}
+\item [name:] The name of the mean value of a variable is the same as
+  the name of the original (instantaeous) variable. 
+For the mean of the
+square {\tt \_s} is 
+added at the end of the variable name. Consequently, if the mean of the 
+square is desired, the variable name has to be 2 characters shorter than the
+allowed maximum specified in \echam.
+\item [full name:] Same as for name (relevant for tracer stream only).
+\item [unit:] Units of mean values are unchanged of course, but in the case of
+mean values of the square {\tt \it unitchar} is replaced by 
+{\tt ({\it unitchar})**2} so that units have to be 5 characters shorter than
+the maximum allowed by \echam{} if mean values of the square are required.
+\end{description}
+
+\item If \texttt{target} is not set,
+      the length of \texttt{source} must 
+      allow for an additional {\tt 'm'}.
+
+\item If \texttt{filetag} is not set, the length of \texttt{target}
+  must not exceed the maximum length of \texttt{filetag(len=7)}. 
+\end{enumerate}
+
+{\bf Backwards compatibility:}
+
+Before \echam{} version~1.03, the namelist group \CODE{mvstreamctl} only defined
+the source streams, using \code{m\_stream\_name} instead of \code{source}.
+Other settings, namely \code{putmean} (same as \code{interval}),
+\code{meannam}, and \code{stddev} (replaced by \code{sqrmeannam})
+were to be put into a namelist group \CODE{mvctl} stored in a separate
+namelist file named
+\code{\cvar{streamname}.nml}.
+For compatibility reasons, these are still recognised,
+so old setups will continue to work.
+
+Note though, that if you additionally use the new variables \code{interval}
+or \code{meannam} of \CODE{mvstreamctl}, a warning will appear,
+and the  \CODE{mvstreamctl} settings will override any settings from
+\code{\cvar{streamname}.nml} to avoid inconsistencies.
+
+{\bf New features and migration hints:}
+
+\begin{itemize}
+\item resulting stream may be renamed by setting \code{target}
+\item file name suffix may be set using \code{filetag};
+      an underscore (\_) is prepended automatically
+\item to request all variables of a stream, simply omit the
+  \code{meannam} element; 
+      setting it to an empty string ('') or '*' has the same effect
+\item for \CODE{mvstreamctl}, 
+      \code{stddev} has been replaced by \code{sqrmeannam}.
+      It takes variable names instead of numeric flags,
+      to allow for a more direct and -- if only a few square means are needed --
+      a more concise definition of those variables.
+      \code{stddev = -1} is now \code{sqrmeannam ='*'}
+\end{itemize}
+
+The relation between old and new variables in the namelist group {\tt
+  mvstreamctl} and {\tt mvctl} is summarized below.
+
+%\vspace{\baselineskip}
+\begin{tabular}{lll} \hline
+\textbf{mvstreamctl (new)} & \textbf{mvstreamctl (old)} & \textbf{mvctl} \\\hline
+source & m\_stream\_name & + '.nml' \emph{as file names} \\
+target & m\_stream\_name(i) + 'm' & \\
+interval & & putmean \\
+filetag & '\_' + m\_stream\_name(i) + 'm' & \\
+meannam & & meannam \\
+meannam \emph{not set,} = ''\emph{, or} = '*' & & meannam = 'all' \\
+sqrmeannam & & stddev \\
+sqrmeannam = 'var1', 'var4', \dots & & stddev = 1, 0, 0, 1, \dots \\
+sqrmeannam = '*' & & stddev = -1 \\\hline
+\end{tabular}
+%\vspace{\baselineskip}
+
+
+
+\subsubsection{Namelist {\tt ndgctl}\index{namelists!ndgctl}}
+
+This namelist controls all variables that are relevant for nudging,
+i.e.~relevant for a simulation mode in which the spectral
+3d--temperature, vorticity, 
+divergence, surface pressure, and surface temperature can be constrained
+to external fields obtained e.g.~from the assimilation of
+observations. It has to be underlined that constraining the surface
+temperature may lead to wrong sea ice coverage since the presence of
+sea ice is diagnosed from the surface temperature directly without
+taking into account any hysteresis effects (see Appendix~\ref{cr20120806}).
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt ndgctl}]{Namelist 
+  {\tt ndgctl}}\\\hline\label{tabndgctl}
+\endfirsthead
+\caption[]{{\tt ndgctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt dt\_nudg\_start(1:6)}\index{namelist variables!dt\_nudg\_start}
+ & integer    & defines the beginning of the nudging 
+ in the experiment. Is of the form yy,mo,dy,hr,mi,se (year, month,
+ day, hour, minute, second) & {\tt 0,0,0,0,0,0} \\
+{\tt dt\_nudg\_stop(1:6)}\index{namelist variables!dt\_nudg\_stop}
+ & integer     &  defines the
+  date at which nudging stops in a simulation. Is of the form
+  yy,mo,dy,hr,mi,se (year, month, 
+  day, hour, minute, second) & {\tt 0,0,0,0,0,0} \\
+{\tt inudgformat}\index{namelist variables!inudgformat}
+ & integer & format of nudging input files \newline
+${\tt inudgformat}=0$: old CRAY format input files \newline
+${\tt inudgformat}=2$: netcdf format input file & 0 \\
+{\tt ldamplin}\index{namelist variables!ldamplin}
+ & logical & linear damping (${\tt ldamplin}={\tt
+ .true.}$) or damping with a parabolic function (${\tt ldamplin}={\tt
+ .false.}$) 
+ of the nudging efficiency
+ between two synoptic times at
+ which nudging data sets are given
+ & {\tt .true.} \\
+{\tt lnudgdbx}\index{namelist variables!lnudgdbx}
+ & logical  & {\tt .true.} for additional diagnostic output
+ about nudging, {\tt .false.} otherwise& {\tt .false.}\\
+{\tt lnudgcli}\index{namelist variables!lnudgcli}
+ & logical & ${\tt lnudgcli}={\tt .true.}$: \echam{}
+ ignores the information about the year in the 
+ nudging data file and reads nudging data in a cyclic way. Consequently,
+ for each model year, the same nudging data are read.\newline
+ ${\tt lnudgcli}={\tt .false.}$: The information about the year is
+ included in the 
+ nudging procedure, the data to which the model is constrained depend
+ on the year. & {\tt .false.} \\
+{\tt lnudgfrd}\index{namelist variables!lnudgfrd}
+ & logical  & ${\tt lnudgfrd}={\tt .true.}$: normal
+ mode filtering is done 
+ at reading the data\newline 
+ ${\tt lnudgfrd}={\tt .false.}$: normal mode filtering is done
+ elsewhere. Works only together with {\tt lnmi=.true.}& {\tt .false.}\\
+{\tt lnudgimp}\index{namelist variables!lnudgimp}
+ &  logical & ${\tt lnudgimp}= {\tt .true.}$: implicit
+ nudging\newline 
+ ${\tt lnudgimp}={\tt .false.}$:
+ explicit nudging & {\tt .true.} \\
+{\tt lnudgini}\index{namelist variables!lnudgini} 
+ & logical & ${\tt lnudgini}={\tt .false.}$: \echam{}
+ starts or restarts a simulation for 
+ a certain experiment from the date given in the namelist by {\tt
+ dt\_start} or the restart date in the restart file\newline
+ ${\tt lnudgini}={\tt .true.}$: If ${\tt lresume}={\tt .false.}$, the model
+ starts the simulation at the
+ date of the first nudging data set being in the nudging files the names of
+ which correspond to {\tt dt\_nudge\_start}. There must be nudging
+ files having a file name corresponding to {\tt dt\_nudge\_start}.
+ If {\tt lresume=.true.}, the model starts its run at the first date
+ being in the nudging data files the file names of which correspond to
+ the {\tt next\_date} (next time step) of the rerun date. & {\tt
+  .false.} \\
+{\tt lnudgpat}\index{namelist variables!lnudgpat}
+ &  logical & ${\tt lndgpat}={\tt .true.}$: pattern
+ nudging. Does not work properly, to be removed\newline
+ ${\tt lndgpat}= {\tt .false}$:
+ otherwise& {\tt .false.}\\
+{\tt lnudgwobs}\index{namelist variables!lnudgwobs}
+ & logical & {\tt .true.} for storing additional nudging
+ reference fields, {\tt .false.} otherwise& {\tt .false.}\\ 
+{\tt lsite}& logical  &  switches on/off the Systematic Initial
+Tendency Error diagnostic&{\tt .false.}\\ 
+{\tt ltintlin}&logical   & ${\tt ltintlin}={\tt .true.}$: linear  time
+ interpolation\newline 
+ ${\tt ltintlin}= {\tt .false.}$ for cubic spline
+ time interpolation between two  
+ synoptic times at which nudging data sets are given& {\tt .true.}\\
+{\tt ndg\_file\_div(256)}\index{namelist variables!ndg\_file\_div}
+ & character & file name template for the file
+ containing the nudging data for the divergence & --- \\
+{\tt ndg\_file\_nc(256)}\index{namelist variables!ndg\_file\_nc}
+ & character & file name template for netcdf
+format file
+containing all nudging data (temperature, logarithm of surface
+pressure, divergence and vorticity)& --- \\
+{\tt ndg\_file\_sst(256)}\index{namelist variables!ndg\_vile\_stt}
+ & character & file name template for file
+ containing the sea surface temperature& --- \\ 
+{\tt ndg\_file\_stp(256)}\index{namelist variables!ndg\_file\_stp}
+ & character & file name template for the file
+containing the nudging data for the temperature and the logarithm of
+the surface pressure & --- \\
+{\tt ndg\_file\_vor(256)}\index{namelist variables!ndg\_file\_vor} 
+ & character &  file name template for the file
+ containing the nudging data for the vorticity & --- \\
+{\tt ndg\_freez}\index{namelist variables!ndg\_freez}
+ & real & temperature at which sea water is
+ assumed to freeze in Kelvin& {\tt 271.65}\\
+{\tt nsstinc}\index{namelist variables!nsstinc} 
+ & integer            & treatment of the sea surface
+ temperature (sst): read new sst data set each
+ {\tt nsstinc} hours. A value of 0 means that sst is not used and
+ prevents the model to produce too low sea ice coverage when nudging
+ since sea ice would be detected only if temperatures drop below {\tt
+   ndg\_freez}  & {\tt 0} \\
+{\tt nsstoff}\index{namelist variables!nsstoff}
+ & integer   & read the first sst data at hour {\tt nsstoff}
+ after the beginning of the nudging & {\tt 12}\\
+{\tt nudgd(1:80)}\index{namelist variables!ndgd}
+ &  real & the relaxation time for each model layer
+ for the nudging of the spectral divergence is given by $1/({\tt
+   nudgd}\times 10^{-5})s$. Note the maximum of 80 layers!
+ & {\tt 0.5787(1:80)}/s
+ corresponding to 48 hours\\ 
+{\tt nudgdamp}\index{namelist variables!ndgdamp}
+ & real  & the nudging between two synoptic times
+ will be reduced to {\tt nudgdamp}. Consequently, {\tt nudgdamp}=1.0
+ means that nudging will be effective at 100\% at every time step, {\tt
+ nudgdamp}=0.0 means that the nudging will be switched off somewhere
+ between two synoptic times at which nudging data are available
+  & {\tt 1.0}\\
+{\tt nudglmax}\index{namelist variables!ndglmax}
+ & integer         & highest index of the model layer at
+ which nudging 
+ is performed. Note the maximum of 80 layers! & {\tt 80}\\
+{\tt nudglmin}\index{namelist variables!ndglmin}
+ & integer  &  lowest index of the model layer at which nudging is
+ performed& {\tt 1}\\
+{\tt nudgp}\index{namelist variables!nudgp}
+ & real     & the relaxation time for the nudging of
+ the logarithm of the surface pressure is given by $1/({\tt
+ nudgp}\times10^{-5})\,{\rm s}$& {\tt 1.1574}/s correspondig to 24 hours\\
+{\tt nudgdsize}\index{namelist variables!nudgdsize}
+ & real & fraction of the synoptic time interval after
+ which only the fraction {\tt nudgdamp} is applied in the nudging
+ procedure. If ${\tt nudgdsize}<0.5$, the minimum is reached after a
+ fraction of {\tt nudgdsize} of the synoptic time interval. This
+ minimum nudging level is then maintained until the model time reaches
+ the next synoptic time step minus the fraction {\tt nudgdsize} of the
+ synoptic time interval. Then, the nudging strength is starting to
+ increase again & {\tt 0.5}\\
+{\tt nudgsmax}\index{namelist variables!ndgsmax}
+ & integer  & highest nudged wavenumber. Note the
+restriction to model resolution not higher than T106! & {\tt 106}\\
+{\tt nudgsmin}\index{namelist variables!nudgsmin}
+ & integer  & Index of lowest nudged wavenumber minus one. This
+ means, that with ${\tt nudgsmin}=0$, the spectral coefficient 0 (global
+ average) is not nudged& {\tt 0}\\
+{\tt nudgt(1:80)}\index{namelist variables!nudgt}
+ & real & the relaxation time for each model layer for
+ the nudging of the spectral temperature is given by $1/({\tt
+   nudgt}\times10^{-5})s$. Note the maximum of 80
+ layers! & {\tt 1.1574(1:80)}/s
+ corresponding to 24 hours\\ 
+{\tt nudgtrun}\index{namelist variables!nudgtrun}
+ & integer  & mode of selection of spectral coefficients
+  for nudging (see {\tt mo\_nudging\_init.f90}). The spectral
+  coefficients of any quantity in spectral space are characterized by
+  two indices $(n,m)$ 
+  associated with zeros of the spherical harmonics $Y_n^m$ in longitudinal
+  direction (index $m$) and latitudinal direction (index $n$). Let $L$
+  be the spectral model resolution characterized by the maximum $n$
+  and $\tilde{L}$ the maximum spectral resolution to which nudging has
+  to be applied ($\tilde{L}$ can be set by the namelist parameter {\tt
+    nudgsmax}). If one
+  sets ${\tt nudgtrun}={\tt
+    NDG\_WINDOW\_ALL}=0$, all spectral coefficients to the
+  maximum possible $m=L$ are used even if $\tilde{L}<L$. For ${\tt
+    nudgtrun}={\tt NDG\_WINDOW\_CUT}=1$, $m\le n\le\tilde{L}$ is
+  chosen, even if $\tilde{L}<L$. If ${\tt nudgtrun}={\tt
+    NDG\_WINDOW\_CUT0}=2$, all spectral coefficients are nudged as
+  with ${\tt nudgtrun}=1$ but for $m=0$ ALL coefficients up to $n=L$
+  are used. & {\tt 0}\\
+{\tt nudgv(1:80)}\index{namelist variables!nudgv}
+ & real & the relaxation time for each model layer
+ for the nudging of the spectral vorticity is given by $1/({\tt
+   nudgv}\times 10^{-5})s$. Note the maximum of 80
+ layers! & {\tt 4.6296(1:80)}/s
+ corresponding to 6 hours\\ \hline
+\end{longtable}
+
+\subsubsection{Namelist {\tt new\_tracer}\index{namelists!new\_tracer}}
+
+This namelist allows to declare new transported tracers in \echam{}
+without the direct use of the ``tracer interface''.
+However, in most cases, tracers belong to submodels and will be declared by
+them. Often the processes that modify the (mass) mixing ratios of
+tracers other than transport by advection, diffusion, convection
+and a constant decay (radioactive decay) in the atmosphere are very
+complex and need to be programmed in special subroutines. If
+transport and some kind of radioactive decay are the only processes
+that are relevant for changes of the (mass) mixing ratio of a tracer,
+this namelist is sufficient. Any quantity proportional to the mass
+mixing ratio can be transported. This namelist can be specified
+several times in the namelist file {\tt namelist.echam} for the
+definition of more tracers than one.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt new\_tracer}]{Namelist 
+  {\tt new\_tracer}}\\\hline\label{tabnewtracer}
+\endfirsthead
+\caption[]{{\tt new\_tracer} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt bits}\index{namelist variables!bits}
+ & integer & number of bits used in GRIB encoding & 16 \\
+{\tt code}\index{namelist variables!code}
+ & integer & GRIB code number of tracer in GRIB format
+output file & 0 \\
+{\tt nconv}\index{namelist variables!nconv}
+ & integer & transport by convection switched on ({\tt
+  nvdiff=ON=1}) or switched off ({\tt nvdiff=OFF=0}) & {\tt ON}\\
+{\tt name(24)}\index{namelist variables!name} 
+ & character & name of tracer & --- \\
+{\tt ninit}\index{namelist variables!ninit}
+ & integer & initialization flag, for a detailed
+explanation, see the lecture ``Working with \echam{} --- a first
+introduction''. {\tt RESTART + CONSTANT = 1 + 2 = 3} means that the
+tracer (mass) 
+mixing ratio will be read from a restart file if there is any or set
+to a constant throughout the atmosphere & {\tt RESTART}+{\tt CONSTANT} \\
+{\tt nint}\index{namelist variables!nint}
+ & integer & time integration switched on ({\tt
+  nint=ON=1}) or switched off ({\tt nint=OFF=0}) & {\tt ON}\\
+{\tt nrerun}\index{namelist variables!nrerun}
+ & integer & restart flag. {\tt ON=1} means that the tracer
+(mass) mixing ratio is written to the restart file, {\tt OFF=0} that it
+is not written to the restart file & {\tt ON} \\
+{\tt ntran}\index{namelist variables!ntran}
+ & integer & transport flag. {\tt ntran=no\_advection=0}:
+advective transport switched off, {\tt ntran=semi\_lagrangian=1}:
+semi--Lagrangian transport scheme (based on a version of Olson \&
+Rosinski), {\tt ntran=tpcore=3}: multi--dimensional 
+flux form semi-Lagrangian (FFSL) scheme (Lin and Rood 1996, Monthly
+Weather Review) with many unpublished modifications  & {\tt tpcore} \\
+{\tt nvdiff}\index{namelist variables!nvdiff}
+ & integer & transport by vertical diffusion switched on ({\tt
+  nvdiff=ON=1}) or switched off ({\tt nvdiff=OFF=0}) & {\tt ON}\\
+{\tt nwrite}\index{namelist variables!nwrite}
+ & integer & {\tt ON=1}: tracer (mass) mixing ratio is
+written to output file {\tt $\ast$\_tracer}; {\tt OFF=0}: no output &
+{\tt ON}\\
+{\tt table}\index{namelist variables!table} & integer & GRIB code table number in GRIB format output
+file & 131 \\
+{\tt tdecay}\index{namelist variables!tdecay}
+ & real & decay time in seconds (exponential decay) & {\tt
+  0.e0}\\
+{\tt units(24)}\index{namelist variables!units}
+ & character & units of tracer  & --- \\
+{\tt vini}\index{namelist variables!vini}
+ & real & Performing an initial run, the tracer (mass) mixing
+ratio will be set to this value at the beginning of the time
+integration & {\tt 0.e0}\\
+\hline
+\end{longtable}
+
+\subsubsection{Namelist {\tt nmictl}\index{namelists!nmictl}}
+
+This is the namelist to control the normal mode analysis.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt nmictl}]{Namelist 
+  {\tt nmictl}}\\\hline\label{tabnmictl}
+\endfirsthead
+\caption[]{{\tt nmictl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt dt\_nmi\_start(1:6)}\index{namelist variables!dt\_nmi\_start}
+ & integer & start date of the NMI procedure.
+  Is of the form yy,mo,dy,hr,mi,se (year, month,
+ day, hour, minute, second)& {\tt 0,0,0,0,0,0}\\
+{\tt lnmi\_cloud}\index{namelist variables!lnmi\_cloud}
+ & logical & run initialization including clouds &
+  {\tt .TRUE.} \\
+{\tt ntdia}\index{namelist variables!ntdia}
+ & integer & number of time steps of accumulation interval
+  for diabatic tendencies & {\tt 8}\\
+{\tt ntiter}\index{namelist variables!ntiter}
+ & integer & number of time steps in an iteration interval
+  & {\tt 2}\\
+{\tt ntpre}\index{namelist variables!ntpre}
+ & integer & number of time steps of pre--integration
+  interval & {\tt 2} \\
+{\tt pcut}\index{namelist variables!pcut}
+ & real & cut off period in hours (used for nudging)
+  & {\tt 12.0} \\
+{\tt pcutd}\index{namelist variables!pcutd}
+ & real & cut off period in hours (used for
+  initialization) & {\tt 6.0} \\\hline
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt parctl}\index{namelists!parctl}}
+
+This namelist controls the parallelization of the \echam{} program.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt parctl}]{Namelist 
+  {\tt parctl}}\\\hline\label{tabparctl}
+\endfirsthead
+\caption[]{{\tt parctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt db\_host(132)}\index{namelist variables!db\_host}
+ & character & hostname to display time performance profiles of a
+ model run on a special server: {\tt
+   http://jobs-mpi.zmaw.de/index.php}
+ The value of {\tt db\_host} is machine dependent as follows:
+ \blizzard: {\tt 'plogin1'} \newline
+ ZMAW computers: {\tt 'jobs-mpi.zmaw.de'}\newline
+ In order to use this feature, set ${\tt ltimer}={\tt .true.}$ in the
+ {\tt runctl} namelist group (see Tab.~\ref{tabrunctl}) & {\tt ''}\\
+{\tt iomode}\index{namelist variables!iomode}& integer & I/O mode for
+parallel output. On \blizzard{} ${\tt iomode}=2$ should be used,
+on \thunder{} the faster ${\tt iomode}=1$ is also possible & {\tt 0}\\
+{\tt lyaxt\_transposition}\index{namelist
+  variables!lyaxt\_transposition} & logical & switch on/off the use of
+  YAXT library for transpositions. This is currently unsupported. & 
+  {\tt .false.}\\
+{\tt network\_logger(132)}\index{namelist variables!network\_logger}
+ & character & network logger for TCP/IP based debugging
+  & {\tt ''} \\ 
+{\tt nproca}\index{namelist variables!nproca}
+ & integer & number of processors for set A division of earth &
+  {\tt 1} \\
+{\tt nprocb}\index{namelist variables!nprocb}
+ & integer & number of processors for set B division of earth &
+  {\tt 1}\\
+{\tt nprocio}\index{namelist variables!nprocio}
+ & integer & number of processors used for parallel~I/O.
+ For serial~I/O, choose ${\tt nprocio}=0$.
+ 
+ On \blizzard{}
+ ${\tt nprocio}=32$, on \thunder{} ${\tt nprocio}=16$ is recommended &
+ {\tt 0} \\
+\hline
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt physctl}\index{namelists!physctl}}
+
+This namelist controls the physics calculations in \echam. These are
+mainly calculations in the grid point space with parametrized
+equations for convection, diffusion, gravity waves, and the exchange
+of energy and mass at the surface of the earth.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt physctl}]{Namelist
+  {\tt physctl}}\\\hline\label{tabphysctl}
+\endfirsthead
+\caption[]{{\tt physctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt iconv}\index{namelist variables!iconv}
+ &   integer  &   switch for convection scheme:\newline
+                         ${\tt iconv}=1$: Nordeng\newline
+                         ${\tt iconv}=2$: Tiedtke\newline
+                         ${\tt iconv}=3$: Hybrid                 &
+                         {\tt 1} \\
+{\tt icover}\index{namelist variables!icover}
+ &   integer   & switch for cloud cover scheme:\newline
+                         ${\tt icover}=1$: diagnostic (Sundqvist)
+                         \newline
+                         ${\tt icover}=2$: prognostic (Tompkins) &
+                         {\tt 1} \\
+{\tt lcdnc\_progn}\index{namelist variables!lcdnc\_progn}
+ & logical & switches on/off prognostic cloud
+  droplet number concentration & {\tt .false.} \\
+{\tt lcond}\index{namelist variables!lcond}
+ &   logical  &   switches on/off large scale condensation scheme &
+{\tt .true.} \\    
+{\tt lconv}\index{namelist variables!lconv}
+ &   logical  &   switches on/off convection & {\tt .true.}\\
+{\tt lconvmassfix}\index{namelist variables!lconvmassfix}
+ & logical & switches on/off aerosol mass fixer in
+  convection (obsolete?) & {\tt .true.} \\
+{\tt lgwdrag}\index{namelist variables!lgwdrag}
+ & logical  &   switches on/off gravity wave drag scheme of orographic
+ gravity waves & {\tt
+  .true.} \\  
+{\tt lice}\index{namelist variables!lice} 
+ &    logical  &   switches on/off sea--ice temperature calculation &
+  {\tt .true.} \\
+{\tt lice\_supersat}\index{namelist variables!lice\_supersat}
+ & logical & switches on/off saturation over ice
+for cirrus clouds (former ${\tt icnc} = 2$) & {\tt .false.} \\
+{\tt lmfpen}\index{namelist variables!lmfpen}
+ &  logical  &   switches on/off penetrative convection & {\tt
+  .true.} \\
+{\tt lphys}\index{namelist variables!lphys}
+ &   logical &   switches on/off the parameterisation of
+  diabatic processes   & {\tt .true.} \\
+{\tt lrad}\index{namelist variables!lrad}
+ &     logical &   switches on/off radiation calculation & {\tt
+  .true.} \\
+{\tt lsurf}\index{namelist variables!lsurf}
+ &   logical  &   switches on/off surface--atmosphere exchanges &
+  {\tt .true.}\\
+{\tt lvdiff}\index{namelist variables!lvdiff}
+ &   logical &   switches on/off vertical diffusion processes &
+  {\tt .true.} \\
+{\tt nauto}\index{namelist variables!nauto}
+ &integer&  autoconversion scheme (not yet implemented) &
+{\tt 1} \\
+{\tt ncd\_activ}\index{namelist variables!ncd\_activ}
+ & integer & type of cloud droplet activation scheme
+(not yet implemented) & {\tt 0} \\
+\hline
+\end{longtable}
+
+
+
+\subsubsection{Namelist {\tt radctl}\index{namelists!radctl}}
+
+The namelist {\tt radctl} controls the radiation calculation, in
+particular the frequency of the calls of the full radiation scheme,
+and which greenhouse gas concentrations and aerosol properties are
+taken into account. See the scientific documentation of \echam{} for
+futher details. For some namelist variables, special documentation
+exists and can be provided by S.~Rast (sebastian.rast@zmaw.de):
+3d-ozone climatology (Appendix~\ref{cr20100408}), CO$_2$ submodel 
+(Appendix~\ref{cr20091210}), 
+stratospheric aerosols by T.~Crowley or HAM
+(Appendix~\ref{cr20110323}), 
+tropospheric aerosols by S.~Kinne
+(Appendix~\ref{cr20090109}),
+variable solar irradiance (Appendix~\ref{cr20100401}), volcanic aerosols by
+G.~Stenchikov (Appendix~\ref{cr20100315}).
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt radctl}]{Namelist
+  {\tt radctl}}\\\hline\label{tabradctl}
+\endfirsthead
+\caption[]{{\tt radctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+
+Variable & type & Explanation & default \\\hline
+{\tt cecc}\index{namelist variables!cecc}
+ &real & eccentricity of the orbit of the earth& {\tt
+  0.016715}\\ 
+{\tt cfcvmr(1:2)}\index{namelist variables!cfcvmr}
+ & real &  CFC volume mixing ratios for CFC11 and
+  CFC12 if {\tt icfc=2} & ${\tt 252.8\times10^{-12},}$ ${\tt
+    466.2\times10^{-12}}$\\ 
+{\tt   ch4vmr}\index{namelist variables!ch4vmr}
+ & real & CH$_4$ volume mixing ratio (mole fraction)
+  for {\tt ich4=2,3} & ${\tt 1693.6\times10^{-9}}$ \\
+{\tt clonp}\index{namelist variables!clonp}
+ &real &longitude of perihelion measured from vernal
+  equinox in degrees&{\tt 282.7}\\
+{\tt   co2vmr}\index{namelist variables!co2vmr}
+ & real & CO$_2$ volume mixing ratio (mole fraction)
+  for {\tt ico2=2} & ${\tt 353.9\times10^{-06}}$ \\
+{\tt cobld}\index{namelist variables!cobld}
+ &real & obliquity of the orbit of the earth in
+  degrees&{\tt 23.441}\\ 
+{\tt fco2}\index{namelist variables!fco2}
+  &real & if an external co2 scenario ($\tt ighg=1$ and
+$\tt ico2=4$) is used, the CO$_2$ concentrations are multiplied by {\tt
+  fco2} & {\tt 1.}\\ 
+{\tt iaero}\index{namelist variables!iaero}
+ & integer & ${\tt iaero}= 0$: the aerosol concentrations
+  are set to 
+  zero  in the radiation computation \newline
+  ${\tt  iaero} = 1$: prognostic aerosol of a submodel (HAM)\newline
+  ${\tt  iaero} = 2$: climatological Tanre aerosols\newline
+  ${\tt  iaero} = 3$: aerosol climatology compiled by S.~Kinne \newline 
+  ${\tt  iaero} = 5$: aerosol climatology compiled by S.~Kinne
+  complemented with the volcanic aerosols of G.~Stenchikov \newline
+  ${\tt  iaero} = 6$: aerosol climatology compiled by S.~Kinne
+  complemented with the volcanic aerosols of G.~Stenchikov plus
+  additional (stratospheric) aerosols from submodels like HAM. The
+  additional aerosol optical properties are computed from effective
+  radii and the aerosol optical depth at 550~nm, both quantities
+  provided by external files with the help of a lookup table by
+  S.~Kinne (b30w120), see Tab.~\ref{tabechamp} \newline
+  ${\tt  iaero} = 7$: aerosol climatology compiled by S.~Kinne
+  complemented by the volcanic aerosols by T.~Crowley that are
+  computed using the lookup table by S.~Kinne (b20w120), see
+  Tab.~\ref{tabechamp} \newline
+  There is no ${\tt  iaero} = 4$. & 2\\
+{\tt icfc}\index{namelist variables!icfc}
+  & integer &   ${\tt icfc} = 0$:  all
+  chloro--fluoro--carbon (CFC) concentrations are set to zero
+  for the radiation computation\newline
+  ${\tt icfc} = 1$: transported CFCs by any submodel (not yet
+  implemented) \newline
+  ${\tt icfc} = 2$: uniform volume mixing ratios as defined in the 2--element
+  vector {\tt cfcvmr(1:2)} are used for CFC11 and CFC12, respectively\newline 
+  ${\tt icfc} = 4$: uniform volume mixing ratios for a specific scenario
+  defined by {\tt ighg} are used in the radiation computation & {\tt 2} \\
+{\tt ich4}\index{namelist variables!ich4}
+ &integer&${\tt ich4} = 0$: CH$_4$ concentration is set to
+zero for the 
+  radiation computation \newline 
+  ${\tt ich4} = 1$: transported CH$_4$ by any submodel (not yet
+  implemented) \newline
+  ${\tt ich4} = 2$: uniform volume mixing ratio {\tt ch4vmr} of methane
+  used in radiation 
+  computation\newline 
+  ${\tt ich4} = 3$: in the troposphere a volume mixing ratio {\tt ch4vmr} with
+  a decay in the layers above the troposphere is used in the
+  radiation computation\newline
+  ${\tt ich4} = 4$: a uniform volume mixing ratio for a certain scenario
+  defined by the parameter {\tt ighg} is used in the radiation
+  computation & {\tt 3} \\ 
+{\tt ico2}\index{namelist variables!ico2}
+ & integer &  ${\tt ico2} = 0$: CO$_2$ concentration set to
+zero for the
+  radiation computation\newline 
+  ${\tt ico2} = 1$: interactively calculated CO$_2$ volume mixing
+  ratio is used with a start value of {\tt co2vmr} \newline
+  ${\tt ico2} = 2$: uniform volume mixing ratio {\tt co2vmr} used in radiation
+  computation\newline 
+  ${\tt ico2} = 4$: uniform volume mixing ratio for a certain scenario run
+  defined by the {\tt ighg} parameter is used & {\tt 2} \\
+{\tt ighg}\index{namelist variables!ighg}
+ & integer &     {$\tt ighg = 0$}: no specific scenario is
+  chosen\newline 
+                   {$\tt ighg = 1$}: a certain scenario of greenhouse
+                   gas volume mixing ratios is used. {\bf Caution}:
+                   the variables {\tt icfc}, {\tt ich4}, {\tt ico2},
+                   {\tt in2o} have to be set to the values
+                   corresponding to the usage of a scenario in that
+                   case & 0\\
+{\tt ih2o}\index{namelist variables!ih2o}
+ & integer & ${\tt ih2o} = 0$: H$_2$O is not taken into account in the
+  radiation computation, i.e. specific humidity, cloud water, cloud ice
+  are all set to zero for the radiation computation\newline
+  ${\tt ih2o} = 1$: use prognostic specific humidity, cloud water and cloud ice
+  in radiation computation & {\tt 1} \\
+{\tt in2o}\index{namelist variables!in2o}
+  &integer&  ${\tt in2o} = 0$ : the N$_2$O concentration is
+  set to zero for 
+  the radiation computation \newline
+  ${\tt in2o} = 1$: transported N$_2$O by any submodel (not yet
+  implemented) \newline
+  ${\tt in2o} = 2$: a uniform volume mixing ratio of {\tt n2ovmr} is
+  used for
+  the radiation computation \newline
+  ${\tt in2o} = 3$: a uniform volume mixing ratio of {\tt n2ovmr} is used in
+  the troposphere with a decay in the layers above the troposphere for
+  the radiation computation\newline
+  ${\tt in2o} = 4$: a uniform volume mixing ratio of N$_2$O for a specific
+  scenario run defined by {\tt ighg} is used for the radiation
+  computation & {\tt 3} \\
+{\tt io3}\index{namelist variables!io3}
+ & integer & ${\tt io3}  = 0$: the O$_3$ concentration is set
+  to zero for
+  the radiation computation\newline
+  ${\tt io3} = 1$: transported O$_3$ by any submodel (not yet
+  implemented) \newline
+  ${\tt io3}  = 2$: climatological O$_3$ volume mixing ratios given in spectral
+  space are used in the radiation computation as it was done in ECHAM4 \newline
+  ${\tt io3}  = 3$: climatological O$_3$ volume mixing ratios given in
+  gridpoint space in a NetCDF file are used in the radiation computation\newline
+  ${\tt io3}  = 4$: climatological O$_3$ volume mixing ratios provided by the
+  IPCC process in NetCDF files are
+  used for the radiation calculation & {\tt 3} \\
+{\tt io2}\index{namelist variables!io2}
+ & integer & ${\tt io2}  = 0$: the O$_2$ concentration is set
+  to zero for the radiation computation \newline
+                     $ {\tt io2}  = 2$: the O$_2$ volume mixing ratio
+                     is set to {\tt o2vmr} for the radiation
+                     computation. & {\tt 2} \\
+{\tt isolrad}\index{namelist variables!isolrad} & integer & controls choice of solar constant. \newline
+  ${\tt isolrad} = 0$: standard rrtm solar constant \newline
+  ${\tt isolrad} = 1$: time dependent spectrally resolved solar
+   constant read from file \newline
+  ${\tt isolrad} = 2$: pre--industrial solar constant \newline
+  ${\tt isolrad} = 3$: solar constant for amip runs (fixed in time) &
+  3 \newline
+  ${\tt isolrad} = 4$: constant solar irradiation for
+  radiative--convective equilibrium including a diurnal cycle.\newline
+  ${\tt isolrad} = 5$: constant solar irradiation for
+  radiative--convective equilibrium without diurnal cycle, so it's
+  really constant in time here.\\
+{\tt ldiur}\index{namelist variables!ldiur}
+ & logical & switches on/off diurnal cycle & {\tt .true.} \\
+{\tt lradforcing(2)}\index{namelist variables!lradforcing}
+ & logical & switches on/off the diagnostic of
+  instantaneous aerosol forcing in the solar spectral range ({\tt
+  lradforcing(1)}) and the thermal spectral range ({\tt
+  lradforcing(2)}). See Appendix~\ref{cr20100510} & {\tt .false.,.false.}\\
+{\tt   n2ovmr}\index{namelist variables!n2ovmr}
+ & real & N$_2$O volume mixing ratio (mole fraction)
+  for {\tt in2o=2,3} & ${\tt 309.5\times10^{-9}}$ \\
+{\tt lw\_gpts\_ts}\index{namelist variables!lw\_gpts\_ts} & integer &
+number of g--points in Monte--Carlo 
+spectral integration for thermal radiation, see {\tt lw\_spec\_samp} &
+{\tt 1}\\
+{\tt lw\_spec\_samp}\index{namelist variables!lw\_spec\_samp} &
+integer & sampling of spectral bands in 
+radiation calculation for thermal radiation\newline
+  ${\tt lw\_spec\_samp} = 1$: standard broad band sampling \newline
+  ${\tt lw\_spec\_samp} = 2$: Monte--Carlo spectral integration
+  (MSCI); {\tt lw\_gpts\_ts} randomly chosen g--points per column and
+  radiation call\newline
+  ${\tt lw\_spec\_samp} = 3$: choose g--points not completely randomly
+  in order to reduce errors in the surface radiative fluxes\\
+  &{\tt 1}\\
+{\tt nmonth}\index{namelist variables!nmonth}
+ & integer & ${\tt nmonth}=0$: execute full annual cycles\newline
+  ${\tt nmonth}=1,2,\dots,12$: perpetual repetition of the month
+  corresponding to the number to which {\tt nmonth} is set. The
+  perpetual month works with a 360--day orbit only ({\tt
+  l\_orbvsop87=.false.} must be set in {\tt runctl}).& {\tt 0}\\
+{\tt o2vmr}\index{namelist variables!o2vmr}
+ & real & O$_2$ volume mixing ratio & {\tt 0.20946}\\
+{\tt rad\_perm}\index{namelist variables!rad\_perm} & integer &
+number that influences the perturbation of the random seed from column
+to column & {\tt 0} \\
+{\tt sw\_gpts\_ts}\index{namelist variables!sw\_gpts\_ts} & integer &
+number of g--points in Monte--Carlo 
+spectral integration for solar radiation, see {\tt sw\_spec\_samp} &
+{\tt 1}\\
+{\tt sw\_spec\_samp}\index{namelist variables!sw\_spec\_samp} &
+integer & sampling of spectral bands in 
+radiation calculation for thermal radiation\newline
+  ${\tt sw\_spec\_samp} = 1$: standard broad band sampling \newline
+  ${\tt sw\_spec\_samp} = 2$: Monte--Carlo spectral integration
+  (MSCI); {\tt lw\_gpts\_ts} randomly chosen g--points per column and
+  radiation call\newline
+  ${\tt sw\_spec\_samp} = 3$: choose g--points not completely randomly
+  in order to reduce errors in the surface radiative fluxes\\
+  &{\tt 1}\\
+{\tt trigrad}\index{namelist variables!trigrad}
+ & special& time interval for radiation calculation &
+  {\tt 2,'hours','first',0}\\ 
+{\tt yr\_perp}\index{namelist variables!yr\_perp}
+ & integer & year in the Julian calendar for perpetual
+year simulations. Works with {\tt l\_orbvsop87=.true.} only. & {\tt
+  -99999} \\\hline
+\end{longtable}
+
+
+
+\subsubsection{Namelist {\tt runctl}\index{namelists!runctl}}\label{secrunctl}
+
+This namelist contains variables which control the start and end of a
+simulation and general properties of the output. For some namelist
+variables, special documentation 
+exists and can be provided by S.~Rast (sebastian.rast@zmaw.de):
+debug stream (Appendix~\ref{cr20090331}) and tendency diagnostic 
+(Appendix~\ref{cr20110118}).
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7.cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt runctl}]{Namelist
+  {\tt runctl}}\\\hline\label{tabrunctl}
+\endfirsthead
+\caption[]{{\tt runctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+
+Variable & type & Explanation & default \\\hline
+{\tt default\_output}\index{namelist variables!default\_output}
+ & logical & this variable sets the default value
+of {\tt lpost} of any stream. If {\tt lpost} of a certain stream is
+{\tt .TRUE.}, the respective variables of the stream will be written
+to the respective output file. It can be used to switch off all
+default output & {\tt .TRUE.}\\
+{\tt delta\_time}\index{namelist variables!delta\_time}
+ & integer & time step length in seconds & default depends
+on model resolution, e.g.: T63L47: 600~s, T63L95: 450~s, T127L95: 240~s\\
+{\tt dt\_resume(1:6)}\index{namelist variables!dt\_resume}
+ & integer  & reset restart date to a user defined
+ value. Is of the form yy,mo,dy,hr,mi,se (year, month,
+ day, hour, minute, second) &
+{\tt 0,0,0,0,0,0} \\
+{\tt dt\_start(1:6)}\index{namelist variables!dt\_start}
+ & integer  & vector of 6 integer numbers defining the start
+date of the experiment of the form yy,mo,dy,hr,mi,se (year, month,
+day, hour, minute, second) & {\tt 0,0,0,0,0,0} \\
+{\tt dt\_stop(1:6)}\index{namelist variables!dt\_stop}
+ & integer    & stop date of experiment. Is of the form
+yy,mo,dy,hr,mi,se (year, month, 
+ day, hour, minute, second) & {\tt 0,0,0,0,0,0} \\
+{\tt earth\_angular\_velocity}\index{namelist
+  variables!earth\_angular\_velocity} & real & value for solid earth angular
+velocity in ${\rm rad/s}$ & {\tt 7.29212e-5}${\rm rad/s}$\\  
+{\tt gethd}\index{namelist variables!gethd}
+ & special      & time interval for getting data from
+  hydrological discharge model & {\tt 1,'days','off',0}\\
+{\tt getocean}\index{namelist variables!getocean}
+ &special   & time interval for sending atmospheric data to an
+  ocean program coupled to ECHAM5 & {\tt 1,'days','off',0}\\
+{\tt iadvec}\index{namelist variables!iadvec}
+ & integer     & selection of the advection scheme:\newline 
+             ${\tt iadvec}=0$: no advection of trace species and water
+             vapour\newline
+             ${\tt iadvec}=1$: semi Lagrangian transport
+             algorithm\newline
+             ${\tt iadvec}=2$: spitfire advection scheme\newline
+             ${\tt iadvec}=3$:
+             flux form semi Lagrangian transport (Lin and Rood) &
+             {\tt 3} -- flux form semi Lagrangian transport \\
+{\tt l\_orbvsop87}\index{namelist variables!l\_orbvsop87}
+ & logical & ${\tt l\_orbvsop87}={\tt .true.}$: use
+orbit functions from 
+  vsop87 (real orbit); ${\tt l\_orbvsop87}={\tt .false.}$:
+  ``climatological'' pcmdi 
+  (AMIP) orbit & {\tt .true.} \\
+{\tt lfractional\_mask}\index{namelist variables!lfractional\_mask}
+& logical & switches on/off the usage of a fractional land--sea mask &
+{\tt .false.} \\
+{\tt l\_volc}\index{namelist variables!l\_volc}
+ & logical & switches on/off volcanic aerosols. This
+variable is obsolete and has to be removed. Use {\tt iaero} of the
+{\tt radctl} namelist instead. & {\tt .false.} \\
+{\tt lamip}\index{namelist variables!lamip}
+ & logical   & switches on/off the use of a timeseries of sea
+  surface temperatures (AMIP style simulation) & {\tt .false.} \\
+{\tt lcollective\_write} & logical & switch on/off parallel writing of restart
+files & {\tt .false.} \\
+{\tt lcouple}\index{namelist variables!lcouple} 
+ & logical    & switches on/off coupling with ocean & {\tt
+    .false.} \\
+{\tt lcouple\_co2}\index{namelist variables!lcouple\_co2}
+ & logical & switches on/off the interactive CO$_2$
+budget calculation in a coupled atmosphere/ocean run & {\tt .false.}
+\\
+{\tt lcouple\_parallel}\index{namelist variables!lcouple\_parallel}
+ & logical & Only if model was compiled with
+{\tt --prism}: switches on/off communication by OASIS via all or one
+processor & {\tt .false.}\\
+{\tt ldailysst}\index{namelist variables!ldailysst}
+ & logical   & switches on/off daily varying sea surface
+temperature and sea ice & {\tt .false.}\\
+{\tt ldebug}\index{namelist variables!ldebug}
+ & logical     & switches on/off mass fixer diagnostics &
+     {\tt .false.}\\
+{\tt ldebugcpl}\index{namelist variables!ldebugcpl}
+ & logical & switches on/off debugging of OASIS
+coupling (only if model was compiled using {\tt --prism}) & {\tt
+  .false.} \\
+{\tt ldebugev}\index{namelist variables!ldebugev}
+ & logical    & switches on/off the output of debugging
+information about events & {\tt .false.}\\
+{\tt ldebughd}\index{namelist variables!ldebughd}
+ & logical     & switches on/off the output of
+debugging information 
+about the hydrological discharge model & {\tt .false.}\\
+{\tt ldebugio}\index{namelist variables!ldebugio}
+ & logical      & switches on/off the output of debugging
+information about input and output & {\tt .false.}\\
+{\tt ldebugmem}\index{namelist variables!ldebugmem}
+ & logical     & switches on/off the output of debugging
+information about memory use & {\tt .false.}\\
+{\tt ldebugs}\index{namelist variables!ldebugs}
+ & logical    & switches on/off the debug stream & {\tt
+  .false.}\\
+{\tt ldiagamip}\index{namelist variables!ldiagamip}
+ & logical  & switches on/off AMIP diagnostics & {\tt
+    .false. }\\
+{\tt lforcererun}\index{namelist variables!lforcererun}
+ & logical  & switches on/off forced re--initialization of the
+ \echam{} run when restart files were written. Forced
+ re--initialization makes the model behave like starting from restart
+ files with {\tt lresume=.true.} & {\tt .true.} \\ 
+{\tt lhd}\index{namelist variables!lhd}
+ & logical        & switches on/off the coupling to the hydrologic
+  discharge model (HD model) & {\tt .false.}\\
+{\tt lhd\_highres}\index{namelist variables!lhd\_highres}
+ & logical & switches on/off high resolution
+(0.5$^\circ$) output of hydrological discharge model & {\tt .false.} \\
+{\tt lhd\_que}\index{namelist variables!lhd\_que}
+ & logical    &switches on/off additional output from
+  hydrological discharge model & {\tt .false.}\\
+{\tt lindependent\_read}\index{namelist variables!lindependent\_read}
+ & logical & switches on/off reading initial or restart
+data by each MPI rank separately & {\tt .false.}\\
+{\tt lmeltpond}\index{namelist variables!lmeltpond}
+ & logical & switches on/off the presence of meltponds
+in albedo calculation & {\tt .true.} \\
+{\tt lmidatm}\index{namelist variables!lmidatm}
+ & logical    &  switches on/off middle atmosphere model
+  version & {\tt .true.} \\
+{\tt lmlo}\index{namelist variables!lmlo}
+ & locical       & switches on/off mixed layer ocean & {\tt
+    .false.} \\
+{\tt lmlo\_ice}\index{namelist variables!lmlo\_ice} & logical & switch
+on/off sea ice calculation for mixed layer ocean & {\tt .true.}\\
+{\tt lnmi}\index{namelist variables!lnmi}
+ & logical       & switches on/off normal mode initialisation &
+  {\tt .false.}\\
+{\tt lnudge}\index{namelist variables!lnudge}
+ & logical     & switches on/off the ``nudging''
+  i.e. constraining the dynamic variables divergence, vorticity,
+  temperature, and surface pressure towards given external values by relaxation
+  & {\tt .false.} \\
+{\tt lnwp}\index{namelist variables!lnwp}
+ & logical       & switches on/off Numerical Weather Prediction
+  mode & {\tt .false.} \\
+{\tt lport}\index{namelist variables!lport}
+ & logical      & switches on/off the introduction of a random
+  perturbation for portability  tests & {\tt .false.}\\
+{\tt lprint\_m0}\index{namelist variables!lprint\_m0}
+ & logical & switches on/off measuring and printing
+the cpu time for every time step & {\tt .false.}\\
+{\tt lrce}\index{namelist variables!lrce} & logical & switch on/off
+radiation calculation for radiative--convective equilibrium (same
+zenith angle at all grid points), constant
+ocean albedo of 0.07, ignore dynamical planetary boundary layer height
+in planetary boundary layer calculation & {\tt .false.} \\
+{\tt lresume}\index{namelist variables!lresume}
+ & logical & ${\tt lresume}={\tt .true.}$: perform a rerun
+\newline ${\tt lresume}={\tt .false.}$: perform an initial run & {\tt
+  .false.} \\
+{\tt ltctest}\index{namelist variables!ltctest}
+ & logical & switches on/off a test of time control
+ without performing a true simulation& {\tt .false.}\\
+{\tt ltdiag}\index{namelist variables!ltdiag}
+ & logical     & switches on/off an additional detailed tendency
+  diagnostic & {\tt .false.}\\
+{\tt ltimer}\index{namelist variables!ltimer}
+ & logical & switches on/off the output of some
+performance related information (run time) & {\tt .false.}\\
+{\tt ly360}\index{namelist variables!ly360}
+ & logical& switches on/off the use of a 360--day year &
+  {\tt .false.}\\ 
+{\tt ndiahdf}\index{namelist variables!ndiahdf}
+  & integer & logical unit number for file containing
+horizontal diffusion diagnostics. & {\tt 10} \\
+{\tt nhd\_diag}\index{namelist variables!ndg\_diag}
+ & integer   & number of region for which hydrological
+  discharge  model diagnostics is required & {\tt 0}\\
+{\tt no\_cycles}\index{namelist variables!no\_cycles}
+ & integer  & stop after {\tt no\_cycles} of reruns &
+{\tt 1} \\
+{\tt no\_days}\index{namelist variables!no\_days}
+ & integer  & stop after {\tt no\_days} days after {\tt
+    dt\_start}& {\tt -1}\\
+{\tt no\_steps}\index{namelist variables!no\_steps}
+ & integer  & stop after the integration of {\tt no\_steps}
+  of time steps after {\tt dt\_start} & {\tt -1} \\
+{\tt nproma}\index{namelist variables!nproma}
+ &integer     & vector length of calculations in grid point
+  space & number of longitudes \\
+{\tt nsub}\index{namelist variables!nsub}
+ & integer       & number of subjobs & {\tt 0} \\ 
+{\tt out\_datapath}(256)\index{namelist variables!out\_datapath}
+ & character   & name of path to which output
+files are written. Must have a
+``/'' at the end & {\tt ' '} \\
+{\tt out\_expname}(19)\index{namelist variables!out\_expname}
+ &character & prefix of output file names & {\tt ' '} \\
+{\tt out\_filetype}\index{namelist variables!out\_filetype}
+ &integer  & format of meteorological output files \newline
+                        ${\tt out\_filetype}=1$:  GRIB format \newline 
+                        ${\tt out\_filetype}=2$:  NetCDF format
+                        \newline 
+                        ${\tt out\_filetype}=6$:  NetCDF4 format &
+                        {\tt 1} \\
+{\tt out\_ztype}\index{namelist variables!out\_ztype}
+ & integer & compression type of outputfiles\newline
+                        ${\tt out\_ztype}=0$: no compression\newline
+                        ${\tt out\_ztype}=1$: szip only for GRIB
+                        output\newline
+                        ${\tt out\_ztype}=2$: zip only for NetCDF4
+                        output                                    &
+                        {\tt 0} \\
+{\tt putdata}\index{namelist variables!putdata}
+ & special    & time interval at which output data are written
+  to output files & {\tt 12,'hours','first',0} \\
+{\tt puthd}\index{namelist variables!puthd}
+ & special      & time interval for putting data to the
+  hydrological discharge model & {\tt 1,'days','off',0}\\
+{\tt putocean}\index{namelist variables!putocean}
+ & special   & time interval for receiving ocean data in the
+  atmospheric part if \echam{} is coupled to an ocean model & {\tt
+    1,'days','off',0} \\
+{\tt putrerun}\index{namelist variables!putrerun}
+ & special  & time interval for writing rerun files &
+  {\tt 1,'months','last',0}\\
+{\tt rerun\_filetype}\index{namelist variables!rerun\_filetype}
+ &integer & format of rerun files\newline
+                        ${\tt rerun\_filetype}=2$: NetCDF format
+                        \newline
+                        ${\tt rerun\_filetype}=4$: NetCDF2 format &
+                        {\tt 2}\\
+{\tt rmlo\_depth}\index{namelist variables!rmlo\_depth} & real & depth of
+mixed layer ocean in metres & {\tt 50}m \\
+{\tt subflag(1:9)}\index{namelist variables!subflag}
+ & logical &vector of nine switches for switching on/off the
+  binding of subjob output to output streams & {\tt .false.}\\
+{\tt trac\_filetype}\index{namelist variables!trac\_filetype}
+ &integer  & format of tracer output files \newline
+                        ${\tt trac\_filetype}=1$:  GRIB format \newline 
+                        ${\tt trac\_filetype}=2$:  NetCDF format &
+                        {\tt 1} \\
+{\tt trigfiles}\index{namelist variables!trigfiles}
+ & special  & time interval at which new output files are
+  opened & {\tt 1,'months','first',0} \\
+{\tt trigjob}(1:9)\index{namelist variables!trigjob}
+ & special    & time interval for the automatic submission of
+  up to nine subjobs &{\tt 1,'months','off',0} \\
+\hline
+\end{longtable}
+
+\subsubsection{Namelist {\tt set\_stream}\index{namelists!set\_stream}}
+
+This namelist allows to modify the properties of an existing stream. You
+may overwrite output properties of an existing stream here. If a namelist
+variable is not present or set to certain values, the original values
+of these descriptor variables remain unchanged. In that case the
+default is marked by ``original state''.
+For
+specifying these properties for several streams, this namelist group
+has to be specified for each single 
+stream.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt set\_stream}]{Namelist 
+  {\tt set\_stream}}\\\hline\label{tabset_stream}
+\endfirsthead
+\caption[]{{\tt set\_stream} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt filetype}\index{namelist variables!filetype} 
+& integer & file format of output file associated
+with stream.  \newline
+                        ${\tt out\_filetype}=1$:  GRIB format \newline 
+                        ${\tt out\_filetype}=2$:  NetCDF format
+                        \newline 
+                        ${\tt out\_filetype}=6$:  NetCDF4 format &
+                        original filetype \\
+{\tt init\_suf(8)}\index{namelist variables!init\_suf}
+ & character & suffix of file with initial data for
+this stream & original suffix \\
+{\tt interval}\index{namelist variables!interval}
+ & special & output frequency & original state (also if
+{\tt counter=0})\\
+{\tt linit}\index{namelist variables!linit}
+ & integer & switch on ({\tt linit=1}) or off ({\tt
+  linit$\neq$1,-1}) writing stream to initial file (does not work?) &
+original state \\
+{\tt lpost}\index{namelist variables!lpost}
+ & integer & switch on ({\tt lpost=1}) or off ({\tt
+  lpost$\neq$1,-1}) output of stream. & original state  \\
+{\tt lrerun}\index{namelist variables!lrerun}
+ & integer & switch on ({\tt lrerun=1}) or off ({\tt
+  lrerun$\neq$1,-1}) output of stream to restart file. & original state \\
+{\tt post\_suf(8)} & character & suffix of output file associated with
+this stream & original suffix \\
+{\tt rest\_suf(8)}\index{namelist variables!rest\_suf}
+ & character & suffix of restart file associated
+with this stream & original suffix \\
+{\tt stream(16)}\index{namelist variables!stream}
+ & character & name of the stream the properties of
+which shall be changed & --- \\
+\hline
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt
+    set\_stream\_element}\index{namelists!set\_stream\_element}} 
+
+This namelist allows to modify the properties of an existing stream
+element. You may overwrite output properties of an existing stream
+element here. If a namelist
+variable is not present or set to certain values, the original values
+of these descriptor variables remain unchanged.
+For specifying these properties for several stream
+elements, this namelist group has to be specified for each single
+stream element.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt set\_stream\_element}]{Namelist 
+  {\tt set\_stream\_element}}\\\hline\label{tabset_stream_element}
+\endfirsthead
+\caption[]{{\tt set\_stream\_element} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt bits}\index{namelist variables!bits}
+ & integer & number of bits used in GRIB encoding & original
+value\\
+{\tt code}\index{namelist variables!code}
+ & integer & GRIB code number of stream element in GRIB format
+output file & original value \\
+{\tt longname(64)}\index{namelist variables!longname}
+ & character & long name of stream element
+containing some explanation & original value \\ 
+{\tt lpost}\index{namelist variables!lpost}
+ & integer & switch on ({\tt lpost=1}) or off ({\tt
+  lpost$\neq$1,-HUGE(lpost)}) output of stream element.  & original state  \\
+{\tt lrerun}\index{namelist variables!lrerun}
+ & integer & switch on ({\tt lrerun=1}) or off ({\tt
+  lrerun$\neq$1,-HUGE(lrerun)}) output of stream element to restart
+file. If {\tt 
+  lrerun=1}, the {\tt 
+  lrerun} element of a variable of type {\tt memory\_info} associated
+with this stream element will be set
+to {\tt .true.} & original state  \\
+{\tt name(64)}\index{namelist variables!name}
+ & character & name of stream element as it was used in
+its declaration & --- \\ 
+{\tt reset}\index{namelist variables!reset}
+ & real & value to which stream element is set after output
+if and only if {\tt laccu=.true.} for this stream element & original value \\
+{\tt stream(64)}\index{namelist variables!stream}
+ & character &name of stream to which the stream
+element belongs & --- \\
+{\tt table}\index{namelist variables!table}
+ & integer & GRIB code table number in GRIB format output
+file & original value \\
+{\tt units(64)}\index{namelist variables!units}
+ & character & units of the quantity described by stream
+element  & original value \\ 
+\hline
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt set\_tracer}\index{namelists!set\_tracer}}
+
+This namelist allows to modify the properties of a tracer that is defined
+in some submodel or subroutine of \echam{}
+without the direct use of the ``tracer interface''.
+If a namelist
+variable is not present or set to certain values, the original values
+of these descriptor variables remain unchanged.
+In order to set the properties of several tracers, you can specify this
+namelist several times in the namelist file {\tt namelist.echam}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt set\_tracer}]{Namelist 
+  {\tt set\_tracer}}\\\hline\label{tabset_tracer}
+\endfirsthead
+\caption[]{{\tt set\_tracer} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt bits}\index{namelist variables!bits}
+ & integer & number of bits used in GRIB encoding & original
+value\\
+{\tt code}\index{namelist variables!code}
+ & integer & GRIB code number of tracer in GRIB format
+output file & original value \\
+{\tt nconv}\index{namelist variables!nconv}
+ & integer & transport by convection switched on ({\tt
+  nvdiff=ON=1}) or switched off ({\tt nvdiff=OFF=0}) & original value\\
+{\tt name(24)}\index{namelist variables!name}
+ & character & name of tracer as it was used in the
+tracer declaration & --- \\
+{\tt ninit}\index{namelist variables!ninit}
+ & integer & initialization flag, for a detailed
+explanation, see the lecture ``Working with \echam{} --- a first
+introduction''. {\tt RESTART + CONSTANT = 1 + 2 = 3} means that the
+tracer (mass) 
+mixing ratio will be read from a restart file if there is any or set
+to a constant throughout the atmosphere & original value \\
+{\tt nint}\index{namelist variables!nint}
+ & integer & time integration switched on ({\tt
+  nint=ON=1}) or switched off ({\tt nint=OFF=0}) & original value\\
+{\tt nrerun}\index{namelist variables!nrerun}
+ & integer & restart flag. {\tt ON=1} means that the tracer
+(mass) mixing ratio is written to the restart file, {\tt OFF=0} that it
+is not written to the restart file & original value \\
+{\tt ntran}\index{namelist variables!ntran}
+ & integer & transport flag. {\tt ntran=no\_advection=0}:
+advective transport switched off, {\tt ntran=semi\_lagrangian=1}:
+semi--Lagrangian transport scheme (based on a version of Olson \&
+Rosinski), {\tt ntran=tpcore=3}: multi--dimensional 
+flux form semi-Lagrangian (FFSL) scheme (Lin and Rood 1996, Monthly
+Weather Review) with many unpublished modifications  & original value \\
+{\tt nvdiff}\index{namelist variables!nvdiff}
+ & integer & transport by vertical diffusion switched on ({\tt
+  nvdiff=ON=1}) or switched off ({\tt nvdiff=OFF=0}) & original value\\
+{\tt nwrite}\index{namelist variables!nwrite}
+ & integer & {\tt ON=1}: tracer (mass) mixing ratio is
+written to output file {\tt $\ast$\_tracer}; {\tt OFF=0}: no output &
+original value\\
+{\tt table}\index{namelist variables!table}
+ & integer & GRIB code table number in GRIB format output
+file & original value \\
+{\tt tdecay}\index{namelist variables!tdecay}
+ & real & decay time in seconds (exponential decay) &
+original value\\
+{\tt units(24)}\index{namelist variables!units}
+ & character & units of tracer  & original value \\
+{\tt vini}\index{namelist variables!vini}
+ & real & Performing an initial run, the tracer (mass) mixing
+ratio will be set to this value at the beginning of the time
+integration & original value \\
+\hline
+\end{longtable}
+
+\subsubsection{Namelist {\tt stationctl}\index{namelists!stationctl}}
+
+This namelist switches on/off the high frequency output of \echam{}
+variables at the CFMIP2--sites including profiles. The collection of sites
+is that of K.~Taylor that were used in the CMIP5 simulations and are
+listed in the file {\tt pointlocations.txt} (see
+Tab.~\ref{tabdiaginput}). A description of the output can be found in
+section~\ref{secdiagoutput}. A more detailed description of the
+station diagnostic can be found in section~\ref{cr20130913}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}\hline\hline
+\caption[Namelist {\tt stationctl}]{Namelist
+  {\tt stationctl}}\\\hline\label{tabstationctl}
+\endfirsthead
+\caption[]{{\tt stationctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt lostation}\index{namelist variables!lostation} & logical & logical that switches on ({\tt
+  lostation=.true.} or off {\tt lostation=.false.} the output
+of certain \echam{} variables at a collection of sites. At these
+sites, profiles are also written to the output. & {\tt .false.}\\
+\hline
+\end{longtable}
+
+\subsubsection{Namelist {\tt
+    submdiagctl}\index{namelists!submdiagctl}}\label{secsubmdiagctl} 
+
+This namelist controls diagnostic output of generic submodel variables
+and streams. In the ``pure'' \echam{} version, these switches do not
+have any functionality. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}\hline\hline
+\caption[Namelist {\tt submdiagctl}]{Namelist
+  {\tt submdiagctl}}\\\hline\label{tabsubmdiagctl}
+\endfirsthead
+\caption[]{{\tt submdiagctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt drydep\_gastrac(24,1:200)}
+\index{namelist variables!drydep\_gastrac}
+ & character & names of gas phase
+  tracers to be included in
+  dry deposition stream. Special name {\tt 'default'} is possible 
+  & {\tt drydep\_gastrac(1) = 'default'}, {\tt drydep\_gastrac (2:200) = ''}\\
+{\tt drydep\_keytype}\index{namelist variables!drydep\_keytype}
+ & integer & aggregation level of
+  output of dry deposition stream \newline
+  {\tt drydep\_keytype=1}: output by tracer\newline
+  {\tt drydep\_keytype=2}: output by (chemical) species\newline
+  {\tt drydep\_keytype=3}: output by (aerosol) mode\newline
+  {\tt drydep\_keytype=4}: user defined
+  & {\tt 2}\\
+{\tt drydep\_lpost}\index{namelist variables!drydep\_lpost}
+ & logical & switches on/off output of wet deposition stream
+  & {\tt .true.} \\
+{\tt drydep\_tinterval}\index{namelist variables!drydep\_tinterval}
+ & special & output frequency of wet deposition stream
+  & {\tt putdata} (see {\tt runctl} namelist) \\
+{\tt drydepnam(32,1:50)}\index{namelist variables!drydepnam}
+ & character & list of tracer names of
+  dry deposition output stream. There are the special names {\tt 'all' =
+  'detail'},  and {\tt 
+  'default'}
+  & {\tt drydepnam(1) = 'default'}, {\tt drydepnam(2:50) = ''}\\
+{\tt emi\_gastrac(24,1:200)}\index{namelist variables!emi\_gastrac}
+ & character & names of gas phase
+  tracers to be included in
+  emission stream to diagnose emissions. Special name {\tt 'default'}
+  is possible  
+  & {\tt emi\_gastrac(1) = 'default'}, {\tt emi\_gastrac (2:200) = ''}\\
+{\tt emi\_keytype}\index{namelist variables!emi\_keytype}
+ & integer & aggregation level of
+  output of emission diagnostic stream \newline
+  {\tt emi\_keytype=1}: output by tracer\newline
+  {\tt emi\_keytype=2}: output by (chemical) species\newline
+  {\tt emi\_keytype=3}: output by (aerosol) mode\newline
+  {\tt emi\_keytype=4}: user defined
+  & {\tt 2}\\
+{\tt emi\_lpost}\index{namelist variables!emi\_lpost}
+ & logical & switches on/off output of emission
+  diagnostic stream 
+  & {\tt .true.} \\
+{\tt emi\_lpost\_detail}\index{namelist variables!emi\_lpost\_detail}
+ & logical & switches on/off detailed
+(emissions by sector) output of emission diagnostic stream
+  & {\tt .true.} \\
+{\tt emi\_tinterval}\index{namelist variables!emi\_tinterval}
+  & special & output frequency of emission diagnostic stream
+  & {\tt putdata} (see {\tt runctl} namelist) \\
+{\tt eminam(32,1:50)}\index{namelist variables!eminam}
+ & character & list of tracer names of
+  emission diagnostic stream. There are the special names {\tt 'all' =
+  'detail'},  and {\tt 
+  'default'}
+  & {\tt eminam(1) = 'default'}, {\tt eminam(2:50) = ''}\\
+  {\tt sedi\_keytype}\index{namelist variables!sedi\_keytype}
+ & integer & aggregation level of
+  output of sedimentation stream \newline
+  {\tt sedi\_keytype=1}: output by tracer\newline
+  {\tt sedi\_keytype=2}: output by (chemical) species\newline
+  {\tt sedi\_keytype=3}: output by (aerosol) mode\newline
+  {\tt sedi\_keytype=4}: user defined
+  & {\tt 2}\\
+{\tt sedi\_lpost}\index{namelist variables!sedi\_lpost}
+ & logical & switches on/off output of sedimentation stream
+  & {\tt .true.} \\
+{\tt sedi\_tinterval}\index{namelist variables!sedi\_interval}
+ & special & output frequency of sedimentation stream
+  & {\tt putdata} (see {\tt runctl} namelist) \\
+{\tt sedinam(32,1:50)}\index{namelist variables!sedinam}
+ & character & list of tracer names of
+  sedimentation diagnostic stream. There are the special names ${\tt 'all'}=
+  {\tt 'detail'}$,  and {\tt 
+  'default'}
+  & {\tt sedinam(1) = 'default'}, {\tt sedinam(2:50) = ''}\\
+{\tt vphysc\_lpost}\index{namelist variables!vphysc\_lpost}
+ & logical & switches on/off output of vphysc stream
+  & {\tt .true.} \\
+{\tt vphysc\_tinterval}\index{namelist variables!vphysc\_tinterval}
+ & special & output frequency of vphysc stream
+  & {\tt putdata} (see {\tt runctl} namelist) \\
+{\tt vphyscnam(32,1:50)}\index{namelist variables!vphyscnam}
+ & character & list of variable names of
+  vphysc stream. There are the special names {\tt 'all'} and {\tt
+  'default'}
+  & {\tt vphyscnam(1) = 'default'}, {\tt vphyscnam(2:50) = ''}\\
+{\tt wetdep\_gastrac(24,1:200)}
+\index{namelist variables!wetdep\_gastrac}
+ & character & names of gas phase
+  tracers to be included in
+  wet deposition stream. Special name {\tt 'default'} is possible 
+  & {\tt wetdep\_gastrac(1) = 'default'}, {\tt wetdep\_gastrac (2:200) = ''}\\
+{\tt wetdep\_keytype}\index{namelist variables!wetdep\_keytype}
+ & integer & aggregation level of
+  output of wet deposition stream \newline
+  {\tt wetdep\_keytype=1}: output by tracer\newline
+  {\tt wetdep\_keytype=2}: output by (chemical) species\newline
+  {\tt wetdep\_keytype=3}: output by (aerosol) mode\newline
+  {\tt wetdep\_keytype=4}: user defined
+  & {\tt 2}\\
+{\tt wetdep\_lpost}\index{namelist variables!wetdep\_lpost}
+ & logical & switches on/off output of wet deposition stream
+  & {\tt .true.} \\
+{\tt wetdep\_tinterval}\index{namelist variables!wetdep\_tinterval}
+ & special & output frequency of wet deposition stream
+  & {\tt putdata} (see {\tt runctl} namelist) \\
+{\tt wetdepnam(32,1:50)}\index{namelist variables!wetdepnam}
+ & character & list of tracer names of
+wet deposition output stream. There are the special names ${\tt 'all'}={\tt
+  'detail'}$,  and {\tt
+  'default'}
+  & {\tt wetdepnam(1) = 'default'}, {\tt wetdepnam(2:50) = ''}\\
+\hline
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt
+    submodelctl}\index{namelists!submodelctl}}\label{secsubmodelctl} 
+
+This namelist contains general submodel switches of
+``proper submodels'' including switches that control the coupling
+among submodels. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.0cm}p{3.0cm}}\hline\hline
+\caption[Namelist {\tt submodelctl}]{Namelist
+  {\tt submodelctl}}\\\hline\label{tabsubmodelctl}
+\endfirsthead
+\caption[]{{\tt submodelctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt laircraft}\index{namelist variables!laircraft}
+ & logical & switches on/off aircraft emissions
+  & {\tt .false.} \\
+{\tt lburden}\index{namelist variables!lburden}
+ & logical & switches on/off burden calculation (column
+integrals)
+  & {\tt .false.} \\
+{\tt lco2}\index{namelist variables!lco2}
+ & logical & switches on/off CO$_2$ submodel (interacting
+  with JSBACH) & {\tt .false.} \\
+{\tt lchemheat}\index{namelist variables!lchemheat}
+ & logical & switches on/off chemical heating
+  & {\tt .false.} \\
+{\tt lchemistry}\index{namelist variables!lchemistry}
+ & logical & switches on/off chemistry
+  & {\tt .false.} \\
+{\tt ldrydep}\index{namelist variables!ldrydep}
+ & logical & switches on/off dry deposition
+  & {\tt .false.} \\
+{\tt lham}\index{namelist variables!lham}
+ & logical & switches on/off HAM aerosol submodel &
+  {\tt .false.} \\
+{\tt lemissions}\index{namelist variables!lemissions}
+ & logical & switches on/off emissions
+  & {\tt .false.} \\
+{\tt lhammonia}\index{namelist variables!lhammonia}
+ & logical & switches on/off HAMMONIA submodel (middle
+  and upper atmosphere submodel) & {\tt .false.} \\
+{\tt lhammoz}\index{namelist variables!lhammoz}
+ & logical & switches on/off HAM aerosol submodel and
+  MOZART chemistry submodel and the coupling between the two &
+  {\tt .false.} \\
+{\tt lhmzhet}\index{namelist variables!lhmzhet}
+ & logical & switches on/off hammoz heterogeneous chemistry &
+  {\tt .false.} \\
+{\tt lhmzphoto}\index{namelist variables!lhmzphoto}
+ & logical & switches on/off hammoz photolysis &
+  {\tt .false.} \\
+{\tt lhmzoxi}\index{namelist variables!lhmzoxi}
+ & logical & switches on/off hammoz oxidant fields &
+  {\tt .false.} \\
+{\tt linterchem}\index{namelist variables!linterchem}
+ & logical & switches on/off coupling of chemistry
+  with radiation & {\tt .false.} \\
+{\tt linteram}\index{namelist variables!linteram}
+ & logical &
+  switches on/off interactive airmass calculation (HAMMONIA)
+  & {\tt .false.} \\
+{\tt lintercp}\index{namelist variables!lintercp}
+ & logical & switches on/off interactive $c_p$
+  calculation (HAMMONIA) 
+  & {\tt .false.} \\
+{\tt llght}\index{namelist variables!llght}
+ & logical & switches on/off interactive computation of
+  lightning emissions & {\tt .false.} \\
+{\tt lmethox}\index{namelist variables!lmethox}
+ & logical & switches on/off methane oxidation in stratosphere &
+  {\tt .false.} \\
+{\tt lmegan}\index{namelist variables!lmegan}
+ & logical & switches on/off biogenic vegetation emissions &
+  {\tt .false.} \\
+{\tt lmicrophysics}\index{namelist variables!lmicrophysics}
+ & logical & switches on/off microsphysics calculations &
+  {\tt .false.} \\
+{\tt lmoz}\index{namelist variables!lmoz}
+ & logical & switches on/off MOZART chemistry submodel &
+  {\tt .false.} \\
+{\tt loisccp}\index{namelist variables!loisccp}
+ & logical & switches on/off isccp
+  simulator. Currently, the isccp simulator is implemented outside the
+  submodel interface &
+  {\tt .false.} \\
+{\tt losat}\index{namelist variables!losat}
+ & logical & switches on/off satellite
+  simulator. Currently, the {\tt locosp} switch for the cosp satellite
+  simulator is implemented outside the submodel interface.&
+  {\tt .false.} \\
+{\tt lsalsa}\index{namelist variables!lsalsa}
+ & logical & switches on/off SALSA aerosol submodel &
+  {\tt .false.} \\
+{\tt lsedimentation}\index{namelist variables!lsedimentation}
+ & logical & switches on/off sedimentation &
+  {\tt .false.} \\
+{\tt ltransdiag}\index{namelist variables!ltransdiag}
+ & logical & switches on/off atmospheric energy
+  transport diagnostic & {\tt .false.} \\
+{\tt lwetdep}\index{namelist variables!lwetdep}
+ & logical & switches on/off drydeposition &
+  {\tt .false.} \\
+{\tt lxt}\index{namelist variables!lxt}
+ & logical & switches on/off generic test of tracer submodel &
+  {\tt .false.} \\\hline 
+\end{longtable}
+
+
+\subsubsection{Namelist {\tt tdiagctl}\index{namelists!tdiagctl}}\label{sectdiagctl}
+
+This namelist determines the output of the tendency diagnostic.
+The tendencies of Tab.~\ref{tab_var} can be diagnosed.
+The following variables are contained in the diagnostic stream {\tt tdiag}.
+         The top row describes the variables, the first column
+         gives the routine names (processes) producing the tendencies
+         saved under the names in the corresponding rows.
+  The units of the variables and code numbers are given in
+  parenthesis.
+
+\begin{scriptsize}
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{c@{\extracolsep\fill}cccccc}\hline\hline
+\caption[Variables of {\tt tdiagctl}]{Variables of the diagnostic stream
+  {\tt tdiagctl}}\\\hline\label{tab_var}
+\endfirsthead
+\caption[]{{\tt variables of tdiagctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{7}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+\rule{0cm}{2.5ex}{\bf variable} & $du/dt$ & $dv/dt$ & $dT/dt$ &
+$dq/dt$ & $dx_{\rm l}/dt$ & $dx_{\rm i}/dt$ \\
+& (m/s/day) & (m/s/day) & (K/day) & (1/day) & (1/day) & (1/day)\\
+{\bf routine} &&&&&& \\
+{\bf (process)} &&&&&& \\\hline\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf vdiff} & {\tt dudt\_vdiff} &
+{\tt dvdt\_vdiff} & {\tt dtdt\_vdiff} & {\tt dqdt\_vdiff} & 
+{\tt dxldt\_vdiff} & {\tt dxidt\_vdiff} \\
+ & (code 11) & (code 21) & (code 1) & (code 31) & (code 41) & (code 51) \\\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf radheat} & --- & --- &
+{\tt dtdt\_rheat\_sw} (code 62) & --- & --- & ---\\ 
+& --- & --- & {\tt dtdt\_rheat\_lw} (code 72) & --- & --- & --- \\\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf gwspectrum} &
+{\tt dudt\_hines} & {\tt dvdt\_hines} & {\tt dtdt\_hines} & \om &\om  &\om \\
+&(code 13) & (code 23) & (code 3) & & & \\\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf ssodrag} &
+{\tt dudt\_sso} & {\tt dvdt\_sso} & {\tt dtdt\_sso} &\om &\om & \om\\
+&(code 14) & (code 24) & (code 4) & & & \\\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf cucall} & {\tt dudt\_cucall} &
+{\tt dvdt\_cucall} & {\tt dtdt\_cucall} & {\tt dqdt\_cucall} &\om & \om\\
+& (code 15) & (code 25) & (code 5) & (code 35) && \\\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf cloud} &
+\om&\om & {\tt dtdt\_cloud} & {\tt dqdt\_cloud} & {\tt dxldt\_cloud} & {\tt dxidt\_cloud} \\
+&&& (code 6)    & (code 36)   & (code 46)    & (code 56) \\\hline
+\multicolumn{7}{c}{\rule{0cm}{2.5ex}\bf spectral variables}\\\hline
+\rule{0cm}{2.5ex}{\bf variable} & $d\hat{\xi}/dt$ & $d\hat{D}/dt$ &
+$d\hat{T}/dt$ & & & \\
+& (1/s/day) & (1/s/day) & (K/day) & & & \\
+{\bf routine} &&&&&& \\
+{\bf (process)} &&&&&& \\\hline
+\rule{0cm}{2.5ex}\raisebox{-1.5ex}[1.5ex]{\bf hdiff} &
+{\tt dsvodt\_hdiff} & {\tt dsddt\_hdiff} & {\tt
+  dstdt\_hdiff} & & & \\
+& (code 87) & (code 97) & (code 7) & & & \\\hline
+\multicolumn{7}{c}{\rule{0cm}{2.5ex}\bf atmospheric variables}\\\hline
+\multicolumn{7}{c}{\rule{0cm}{2.5ex}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}ccccc}
+Box area & surface geopotential & $\ln(p_{\rm s}/p^\ominus)$ & $p_s$ & 
+$T(t)$ & $T(t-\Delta t)$ \\
+$\rm m^2$ & $\rm m^2/s^2$ & spectral & Pa & spectral & K \\
+\end{tabular*}}\\\hline\hline
+\end{longtable}
+
+\end{scriptsize}
+
+Additional documentation can be found in Appendix~\ref{cr20110118}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{7.0cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt tdiagctl}]{Namelist
+  {\tt tdiagctl}}\\\hline\label{tabtdiagctl}
+\endfirsthead
+\caption[]{{\tt tdiagctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt puttdiag}\index{namelist variables!puttdiag}
+& special & Output frequency of tendency stream & {\tt
+  6, 'hours', 'first', 0}\\
+{\tt tdiagnam(32,1:22)}\index{namelist variables!tdiagnam}
+ & character & determines the choice of tendencies
+that are written to the output stream {\tt \_tdiag} \newline
+\begin{tabular*}{7cm}{p{3cm}|p{3.7cm}}\\\hline
+keyword & explanation \\\hline
+{\tt 'all'} & output all tendencies of {\tt tdiag} stream\\\hline
+one of \rule{2cm}{0cm} 
+\rule{2cm}{0cm}\newline
+{\tt 'vdiff'}, \newline 
+{\tt 'hdiff'}, \newline
+{\tt 'radheat'},\newline
+{\tt 'gwspectrum'},\newline
+{\tt 'ssodrag'},\newline
+{\tt 'cucall'},\newline
+{\tt 'cloud'}
+&
+output all tendencies
+associated with \newline\newline
+{\bf vdiff},\newline
+{\bf hdiff},\newline
+{\bf radheat},\newline
+{\bf gwspectrum},\newline
+{\bf ssodrag},\newline 
+{\bf cucall}, \newline
+{\bf cloud}
+\\\hline
+one of \rule{2cm}{0cm}
+\rule{2cm}{0cm}\newline
+{\tt 'uwind'}\newline
+{\tt 'vwind'}\newline
+{\tt 'temp'}\newline
+{\tt 'qhum'}\newline
+{\tt 'xl'}\newline
+{\tt 'xi'}\newline
+&
+of all processes, output the tendencies\newline\newline
+$du/dt$, $d\hat{\xi}/dt$, $d\hat{D}/dt$\newline
+$dv/dt$, $d\hat{\xi}/dt$, $d\hat{D}/dt$\newline
+$dT/dt$, $d\hat{T}/dt$\newline
+$dq/dt$\newline
+$dx_{\rm l}$\newline
+$dx_{\rm i}$
+\\\hline
+one of the variable names of the tendencies listed in
+table~\ref{tab_var}, e.g.~{\tt dudt\_hines} & output this tendency,
+e.g.~$du/dt$ due to {\tt gwspectrum}\\\hline
+\end{tabular*}\newline
+
+&${\tt
+  tdiagnam}(1)={\tt 'all'}$, ${\tt tdiagnam}(2:22)={\tt 'end'}$\\
+\hline 
+\end{longtable}

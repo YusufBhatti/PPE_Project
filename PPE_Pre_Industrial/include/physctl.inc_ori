@@ -1,0 +1,23 @@
+!*    NAMELIST *PHYSCTL* TO CONTROL OPTIONS HAVING A BEARING ON THE     
+!                        PARAMETERISATIONS OF DIABATIC PROCESSES.       
+!                                                                       
+!     R.G AND M.J        E.C.M.W.F.     23/11/82.                       
+!                                                                       
+!      NAME     TYPE      PURPOSE                                       
+!      ----     ----      -------                                       
+!                                                                       
+!     *LPHYS*   LOGICAL   *TRUE FOR PARAMETERISATION OF DIABATIC        
+!                          PROCESSES.                            
+!     *LRAD*    LOGICAL   *TRUE FOR RADIATION SCHEME        
+!     *LVDIFF*  LOGICAL   *TRUE FOR VERTICAL DIFFUSION.                 
+!     *LCONV*   LOGICAL   *TRUE* TO ALLOW CONVECTION                   
+!     *LMFPEN*  LOGICAL   *TRUE IF PENETRATIVE CONVECTION IS SWITCHED ON 
+!     *LCOND*   LOGICAL   *TRUE FOR LARGE SCALE CONDENSATION SCHEME.    
+!     *LGWDRAG* LOGICAL   *TRUE FOR GRAVITY WAVE DRAG SCHEME  
+!     *LSURF*   LOGICAL   *TRUE FOR SURFACE EXCHANGES.                  
+!     *LICE*    LOGICAL   *TRUE* FOR SEA-ICE TEMPERATURE CALCULATION    
+!                                                                       
+
+
+NAMELIST /PHYSCTL/ LPHYS,  LRAD,  LVDIFF, LCOND,   LSURF,                      &
+                   LCONV, LMFPEN, LGWDRAG, LICE, LCONVMASSFIX

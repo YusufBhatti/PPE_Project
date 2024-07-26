@@ -1,0 +1,365 @@
+#! /usr/bin/env python
+#
+# Generate an experiment from templates and the given configuration file.
+#
+# $Id: mkexp 3740 2014-10-17 12:39:49Z m221078 $
+#
+
+import argparse
+import os
+import re
+import stat
+import StringIO
+import sys
+from time import strftime
+
+from configobj import ConfigObj
+from jinja2 import Environment, ChoiceLoader, FileSystemLoader, \
+                   TemplateNotFound, TemplatesNotFound
+
+from expconfig import ExpConfig, ExpConfigError
+import feedback
+
+#
+# Basic settings
+#
+
+#
+# Define functions
+#
+
+# File system
+ 
+def chmod_plus_x(file_name):
+    '''Make a file executable, respecting user mask.'''
+    # Get umask
+    umask = os.umask(0)
+    os.umask(umask)
+    # Mask all executable flags forbidden by umask
+    add_mode = ~umask & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+    # Add remaining executable flags to current mode
+    mode = os.stat(file_name).st_mode | add_mode
+    os.chmod(file_name, mode)
+
+# Templates
+
+def get_template_name(base_name, dir_name=ExpConfig.exp_lib_dir):
+    '''Determine script template, using experiments' or given library path.'''
+    return os.path.join(dir_name, base_name+'.tmpl')
+
+def get_exp_template_name(experiment_kind, job_id, dir_name=ExpConfig.exp_lib_dir):
+    '''Determine job script template, using experiments' or given library path.'''
+    return get_template_name(experiment_kind+'.'+job_id, dir_name)
+
+def get_script_name(base_name):
+    '''Determine job script name.'''
+    return os.path.join(script_dir, base_name)
+
+def get_exp_script_name(experiment_id, job_id):
+    '''Determine job script name.'''
+    return os.path.join(script_dir, experiment_id+'.'+job_id)
+
+def expand_template(template_dict, template_name):
+    '''Replace keywords in template string using the given dictionary.'''
+    try:
+        return template_env.get_template(template_name).render(template_dict)
+    except TemplateNotFound as error:
+        feedback.die(error.message)
+
+def expand_template_file(template_dict, template_names, expanded_name, backup_name):
+    '''Replace keywords in template file using the given dictionary.'''
+    move_file_to_backup(expanded_name, backup_name)
+    expanded_file = open(expanded_name, 'w')
+    try:
+        for line in template_env.select_template(template_names).generate(template_dict):
+            expanded_file.write(line)
+    except TemplatesNotFound as error:
+        feedback.die(error.message)
+    expanded_file.write('\n')
+    expanded_file.close()
+    chmod_plus_x(expanded_name)
+
+def move_file_to_backup(file_name, backup_name):
+    '''If given file name exists, move it to the backup location'''
+    if os.path.exists(file_name):
+        feedback.info("renaming '%s' to '%s'", file_name, backup_name)
+        os.rename(file_name, backup_name)
+
+    
+
+# Namelist formatting
+
+def format_atom(value):
+    '''Format atomic value for use in namelists'''
+    result = repr(value)
+    # Strip quotes from all-numeric strings
+    result = re.sub('^(["'r"'])([-+]?(\d+\.\d*|\.?\d+)([de][-+]?\d+)?)\1$", r'\2', 
+                    result, flags=re.I)
+    # Strip leading zeroes from integers (just to be sure)
+    result = re.sub(r'^0+([1-9]\d*|0)$', r'\1', result)
+    # 
+    result = re.sub('^(["'r"'])\.?t(rue)?\.?\1$", '.true.', result, flags=re.I)
+    result = re.sub('^(["'r"'])\.?f(alse)?\.?\1$", '.false.', result, flags=re.I)
+    return result
+
+def format_value(value, indent):
+    '''Format list, tuple, or atomic value for use in namelists'''
+    if isinstance(value, (list, tuple)):
+        width = 79 - indent
+        sep = ''
+        line = ''
+        lines = []
+        for element in value:
+            formatted = format_atom(element)
+            if len(line) + len(sep) + len(formatted) > width:
+                lines.append(line)
+                line = formatted
+            else:
+                line += sep + formatted
+                sep = ', '
+        if line:
+            lines.append(line)
+        return (',\n' + ' '*indent).join(lines)
+    return format_atom(value)
+
+def keyword_warning(key):
+    feedback.warning("keyword '"+key+"' is deprecated, use '."+key+"' instead")
+
+def cut_remove_list(section, key):
+    remove_list = []
+    if key in section:
+        # Deprecation warning for non .keys
+        if key[0] != '.':
+            keyword_warning(key)
+        if isinstance(section[key], basestring):
+            remove_list = [section[key]]
+        else:
+            remove_list = section[key]
+        del section[key]
+    return remove_list
+
+def format_namelist(section):
+    '''Format config section as a namelist'''
+    # Settings
+    base_indent = 4
+    # Create list of removed namelist groups.
+    # Support old keyword for backward compatibility
+    remove_list = cut_remove_list(section, '.remove')
+    remove_list += cut_remove_list(section, 'remove')
+    black_list = map(lambda x: x.replace(r'\*', '.*').replace(r'\?', '.')+'$', 
+                     map(lambda x: re.escape(x.lower()), remove_list))
+    # Format namelist groups that were not removed
+    lines = StringIO.StringIO()
+    for group, contents in section.iteritems():
+        if isinstance(contents, dict):
+            group_id = group.lower()
+            if not any(map(lambda x: re.match(x, group_id), black_list)):
+                # Create list of removed keys
+                remove_keys = cut_remove_list(contents, '.remove')
+                group_name = re.sub(r' .*$', '', group_id)
+                lines.write('&'+group_name+'\n')
+                for key, value in contents.iteritems():
+                    if key not in remove_keys:
+                        key = key.lower()
+                        indent = base_indent + len(key) + 3
+                        for line in contents.comments.get(key, []):
+                            if line:
+                                lines.write(' '*base_indent+
+                                            re.sub(r'^#', '!', line)+'\n')
+                        line = contents.inline_comments[key]
+                        if not line:
+                            line = ''
+                        line = re.sub(r'^#', ' !', line)
+                        lines.write(' '*base_indent+key+' = '+
+                                    format_value(value, indent)+line+'\n')
+                for line in section.comments.get(group, []):
+                    if line:
+                        match = re.match(r'#\s*(\w+)\s*=\s*(.*?)\s*$', line)
+                        if match:
+                            key = match.group(1)
+                            value = match.group(2)
+                            indent = base_indent + 2 + len(key) + 3
+                            lines.write(' '*base_indent+'! '+key+' = '+
+                                        format_value(value, indent)+'\n')
+                lines.write('/\n')
+    return lines.getvalue()
+
+#
+# Main routine
+#
+
+# Check environment
+
+config_roots = os.environ.get('MKEXP_PATH', '').split(':')
+
+# Check command line
+
+command_line = argparse.ArgumentParser(description=
+    'Generate an experiment from templates and the given configuration file.')
+command_line.add_argument('config', help='experiment configuration file name')
+command_line.add_argument('assigns', metavar='key=value', nargs='*',
+                           help='override configuration file settings')
+command_line.add_argument('--path', '-p', 
+                          help='search path for default config and templates')
+
+args = command_line.parse_args()
+
+# Experiment configuration
+if args.path:
+    config_roots = args.path.split(':')
+
+experiment_config_name = args.config
+
+if not os.path.exists(experiment_config_name):
+    feedback.die("config file '{0}' does not exist".format(experiment_config_name))
+
+# Overrides
+invalid_args = filter(lambda x: not x.find('=')+1, args.assigns)
+
+if invalid_args:
+    feedback.die("invalid parameters ('"+"', '".join(invalid_args)+"')\n" +
+                 command_line.format_usage())
+
+# Setup templating environment
+
+template_env = Environment(
+    loader = ChoiceLoader(map(FileSystemLoader, config_roots)),
+    variable_start_string = '%{',
+    variable_end_string = '}',
+    line_statement_prefix = '#%',
+    line_comment_prefix = '#%#'
+)    
+
+# Additional filters
+# - There's a join but no split operation...
+template_env.filters['split'] = lambda x, s: x.split(s)
+# - Add list operations filter and map
+template_env.filters['filter'] = lambda x, f=None: filter(f, x)
+
+# Read and store configuration info from input and experiments' library
+# Store environment as default for control settings, then add config from files
+
+extra_dict = dict(map(lambda x: x.split('=', 1), args.assigns))
+extra_dict.update(mkexp_input='Generated by $$Id: mkexp 3740 2014-10-17 12:39:49Z m221078 $$')
+try:
+    config = ExpConfig(experiment_config_name, extra_dict, config_roots)
+except ExpConfigError as error:
+    feedback.die(error.message, status=2)
+
+# Create target directories
+
+# Create directory for scripts if it doesn't exist
+script_dir = config['SCRIPT_DIR']
+print "Script directory: '"+script_dir+"'"
+time_stamp = strftime("%Y%m%d%H%M%S")
+backup_dir = os.path.join(script_dir, 'backup', time_stamp)
+if not os.path.isdir(script_dir):
+    os.makedirs(script_dir)
+else:
+    feedback.warning("script directory already exists, moving existing scripts to backup")
+    if not os.path.isdir(backup_dir):
+        os.makedirs(backup_dir)
+
+# Create directory for output data if it doesn't exist
+data_dir = config['DATA_DIR']
+print "Data directory: '"+data_dir+"'"
+if not os.path.isdir(data_dir):
+    os.makedirs(data_dir)
+elif not script_dir.startswith(data_dir):
+    feedback.warning("data directory already exists")
+
+# Create directory for running the experiment if it doesn't exist
+work_dir = config['WORK_DIR']
+if work_dir != data_dir:
+    print "Work directory: '"+work_dir+"'"
+    if not os.path.isdir(work_dir):
+        os.makedirs(work_dir)
+    else:
+        feedback.warning("work directory already exists")
+
+# Run template expansion
+
+# Process scripts for each job
+
+# Cut queue specific settings
+job_dict = {}
+remove_list = cut_remove_list(config['jobs'], '.remove')
+remove_list += cut_remove_list(config['jobs'], 'remove')
+for key, value in config['jobs'].iteritems():
+    if not isinstance(value, dict):
+        job_dict[key] = value
+        del config['jobs'][key]
+
+# Save configuration to buffer
+config_lines = StringIO.StringIO()
+config.write(config_lines)
+
+# Paste them into each job
+for subjob, subconfig in config['jobs'].iteritems():
+    if not subjob in remove_list:
+
+        # Allow simple inheritance
+        # Support deprecated keyword 'extends' but warn user
+        template_job = subjob
+        if 'extends' in subconfig or '.extends' in subconfig:
+            if 'extends' in subconfig:
+                keyword_warning('extends')
+                template_job = subconfig['extends']
+            else:
+                template_job = subconfig['.extends']
+            backup = subconfig.dict()
+            subconfig.merge(config['jobs'][template_job])
+            subconfig.merge(backup) 
+
+        # Add global job settings
+        subconfig.merge(job_dict)
+
+        # Add useful settings
+        subconfig['id'] = subjob
+        if not 'tasks' in subconfig:
+            subconfig['tasks'] = int(subconfig.get('nodes', 1)) * \
+                                 int(subconfig.get('tasks_per_node', 1))
+
+        # Check namelist override
+        config_lines.seek(0)
+        job_config = ConfigObj(config_lines, interpolation=False)
+        if 'namelists' in subconfig:
+            job_config['namelists'].merge(subconfig['namelists'])
+            del subconfig['namelists']
+        job_config['JOB'] = subconfig
+
+        # Prepare namelists for inclusion in scripts
+        for namelist, groups in job_config['namelists'].iteritems():
+            if isinstance(groups, dict):
+                namelist_name = re.sub(r'\W', '_', namelist.upper())
+                if groups.get('.use_template') or groups.get('use_template'):
+
+                    # Support deprecated keyword 'use_template' but warn user
+                    if groups.get('use_template'):
+                        keyword_warning('use_template')
+
+                    job_config[namelist_name] = \
+                        expand_template(groups, get_template_name(namelist))
+                else:
+                    job_config[namelist_name] = format_namelist(groups)
+
+        # Generate job script
+        expand_template_file(job_config,
+                             ( get_exp_template_name(config.experiment_id,
+                                                     template_job, ''),
+                               get_exp_template_name(config.experiment_kind,
+                                                     template_job),
+                               get_exp_template_name(ExpConfig.default_name,
+                                                     template_job) ),
+                             get_exp_script_name(config.experiment_id, subjob),
+                             os.path.join(backup_dir,
+                                          config.experiment_id+'.'+subjob))
+
+# Create README file from experiment description
+
+move_file_to_backup(os.path.join(script_dir, 'README'),
+                    os.path.join(backup_dir, 'README'))
+readme_file = open(os.path.join(script_dir, 'README'), 'w')
+readme_file.write(config['EXP_DESCRIPTION'] + '\n')
+readme_file.close()
+
