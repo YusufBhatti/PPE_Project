@@ -1,0 +1,18 @@
+#! @SHELL@
+set -e
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_xmap_intersection_parallel
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_xmap_intersection_parallel \
+  -m xt_xmap_intersection_ext_new
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_xmap_intersection_parallel_f
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 3 @abs_builddir@/test_xmap_intersection_parallel_f \
+  -m xt_xmap_intersection_ext_new
+#
+# Local Variables:
+# mode: sh
+# End:
+#

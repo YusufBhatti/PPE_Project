@@ -1,0 +1,31 @@
+#SF Note: This files has been added by Sebastian Wahl and is defining the configuration file for:
+#         NEC HPC cluster at Kiel University
+
+F90 = mpiifort
+FC = mpiifort
+F77 = mpiifort
+MPIROOT            = /opt/intel/impi/4.1.1.036/intel64
+SZIPROOT           = /sfs/fs3/sw/szip/szip-2.1
+ZLIBROOT           = /sfs/fs3/sw/zlib/zlib-1.2.8
+HDF5ROOT           = /sfs/fs3/sw/hdf5/hdf5-1.8.13/hdf5-1.8.13_intel
+NETCDFROOT         = /sfs/fs3/sw/netcdf/netcdf-4.1.3/netcdf-4.1.3_intel
+    
+ARCH     = LINUX
+
+CC       = gcc
+CFLAGS   = -std=gnu99 -O -DpgiFortran -g 
+
+# FFLAGS   = -msse2 -fp-model precise -fp-model source -O2 -g -fpp -DHAMMOZ -DSINGLE_OUTFILE -lmpi
+# FCLAGS   = -msse2 -fp-model precise -fp-model source -O2 -g -fpp -DHAMMOZ -DSINGLE_OUTFILE -lmpi
+# F90FLAGS = -msse2 -fp-model precise -fp-model source -O2 -g -fpp -DHAMMOZ -DSINGLE_OUTFILE -lmpi
+FFLAGS   = -msse2 -fp-model source -O2 -g -fpp -DHAMMOZ -DSINGLE_OUTFILE -lmpi
+FCFLAGS   = -msse2 -fp-model source -O2 -g -fpp -DHAMMOZ -DSINGLE_OUTFILE -lmpi
+F90FLAGS = -msse2 -fp-model source -O2 -g -fpp -DHAMMOZ -DSINGLE_OUTFILE -lmpi
+
+DEFOPT   = -D
+MODOPT   = -I
+
+SRCDIRS  = blas lapack support
+SUPPORT_LIB     = -L../lib -lsupport -llapack -lblas 
+    
+

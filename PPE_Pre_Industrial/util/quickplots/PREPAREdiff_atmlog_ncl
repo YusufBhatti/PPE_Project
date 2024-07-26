@@ -1,0 +1,93 @@
+#!/bin/sh 
+set -ex
+#
+TYP=$1
+echo $TYP
+#
+ANAME=$2
+#
+BNAME=$3
+#
+WORKDIR=$4
+#
+#
+   echo QUELLE path $QUELLE
+# 
+   FIXCODE=/pool/data/ECHAM6/post/FixCodes
+
+#
+
+   cdo=/client/bin/cdo
+
+#
+ATMa="${WORKDIR}/LOG_${ANAME}"
+ATMb="${WORKDIR}/LOG_${BNAME}"
+#
+###########################################################################
+# var.txt wird in ATM.gs BOT.gs einglesen
+# number of latitudes
+
+nlat=`cdo griddes $ATMa| grep ysize | cut -d"=" -f2`
+echo $nlat >>var.txt
+
+FORMAT="-f nc -t ${QUELLE}/echam6.varCode"
+
+#
+cp var.txt var1.txt
+
+head  var1.txt >var.txt
+date >var1.txt
+cut -c5-11,25-32 var1.txt >datum
+cat datum >>var.txt
+#
+###########################################################################
+# 
+
+#
+set +e
+
+#
+#----code130--- Temperature---ZONAL-
+#
+CODE=130
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -zonavg -selcode,${CODE} $ATMa \
+         -zonavg -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#-----code131---U----zonal-
+#
+#
+CODE=131
+#
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -zonavg -selcode,${CODE} $ATMa \
+         -zonavg -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#-----code132---V----zonal-
+#
+#
+CODE=132
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -zonavg -selcode,${CODE} $ATMa \
+         -zonavg -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+
+exit
+
+
+
+
+
+
+

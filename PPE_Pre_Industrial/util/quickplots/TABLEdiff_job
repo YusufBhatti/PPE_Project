@@ -1,0 +1,124 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+ANAME=$2
+BNAME=$3
+#
+#
+AEXP=$4
+BEXP=$5
+#
+YY1=$6
+#
+YY2=$7
+#
+#
+WORKDIR=$8
+
+set -ex
+
+echo fractional_mask  $fractional_mask
+
+echo QUELLE path $QUELLE
+BOTa=${WORKDIR}/BOT_${ANAME}
+BOTb=${WORKDIR}/BOT_${BNAME}
+
+#
+if [ "$fractional_mask" = "1" ];then
+  landcode=194
+else
+  landcode=172
+fi
+
+cat > namelist << eon
+ &exper
+ expnam='${AEXP}' average='$TYP' year1=$YY1 year2=$YY2 landcode=$landcode
+ /
+eon
+
+
+check_codes () {
+
+  BOT=$1; new=$2
+
+  if cdo -s showcode -selcode,97 $BOT  > /dev/null
+  then
+    :
+  else
+    echo '##### Attention #####'
+    echo 'code 97 failt'
+    echo 'please add code 97 in ' $BOT 
+    exit
+  fi
+
+  if cdo -s showcode -selcode,${landcode} $BOT > /dev/null
+  then
+    cp $BOT BOT.grb
+  else
+    cdo -O merge F_LAND $BOT ${new}.grb
+    cdo showcode ${new}.grb
+  fi
+
+  if cdo -s showcode -selcode,232  $BOT > /dev/null
+  then
+    :
+  else
+    cdo -O merge F_GLACIER ${new}.grb BOT_GLACIER.grb
+    mv BOT_GLACIER.grb ${new}.grb 
+  fi
+
+########## if code 4 doesn't exist ===> code142 + code143 ##########
+  if cdo -s showcode -selcode,4  $BOT > /dev/null
+  then
+    echo 'PRECIP (code4) exist'
+  else   
+    if cdo -s showcode -selcode,142  $BOT > /dev/null
+    then
+      if cdo -s showcode -selcode,143  $BOT > /dev/null
+      then
+        echo 'make precip code142,code143'
+        cdo add -selcode,142 ${new}.grb -selcode,143 ${new}.grb busy4
+        cdo chcode,142,4  busy4 busy_4
+        cp ${new}.grb busy.grb
+        cdo -O merge busy_4 busy.grb ${new}.grb
+        rm -f busy*
+      else
+        echo 'PRECIP cannot compute, code 143 and 142 miss'
+      fi
+    fi
+  fi
+  
+
+#
+
+  cdo -f srv -sortcode ${new}.grb ${new}.srv
+
+
+}
+check_codes $BOTa BOTa
+
+check_codes $BOTb BOTb
+
+#
+${QUELLE}/table_diff.x < namelist
+
+#
+NAME=${AEXP}_${BEXP}_${TYP}
+mv tabelle tabelle_${NAME}
+mv tablecode tablecode_${NAME}
+
+
+case `hostname` in
+   mlogin*|mistral*)
+    enscript -fCourier10 -o tablecode_${NAME}.ps tablecode_${NAME}
+    enscript -fCourier7.1 -r -o tabelle_${NAME}.ps tabelle_${NAME};;
+   *) 
+    enscript -fCourier10 -o tablecode_${NAME}.ps tablecode_${NAME}
+    enscript -fCourier8 -r -o tabelle_${NAME}.ps tabelle_${NAME};;
+esac
+
+set +e
+rm -f BOTa.srv BOTb.srv BOTa.grb BOTb.grb namelist BBOTa.srv BBOTb.srv
+rm -f F_GLACIER F_SLF F_LAND

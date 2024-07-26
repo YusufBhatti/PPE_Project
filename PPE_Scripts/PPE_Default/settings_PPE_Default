@@ -73,8 +73,8 @@ init_restart_flag=.false.
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="2006,04,01,0,0,0"
-date_stop="2006,04,20,1,0,0"
+date_start="2009,09,01,0,0,0"
+date_stop="2009,09,06,1,0,0"
 
 input_files_version="v0002_input"
 scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's

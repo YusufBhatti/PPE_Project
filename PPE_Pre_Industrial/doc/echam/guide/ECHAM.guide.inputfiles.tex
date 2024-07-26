@@ -1,0 +1,389 @@
+This section provides a brief description of the input files but does
+not describe the input data itself. Such a description can be found in
+the scientific part of the documentation.\newline
+All input files are stored in the
+directory \newline 
+\ini \newline
+and its subdirectories for the atmospheric part and in the directory
+\newline
+{\tt /pool/data/JSBACH}/ \newline
+for the land--surface model.
+The input data of the atmospheric part are released in various
+versions. The version {\tt r0001} contains all data needed for the
+basic atmosphere--only experiments conducted for CMIP5: amip--LR,
+amip--MR, sstClim--LR, sstClim--MR. 
+Transient input data files are provided for the maximum possible time
+period. Some data depend on the scenario. In this version, the rcp26,
+rcp45, and rcp85 scenarios are taken into account.
+
+In \ini, you find the resolution independent data. Furthermore,
+it contains
+directories {\tt \{RES\}}
+where {\tt \{RES\}} has to be replaced by one of the spectral model
+resolutions T31, T63, T127, and T255, respectively providing
+resolution dependent input files. Similarly, the resolution dependent
+land--surface model data are stored in subdirectories {\tt T31}, {\tt
+  T63}, etc. of the {\tt /pool/data/JSBACH} directory.
+In the following, the vertical resolution
+will be denoted by {\tt \{LEV\}} which represents the number of 
+vertical $\sigma$--levels preceeded by a capital {\tt L}. 
+The most common model resolutions are
+T63L47 and T63L95. Currently, \echam{} is tuned for the resolutions
+T63L47, T63L95, T127L95 only.
+Other resolutions may require a new tuning of the model in order to
+adjust the parameters of certain equations to the particular model resolution.
+Some of the input data contain information about the land--sea
+distribution and therefore are provided for various ocean resolutions
+even if the model is not coupled to an interactive ocean. The ocean
+resolution will be symbolized by {\tt \{OCR\}}. Currently, the GR15,
+GR30, and
+TP04 ocean resolutions are considered.
+
+There are three kinds of input data: initial conditions, boundary
+conditions, and data of model parameters. The boundary conditions can
+be either ``transient boundary 
+conditions'' depending on the actual year or ``climatological boundary
+conditions'' which do not depend on the year but may contain a
+seasonal cycle.
+The files containing the initial conditions are listed in 
+Tab.~\ref{tabechami}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{6cm}}\hline\hline
+\caption[Initial conditions]{Initial conditions for
+  \echam{}}\\\hline\label{tabechami}  
+\endfirsthead
+\caption[]{Initial conditions for \echam{} 
+ continued}\\\hline 
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+
+\multicolumn{3}{c}{Resolution dependent \echam{} initial data in
+  \ini{\tt \{RES\}}} \\\hline
+Link target      & Link name & Explanation\\\hline
+{\tt\{RES\}\{LEV\}\_jan\_spec.nc}& 
+{\tt unit.23}\index{input files!unit.23}
+ & Variables
+describing the vertical $\sigma$--coordinates, spectral fields like
+divergence, vorticity etc.~serving to start the model from some
+initial values. These values are very rough estimates only and do not
+describe any dynamic state of the atmosphere that occurs with high
+probability! 
+\\
+{\tt\{RES\}\{OCR\}\_jan\_surf.nc}      & 
+{\tt unit.24}\index{input files!unit.24}
+ & Surface fields like
+land sea mask, glacier mask etc.~for a start of the model from initial
+values. \\ \hline
+\multicolumn{3}{c}{Resolution independent \echam{} initial data in
+  \ini} \\\hline
+{\tt hdstart.nc} & {hdstart.nc}\index{input files!hdstart.nc} & Initial data for hydrological
+discharge model. \\
+\hline
+\end{longtable}
+
+The climatological boundary condition files are listed in 
+Tab.~\ref{tabechamc}. Sea surface temperature and sea ice cover
+climatologies for \echam{} 
+are based on 500 year--climatologies of our coupled control simulations and
+are available for the T63 resolutions only. 
+Furthermore, some of the data are formally read by \echam{} but not
+used: The leaf area index, vegetation ratio, and albedo e.g.~are calculated
+by the surface model JSBACH and it is impossible to use climatological
+values read from files. Actually, JSBACH reads these quantities again,
+but discards them also, even if dynamic vegetation is switched off:
+This just means that the geographical distribution of vegetation types 
+is fixed in time, but the leaf area index changes with season
+and soil moisture and consequently also the albedo varies with time
+according to the vegetation model used in JSBACH, only the vegetation
+ratio remains fixed at the value read from file.
+
+The input data for the hydrological discharge model (see
+Tab.~\ref{tabechami} and Tab.~\ref{tabechamc}) are not entirely
+resolution independent, but the current data can be used for a wide
+range of resolutions.
+
+\begin{longtable}{p{5cm}@{\extracolsep\fill}lp{6cm}}\hline\hline\caption
+[Climatological boundary conditions]
+{Climatological boundary conditions for \echam{}. Some of the
+  climatological boundary conditions have to be linked to year
+  dependent files. The year is symbolized by {\tt
+    yyyy}.}\\\hline\label{tabechamc}  
+\endfirsthead
+\caption[]{Climatological boundary conditions for \echam{} 
+ continued}\\\hline 
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+
+\multicolumn{3}{c}{Resolution dependent data in
+  \ini{\tt \{RES\}}} \\\hline
+Link target      & Link name & Explanation\\\hline
+{\tt\{RES\}\_ozone\_CMIP5\_y1-y2.nc} & 
+{\tt ozonyyyy}\index{input files!ozonyyyy}
+ & 3--d ozone
+  climatology being a mean value over the years {\tt y1} to {\tt
+    y2}. Currently, {\tt y1-y2}=1850-1860 and 1979-1988 is
+  available. These files 
+  have to be linked to filenames {\tt ozonyyyy} where {\tt yyyy} is the
+  actually simulated year. \\
+{\tt\{RES\}\{OCR\}\_VLTCLIM.nc}        & 
+{\tt unit.90}\index{input files!unit.90}
+ & Climatological leaf
+area index (monthly data). \\ 
+{\tt\{RES\}\{OCR\}\_VGRATCLIM.nc}      & 
+{\tt unit.91}\index{input files!unit.21}
+ & Climatological
+vegetation ratio (monthly data). \\ 
+{\tt\{RES\}\_TSLCLIM2.nc}       & 
+{\tt unit.92}\index{input files!unit.92}
+ & Climatological land
+surface temperature (monthly data). \\ 
+T{\tt \{RES\}\{OCR\}\_piControl- LR\_sst\_1880-2379.nc}&{\tt
+  unit.20}\index{input files!unit.20}
+ &
+Climatological 
+sea surface temperatures (monthly data, only in T63GR15 available). \\ 
+{\tt \{RES\}\{OCR\}\_piControl- LR\_sic\_1880-2379.nc}&{\tt
+  unit.96}\index{input files!unit.96}
+&Climatological 
+sea ice data (monthly data, only in T63GR15 available). \\ 
+\hline
+\multicolumn{3}{c}{Tropospheric aerosols}\\\hline
+{\tt aero/\{RES\}\_aeropt\_ kinne\_sw\_b14\_coa.nc} & {\tt
+  aero\_coarse\_yyyy.nc}\index{input files!aero\_coarse\_yyyy.nc} 
+& Optical properties of coarse mode
+aerosols in the solar spectral range. Since these are mostly of natural
+origin, climatological 
+boundary conditions are sufficient for historic times.\\
+{\tt aero/\{RES\}\_aeropt\_ kinne\_lw\_b16\_coa.nc} & {\tt
+  aero\_farir\_yyyy.nc}\index{input files!aero\_farir\_yyyy.nc}
+ & Aerosol optical properties in the thermal
+spectral range. Only coarse mode aerosols play a role. Since these are
+mostly of natural 
+origin, climatological 
+boundary conditions are sufficient for historic times.\\
+\hline
+\multicolumn{3}{c}{Land surface model JSBACH ({\tt /pool/data/JSBACH})}\\\hline
+{\tt jsbach/ jsbach\_\{RES\}\{OCR\}\_\{t\}\_yyyy.nc} &
+{\tt jsbach.nc}\index{input files!jsbach.nc}
+ & Boundary conditions for land surface model
+JSBACH. It also depends on the ocean resolution because the land--sea
+mask does. The structure of JSBACH may vary with the number of tiles,
+encoded in {\tt \{t\}}={\tt 4tiles}, {\tt 8tiles}, {\tt 11tiles}, or
+{\tt 12tiles}. Not all combinations of resolutions are
+available. \\
+\hline
+\multicolumn{3}{c}{Resolution independent data in
+  \ini} \\\hline
+{\tt hdpara.nc} & {\tt hdpara.nc}\index{input files!hdpara.nc}
+ & Data for hydrological discharge
+model. \\
+
+\hline
+\end{longtable}
+
+
+Furthermore, various transient boundary conditions are available which
+can either replace their climatological counterparts or be used as
+supplemental conditions.
+Examples for transient boundary conditions are observed sea surface
+temperatures and sea ice data, transient greenhouse gas concentrations
+or data accounting for interannual variability in
+solar radiation, ozone concentration or aerosol optical
+properties. The historical sea surface temperature (SST) and sea ice
+cover (SIC) data 
+are taken from the Program for Climate Model Diagnosis and
+Intercomparison (PCMDI, status: November 2009). A list of possible
+input data can be found in 
+Tab.~\ref{tabechamt}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{p{5cm}@{\extracolsep\fill}lp{6cm}}\hline\hline 
+\caption[Transient boundary conditions]{\echam{}
+  transient boundary conditions. Specific years are symbolized by {\tt
+    yyyy}.}\\\hline\label{tabechamt}  
+\endfirsthead
+\caption[]{Transient boundary conditions
+  continued}\\\hline 
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+
+\multicolumn{3}{c}{Resolution dependent data
+  in \ini{\tt \{RES\}}} \\\hline
+Link target      & Link name & Explanation\\\hline
+{\tt amip/ \{RES\}\_amip2sst\_yyyy.nc} & 
+{\tt sstyyyy}\index{input files!sstyyyy}
+ & historical sea surface
+temperatures (monthly data).  \\
+{\tt amip/ \{RES\}\_amip2sic\_yyyy.nc}&
+{\tt iceyyyy}\index{input files!iceyyyy}
+& historical
+sea ice data (monthly data). \\\hline
+\multicolumn{3}{c}{Tropospheric aerosols}\\\hline
+{\tt aero/\{RES\}\_aeropt\_ kinne\_sw\_b14\_fin\_yyyy.nc} & {\tt
+  aero\_fine\_yyyy.nc}\index{input files!aero\_fine\_yyyy.nc}
+ & Optical properties of fine mode aerosols in
+the solar spectrum. These aerosols are of anthropogenic origin mainly.
+Therefore, they depend on the year. These are the historical
+data. \\
+{\tt aero/\{RES\}\_aeropt\_ kinne\_sw\_b14\_fin\_\{sc\}\_yyyy.nc} & {\tt
+  aero\_fine\_yyyy.nc}\index{input files!aero\_fine\_yyyy.nc}
+ & Optical properties of fine mode aerosols in
+the solar spectrum. These aerosols are of anthropogenic origin mainly.
+Therefore, they depend on the year. They are provided for different
+scenarios for the future ({\tt \{sc\}}= {\tt rcp26}, {\tt rcp45}, {\tt
+  rcp85}).
+\\
+\hline
+\multicolumn{3}{c}{Volcanic (stratrospheric) aerosols, Stenchikov}\\\hline
+{\tt volcano\_aerosols/strat\_ aerosol\_sw\_T\{RES\}\_yyyy.nc} & 
+{\tt strat\_aerosol\_sw\_yyyy.nc}
+\index{input files!strat\_aerosol\_sw\_yyyy.nc}
+ & Aerosol 
+optical properties of stratospheric aerosols of volcanic
+origin in the solar spectral range. \\
+{\tt volcano\_aerosols/strat\_ aerosol\_ir\_T\{RES\}\_yyyy.nc} & 
+{\tt strat\_aerosol\_ir\_yyyy.nc}
+\index{input files!strat\_aerosol\_ir\_yyyy.nc}
+ & Aerosol
+optical properties of stratospheric aerosols of volcanic
+origin in the thermal spectral range. \\
+\hline
+\multicolumn{3}{c}{Volcanic (stratrospheric) aerosols, provided by HAM}\\\hline
+N.N. & {\tt aoddz\_ham\_yyyy.nc}\index{input files!aodz\_ham\_yyyy.nc}
+ & Aerosol optical properties as
+provided by the HAM model. These data have to be used together with
+the {\tt b30w120}\index{input files!b30w120}
+parameter file of Tab.~\ref{tabechamp}. The aerosol
+type described by the HAM model has to be compatible with that of the
+parameter file. \\
+\hline
+ \multicolumn{3}{c}{Transient 3d--ozone data in \ini{\tt \{RES\}/ozone}}\\\hline
+{\tt \{RES\}\_ozone\_CMIP5\_ yyyy.nc} & 
+{\tt ozonyyyy}\index{input files!ozonyyyy}
+ & Historic
+3d--distribution 
+of ozone in the stratosphere and troposphere. \\
+{\tt \{RES\}\_ozone\_CMIP5\_ \{sc\}\_yyyy.nc} & {\tt
+  ozonyyyy}\index{input files!ozonyyyy}
+&3d--distribution 
+of ozone in the stratosphere and troposphere for the scenarios
+{\tt RCP26}, {\tt RCP45}, and {\tt RCP85}. \\
+\hline
+\multicolumn{3}{c}{Resolution independent data
+  in \ini} \\\hline
+\multicolumn{3}{c}{Volcanic (stratrospheric) aerosols,
+  T.~Crowley}\\\hline
+{\tt volc\_data} & 
+{\tt aodreff\_crow.dat}\index{input files!aodreff\_crow.dat}
+ & Stratospheric aerosol optical properties of volcanic aerosols compiled
+by T. Crowley. All years are in one file. The {\tt b30w120} parameter
+file of Tab.~\ref{tabechamp} has to be used together with these
+data. \\\hline
+\multicolumn{3}{c}{Transient solar irradiance in \ini{\tt
+    solar\_irradiance}}\\\hline 
+{\tt swflux\_14band\_yyyy.nc} & 
+{\tt swflux\_yyyy.nc}\index{input files!swflux\_yyyy.nc}
+ & Monthly
+spectral solar irradiance for year {\tt yyyy}.  \\
+\hline
+\multicolumn{3}{c}{Greenhouse gas scenarios in \ini}\\\hline 
+{\tt greenhouse\_\{sc\}.nc} & 
+{\tt greenhouse\_gases.nc}\index{input files!greenhouse\_gases.nc}
+ & Transient
+greenhouse gas concentrations (all years in one file) for the
+scenarios {\tt \{sc\}}= {\tt rcp26}, {\tt rcp45}, {\tt rcp85}. The
+{\tt rcp45}--file contains the historic data also. \\
+\hline
+
+\end{longtable}
+
+Some of the equations used in \echam{} need tables of
+parameters. E.g.~the radiation needs temperature and pressure
+(concentration) dependent absorption coefficients, the calculation of
+the aerosol optical properties at all wave lengths from the effective
+aerosol radius and 
+the aerosol optical depth at a certain wavelength needs conversion
+factors. The surface model JSBACH needs further input parameters that
+are provided in a kind of a standard input file. A list of the input
+files containing model parameters is provided in Tab.~\ref{tabechamp}.
+
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{p{5cm}@{\extracolsep\fill}lp{6cm}}\hline\hline 
+\caption[Parameter files]{Input files for \echam{} containing
+  parameters for various 
+  physical processes in \ini}\\\hline\label{tabechamp}  
+\endfirsthead
+\caption[]{Parameters files
+  continued}\\\hline 
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+
+Link target      & Link name & Explanation\\\hline
+{\tt surrta\_data} & {\tt  rrtadata}\index{input files!rrtadata}
+ & Tables for RRTM radiation scheme
+--- solar radiation.\\
+{\tt rrtmg\_lw.nc} & 
+{\tt rrtmg\_lw.nc}\index{input files!rrtmg\_lw.nc}
+ & Tables for RRTMG radiation scheme
+--- thermal radiation.\\
+{\tt ECHAM6\_CldOptProps.nc} & {\tt
+  ECHAM6\_CldOptProps.nc}\index{input files!ECHAM6\_CldOptProps.nc} 
+& Optical
+properties of clouds. \\
+{\tt ../../b30w120} & 
+{\tt aero\_volc\_tables.dat}\index{input files!aero\_volc\_tables.dat}
+ & Parametrizations of the
+aerosol optical properties in the case of T.~Crowley aerosols and
+aerosols provided by HAM. This table has to be compatible with the
+aerosol data.\\
+{\tt ../../jsbach/ lctlib\_nlct21.def\_rev5793}& {\tt
+  lctlib.def}\index{input files!lctlib.def}
+ & Parametrization of properties of vegetation and land model
+JSBACH. (imported from the cosmos svn)\\\hline
+\end{longtable}
+
+In some rare cases, input data for diagnostic subroutines are
+needed. This is the case for the station diagnostic that writes values
+at different geographic locations (CFMIP2 sites by K.~Taylor). The file
+and link name is listed in Tab.~\ref{tabdiaginput}
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{p{5cm}@{\extracolsep\fill}lp{6cm}}\hline\hline 
+\caption[Parameter files]{Input files for diagnostics
+ provided in \ini{\tt /CFMIP}}\\\hline\label{tabdiaginput}  
+\endfirsthead
+\caption[]{Diagnostic input files
+  continued}\\\hline 
+\endhead
+\hline\multicolumn{3}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{3}{r}{end of table}
+\endlastfoot
+
+Link target      & Link name & Explanation\\\hline
+{\tt pointlocations.txt}\index{input files!pointlocations.txt} & {\tt pointlocations.txt} & List of CFMIP2
+sites as given by K.~Taylor. At these locations, surface and column
+variables are written to output files.\\\hline
+\end{longtable}

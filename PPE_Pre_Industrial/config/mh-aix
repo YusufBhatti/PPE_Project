@@ -1,0 +1,60 @@
+#_____________________________________________________________________________
+#
+# AIX
+#
+#_____________________________________________________________________________
+#
+SRCDIRS     = support
+#
+LAPACKROOT  = /sw/aix53/lapack-3.2.0 
+LAPACK_LIB  = '-L$(LAPACKROOT)/lib -llapack -lessl -lblas -lmass -lmassvp6'
+#
+SUPPORTROOT = ..
+SUPPORT_LIB = '-L$(SUPPORTROOT)/lib -lsupport'
+#
+#_____________________________________________________________________________
+#
+#
+case $fortran_compiler in
+    default|ibm)
+        configured_compiler = ibm
+        compiler_version    = $(xlf -qversion | awk 'NR==1{split($6,v,"."); printf("xlf%d%d", substr(v[1],2,2), v[2])}')
+    	ARFLAGS    = -X64 crv	
+        CC         = xlc_r
+        CFLAGS     = -q64 -O3 -qhot -qarch=pwr6 -g -qfullpath -Dextname -Dappendus -qlanglvl=stdc99
+        FC         = xlf2003_r
+        FCFLAGS    = -q64 -qextname -qzerosize -O3 -g -qfullpath -qarch=pwr6 -qtune=balanced -qcache=auto -qxflag=nvectver -qxflag=nsmine -qfloat=fltint -qessl -bdatapsize:64k -bstackpsize:64k 
+	F77        = xlf_r
+        FFLAGS     = -q64 -qextname -O3 -qstrict -g -qfullpath 
+        LDFLAGS = $FCFLAGS -Wl,-brtl
+
+        NETCDFFROOT    = /sw/aix61/netcdf-4.2.1.1
+        NETCDFROOT     = /sw/aix61/netcdf-4.2.1.1
+        HDF5ROOT       = /sw/aix61/hdf5-1.8.8
+        SZIPROOT       = /sw/aix53/szip-2.1
+        ZLIBROOT       = /sw/aix61/zlib-1.2.6
+        MPIROOT        =
+        MPI_LIB        =
+        LIBS           = -lessl -lmass -lmassvp6
+        # mpi_launch_poe is a wrapper around poe to enable simple runs of MPI
+        # programs on AIX like with mpirun elsewhere, it's needed for
+        # builds with YAXT including correctness checks of YAXT itself
+        echo $(hostname) >IBM_PE_Hostfile
+        MPI_LAUNCH=$(pwd)/yaxt/util/mpi_launch_poe
+        ac_configure_args="$ac_configure_args MP_PROCS=1 MP_HOSTFILE=$(pwd)/IBM_PE_Hostfile"
+        # test early if YAXT configure can succeed
+        if test x${with_yaxt} != \
+        xno ; then
+          $MPI_LAUNCH -n 1 hostname >/dev/null || exit 1
+        fi
+        # libtool requires a shell that is a bit more modern
+        SHELL=/bin/bash
+    ;;
+esac
+
+#>>SF for HAMMOZ
+FCFLAGS = $FCFLAGS -DHAMMOZ
+#<<SF
+
+# Settings for quickplot
+QPLOT_TABLE_LINES = ${QPLOT_TABLE_LINES:-51}

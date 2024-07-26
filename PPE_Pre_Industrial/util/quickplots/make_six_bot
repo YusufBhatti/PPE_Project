@@ -1,0 +1,32 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+EXP=$2
+#
+PRINTERC=$3
+
+echo QUELLE path $QUELLE
+
+##---------------BOT------------------------
+
+#
+prefix=bot_${TYP}_${EXP}_
+afiles=$(ls  ${prefix}*.eps )
+
+#
+${QUELLE}/sixplot_latex.sh BOT_${TYP}_${EXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv BOT_${TYP}_${EXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname BOT_${TYP}_${EXP}.ps 
+else
+lpr -P${PRINTERC} -o sides=one-sided BOT_${TYP}_${EXP}.ps 
+fi
+
+rm  BOT_${TYP}_${EXP}.aux  BOT_${TYP}_${EXP}.dvi  BOT_${TYP}_${EXP}.log
+exit

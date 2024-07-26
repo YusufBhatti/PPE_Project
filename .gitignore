@@ -47,6 +47,7 @@ version.c
 .ipynb_checkpoints
 # swap
 *.swp
+*.svn
 # Files to ignore
 RUNDIR/
 compile_and_generate.sh

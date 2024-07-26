@@ -1,0 +1,25 @@
+#! /bin/sh
+#
+# Remove experiment setups using config information.
+#
+# $Id: rmexp 3256 2013-08-29 09:48:09Z m221078 $
+#
+
+PROGRAM=`basename $0`
+BINDIR=`dirname $0`
+PATH="$BINDIR:$PATH"
+
+die () {
+    echo "$@" >&2
+    exit 1
+}
+
+[ "x$1" = x ] && die "Oops: invalid number of parameters
+Usage: $PROGRAM config_file [key=value...]"
+
+CONFIG=$1
+shift
+
+eval `getexp "$CONFIG" "$@" || echo \; exit $?`
+
+rm -ri $SCRIPT_DIR $WORK_DIR
