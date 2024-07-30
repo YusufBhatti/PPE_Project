@@ -1,7 +1,7 @@
 #!/bin/bash --login
 #PBS -N PPE_test_install
-#PBS -l walltime=00:20:00
-#PBS -l select=2:ncpus=80
+#PBS -l walltime=00:40:00
+#PBS -l select=1:ncpus=80
 #PBS -j oe
 #PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl

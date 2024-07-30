@@ -472,47 +472,47 @@ CONTAINS
 
     CALL message('',separator)
 
-    nsec=SIZE(sectors_bf)
-    DO isec=1, nsec
-      ind=em_get_sectorindex(TRIM(sectors_bf(isec)))
-      nvars=ematrix%em_sectors(ind)%es_nvars
-      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_bf
-      CALL message('hammoz_perturbations','BF Emissions scale factor for sector:')
-      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
-      DO i=1, nvars
-        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
-      ENDDO
-    ENDDO
-
-    !    --- Fossil fuel:
-
-    nsec=SIZE(sectors_ff)
-    DO isec=1, nsec
-      ind=em_get_sectorindex(TRIM(sectors_ff(isec)))
-      nvars=ematrix%em_sectors(ind)%es_nvars
-      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_ff
-      CALL message('hammoz_perturbations','FF Emissions scale factor for sector:')
-      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
-      DO i=1, nvars
-        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
-      ENDDO
-    ENDDO
-
-!    --- Biomass burning:
-
-    DO ind=1, maxsectors
-    !Find any sectors that are type FIRE since it can change for different emissions datasets
-      IF (ematrix%em_sectors(ind)%es_emtype == EM_FIRE) THEN
-        nvars=ematrix%em_sectors(ind)%es_nvars
-        ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_bb
-        CALL message('hammoz_perturbations','Bio Emissions scale factor for sector:')
-        CALL message('', ematrix%em_sectors(ind)%es_sectorname )
-        DO i=1, nvars
-          CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
-        ENDDO
-      END IF
-    ENDDO
-
+!    nsec=SIZE(sectors_bf)
+!    DO isec=1, nsec
+!      ind=em_get_sectorindex(TRIM(sectors_bf(isec)))
+!      nvars=ematrix%em_sectors(ind)%es_nvars
+!      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_bf
+!      CALL message('hammoz_perturbations','BF Emissions scale factor for sector:')
+!      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+!      DO i=1, nvars
+!        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+!      ENDDO
+!    ENDDO
+!
+!    !    --- Fossil fuel:
+!
+!    nsec=SIZE(sectors_ff)
+!    DO isec=1, nsec
+!      ind=em_get_sectorindex(TRIM(sectors_ff(isec)))
+!      nvars=ematrix%em_sectors(ind)%es_nvars
+!      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_ff
+!      CALL message('hammoz_perturbations','FF Emissions scale factor for sector:')
+!      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+!      DO i=1, nvars
+!        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+!      ENDDO
+!    ENDDO
+!
+!!    --- Biomass burning:
+!
+!    DO ind=1, maxsectors
+!    !Find any sectors that are type FIRE since it can change for different emissions datasets
+!      IF (ematrix%em_sectors(ind)%es_emtype == EM_FIRE) THEN
+!        nvars=ematrix%em_sectors(ind)%es_nvars
+!        ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_bb
+!        CALL message('hammoz_perturbations','Bio Emissions scale factor for sector:')
+!        CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+!        DO i=1, nvars
+!          CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+!        ENDDO
+!      END IF
+!    ENDDO
+!
 !    --- DMS:
 
 !    DO ind=1, maxsectors
@@ -544,20 +544,20 @@ CONTAINS
     ENDDO
 
 !    -- Anthropogenic SO2: YAB
-
-    nsec=SIZE(sectors_so2)
-    DO isec=1, nsec
-      ind=em_get_sectorindex(TRIM(sectors_so2(isec)))
-      nvars=ematrix%em_sectors(ind)%es_nvars
-      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_so2
-      CALL message('hammoz_perturbations','FF Emissions scale factor for sector:')
-      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
-      DO i=1, nvars
-        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
-      ENDDO
-    ENDDO
-
-   !    --- SSA:
+!
+!    nsec=SIZE(sectors_so2)
+!    DO isec=1, nsec
+!      ind=em_get_sectorindex(TRIM(sectors_so2(isec)))
+!      nvars=ematrix%em_sectors(ind)%es_nvars
+!      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_so2
+!      CALL message('hammoz_perturbations','FF Emissions scale factor for sector:')
+!      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+!      DO i=1, nvars
+!        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+!      ENDDO
+!    ENDDO
+!
+!   !    --- SSA:
 
     DO ind=1, maxsectors
 !       Find any sectors that are type SSA since it can change for different emissions datasets

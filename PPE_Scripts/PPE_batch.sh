@@ -60,8 +60,8 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=2  # Maximum number of experiments run concurrently
-nexp_maxran=10      # Maximum number of experiments run by this batch job
+nexp_maxrunning=4  # Maximum number of experiments run concurrently
+nexp_maxran=108      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
