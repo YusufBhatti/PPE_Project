@@ -1,0 +1,67 @@
+#------------------------------------------------------------
+# Reference of the svn 'base' version of the current code:
+
+Path: /home/ybhatti/yusufb/Branches/PPE_Aerosol
+Working Copy Root Path: /home/ybhatti/yusufb/Branches/PPE_Aerosol
+URL: https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Relative URL: ^/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol
+Repository Root: https://svn.iac.ethz.ch/external/echam-hammoz
+Repository UUID: 5abd231c-38af-11dd-ab7a-a2415d6bb57b
+Revision: 7533
+Node Kind: directory
+Schedule: normal
+Last Changed Author: ybhatti
+Last Changed Rev: 7533
+Last Changed Date: 2024-05-24 10:41:21 +0200 (Fri, 24 May 2024)
+
+
+#--------------------------------------------------------------------------
+# List of modified / added / removed files as compared to the svn 'base' version
+# (filtered out from any non-versioned file, which won't anyway be seen in the patch):
+
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/aclocal.m4
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/blas/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config/config.h.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/config/mh-linux
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/configure
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/lapack/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/src/Makefile.am
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/src/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/src/mo_hammoz_perturbations.f90
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/src/mo_jsbach.f90
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/support/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/util/Makefile.in
+M       /home/ybhatti/yusufb/Branches/PPE_Aerosol/util/quickplots/Makefile.in
+
+#--------------------------------------------------------------------
+# Patch information:
+
+The unversioned code modifications relative to:
+
+'https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol@7533'
+
+are recorded in the following patch:
+
+'/home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default//patch_PPE_Default_2024-05-24_16.13.diff'
+
+You can always restore this particular state of the code with either:
+
+* making a fresh new working copy:
+
+    mkdir [new dir] 
+    cd [new dir]
+    svn co https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/branches/sron/branches/yusuf/PPE_Aerosol@7533 [my fresh working copy]
+    cd [my fresh working copy]
+    patch -p[num] < /home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default//patch_PPE_Default_2024-05-24_16.13.diff
+
+,where [num] is the number of '/' in '/home/ybhatti/yusufb/Branches/PPE_Aerosol//' (adjacent slashes are counted as 1, see: man patch).
+
+* or revert to this state directly in /home/ybhatti/yusufb/Branches/PPE_Aerosol//:
+
+cd /home/ybhatti/yusufb/Branches/PPE_Aerosol/
+svn revert -R *
+svn update -r 7533
+patch -p0 < /home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default//patch_PPE_Default_2024-05-24_16.13.diff
+
+'!!WARNING!!' In the second option, you will loose any new unversioned modification that you have done since 'Fri May 24 16:14:02 CEST 2024'

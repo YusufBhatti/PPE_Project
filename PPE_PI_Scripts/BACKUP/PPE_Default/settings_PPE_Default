@@ -1,0 +1,260 @@
+#!/bin/bash
+# 
+# Jobscript toolkit version 1.2 (March  2016, svn revision r3070). 
+#
+
+
+#-------------------------------------------------------------------------------------------------------
+#
+# Sylvaine Ferrachat / Grazia Frontoso 2012
+#
+#
+# Set the variables for running echam 
+# This file is sourced in jobsubm_echam.sh
+#
+# The task of creating the symlinks to input files is done elsewhere (see jobsubm_echam.sh),
+# to avoid cluttering this settings file
+#
+# This file comprises 4 main chapters, where you should adjust your settings:
+#   - General settings
+#   - Compute settings
+#   - ECHAM(-HAMMOZ) settings
+#   - Settings for launching a slave p-proc job at the end of each echam integration
+#
+#-------------------------------------------------------------------------------------------------------
+
+set -e
+
+#------------------------------------------------------------------------------------------------------
+#-- General settings:
+
+model_dir="/home/ybhatti/yusufb/Branches/PPE_Aerosol/"
+exp="PPE_Default"
+script_dir="/home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default/"
+echam_jobscript=${script_dir}/echam_jobscript_${exp}.sh # echam batch job script name
+
+make_source_backup=true   # set to true if you want to keep records of the current state of your code
+                          # it will create a text file named "source_info_[exp]_YYYY-MM-DD_HH.mm.txt"
+                          # where you'll find all details (base version number, differences to base version
+                          # and how to restore your code in future)
+                          # !!WARNING!! it only works if your code is a working copy from an svn repository
+                          #             In the opposite case, make_source_backup will be automatically reset
+                          #             to false.
+
+#------------------------------------------------------------------------------------------------------
+#-- Compute settings for machine: snellius (linux_debain)
+
+queue_name="genoa"                         # queue name to use on current batch system
+jobname="$exp"                          # batch job name
+ncpus=192
+walltime="25:00:00"
+nproma=16                               # vector length (don't modify if you don't know about it)
+account="srsei8447"
+email="y.bhatti@sron.nl"
+exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/${exp}/"
+
+#-Body-begin. Do not delete this line!
+#------------------------------------------------------------------------------------------------------
+#-- ECHAM6-HAMMOZ settings:
+
+   #-- General:
+
+model_type="echam6-ham"                           # model type (echam5.5-ham, echam6, echam6-ham, etc...)
+model_bin=${model_dir}/bin/echam6                 # model bin name
+emissions_spec=${script_dir}/emi_spec_${exp}.txt  # name of your exp emi_spec file to copy to $exp_dir
+
+hres="T63"                    # horizontal spectral truncation
+vres="L31"                    # vertical resolution
+oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
+ntiles=11                     # number of tiles in the vegetation model
+
+no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+init_restart_flag=.false.
+                              # (in case of job chaining, the proper rerun flag will be automatically 
+                              #  set when further jobs will be started)
+
+date_start="2006,04,01,0,0,0"
+date_stop="2006,04,04,1,0,0"
+
+input_files_version="v0002_input"
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
+                              # ozone or climatologic aerosols, AND the experiment's time range 
+                              # overlaps with [2009,2100]), choose here the scenario you'd like
+                              # (RCP45, XXX, all case insensitive)
+
+   #-- ECHAM6-HAMMOZ namelists:
+
+       #-- ECHAM:
+
+cat > ${script_dir}/namelist_${exp}.echam << EOF
+&PARCTL
+ nproca = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+ nprocb = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+/
+&RUNCTL 
+ nproma         = ${nproma}
+ lresume        = $init_restart_flag,
+ lmidatm        = .false.
+ out_datapath   = "$exp_dir"
+ out_expname    = "$exp"
+ out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
+ rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
+ dt_start       = $date_start
+ dt_stop        = $date_stop
+ putdata        = 1,'days','last',0
+ trigfiles      = 1,'days','first',0
+ putrerun       = 1,'days','last',0
+ no_cycles      = ${no_cycles}, 
+ lamip          = .false.
+ lnudge         = .true.
+ ldebugs        = .false.
+ ltimer         = .false.
+/
+&SUBMODELCTL
+ lmethox          = .true.
+ lham             = .true.
+ lbioemi_stdalone = .false.
+ lmoz             = .false.
+ lhammoz          = .false.
+ lburden          = .true.
+ emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
+ emi_scenario     = "${scenario}"
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .true.
+ vphyscnam        = 'all'
+ wetdep_lpost     = .true. 
+ wetdepnam        = 'default' 
+ wetdep_gastrac   = 'SO2', 'H2SO4'
+ wetdep_keytype   = 3          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ drydep_lpost     = .true. 
+ drydepnam        = 'all' 
+ drydep_gastrac   = 'SO2', 'H2SO4'
+ drydep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ sedi_lpost       = .true. 
+ sedinam          = 'all'
+ sedi_keytype     = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3 
+ emi_lpost        = .true.
+ emi_lpost_sector = .true.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+/
+&DEBUGSCTL
+ putdebug_stream = 1, 'days', 'last', 0
+/
+&RADCTL
+ iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+ isolrad = 3      
+ io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
+/
+&PHYSCTL
+ lcdnc_progn    = .true.
+ nauto          = 2
+/
+&HAMCTL
+ nseasalt       = 7
+ nwetdep        = 3
+ naerorad       = 1
+ nraddiag       = 1
+ burden_keytype = 2          ! BYTRACER=1; BYSPECIES=2;
+/
+&NDGCTL
+ inudgformat     = 2
+ dt_nudg_start   = $date_start
+ dt_nudg_stop    = $date_stop
+ lnudgdbx        = .false.
+ lnudgini        = .false.
+ nudglmin        = 1
+ nudglmax        = ${vres#L}
+ nudgsmin        = 0
+ nudgsmax        = ${hres#T}
+ lnudgimp        = .true.
+ nudgt           = ${vres#L}*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
+ ltintlin        = .false.
+ ldamplin        = .true.
+ nudgdamp        = 1.
+ nudgdsize       = 0.5
+ ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&HAMMOZ_PERTURBATIONS
+  scale_nuc_bl     = V_SCALE_NUC_BL   ! V_SCALE_NUC_BL
+  scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
+  scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF
+  scale_emi_cmr_bb = V_SCALE_EMI_CMR_BB   ! V_SCALE_EMI_CMR_BB
+  scale_emi_cmr_bf = V_SCALE_EMI_CMR_BF   ! V_SCALE_EMI_CMR_BF
+  scale_emi_ff     = V_SCALE_EMI_FF  ! V_SCALE_EMI_FF
+  scale_emi_bb     = V_SCALE_EMI_BB  ! V_SCALE_EMI_BB
+  scale_emi_bf     = V_SCALE_EMI_BF  ! V_SCALE_EMI_BF
+  scale_emi_dms    = V_SCALE_EMI_DMS  ! V_SCALE_EMI_DMS
+  scale_drydep_ait = V_SCALE_DRYDEP_AIT   ! V_SCALE_DRYDEP_AIT
+  scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC
+  scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
+  scale_wetdep_ic = V_SCALE_WETDEP_IC     ! V_SCALE_WETDEP_IC
+  scale_wetdep_ic_bc_only = V_SCALE_WETDEP_IC_BC_ONLY  ! V_SCALE_WETDEP_IC_BC_ONLY
+  scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
+  scale_wetdep_bc_bc_only = V_SCALE_WETDEP_BC_BC_ONLY  ! V_SCALE_WETDEP_BC_BC_ONLY
+  bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
+  prop_fire_in_pbl_p1 = V_PROP_FIRE_IN_PBL_P1  ! V_PROP_FIRE_IN_PBL_P1
+  prop_fire_in_pbl_p2 = V_PROP_FIRE_IN_PBL_P2  ! V_PROP_FIRE_IN_PBL_P2
+  prop_fire_in_pbl = V_PROP_FIRE_IN_PBL  ! V_PROP_FIRE_IN_PBL
+  scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
+  scale_tr_entrainment = V_SCALE_TR_ENTRAINMENT  ! V_SCALE_TR_ENTRAINMENT
+  scale_vertical_velocity = V_SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
+  scale_intra_mode_coagulation = V_SCALE_INTRA_MODE_COAGULATION  ! V_SCALE_INTRA_MODE_COAGULATION
+  scale_inter_mode_coagulation = V_SCALE_INTER_MODE_COAGULATION  ! V_SCALE_INTER_MODE_COAGULATION
+/
+EOF
+
+       #-- JS-BACH:
+
+cat > ${script_dir}/namelist_${exp}.jsbach <<EOF
+&JSBACH_CTL
+  standalone = .false.
+  ntiles = ${ntiles}
+
+  ! --- options to activate the different jsbach modules ---
+  use_bethy = .true.
+  use_phenology = .true.
+  use_albedo = .true.
+  use_roughness_lai = .true.
+  use_roughness_oro = .false.
+  test_cconservation = .true.
+
+  ! --- output options ---
+  file_type = 2
+  veg_at_1200 = .false.
+/
+&SOIL_CTL
+  nsoil =5
+/
+EOF
+
+       #-- Mean-values streams:
+
+cat >> ${script_dir}/namelist_${exp}.echam << EOF
+&MVSTREAMCTL
+ interval = 1,'months','last',0
+ filetag = 'echamm'
+ source  = 'sp', 'gl', 'g3b'
+/
+!SF Further example of online mean setup (simpler than for the echam stream)
+!   Uncomment / amend if needed
+!&MVSTREAMCTL
+! interval = 1,'months','last',0
+! source  = 'activ'
+! meannam = ''
+/
+EOF
+
+#-Body-end. Do not delete this line!
+
+#------------------------------------------------------------------------------------------------------
+#-- Settings for launching a slave p-proc job at the end of each echam integration
+#   This may be specific for machine: snellius (linux_debain)
+
+flag_p_proc=false                                         # flag to launch the p-proc
+p_proc_script="/path/to/some/post-processing script"      # p-proc script (no batch directives in there)
+p_proc_dir="/path/to/post_proc_disk/${USER}/${exp}"       # remote directory where p_proc is done
+p_proc_jobname="p-proc"                                   # batch jobname for executing the p_proc_script
+p_proc_walltime="24:00:00"

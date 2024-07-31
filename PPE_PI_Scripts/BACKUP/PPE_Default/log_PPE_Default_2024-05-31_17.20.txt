@@ -1,0 +1,17 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-04-01 00:00:00
+Starting date for this run:        2006-04-01 00:00:00
+Ending date for this run:          2006-05-01 01:00:00
+
+
+----
+Create a backup of the current state of this code...

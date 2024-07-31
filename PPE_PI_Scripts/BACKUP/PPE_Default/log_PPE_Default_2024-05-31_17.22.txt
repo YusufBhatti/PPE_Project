@@ -1,0 +1,441 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-04-01 00:00:00
+Starting date for this run:        2006-04-01 00:00:00
+Ending date for this run:          2006-05-01 01:00:00
+
+
+----
+Create a backup of the current state of this code...
+
+All the source information (and how to restore this code) can be found here:
+./source_info_PPE_Default_2024-05-31_17.22.txt
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 24 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 128
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default//echam_jobscript_PPE_Default.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: PPE_Default
+ - number of cpus: 192
+
+----
+Creating the output directory...
+
+Output directory: /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/
+
+----
+Parsing namelist_PPE_Default.echam to get input files-related flags...
+
+----
+Starting input files linking process into /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/...
+
+with:
+
+input_basepath: /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input
+nudg_basepath: /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf
+exp_dir: /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/
+hres: T63
+vres: L31
+oceres: GR15
+start_yyyymm: 200604
+stop_yyyymm: 200605
+start_year_m1: 2005
+stop_year_p1: 2007
+start_yyyymm_m1: 200603
+stop_yyyymm_p1: 200606
+flag_time_dep_sst_sic: false
+sst_sic_dataset: amip
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: rcp45
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+
+Nudging dataset from 200604 on: era5
+
+----
+Keeping a record of all symbolic links... 
+
+lrwxrwxrwx 1 ybhatti ybhatti 81 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.23 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63L31_jan_spec.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ozon2006 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti ybhatti 92 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/dust_potential_sources.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/dust_potential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 85 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/parnuc.15H2SO4.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/parnuc.15H2SO4.A0.total.nc
+lrwxrwxrwx 1 ybhatti ybhatti 101 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/jsbach.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/jsbach/T63/jsbach_T63GR15_11tiles_5layers_2005.nc
+lrwxrwxrwx 1 ybhatti ybhatti 78 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/greenhouse_gases.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/greenhouse_rcp45.nc
+lrwxrwxrwx 1 ybhatti ybhatti 85 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/dust_msg_pot_sources.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/msg_pot_sources_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ndg200606.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf/era5T63L31_200605.nc
+lrwxrwxrwx 1 ybhatti ybhatti 97 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.20 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc
+lrwxrwxrwx 1 ybhatti ybhatti 97 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.96 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
+lrwxrwxrwx 1 ybhatti ybhatti 82 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/dust_regions.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/dust_regions_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ndg200604.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf/era5T63L31_200604.nc
+lrwxrwxrwx 1 ybhatti ybhatti 80 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/xtsoil.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/soilpHfrac_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 81 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.90 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63GR15_VLTCLIM.nc
+lrwxrwxrwx 1 ybhatti ybhatti 87 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/surface_rough_12m.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/surface_rough_12m_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 94 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/megan_fraction_broadl_ev.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/megan_fraction_broadl_ev_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 83 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/pointlocations.txt -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/CFMIP/pointlocations.txt
+lrwxrwxrwx 1 ybhatti ybhatti 83 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/soil_type_all.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/soil_type_all_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/lctlib.def -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/jsbach/lctlib_nlct21.def_rev7624
+lrwxrwxrwx 1 ybhatti ybhatti 71 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/lut_kappa.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/lut_kappa.nc
+lrwxrwxrwx 1 ybhatti ybhatti 107 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/explosive_volcanos.dat -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/emissions_inventories/aerocom_II/explosive_volcanos.dat
+lrwxrwxrwx 1 ybhatti ybhatti 69 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/gcr_ipr_solmax.txt -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/solmax.txt
+lrwxrwxrwx 1 ybhatti ybhatti 96 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/megan_boreal_grasses_limit.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/megan_boreal_grasses_limit_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 80 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ECHAM6_CldOptProps.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/ECHAM6_CldOptProps.nc
+lrwxrwxrwx 1 ybhatti ybhatti 94 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/megan_boreal_trees_limit.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/megan_boreal_trees_limit_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 90 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/lut_optical_properties_lw.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/lut_optical_properties_lw_M7.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ozon2005 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti ybhatti 79 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/surface_properties.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/xtsurf_v2_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 98 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ham_oxidants_monthly.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/ham_oxidants_monthly_T63L31_macc.nc
+lrwxrwxrwx 1 ybhatti ybhatti 70 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/rrtmg_sw.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/rrtmg_sw.nc
+lrwxrwxrwx 1 ybhatti ybhatti 96 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/megan_clm_pft_map.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/megan_mksrf_pft_cesm4_2005_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ozon2007 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti ybhatti 77 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.92 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63_TSLCLIM.nc
+lrwxrwxrwx 1 ybhatti ybhatti 82 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.24 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63GR15_jan_surf.nc
+lrwxrwxrwx 1 ybhatti ybhatti 87 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/megan_emission_factors.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/megan_ef_specific_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 70 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/rrtmg_lw.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/rrtmg_lw.nc
+lrwxrwxrwx 1 ybhatti ybhatti 108 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/continuous_volcanos.dat -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/emissions_inventories/aerocom_II/continuous_volcanos.dat
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ndg200605.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf/era5T63L31_200605.nc
+lrwxrwxrwx 1 ybhatti ybhatti 91 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/ndg200603.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf/era5T63L31_200604.nc
+lrwxrwxrwx 1 ybhatti ybhatti 69 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/gcr_ipr_solmin.txt -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/solmin.txt
+lrwxrwxrwx 1 ybhatti ybhatti 120 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/conc_aerocom_DMS_sea.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/emissions_inventories/others/T63/emiss_fields_dms_sea_monthly_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 95 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/dust_preferential_sources.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/dust_preferential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 94 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/megan_fraction_broadl_de.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/T63/megan_fraction_broadl_de_T63.nc
+lrwxrwxrwx 1 ybhatti ybhatti 87 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/lut_optical_properties.nc -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/hammoz/lut_optical_properties_M7.nc
+lrwxrwxrwx 1 ybhatti ybhatti 83 May 31 17:22 /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/unit.91 -> /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/echam6/T63/T63GR15_VGRATCLIM.nc
+
+----
+Checking if all symbolic links point to real files...
+
+List of non-existent input files:
+None!
+
+----
+Setting emi_basepath to:
+/projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/emissions_inventories/
+in
+./namelist_PPE_Default.echam
+
+----
+Copying the model binary and the namelists (and emi_spec.txt if relevant) into the output directory...
+... and keeping a record of all namelists (and emi_spec.txt if relevant)...
+
+
+Recording namelist.echam:
+
+&PARCTL
+   nproca=24,
+   nprocb=8,
+/
+&RUNCTL 
+ lresume        = .false.,
+ lmidatm        = .true.
+ out_datapath   = "/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/"
+ out_expname    = "PPE_Default"
+ out_filetype   = 2     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
+ rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
+ dt_start       = 2006,04,01,0,0,0
+ dt_stop        = 2006,05,01,1,0,0
+ putdata        = 1,'months','last',0
+ trigfiles      = 1, 'months', 'first', 0
+ putrerun       = 1,'months','last',0
+ no_cycles      = 15, 
+ lamip          = .false.
+ lnudge         = .true.
+ ldebugs        = .false.
+ ltimer         = .false.
+/
+&SUBMODELCTL
+ lmethox          = .true.
+ lham             = .true.
+ lbioemi_stdalone = .false.
+ lmoz             = .false.
+ lhammoz          = .false.
+ lburden          = .true.
+ emi_basepath     =  "/projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input/emissions_inventories/"
+ emi_scenario     = "RCP45"
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .true.
+ vphyscnam        = 'all'
+ wetdep_lpost     = .true. 
+ wetdepnam        = 'default' 
+ wetdep_gastrac   = 'SO2', 'H2SO4'
+ wetdep_keytype   = 3          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ drydep_lpost     = .true. 
+ drydepnam        = 'all' 
+ drydep_gastrac   = 'SO2', 'H2SO4'
+ drydep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ sedi_lpost       = .true. 
+ sedinam          = 'all'
+ sedi_keytype     = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3 
+ emi_lpost        = .true.
+ emi_lpost_sector = .true.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+/
+&DEBUGSCTL
+ putdebug_stream = 1, 'days', 'last', 0
+/
+&RADCTL
+ iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+ isolrad = 3      
+ io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
+/
+&PHYSCTL
+ lcdnc_progn    = .true.
+ nauto          = 2
+/
+&HAMCTL
+ nseasalt       = 7
+ nwetdep        = 3
+ naerorad       = 1
+ nraddiag       = 1
+ burden_keytype = 2          ! BYTRACER=1; BYSPECIES=2;
+/
+&NDGCTL
+ inudgformat     = 2
+ dt_nudg_start   = 2006,04,01,0,0,0
+ dt_nudg_stop    = 2006,05,01,1,0,0
+ lnudgdbx        = .false.
+ lnudgini        = .false.
+ nudglmin        = 1
+ nudglmax        = 31
+ nudgsmin        = 0
+ nudgsmax        = 63
+ lnudgimp        = .true.
+ nudgt           = 31	 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
+ ltintlin        = .false.
+ ldamplin        = .true.
+ nudgdamp        = 1.
+ nudgdsize       = 0.5
+ ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&HAMMOZ_PERTURBATIONS
+  scale_nuc_bl     = V_SCALE_NUC_BL   ! V_SCALE_NUC_BL
+  scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
+  scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF
+  scale_emi_cmr_bb = V_SCALE_EMI_CMR_BB   ! V_SCALE_EMI_CMR_BB
+  scale_emi_cmr_bf = V_SCALE_EMI_CMR_BF   ! V_SCALE_EMI_CMR_BF
+  scale_emi_ff     = V_SCALE_EMI_FF  ! V_SCALE_EMI_FF
+  scale_emi_bb     = V_SCALE_EMI_BB  ! V_SCALE_EMI_BB
+  scale_emi_bf     = V_SCALE_EMI_BF  ! V_SCALE_EMI_BF
+  scale_emi_dms    = V_SCALE_EMI_DMS  ! V_SCALE_EMI_DMS
+  scale_drydep_ait = V_SCALE_DRYDEP_AIT   ! V_SCALE_DRYDEP_AIT
+  scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC
+  scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
+  scale_wetdep_ic = V_SCALE_WETDEP_IC     ! V_SCALE_WETDEP_IC
+  scale_wetdep_ic_bc_only = V_SCALE_WETDEP_IC_BC_ONLY  ! V_SCALE_WETDEP_IC_BC_ONLY
+  scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
+  scale_wetdep_bc_bc_only = V_SCALE_WETDEP_BC_BC_ONLY  ! V_SCALE_WETDEP_BC_BC_ONLY
+  bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
+  prop_fire_in_pbl_p1 = V_PROP_FIRE_IN_PBL_P1  ! V_PROP_FIRE_IN_PBL_P1
+  prop_fire_in_pbl_p2 = V_PROP_FIRE_IN_PBL_P2  ! V_PROP_FIRE_IN_PBL_P2
+  prop_fire_in_pbl = V_PROP_FIRE_IN_PBL  ! V_PROP_FIRE_IN_PBL
+  scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
+  scale_tr_entrainment = V_SCALE_TR_ENTRAINMENT  ! V_SCALE_TR_ENTRAINMENT
+  scale_vertical_velocity = V_SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
+  scale_intra_mode_coagulation = V_SCALE_INTRA_MODE_COAGULATION  ! V_SCALE_INTRA_MODE_COAGULATION
+  scale_inter_mode_coagulation = V_SCALE_INTER_MODE_COAGULATION  ! V_SCALE_INTER_MODE_COAGULATION
+/
+&MVSTREAMCTL
+ interval = 1,'months','last',0
+ filetag = 'echamm'
+ source  = 'sp', 'gl', 'g3b'
+/
+!SF Further example of online mean setup (simpler than for the echam stream)
+!   Uncomment / amend if needed
+!&MVSTREAMCTL
+! interval = 1,'months','last',0
+! source  = 'activ'
+! meannam = ''
+/
+
+End recording namelist.echam
+
+
+Recording namelist.jsbach:
+
+&JSBACH_CTL
+  standalone = .false.
+  ntiles = 11
+
+  ! --- options to activate the different jsbach modules ---
+  use_bethy = .true.
+  use_phenology = .true.
+  use_albedo = .true.
+  use_roughness_lai = .true.
+  use_roughness_oro = .false.
+  test_cconservation = .true.
+
+  ! --- output options ---
+  file_type = 2
+  veg_at_1200 = .false.
+/
+&SOIL_CTL
+  nsoil =5
+/
+
+End recording namelist.jsbach
+
+
+Recording emi_spec.txt:
+
+# HAMMOZ emission matrix
+#
+# This is an example emi_spec file for echam-hammoz with HAM switched on, with:
+#   * ACCMIP interpolated for most of the sectors that are read from files
+#   * prescribed SOA
+#   * transient conditions
+#
+# This is the reference emi_spec file for echam-hammoz with HAM switched on.
+# See all references and details about the HAMMOZ emission dataset on redmine:
+# https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_References#HAMMOZ-emissions
+#
+# Authors:
+# Martin Schultz and Sabine Schroeder, FZ Juelich
+# Grazia Frontoso, C2SM / ETH Zurich
+# Sylvaine Ferrachat (cleanup), ETH Zurich
+# Colombe Siegenthaler - Le Drian, C2SM / ETH Zurich
+#
+# 1. Sectors
+# Notes:
+#
+#  a) format is: EF_TYPE, parameters
+#      - for EF_FILE (reading from file),            paramaters are: filename, variable name, options, emission type
+#      - for EF_MODULE (using a module in the code), parameters are: emission type (mandatory)
+#      - for EF_VALUE (using a constant),            parameters are: a constant value, emission type
+#      - for EF_INACTIVE (sector switch off),        parameters are: none 
+#
+#  b) %C0 will be replaced by species name to identify the correct file
+#
+#  c) %T0 will be replaced by the horizontal resolution
+#
+#  d) %Y4 will be replaced by the actual year of the model run
+#
+#  e) the path to files is prepended by the value of 'emi_basepath' (which is set in the SUBMODELCTL namelist)
+#     unless it starts with '/' (absolute path).
+#  f) %R0 will be replaced by "emi_scenario" of namelist "submodel"
+#
+#  g) Valid tags for emission type are:
+#      - surface  (mass flux will be added to pxtems array)
+#      - level50m (mass flux will be added to 2nd lowest model level)
+#      - volume   (mass flux will be defined as 3D field and added to pxtte at all levels)
+#      - fire     (specific handling of vertical mass flux distribution for fire emissions)
+# 
+#  h) for more infos, please read the Boundary Condition Scheme manual, available on redmine here:
+#      https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_Technical_Documentation#ECHAM
+#
+
+# Agricultural:
+AGR=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_agr,  EF_LONLAT,  surface
+# Agricultural waste burning:
+AWB=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_awb,  EF_LONLAT,  surface
+# Aircraft:
+AIRC=EF_FILE,     accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_aircraft_%Y4_%T0.nc,      emiss_air,  EF_3D,      volume
+# Biogenic:
+BIOGENIC=EF_FILE, aerocom_II/%T0/2000/emiss_aerocom_%C0_monthly_2000_%T0.nc,                           emiss_biogenic,  EF_LONLAT, EF_IGNOREYEAR, surface
+# Domestic:
+DOM=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_dom,  EF_LONLAT,  surface
+# Energy:
+ENE=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ene,  EF_LONLAT, level50m
+# Forest fire:
+FFIRE=EF_FILE,    gfas/%T0/daily/%Y4/emiss_GFAS_%C0_wildfire_%Y4_%T0_modified.nc,emiss_fire,  EF_LONLAT, fire
+# Grass fire:
+GFIRE=EF_FILE,    gfas/%T0/daily/%Y4/emiss_GFAS_%C0_wildfire_%Y4_%T0_modified.nc,gfire,  EF_LONLAT, fire
+# Industry:
+IND=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ind,  EF_LONLAT,  surface
+# Ships:
+SHIPS=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_ships_%Y4_%T0.nc,         emiss_shp,  EF_LONLAT,  level50m
+# Solvent:
+SLV=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_slv,  EF_LONLAT,  surface
+# Terrestrial:
+TERR=EF_FILE,     aerocom_II/%T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc,                                      DMS_terr,  EF_LONLAT, EF_IGNOREYEAR, surface
+# Transport:
+TRA=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_tra,  EF_LONLAT,  surface
+# Waste:
+WST=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_wst,  EF_LONLAT,  surface
+
+# Dust:
+DUST=EF_MODULE,    surface
+# Oceanic: 
+OCEANI=EF_MODULE,  surface
+# Sea salt:
+SEASALT=EF_MODULE, surface
+# Volcanic (continuous):
+VOLCC=EF_MODULE,   volume
+# Volcanic (explosive):
+VOLCE=EF_MODULE,   volume
+
+#
+# 2. Species-sector-matrix
+#
+# Values in this matrix are interpreted as a scale factor
+# Use 0 to switch off emissions usually present
+# Use a minus sign (-) to indicate a missing sector for a specific species
+# You can enter decimal values here, but the default is to use 1 or zero to make the table look less cluttered
+# The MATRIX keyword is mandatory
+#
+# Notes:
+# (1) Units for DMS and SO2 in the input files need to be "Kg m-2 s-1".
+# (2) Diagnostics ("_emi") for SO2 emissions contains the fraction that is emitted as SO4.
+#
+
+MATRIX
+  SPEC   AGR AWB AIRC BIOGENIC DOM ENE FFIRE GFIRE IND SHIPS SLV TERR TRA WST DUST OCEANI SEASALT VOLCE VOLCC
+  BC      -   1    1     -      1   1   1     1     1    1    -   -    1   1  -     -      -       -     -
+  DMS     -   -    -     -      -   -   1     1     -    -    -   1    -   -  -     1      -       -     -
+  DU      -   -    -     -      -   -   -     -     -    -    -   -    -   -  1     -      -       -     -
+  OC      -   1    -     1      1   1   1     1     1    1    -   -    1   1  -     -      -       -     -	
+  SO2     -   1    -     -      1   1   1     1     1    1    -   -    1   1  -     -      -       1     1	
+  SS      -   -    -     -      -   -   -     -     -    -    -   -    -   -  -     -      1       -     -
+ 
+# 2.b translation table for emission matrix
+#
+# 1. column: species name in emission matrix
+# 2. column: species name in filename
+# 3. column: list of sectors which the alias name should be applied to
+
+ALIAS
+# HAMMOZ_name       | species_in_filename            | apply_to_sectors (default: all)
+DMS                 C2H6S                            FFIRE GFIRE
+
+End recording emi_spec.txt
+
+
+----
+Submitting ./echam_jobscript_PPE_Default.sh to the batch system...
+----
+The complete log of this job submission can be found here:
+/home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default//log_PPE_Default_2024-05-31_17.22.txt
+
+----
+Finished!
