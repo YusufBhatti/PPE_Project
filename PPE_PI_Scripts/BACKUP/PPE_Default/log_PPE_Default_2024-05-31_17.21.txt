@@ -1,0 +1,85 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-04-01 00:00:00
+Starting date for this run:        2006-04-01 00:00:00
+Ending date for this run:          2006-05-01 01:00:00
+
+
+----
+Create a backup of the current state of this code...
+
+All the source information (and how to restore this code) can be found here:
+./source_info_PPE_Default_2024-05-31_17.21.txt
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 24 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 128
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default//echam_jobscript_PPE_Default.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: PPE_Default
+ - number of cpus: 192
+
+----
+Creating the output directory...
+
+Output directory: /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/
+
+----
+Parsing namelist_PPE_Default.echam to get input files-related flags...
+
+----
+Starting input files linking process into /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/...
+
+with:
+
+input_basepath: /projects/0/prjs0937/yusufb/MODEL_INPUT/v0002_input
+nudg_basepath: /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf
+exp_dir: /projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/
+hres: T63
+vres: L47
+oceres: GR15
+start_yyyymm: 200604
+stop_yyyymm: 200605
+start_year_m1: 2005
+stop_year_p1: 2007
+start_yyyymm_m1: 200603
+stop_yyyymm_p1: 200606
+flag_time_dep_sst_sic: false
+sst_sic_dataset: amip
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: rcp45
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+
+ERROR! Nudging data for T63L47 at 200604 in netcdf format does not seem to be available in /projects/0/prjs0937/yusufb/MODEL_INPUT/Nudging_tmp/era5_T63L31_netcdf.
+You may check if alternate format exists for this date and change the NDGCTL namelist parameters accordingly.
+Exiting

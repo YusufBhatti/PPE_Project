@@ -1,0 +1,102 @@
+&PARCTL
+ nproca = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+ nprocb = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+/
+&RUNCTL 
+ nproma         = 16
+ lresume        = .false.,
+ lmidatm        = .true.
+ out_datapath   = "/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/"
+ out_expname    = ""
+ out_filetype   = 2     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
+ rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
+ dt_start       = 2006,04,01,0,0,0
+ dt_stop        = 2006,05,01,1,0,0
+ putdata        = 1,'months','last',0
+ trigfiles      = 1, 'months', 'first', 0
+ putrerun       = 1,'months','last',0
+ no_cycles      = 15, 
+ lamip          = .false.
+ lnudge         = .false.
+ ldebugs        = .false.
+ ltimer         = .false.
+/
+&SUBMODELCTL
+ lmethox          = .true.
+ lham             = .true.
+ lbioemi_stdalone = .false.
+ lmoz             = .false.
+ lhammoz          = .false.
+ lburden          = .true.
+ emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
+ emi_scenario     = "RCP45"
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .true.
+ vphyscnam        = 'all'
+ wetdep_lpost     = .true. 
+ wetdepnam        = 'default' 
+ wetdep_gastrac   = 'SO2', 'H2SO4'
+ wetdep_keytype   = 3          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ drydep_lpost     = .true. 
+ drydepnam        = 'all' 
+ drydep_gastrac   = 'SO2', 'H2SO4'
+ drydep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ sedi_lpost       = .true. 
+ sedinam          = 'all'
+ sedi_keytype     = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3 
+ emi_lpost        = .true.
+ emi_lpost_sector = .true.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+/
+&DEBUGSCTL
+ putdebug_stream = 1, 'days', 'last', 0
+/
+&RADCTL
+ iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+ isolrad = 3      
+ io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
+/
+&PHYSCTL
+ lcdnc_progn    = .true.
+ nauto          = 2
+/
+&HAMCTL
+ nseasalt       = 7
+ nwetdep        = 3
+ naerorad       = 1
+ nraddiag       = 1
+ burden_keytype = 2          ! BYTRACER=1; BYSPECIES=2;
+/
+&NDGCTL
+ inudgformat     = 2
+ dt_nudg_start   = 2006,04,01,0,0,0
+ dt_nudg_stop    = 2006,05,01,1,0,0
+ lnudgdbx        = .false.
+ lnudgini        = .false.
+ nudglmin        = 1
+ nudglmax        = 47
+ nudgsmin        = 0
+ nudgsmax        = 63
+ lnudgimp        = .true.
+ nudgt           = 47*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
+ ltintlin        = .false.
+ ldamplin        = .true.
+ nudgdamp        = 1.
+ nudgdsize       = 0.5
+ ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&MVSTREAMCTL
+ interval = 1,'months','last',0
+ filetag = 'echamm'
+ source  = 'sp', 'gl', 'g3b'
+/
+!SF Further example of online mean setup (simpler than for the echam stream)
+!   Uncomment / amend if needed
+!&MVSTREAMCTL
+! interval = 1,'months','last',0
+! source  = 'activ'
+! meannam = ''
+/

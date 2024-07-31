@@ -1,0 +1,128 @@
+&PARCTL
+   nproca=24,
+   nprocb=8,
+/
+&RUNCTL 
+ lresume        = .false.,
+ lmidatm        = .true.
+ out_datapath   = "/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Default/"
+ out_expname    = "PPE_Default"
+ out_filetype   = 2     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
+ rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
+ dt_start       = 2006,04,01,0,0,0
+ dt_stop        = 2006,05,01,1,0,0
+ putdata        = 1,'months','last',0
+ trigfiles      = 1, 'months', 'first', 0
+ putrerun       = 1,'months','last',0
+ no_cycles      = 15, 
+ lamip          = .false.
+ lnudge         = .true.
+ ldebugs        = .false.
+ ltimer         = .false.
+/
+&SUBMODELCTL
+ lmethox          = .true.
+ lham             = .true.
+ lbioemi_stdalone = .false.
+ lmoz             = .false.
+ lhammoz          = .false.
+ lburden          = .true.
+ emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
+ emi_scenario     = "RCP45"
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .true.
+ vphyscnam        = 'all'
+ wetdep_lpost     = .true. 
+ wetdepnam        = 'default' 
+ wetdep_gastrac   = 'SO2', 'H2SO4'
+ wetdep_keytype   = 3          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ drydep_lpost     = .true. 
+ drydepnam        = 'all' 
+ drydep_gastrac   = 'SO2', 'H2SO4'
+ drydep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ sedi_lpost       = .true. 
+ sedinam          = 'all'
+ sedi_keytype     = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3 
+ emi_lpost        = .true.
+ emi_lpost_sector = .true.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+/
+&DEBUGSCTL
+ putdebug_stream = 1, 'days', 'last', 0
+/
+&RADCTL
+ iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+ isolrad = 3      
+ io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
+/
+&PHYSCTL
+ lcdnc_progn    = .true.
+ nauto          = 2
+/
+&HAMCTL
+ nseasalt       = 7
+ nwetdep        = 3
+ naerorad       = 1
+ nraddiag       = 1
+ burden_keytype = 2          ! BYTRACER=1; BYSPECIES=2;
+/
+&NDGCTL
+ inudgformat     = 2
+ dt_nudg_start   = 2006,04,01,0,0,0
+ dt_nudg_stop    = 2006,05,01,1,0,0
+ lnudgdbx        = .false.
+ lnudgini        = .false.
+ nudglmin        = 1
+ nudglmax        = 31
+ nudgsmin        = 0
+ nudgsmax        = 63
+ lnudgimp        = .true.
+ nudgt           = 31	 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
+ ltintlin        = .false.
+ ldamplin        = .true.
+ nudgdamp        = 1.
+ nudgdsize       = 0.5
+ ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&HAMMOZ_PERTURBATIONS
+  scale_nuc_bl     = V_SCALE_NUC_BL   ! V_SCALE_NUC_BL
+  scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
+  scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF
+  scale_emi_cmr_bb = V_SCALE_EMI_CMR_BB   ! V_SCALE_EMI_CMR_BB
+  scale_emi_cmr_bf = V_SCALE_EMI_CMR_BF   ! V_SCALE_EMI_CMR_BF
+  scale_emi_ff     = V_SCALE_EMI_FF  ! V_SCALE_EMI_FF
+  scale_emi_bb     = V_SCALE_EMI_BB  ! V_SCALE_EMI_BB
+  scale_emi_bf     = V_SCALE_EMI_BF  ! V_SCALE_EMI_BF
+  scale_emi_dms    = V_SCALE_EMI_DMS  ! V_SCALE_EMI_DMS
+  scale_drydep_ait = V_SCALE_DRYDEP_AIT   ! V_SCALE_DRYDEP_AIT
+  scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC
+  scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
+  scale_wetdep_ic = V_SCALE_WETDEP_IC     ! V_SCALE_WETDEP_IC
+  scale_wetdep_ic_bc_only = V_SCALE_WETDEP_IC_BC_ONLY  ! V_SCALE_WETDEP_IC_BC_ONLY
+  scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
+  scale_wetdep_bc_bc_only = V_SCALE_WETDEP_BC_BC_ONLY  ! V_SCALE_WETDEP_BC_BC_ONLY
+  bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
+  prop_fire_in_pbl_p1 = V_PROP_FIRE_IN_PBL_P1  ! V_PROP_FIRE_IN_PBL_P1
+  prop_fire_in_pbl_p2 = V_PROP_FIRE_IN_PBL_P2  ! V_PROP_FIRE_IN_PBL_P2
+  prop_fire_in_pbl = V_PROP_FIRE_IN_PBL  ! V_PROP_FIRE_IN_PBL
+  scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
+  scale_tr_entrainment = V_SCALE_TR_ENTRAINMENT  ! V_SCALE_TR_ENTRAINMENT
+  scale_vertical_velocity = V_SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
+  scale_intra_mode_coagulation = V_SCALE_INTRA_MODE_COAGULATION  ! V_SCALE_INTRA_MODE_COAGULATION
+  scale_inter_mode_coagulation = V_SCALE_INTER_MODE_COAGULATION  ! V_SCALE_INTER_MODE_COAGULATION
+/
+&MVSTREAMCTL
+ interval = 1,'months','last',0
+ filetag = 'echamm'
+ source  = 'sp', 'gl', 'g3b'
+/
+!SF Further example of online mean setup (simpler than for the echam stream)
+!   Uncomment / amend if needed
+!&MVSTREAMCTL
+! interval = 1,'months','last',0
+! source  = 'activ'
+! meannam = ''
+/
