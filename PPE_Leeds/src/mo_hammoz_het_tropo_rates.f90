@@ -528,10 +528,10 @@ MODULE mo_hammoz_het_tropo_rates
 ! YAB pH perturbation
     !IF (lo_hammoz_perturbations) THEN
     !       scale_pH = pH_pert )/ pH
-    pH = 1.e-10_dp! pH_pert
+!    pH = 1.e-10_dp! pH_pert
      !  PRINT *,'pH is', pH
 !    ELSE
-!      pH = 1.e-5_dp ! Assume a pH value of 5
+      pH = 1.e-5_dp ! Assume a pH value of 5
  
     !ENDIF
     PRINT *,'pH is', pH
@@ -697,9 +697,9 @@ MODULE mo_hammoz_het_tropo_rates
   ! YAB pH perturbation
 !  IF (lo_hammoz_perturbations) THEN
   !       scale_pH = pH_pert / pH
-  pH = 1.e-10_dp !* 0.000001_dp! pH_pert
+!  pH = 1.e-10_dp !* 0.000001_dp! pH_pert
        PRINT *,'pH2 is', pH
-!    pH = 1.e-5_dp ! Assume a pH value of 5
+    pH = 1.e-5_dp ! Assume a pH value of 5
 
 !  ENDIF
   PRINT *,'pH2 is', pH

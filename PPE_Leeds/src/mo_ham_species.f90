@@ -312,7 +312,7 @@ MODULE mo_ham_species
                       lelectrolyte = .TRUE.,             &
                       nion         = 2,                  &
                       osm          = 1._dp,              &
-                      kappa        = 0.60_dp * scale_kappa_so4,            &
+                      kappa        = 1.0_dp * scale_kappa_so4,            &! # should be 0.6
                       lburden      = .TRUE.,             &
                       idx          = id_so4              )
 !<<DT
@@ -398,7 +398,7 @@ MODULE mo_ham_species
                       lelectrolyte = .TRUE.,              &
                       nion         = 2,                   &
                       osm          = 1._dp,               & 
-                      kappa        = 1._dp * scale_kappa_ss,               &    !>>dod<<
+                      kappa        = 1._dp * scale_kappa_ss,               &! # should be 1    !>>dod<<
                       ldrydep      = .TRUE.,              &
                       lwetdep      = .TRUE.,              &   
                       idx          = id_ss                   )
