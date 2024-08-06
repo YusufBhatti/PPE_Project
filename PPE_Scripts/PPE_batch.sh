@@ -60,8 +60,8 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=4  # Maximum number of experiments run concurrently
-nexp_maxran=108      # Maximum number of experiments run by this batch job
+nexp_maxrunning=6  # Maximum number of experiments run concurrently
+nexp_maxran=3      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
@@ -69,10 +69,10 @@ cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
 PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/PPE_Init/'
-PPElog=$cwd'PPE_test_log.txt'
-PPEtmp=$cwd'PPE_test_tmp.txt'
+PPElog=$cwd'PPE_test_log4.txt'
+PPEtmp=$cwd'PPE_test_tmp4.txt'
 PPEdefaults=$cwd'PPE_Default'
-PPEvalues=$cwd'PPE_values.txt'
+PPEvalues=$cwd'PPE_values4.txt'
 
 #echo 'Activating python environment'
 #source activate master

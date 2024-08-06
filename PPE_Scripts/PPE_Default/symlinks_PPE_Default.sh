@@ -443,7 +443,7 @@ cd $exp_dir
 #SF exclude the links to restart files
 
 find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
-
+#restart_Control_Run_20060404234500
 #--------
 # ECHAM6  
 #--------

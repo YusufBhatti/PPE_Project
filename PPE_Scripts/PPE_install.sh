@@ -1,7 +1,7 @@
 #!/bin/bash --login
 #PBS -N PPE_test_install
-#PBS -l walltime=00:40:00
-#PBS -l select=1:ncpus=80
+#PBS -l walltime=03:00:00
+#PBS -l select=2:ncpus=80
 #PBS -j oe
 #PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
@@ -56,7 +56,7 @@ PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}
 sed -i "s|^PPEdir=.*|PPEdir='${PPEdir}'|" PPE_batch.sh 
 
-mkdir $PPEdir
+#mkdir $PPEdir
 cd $PPEdir
 echo 'Starting PPE_install script' >$PPElog
 

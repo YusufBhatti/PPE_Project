@@ -51,7 +51,7 @@ walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_Init/${exp}/"
+exp_dir="/home/ybhatti/prjs1076/PPE_Output/PPE_Experiments/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ oceres="GR15"                 # resolution of the ocean model used to produce th
 ntiles=11                     # number of tiles in the vegetation model
 
 no_cycles=31                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
-init_restart_flag=.false.
+init_restart_flag=.true.
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
@@ -94,6 +94,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &RUNCTL 
  nproma         = ${nproma}
  lresume        = $init_restart_flag,
+ dt_resume      = 2009,08,29,23,45,0
  lmidatm        = .true.
  out_datapath   = "$exp_dir"
  out_expname    = "$exp"
