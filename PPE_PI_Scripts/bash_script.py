@@ -40,7 +40,7 @@ with open(output_file, 'w') as f_out:
                 parts = line.strip().split()
                 param_values = line.strip().split()
                 # Create a new experiment name based on the header variable
-                new_exp_name = f"PPE_ENS_{i+1}"
+                new_exp_name = f"PPE_PI_ENS_{i+1}"
                 # Copy the current param_values array
                # new_param_values = param_values[:]
                 # Set the corresponding value to 4 for the current variable

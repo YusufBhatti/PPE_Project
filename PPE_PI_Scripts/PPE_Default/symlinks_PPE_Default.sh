@@ -441,8 +441,16 @@ cd $exp_dir
 
 #SF this should not be necessary, but is conserved for security (in case 'ln' is not GNU ln)
 #SF exclude the links to restart files
+#Restart_file = '/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control'
+#Restart_Model = 'restart_PPE_ENS_Control'
+#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
+find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" \
+               -and -not -name "flxatm*" \
+               -and -not -name "sstoce*" \
+               -and -not -name "hdrestart*" \
+     -exec \rm -f {} \;
 
-find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
+#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
 
 #--------
 # ECHAM6  
@@ -461,6 +469,51 @@ ln -sf  ${input_basepath}/echam6/ECHAM6_CldOptProps.nc     ECHAM6_CldOptProps.nc
 
    #-- For pure atm setup:
 #if ! $this_model_flag_with_coupl ; then
+
+#-----------------------------------------------------------------
+#-- Handle the restart file management in case of a faked restart
+#
+#   (ie using a set of restart files from another experiment)
+#    with potentially editing the date to fit with current 
+#    experiment purposes...)
+
+# Note that in the case of mpiom and hamocc files, this is not a symlink operation but a
+# copy because their date must be edited to fit with current experiment purposes...
+
+if $faked_restart ; then
+
+   parent_exp="PPE_PI_Control"
+   parent_restart_dir=$(eval "echo $parent_restart_dir")
+
+   echo "Reminder: you are using a faked restart setup, with:\n"
+
+   max_string="Faked experiment start datetime"
+   len="${#max_string}"
+   echo "Parent experiment name" "$parent_exp" $len
+   echo "Parent restart directory" $parent_restart_dir $len
+   echo "Parent current date" "$parent_current_date" $len
+   echo "Faked experiment start datetime" "`date --utc \"+%F %T\" --date \"$faked_exp_start_datetime\"`" \
+            $len
+   echo "Prefix rerun" "$prefix_rerun_file"
+   echo "restart file =" "${prefix_rerun_file}_${parent_exp}_${parent_current_date}_*$suffix_rerun_file"
+
+   #-- General case
+   list_files_to_link=( \
+     $(find -L $parent_restart_dir \
+            -name "${prefix_rerun_file}_${parent_exp}_${parent_current_date}_*$suffix_rerun_file") \
+                      )
+
+   for file in ${list_files_to_link[*]} ; do
+       link_name=$(sed -e "s|_${parent_current_date}||;s|${parent_exp}|${exp}|" <<< "$(basename $file)")
+       ln -sf $file $link_name
+    done
+fi
+   #-- Specific modifs (for modules not following the general rerun file pattern, or requiring
+   #                    in-file date edition)
+   #                   Important! When files are simply renamed, it is crucial to use `cp` and not
+   #                   `ln`, otherwise the original restart files will be overwritten at end of the
+   #                   cycle.
+
 
       #--------------------------
       # Climatologic SST and SIC

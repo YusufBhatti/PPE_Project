@@ -68,12 +68,16 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=31                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
-init_restart_flag=.true.
+no_cycles=100                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+
+faked_restart=true
+parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control"
+parent_current_date="20090829234500"
+init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="2009,09,01,0,0,0"
+date_start="2009,09,01,0,0,0"  # 20090829234500
 date_stop="2009,09,06,1,0,0"
 
 input_files_version="v0002_input"
@@ -104,8 +108,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'days','last',0
- trigfiles      = 1,'days','first',0
- putrerun       = 6,'days','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
