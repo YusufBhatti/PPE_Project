@@ -51,7 +51,7 @@ walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_PI/${exp}/"
+exp_dir="/home/ybhatti/prjs1076/PPE_Output/PI_PPE_Experiments/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -68,13 +68,17 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=31                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
-init_restart_flag=.false.
+no_cycles=100                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+
+faked_restart=true
+parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_PI_18490901_Restart_Control"
+parent_current_date="18490831234500"
+init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="1850,09,01,0,0,0"
-date_stop="1850,09,06,1,0,0"
+date_start="1849,09,01,0,0,0"
+date_stop="1849,09,03,1,0,0"
 
 input_files_version="v0006"
 scenario="historical"              # in case it is relevant for the given setup (using either variable GHG's
@@ -103,11 +107,11 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'days','last',0
- trigfiles      = 1,'days','first',0
- putrerun       = 4,'days','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
- lnudge         = .true.
+ lnudge         = .false.
  ldebugs        = .false.
  ltimer         = .false.
 /
@@ -193,7 +197,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_kappa_ss   = V_SCALE_KAPPA_SS ! V_SCALE_KAPPA_SS
   scale_kappa_so4  = V_SCALE_KAPPA_SO4 ! V_SCALE_KAPPA_SO4
   pH_pert          = V_SCALE_PH_PERT ! V_SCALE_PH_PERT
-  scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO3_REACTIONS
+  scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO2_REACTIONS
 
 /
 EOF

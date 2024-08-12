@@ -43,14 +43,14 @@
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/"
 cwd=${PWD}/
-DIR='PPE_Init'
+DIR='PPE_Experiments'
 #module purge
 source activate master
 #module load netCDF-Fortran/4.5.3-gompi-2021a
 #--- directories and files used by PPE scripts ----------------------
 PPEdir=$rundir${DIR}'/'
-PPElog=$cwd'PPE_debug_log.txt'
-PPEtmp=$cwd'PPE_debug_tmp.txt'
+PPElog=$cwd'PPE_log.txt'
+PPEtmp=$cwd'PPE_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}

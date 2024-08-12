@@ -28,6 +28,8 @@ my_experiments/
 my_experiments/*/*/*
 *.sh.*
 *log.txt
+log_tmp.txt
+*.csv
 # binaries
 bin/*
 lib
