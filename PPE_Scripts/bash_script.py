@@ -82,7 +82,7 @@ with open(output_file, 'w') as f_out:
         # break
 
 rename(output_file, input_file)
-run(["bash", "fix_values.sh"], check=True)
+run(["bash", "Scripts_for_config/fix_values.sh"], check=True)
 print(f"New PPE values generated and saved to {input_file}")
 
 def check_column_duplicates(file_path):
@@ -110,7 +110,7 @@ def check_column_duplicates(file_path):
             pass
 
 def txt_to_csv(input_file_path, output_file_path):
-    """
+    """i
     Converts a space-separated text file into a CSV file.
 
     Parameters:
@@ -145,7 +145,7 @@ check_column_duplicates(parameters_file)
 
 # Define the path to the input and output files
 input_file_path = 'PPE_values.txt'
-output_file_path = 'PPE_values.csv'
+output_file_path = 'parameter_values_data/PPE_values.csv'
 txt_to_csv(input_file_path, output_file_path)
 #############################
 """ This following script is just when you want all values to be '1' except for the perturbed parameter"""
