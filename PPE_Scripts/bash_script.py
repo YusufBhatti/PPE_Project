@@ -1,12 +1,20 @@
 
-input_file = "PPE_values.txt"
-output_file = "PPE_values_new.txt"
 from subprocess import run
 from os import rename
+import os
+import sys
 from re import search
 import numpy as np
 import pandas as pd
-parameters_file = "LHC_Parameters.txt"
+cwd = os.getcwd()
+utils_path = os.path.join(cwd, 'Scripts_for_config')
+sys.path.append(utils_path)
+from utils import *
+os.chdir(cwd)
+
+input_file = f"{cwd}/PPE_values.txt"
+output_file = f"{cwd}/PPE_values_new.txt"
+parameters_file = f"{cwd}/parameter_values_data/LHC_Parameters.txt"
 with open(parameters_file, 'r') as file:
     column_count = len(file.readline().strip().split())
     line_count = sum(1 for line in file)
@@ -40,9 +48,7 @@ with open(output_file, 'w') as f_out:
                 parts = line.strip().split()
                 param_values = line.strip().split()
                 # Create a new experiment name based on the header variable
-                new_exp_name = f"PPE_ENS_{i+1}"
-                # Copy the current param_values array
-               # new_param_values = param_values[:]
+                new_exp_name = f"PPE_PI_ENS_{i+1}"
                 # Set the corresponding value to 4 for the current variable
                 new_param_values = [f"{float(val):.4e}" if float(val) < 0.1 else f"{float(val):.4f}" for val in param_values]
 
@@ -72,80 +78,20 @@ with open(output_file, 'w') as f_out:
                 print(new_line)
                 # Append the new experiment line to the output file
                 f_out.write(new_line + "\n")
-                #end
-                # Stop the iteration if the new experiment name is TEST_V_SCALE_WATER
-                #if new_exp_name == f"*{header_array[-4]}":
-        #         if search(f".*{header_array[-4]}$", new_exp_name):
 
-        #             break
-            
-        # break
 
 rename(output_file, input_file)
-run(["bash", "Scripts_for_config/fix_values.sh"], check=True)
+run(["bash", f"{cwd}/Scripts_for_config/fix_values.sh"], check=True)
 print(f"New PPE values generated and saved to {input_file}")
 
-def check_column_duplicates(file_path):
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
-    
-    # Read the data into a 2D list
-    data = [line.strip().split() for line in lines]
-    
-    # Transpose the data to work with columns
-    columns = list(zip(*data))
-    colum = len(line.strip().split())
+print(f"We will now check if any rows contain duplicates in the PPE values generated")
 
-    for col_index, column in enumerate(columns):
-        duplicates = set([val for val in column if column.count(val) > 1])
-        if duplicates:
-            if col_index > colum:
-                pass
-            else:
-                print(f"Duplicate values found in {header_array[col_index]}: {duplicates}")
-                print(f"STOP AND CHANGE LINE 55 in the bash_script.py to increased decimal points.")
-
-        else:
-            print(f"No duplicate values found in {header_array[col_index]} columns")
-            pass
-
-def txt_to_csv(input_file_path, output_file_path):
-    """i
-    Converts a space-separated text file into a CSV file.
-
-    Parameters:
-    input_file_path (str): Path to the input text file.
-    output_file_path (str): Path to the output CSV file.
-    """
-    # Read the data from the text file
-    with open(input_file_path, 'r') as file:
-        lines = file.readlines()
-    
-    # Extract the header and data
-    header = lines[0].strip().split()
-    data = [line.strip().split() for line in lines[1:]]
-    
-    # Create a DataFrame
-    df = pd.DataFrame(data, columns=header)
-    
-    # Remove the last three columns
-    df = df.iloc[:, :-3]
-    
-    # Save the DataFrame to a CSV file
-    df.to_csv(output_file_path, index=False)
-    
-    print(f"Data has been successfully converted and saved to {output_file_path}")
-
-# Replace 'parameters_file' with the path to your .txt file
-
-print(f"Now we will check if any rows contain duplicates in the PPE values generated")
-
-parameters_file = "/home/ybhatti/yusufb/Branches/PPE_Scripts/PPE_values.txt"
-check_column_duplicates(parameters_file)
+parameters_file = f"{cwd}/PPE_values.txt"
+check_column_duplicates(parameters_file, header_array)
 
 # Define the path to the input and output files
-input_file_path = 'PPE_values.txt'
-output_file_path = 'parameter_values_data/PPE_values.csv'
+input_file_path = f"{cwd}/PPE_values.txt"
+output_file_path = f"{cwd}/parameter_values_data/PPE_values.csv"
 txt_to_csv(input_file_path, output_file_path)
 #############################
 """ This following script is just when you want all values to be '1' except for the perturbed parameter"""
