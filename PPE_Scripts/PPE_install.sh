@@ -49,8 +49,8 @@ source activate master
 #module load netCDF-Fortran/4.5.3-gompi-2021a
 #--- directories and files used by PPE scripts ----------------------
 PPEdir=$rundir${DIR}'/'
-PPElog=$cwd'PPE_log.txt'
-PPEtmp=$cwd'PPE_tmp.txt'
+PPElog=$cwd'/Logs/PPE_log.txt'
+PPEtmp=$cwd'/Logs/PPE_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}
@@ -124,4 +124,5 @@ done < "$PPEvalues"
 mv $PPEtmp $PPEvalues 
 
 echo 'Finishing PPE_install script' >>$PPElog
+. $cwd/Scripts_for_config/mv_tracking_files.sh
 #cd $cwd
