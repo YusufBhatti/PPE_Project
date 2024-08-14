@@ -324,14 +324,23 @@ SUBROUTINE setphys
 
 !>>SF #489
     CALL message('','---')
-    SELECT CASE(cdnc_min_fixed)
-       CASE(10, 40)
-         CALL print_value('Fixed minimum CDNC (cdnc_min_fixed) = ', cdnc_min_fixed)
-       CASE DEFAULT
-         WRITE (message_text,*) '   cdnc_min_fixed = ',cdnc_min_fixed,' not supported.'
-         CALL message('setphys',message_text, level=em_error)
-    END SELECT
+! YAB comment in
+!    SELECT CASE(cdnc_min_fixed)
+!       CASE(10, 40)
+!         CALL print_value('Fixed minimum CDNC (cdnc_min_fixed) = ', cdnc_min_fixed)
+!       CASE DEFAULT
+!         WRITE (message_text,*) '   cdnc_min_fixed = ',cdnc_min_fixed,' not supported.'
+!         CALL message('setphys',message_text, level=em_error)
+!    END SELECT
 !<<SF
+!! YAB comment out
+! YAB change to allow all cdnc min values for PPE !
+    SELECT CASE (cdnc_min_fixed)
+       CASE DEFAULT
+         CALL print_value('Fixed minimum CDNC (cdnc_min_fixed) = ', cdnc_min_fixed)
+    END SELECT
+    !YAB end CDNC
+
     CALL message('','---')
 !
 !*        3.2      SET UP CONSTANTS IN *mo_physc2*.

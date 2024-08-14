@@ -50,8 +50,10 @@ version.c
 # swap
 *.swp
 *.svn
+*.swo
 # Files to ignore
 RUNDIR/
 compile_and_generate.sh
 echam6.3-ham2.3-moz1.0/
 PPE_Aerosol/
+__pycache__/
