@@ -1,3 +1,4 @@
-cwd = ${PWD}/
-mv $cwd*.sh.* '../Logs/'
-mv $cwd*log* '../Logs/'
+#cwd = '${PWD}/'
+mv $PWD/*.sh.* '../Logs/'
+mv $PWD/*log* '../Logs/'
+mv $PWD/*.txt* '../Logs/'
