@@ -51,7 +51,7 @@ walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/home/ybhatti/prjs1076/PPE_Output/PI_PPE_Experiments/${exp}/"
+exp_dir="/home/ybhatti/prjs1076/PPE_Output/PPE_Experiments/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -71,17 +71,17 @@ ntiles=11                     # number of tiles in the vegetation model
 no_cycles=100                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 
 faked_restart=true
-parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_PI_18490901_Restart_Control"
-parent_current_date="18490831234500"
+parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control"
+parent_current_date="20090829234500"
 init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="1849,09,01,0,0,0"
-date_stop="1849,09,03,1,0,0"
+date_start="2009,09,01,0,0,0"  # 20090829234500
+date_stop="2009,09,06,1,0,0"
 
-input_files_version="v0006"
-scenario="historical"              # in case it is relevant for the given setup (using either variable GHG's
+input_files_version="v0002_input"
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
                               # ozone or climatologic aerosols, AND the experiment's time range 
                               # overlaps with [2009,2100]), choose here the scenario you'd like
                               # (RCP45, XXX, all case insensitive)
@@ -98,6 +98,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &RUNCTL 
  nproma         = ${nproma}
  lresume        = $init_restart_flag,
+ dt_resume      = 2009,08,29,23,45,0
  lmidatm        = .true.
  out_datapath   = "$exp_dir"
  out_expname    = "$exp"
@@ -111,7 +112,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  putrerun       = 1,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
- lnudge         = .false.
+ lnudge         = .true.
  ldebugs        = .false.
  ltimer         = .false.
 /
@@ -155,7 +156,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &PHYSCTL
  lcdnc_progn    = .true.
  nauto          = 2
- cdnc_min_fixed = V_SCALE_CDNC_MIN
+ cdnc_min_fixed = V_SCALE_CDNC_MIN    ! V_SCALE_CDNC_MIN
 /
 &HAMCTL
  nseasalt       = 7

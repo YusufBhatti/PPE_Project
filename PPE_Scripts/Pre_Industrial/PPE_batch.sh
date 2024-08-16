@@ -60,19 +60,19 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=4  # Maximum number of experiments run concurrently
-nexp_maxran=108      # Maximum number of experiments run by this batch job
+nexp_maxrunning=6  # Maximum number of experiments run concurrently
+nexp_maxran=3      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
-PPEdir='/home/ybhatti/yusufb/Branches/PPE_Pre_Industrial/my_experiments/PPE_PI_Init/'
-PPElog=$cwd'PPE_test_log.txt'
-PPEtmp=$cwd'PPE_test_tmp.txt'
+PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/PI_PPE_Experiments/'
+PPElog=$cwd'..//Logs/PPE_log.txt'
+PPEtmp=$cwd'..//Logs/PPE_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'
-PPEvalues=$cwd'PPE_values.txt'
+PPEvalues=$cwd'../PPE_values.txt'
 
 #echo 'Activating python environment'
 #source activate master
@@ -158,4 +158,5 @@ while [ "$nexp_ran" -lt "$nexp_maxran" ] && [ "$batch_finished" == 0 ]; do
 done # nexp_ran > nexp_maxran (outer loop)
 
 echo 'Finishing PPE_batch script' >>$PPElog
-
+. $cwd/../Scripts_for_config/mv_tracking_files.sh
+cd $cwd
