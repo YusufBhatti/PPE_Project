@@ -155,6 +155,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &PHYSCTL
  lcdnc_progn    = .true.
  nauto          = 2
+ cdnc_min_fixed = V_SCALE_CDNC_MIN
 /
 &HAMCTL
  nseasalt       = 7
@@ -183,8 +184,15 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 /
 &HAMMOZ_PERTURBATIONS
   scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
+  scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF
+  scale_emi_cmr_bb = V_SCALE_EMI_CMR_BB   ! V_SCALE_EMI_CMR_BB
+  scale_emi_cmr_bf = V_SCALE_EMI_CMR_BF   ! V_SCALE_EMI_CMR_BF
+  scale_emi_ff     = V_SCALE_EMI_FF  ! V_SCALE_EMI_FF
+  scale_emi_bb     = V_SCALE_EMI_BB  ! V_SCALE_EMI_BB
+  scale_emi_bf     = V_SCALE_EMI_BF  ! V_SCALE_EMI_BF
   scale_emi_dms    = V_SCALE_EMI_DMS  ! V_SCALE_EMI_DMS
   scale_emi_ssa    = V_SCALE_EMI_SSA  ! V_SCALE_EMI_SSA
+  scale_emi_so2    = V_SCALE_EMI_ANTH_SO2 ! V_SCALE_EMI_ANTH_SO2
   scale_emi_du     = V_SCALE_EMI_DUST ! V_SCALE_EMI_DUST
   scale_drydep_ait = V_SCALE_DRYDEP_AIT   ! V_SCALE_DRYDEP_AIT
   scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC

@@ -31,7 +31,7 @@ with open(parameters_file, 'r') as f_params:
         scaling_factors = list(map(float, parts[:]))
         Array[i,:] = scaling_factors
 
-
+decimal = 7
 # Read the first line (header)
 with open(input_file, 'r') as f_in:
     header = f_in.readline().strip()
@@ -48,9 +48,9 @@ with open(output_file, 'w') as f_out:
                 parts = line.strip().split()
                 param_values = line.strip().split()
                 # Create a new experiment name based on the header variable
-                new_exp_name = f"PPE_PI_ENS_{i+1}"
+                new_exp_name = f"PPE_ENS_{i+1}"
                 # Set the corresponding value to 4 for the current variable
-                new_param_values = [f"{float(val):.4e}" if float(val) < 0.1 else f"{float(val):.4f}" for val in param_values]
+                new_param_values = [f"{float(val):.{decimal}e}" if float(val) < 0.1 else f"{float(val):.{decimal}f}" for val in param_values]
 
                 # Set last 3 values to 1 
                 new_param_values.extend(['0'] * 3)
@@ -88,6 +88,7 @@ print(f"We will now check if any rows contain duplicates in the PPE values gener
 
 parameters_file = f"{cwd}/PPE_values.txt"
 check_column_duplicates(parameters_file, header_array)
+print(f"The number of decimal places defined is: {decimal}. If there are duplicated identified, increase this number.")
 
 # Define the path to the input and output files
 input_file_path = f"{cwd}/PPE_values.txt"

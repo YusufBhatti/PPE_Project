@@ -57,10 +57,12 @@ MODULE mo_param_switches
                            !                 .TRUE.  (dynamical min CDNC)
 !<<SF #475
 !>>SF #589
- INTEGER :: cdnc_min_fixed ! fixed value for min CDNC in cm-3 (used when ldyn_cdnc_min is FALSE)
+! INTEGER :: cdnc_min_fixed ! fixed value for min CDNC in cm-3 (used when ldyn_cdnc_min is FALSE)
                            ! Warning! So far only values of 40 or 10 are accepted.
 !<<SF #589
 
+ REAL(dp) :: cdnc_min_fixed ! fixed value for min CDNC in cm-3 (used when ldyn_cdnc_min is FALSE)
+                           ! Warning! So far only values of 40 or 10 are accepted.
 !>>DN ambient AOD per species
  LOGICAL  :: lnoh2oaod
 !<<DN

@@ -335,10 +335,10 @@ SUBROUTINE setphys
 !<<SF
 !! YAB comment out
 ! YAB change to allow all cdnc min values for PPE !
-    SELECT CASE (cdnc_min_fixed)
-       CASE DEFAULT
-         CALL print_value('Fixed minimum CDNC (cdnc_min_fixed) = ', cdnc_min_fixed)
-    END SELECT
+!    SELECT CASE (cdnc_min_fixed)
+!       CASE DEFAULT
+     CALL print_value('Fixed minimum CDNC (cdnc_min_fixed) = ', cdnc_min_fixed)
+!    END SELECT
     !YAB end CDNC
 
     CALL message('','---')
