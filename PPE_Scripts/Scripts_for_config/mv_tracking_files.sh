@@ -1,2 +1,3 @@
-mv /home/ybhatti/yusufb/Branches/PPE_Scripts/*.sh.* Logs/
-mv /home/ybhatti/yusufb/Branches/PPE_Scripts/*log* Logs/
+cwd = ${PWD}/
+mv $cwd*.sh.* '../Logs/'
+mv $cwd*log* '../Logs/'

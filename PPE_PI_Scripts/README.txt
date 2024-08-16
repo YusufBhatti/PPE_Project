@@ -1,6 +1,5 @@
 Author: Yusuf Bhatti, (based on Duncan Watson-Paris PPE Scripts), y.bhatti@sron.nl
 
-
 Information on how to install and run an ECHAM-HAM PPE
 
 Directory structure:
@@ -8,6 +7,8 @@ Branches
     Perturbed_Climate_model
 	my_experiments
     PPE_Scripts	
+
+load necessary python packages such as pandas.
 
 Scripts (submitted to job queue):
 PPE_install.sh  : installs directories for individual experiments that are part of PPE
@@ -17,8 +18,23 @@ NOTE: further information can be found in the scripts themselves
 NOTE: PPE_batch.sh can be run multiple times. Suppose HPC goes down after only part of the PPE has been run. Resubmission of PPE_batch.sh will lead to a continuation of the PPE. The PPE_values.txt file is used to keep track of which experiments have already been submitted and which not. The file does not contain information on succesful conclusion of an experiment (see also below)!!!
 
 Initialisation files:
-Latin_Hypercube_Sampling.ipynb : used to create LHC_Parameters.txt, which is the sampling used based on your min and max parameters and the parameters being perturbed. Need to modify simulations number.
-bash_script.py : python script to execute which writes information into the PPE_values file for final prep of PPE.
+Latin_Hypercube_Sampling.py : used to create LHC_Parameters.txt, which is the sampling used based on your min and max parameters and the parameters being perturbed. Need to modify simulations number. when running this file, you will be prompted to input the number of simulations you wish.
+
+bash_script.py : python script to execute. This writes your LHC into the PPE_values file for final prep of P  PE. It also detects for if a parameter contains duplicate values. If there is a duplicate value detected, you should modify the number of decimal places it uses.
+
+Steps:
+1.
+$ python Latin_Hypercube_Sampling.py
+you will then be prompt to enter how many ensemble members you want to use. Enter the number
+2.
+$ python bash_script.py
+Will write into your PPE_values.txt and fill in your parameter values with the values from your LHC.
+3.
+Sort out directories within the PPE_install.sh and PPE_batch.sh
+4.
+qsub PPE_install.sh
+5.
+qsub PPE_batch.sh
 
 
 NOTES: The Initialisation files rely on the parameters_for_script.txt file. The hypercube sampling script uses the parameters_for_script.txt to take in how many columns there will be (how many parameters will be perturbed in your PPE). You specify in the script (n_samples) to the amount of simulations you want. Typically Nu. parameters * 5-7. This will output an array (n_samples, number of parameters) called LHC_Parameters.txt. 
