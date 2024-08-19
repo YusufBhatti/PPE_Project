@@ -1,0 +1,564 @@
+\section{Turbulent transport and surface fluxes\label{sec:para1}}\label{c5}
+
+Mixing by unresolved small-scale turbulent eddies causes exchange of momentum and scalar quantities between the atmosphere, ocean and land, and within the interior of the atmosphere and oceans. The purpose of a turbulence closure scheme is to parameterize these turbulent fluxes in the atmosphere. ECHAM applies a turbulent kinetic energy (TKE) scheme modified from that described by \cite{brinkop95}. The scheme applies Reynolds averaging, whereby the full flow is separated into a resolved mean-flow part, and unresolved turbulent fluctuations. Relative to the second-order closure schemes presented by \cite{mellor74}, the current implementation applies empirical stability functions, rather than solving all ten budget equations for the second-order moments, applies a simple mixing-length scale, and the scheme neglects advection of TKE by the resolved flow. Generally, the tendency of a prognostic variable, $\psi$, due to turbulent motion is then:
+\begin{eqnarray}\label{eqn:reynolds_stress}
+\left(\dnd{\psi}{t}\right)_{\turb} = -\dnd{\overline{w'\psi'}}{z} \,,
+\end{eqnarray}
+where $w$ is the vertical velocity, primes denote turbulent fluctuations, and the overbar indicates Reynolds averaging.
+
+It is the purpose of the turbulence closure scheme to diagnose, or predict, the vertical profile of the turbulent fluxes as a function of the model mean state. The scheme is formulated separately for mixing internally in the atmosphere and for the exchange with the surface. Between atmospheric model levels fluxes are assumed to have the form:
+\begin{equation}
+\overline{w'\psi'}=-K_{\psi}\frac{\partial \psi}{\partial z},
+	\label{eq:1}
+\end{equation}
+while at the surface fluxes are assumed to have the form:
+\begin{equation}
+\overline{w'\psi'}_\textrm{sfc}=-C_{\psi}|\vec{V}|(\psi_\textrm{nlev}-\psi_\textrm{sfc}),
+\label{5.1}
+\end{equation}
+where $K_\psi$ is the diffusion coefficient and $C_\psi$ is the bulk exchange coefficient, both with respect to $\psi$, while nlev indicates lowest model level, and sfc surface quantities, respectively. $|\vec{V}|$ is the absolute value of the difference between the surface velocity and the wind velocity at the lowest model level. At the top of the atmosphere (TOA) the turbulent fluxes are further assumed to vanish:
+\begin{equation}
+\overline{w'\psi'}_\textrm{TOA}=0.
+\end{equation}
+Below we explain how $K_\psi$ and $C_\psi$ are determined.
+
+\subsection{Conservative variables and definitions}
+Vertical turbulent mixing is done on the six prognostic variables temperature ($T$), zonal and meridional winds ($u,v$), specific humidity ($q_v$), cloud liquid water content ($q_l$), cloud ice water content ($q_i$), as well as any tracers that may be defined. To account for dry adiabatic expansion, the mixing of temperature is done on the dry static energy, which is the sum of the specific enthalpy and the geopotential energy:
+\begin{equation}
+h=c_pT+gz,
+\end{equation}
+where $g$ is gravity and $z$ is height. In many ways, mixing $h$ is equivalent to mixing potential temperature, which is more common. These variables are conserved during dry adiabatic processes. Quantities used in this chapter are:
+
+\begin{tabular}{lccl}
+ \text{Potential temperature:}     & $\theta$ & =
+ & $T\left(\frac{p_{00}}{p}\right)^{\frac{R_d}{c_{pd}}}$  \\[2mm]
+ \text{Reference pressure:}     & $p_{00}$ & = & $10^5$ Pa \\[2mm]
+ \text{Constant:} & $\epsilon$ &=& $R_v/R_d - 1$\\[2mm]
+ \text{Virtual potential temperature:} & $\theta_v$ & =
+ & $\theta\left[1+\epsilon q_v - q_l - q_i\right]$ \\[2mm]
+ \text{Liquid water potential temperature:} & $\theta_l$ & =
+ & $\theta\left[1 - \frac{L}{c_{pd}T}\left(q_l+q_i\right)\right]$ \\[2mm]
+ \text{Virtual dry static energy:} & $h_v$ & = 
+ & $gz + c_p T \left[1+ \left(\frac{c_{pv}}{c_{pd}}-1\right)q_v\right]$\\[2mm]
+ \text{Total water content:} & $q_t$ & =
+ & $q_v+q_l+q_i$ \\%[2mm]
+ \text{Surface friction velocity:} & $u_*$ &=
+ & $\left[\left(\overline{w'u'}\right)^2_\B{sfc}+\left(\overline{w'v'}\right)^2_\B{sfc}\right]^{1/4}$\\[2mm]
+ \text{Convective velocity scale:} & $w^*$ &=
+ & $\left[gz_\B{pbl}(\overline{w'\theta'_{v}})_\B{sfc}/{\bar{\theta}_v}\right]^{1/3}$\\[2mm]
+ \text{Monin-Obukhov length scale:}  & $L$ &=
+ & $-u_*^3\bar{\theta}_v /\left[\kappa g\left(\overline{w'\theta'_{v}}\right)_\B{sfc}\right]$\\[2mm]
+ \text{von Karmans constant:} & $\kappa$ &=& $0.4$\\[2mm] 
+ \text{Boundary layer height:} & $z_\B{pbl}$ \\[2mm]
+ \text{Gravity:} & $g$ 
+
+\end{tabular}
+
+\vspace{4mm}
+
+
+
+\subsection{TKE closure model}
+In the atmosphere, away from the surface, the turbulent closure model assumes that the turbulent viscosity and diffusivities have the form:
+\begin{eqnarray}\label{eqn:coeff_K}
+ K_{\psi} = l\;S_{\psi}\;\sqrt{E},
+\end{eqnarray}
+where $l$ is the turbulent mixing-length, $S_{\psi}$ is a stability function and $E=\overline{u'u'}+\overline{v'v'}+\overline{w'w'}$ is the turbulent kinetic energy. $E$ is predicted by solving a simplified version of the TKE-budget equation:
+\begin{equation}\label{eqn:TKE_prog}
+\dnd{E}{t} = -\overline{w'u'}\dnd{u}{z} -\overline{w'v'}\dnd{v}{z}
+             +\frac{g}{\theta_v}\overline{w'\theta'_v}
+             -\delta
+             -\dnd{\overline{w'E'}}{z},
+\end{equation}
+where the first two terms on the right-hand-side are shear production terms, the third is the buoyancy term, $\delta$ is dissipation of $E$ by molecular viscosity and the last term is the third-order vertical turbulent transport of $E$. To solve the prognostic TKE-equation \eref{eqn:TKE_prog} it is necessary to make a series of closure assumptions and characterize the stability of the flow, here using the moist Richardson number. 
+
+
+\subsubsection{Moist Richardson number}
+It is assumed that the stability of the turbulent flow is characterized by the non-dimensional local gradient Richardson number, $Ri$, which is formally defined as the ratio of the static stability to the shear:
+\begin{equation}
+Ri=\frac{N^2}{S^2},
+\end{equation}
+where $N$ is the Brunt-V\"ais\"al\"a frequency and $S$ is the mean-flow vertical shear. The Brunt-V\"ais\"al\"a frequency depends on whether the flow is in clear or cloudy skies, so to approximate the grid-scale flow stability, a so-called moist Ri is defined:
+%===================
+% Richardson number
+%+++++++++++++++++++
+{\small\begin{eqnarray}
+Ri &=& \dfrac
+{\dfrac{g}{\theta_v}\left(A\ddnd{\theta_l}{z}+\theta D\ddnd{q_t}{z}\right)}
+{\left(\ddnd uz\right)^2+\left(\ddnd vz\right)^2}  \label{eqn:ri},
+\end{eqnarray}}
+where:
+{\small\begin{eqnarray}
+%
+% coefficient A
+A &=& \begin{cases}
+1 + \epsilon q, & \text{ in clear-sky} \\[6mm]
+1 + \epsilon q_t 
+- \dfrac{L\,q_s}{R_v T}\cdot\dfrac
+  {\left(\dfrac{L}{c_{pd} T}\left(1+\epsilon q_t\right)- \frac{R_v}{R_d}\right)}
+  {\left(1+\dfrac{L^2 q_s}{R_v c_{pd}T^2}\right)}, & \text{ in cloud}
+\end{cases} \\
+%
+% coefficient D
+D &=& \begin{cases}
+\epsilon, & \text{ in clear-sky} \\
+\frac{L}{c_p T}A - 1, &  \text{ in cloud}
+\end{cases}
+%
+\end{eqnarray}}
+For each grid cell, $A$ and $D$ are first computed for the cloudy and clear-sky parts separately. The grid-cell mean is derived using the cloud fraction as the weighting factor and then used in Equation \eref{eqn:ri}.
+
+
+\subsubsection{Turbulent mixing length}
+The turbulence mixing length used in Equation \eref{eq:1} is computed as in \cite{blackadar62}:
+\begin{equation}\label{eqn:mix_len}
+l = \frac{\kappa z}{1+ \kappa z/\lambda}
+\end{equation}
+in which $\kappa$ is the von Karman constant ($\kappa = 0.4\,$), and
+$z$ is the geopotential height above the surface.
+The asymptotic mixing length $\lambda$ reads
+\begin{equation}\label{eqn:mix_len_asymp}
+\lambda = \begin{cases} 
+\lambda_{o}\,, & \text{if } z\le z_{\pbl}\,, \\
+\left(\lambda_{o}-\lambda_{\infty}\right)
+\exp\left(-\dfrac{z-z_{\pbl}}{z_{\pbl}}\right) + \lambda_{\infty}\,, &\text{if } z > z_{\pbl}\,,
+\end{cases}
+\end{equation}
+%
+with $z_{\pbl}$ being the PBL height as defined below. The asymptotic mixing length is a constant ($\lambda_o= 150$~m) in the boundary layer, and it decreases exponentially with height above the boundary layer approaching $\lambda_{\infty}$ (=~1~m) in the lower stratosphere.
+
+To calculate $\lambda$ it is necessary to estimate the boundary layer height. The scheme distinguishes two types of boundary layers, i.e. neutrally and stably stratified boundary layer (SBL) and convective boundary layer (CBL). The height of the SBL is assumed approximately to be:
+\begin{equation}\label{eqn:z_sbl}
+z_\B{sbl} = 0.3\,u_{*}/f,
+\end{equation}
+with $f$ being the Coriolis parameter. The top of the convective boundary layer is identified when, at a certain height $z_\B{cbl}$, the virtual dry static energy $s_v$ exceeds the value at the lowest model level.
+The boundary layer height is then assumed to be the largest of the two definitions:
+\begin{equation}
+z_\B{pbl} = \max(z_\B{sbl}, z_\B{cbl}) \,.
+\end{equation} 
+%
+In the model there is an additional constraint that the geopotential at the top of the boundary layer does not exceed $5\times 10^4$~m$^2$~s$^{-2}$. The boundary layer height is diagnosed using geopotential height at full model levels.
+
+
+\subsubsection{Stability functions}
+
+The stability factor $S_{\psi}$ in Eqn.~\eref{eqn:coeff_K} 
+is defined as a product of the neutral coefficient $S_{N\psi}$
+and the stability functions $g_{\psi}$:
+%
+\begin{eqnarray}\label{eqn:stabi_factor}
+S_{\psi}&=&S_{N\psi}\,g_{\psi}.
+\end{eqnarray}
+%
+The neutral stability coefficients are constants given by \citet{mellor82}:
+%
+\begin{eqnarray}
+S_{Nh}&=&3\sqrt{2}A_{2}\gamma_{1} \label{eqn:snh},\\
+S_{Nm}&=&S_{Nh}\,\frac{A_{1}}{A_{2}} \left(\frac{\gamma_{1}-C_{1}}{\gamma_{1}}\right), \label{eqn:snm}
+\end{eqnarray}
+%
+with $A_{1} = 0.92$, $A_{2} = 0.74$, $B_{1} = 16.6$, $C_{1} = 0.08$
+and $\gamma_{1} = 1/3 - 2A_{1}/B_{1}$. The stability functions are:
+%
+%=======================
+% stability function gm
+%+++++++++++++++++++++++
+\begin{equation}\label{eqn:gm}
+g_{m}= \begin{cases}
+  \dfrac{1}{1+2cRi\left(\sqrt{1+Ri}\right)^{-1}}
+  & \text{if } Ri \ge 0 \\[6mm]
+  1-\dfrac{2cRi}{1+3c^2l^2
+  \left[\left(\frac{\Delta z}{z}+1\right)^{1/3}-1\right]^{3/2}
+  \left[\frac{\sqrt{-Ri}}{(\Delta z)^{3/2}\sqrt{z}}\right]}
+  & \text{if } Ri < 0 
+\end{cases}
+\end{equation}
+%
+%=======================
+% stability function gh
+%+++++++++++++++++++++++
+\begin{equation}\label{eqn:gh}
+g_{h}= \begin{cases}
+  \dfrac{1}{1+2cRi\,\sqrt{1+Ri}}
+  & \text{if } Ri \ge 0 \\[6mm]
+  1-\dfrac{3cRi}{1+3c^2l^2
+  \left[\left(\frac{\Delta z}{z}+1\right)^{1/3}-1\right]^{3/2}
+  \left[\frac{\sqrt{-Ri}}{(\Delta z)^{3/2}\sqrt{z}}\right]}
+  & \text{if } Ri < 0 
+\end{cases}
+\end{equation}
+%++++++++++++++
+where $z$ is the geopotential height above surface, $\Delta z$ the layer thickness, and $c = 5$ is a constant. $Ri$ is the moist Richardson number defined earlier.
+
+
+\subsubsection{Dissipation}
+The TKE dissipation term, $\delta$, in Equation \eref{eqn:TKE_prog} is assumed to have the form (Kolmogorov 1941):
+\begin{equation}
+\delta \propto \frac{E^{\frac 32}}{l},
+\end{equation}
+where here the length-scale in the denominator is the dissipation length-scale. This length-scale is assumed to equal the mixing-length, and then it can be shown that:
+\begin{equation}
+\delta = S_{Nm}^{3}\frac{E^{\frac 32}}{l}.
+\end{equation}
+
+
+\subsubsection{Third-order TKE transport}
+The turbulent transport of TKE term in Equation \eref{eqn:TKE_prog} is modeled by assuming the form of the flux in Equation \eref{eq:1} and that the relevant exchange coefficient is the turbulent viscosity, $K_m$. Then the transport term is modeled as:
+\begin{equation}
+\dnd{\overline{w'E'}}{z} =  \frac{\partial }{\partial z}\left(-K_m\frac{\partial E}{\partial z}\right)
+\end{equation}
+
+\subsubsection{TKE surface boundary condition}
+The formulation of the bottom boundary condition for TKE is dependent on the surface-layer stability only under convectively unstable situations \cite{mailhot82}: 
+\begin{eqnarray}
+E_\B{sfc} &=& \begin{cases}
+ S_{Nm}^{-2}u^2_{*}, & \frac{z}{L} \ge 0 \\
+ \left[S_{Nm}^{-2}+\left(-\frac{z}{L}\right)^{2/3}\right]u^2_{*}+0.2 w^2_{*}, & \frac{z}{L} < 0 
+\end{cases} \label{eqn:tke_sfc}
+\end{eqnarray}
+%
+where $u_*$ is the friction velocity, $w_*$ is the convective velocity scale and  $L$ is the Monin-Obukhov length-scale defined earlier. The surface buoyancy flux $\left(\overline{w'\theta'_{v}}\right)_\B{sfc}$ is computed as described in Section~\ref{sec:sfc}. With a few steps of simple manipulation one can rewrite Eqn.~\eref{eqn:tke_sfc} into:
+%
+% TKE after manipulation
+\begin{eqnarray}
+E_\B{sfc} &=& \begin{cases}
+ S_{Nm}^{-2} u^2_{*} \\
+ S_{Nm}^{-2} u^2_{*}
+ + 0.2 \left[gz_\B{pbl}
+  \dfrac{\left(\overline{w'\theta'_{v}}\right)_\B{sfc}}
+        {\bar{\theta}_v}\right]^{\frac 23}
+ + \left[\kappa gz_\B{nlev}
+  \dfrac{\left(\overline{w'\theta'_{v}}\right)_\B{sfc}}
+        {\bar{\theta}_v}\right]^{\frac 23} 
+\end{cases} \label{eqn:tke_sfc2}
+\end{eqnarray}
+where the surface-layer mean virtual potential temperature is $\bar{\theta}_v = 0.5\left(\theta_{v,\B{nlev}}+\theta_{v,\B{sfc}}\right)$. In the code we use this formula in order to avoid floating point problem when $u_* = 0$, e.g. when simulations are carried out with the surface momentum flux switched off.
+
+\subsubsection{Prognostic temperature variance}
+Although not directly used in the TKE closure model, for completeness we here mention that the code contains a prognostic equation for virtual potential temperature variance,  $\sigma^2_{\theta_v}$. This quantity is used by the convection scheme to estimate the updraft buoyancy excess. The prognostic equation of this quantity is:
+%
+\begin{equation}\label{eqn:thvvar_eqn}
+\dnd{\sigma^2_{\theta_v}}{t} = 
+- 2\,\overline{w'{\theta_v}'} \,\dnd{{\theta_v}}{z}       
+ -\frac{\sigma^2_{\theta_v}}{\tau} 
+-\dnd{\overline{w'\sigma^2_{\theta_v}}}{z}.           
+\end{equation}
+Changes in the sub-grid variance of virtual potential temperature are assumed to be caused by buoyancy production, molecular dissipation and vertical turbulent transport. The dissipation time-scale is assumed to be $\tau = {l\,S_{Nm}^{-3}}/\sqrt{E}$. The turbulent flux profile used in the buoyancy production term is approximated by Equation \eref{eq:1}. The numerical solution is done analogously to the TKE equation.
+
+
+
+
+
+
+
+
+
+\subsection{Interaction with the surface}
+\label{sec:sfc}
+The surface fluxes in ECHAM are calculated using the bulk-exchange formula, Equation \eref{5.1}. To achieve this it is necessary to define empirical expressions for the bulk transfer coefficients,  $C_{\psi}$, which are usually obtained from Monin-Obukhov similarity theory by integrating the flux-profile relationships from the surface up to the lowest model layer. This results in implicit expressions that requires iterative numerical methods to solve. Therefore, approximate analytical expressions are applied close to those suggested by \cite{louis79}. In ECHAM these depend on the moist Richardson number evaluated between the surface and the first model level. This is often called the bulk Richardson number. We first separate the coefficient into a product of coefficient and a universal function:
+\begin{equation}
+C_\psi = C_{\textrm{N},\psi}f_\psi
+\end{equation}
+where $C_{\textrm{N},\psi}$ is the neutral limit transfer coefficient and $f_\psi$ is an empirical function to be determined. The turbulence formulation in ECHAM distinguishes only between momentum ($\psi = m$) and scalars ($\psi = h$). 
+
+\subsubsection{Neutral limit coefficients}
+The neutral limit coefficients depend only on surface roughness lengths and the height of the first model level, $z_\textrm{nlev}$, which we shall simply designate $z$ in this section:
+\begin{eqnarray}
+C_\B{N,m}  &=& 
+\frac{\kappa^2}{\left[\ln\left(z/z_{0m}+1 \right)\right]^2} \\
+C_\B{N,h}  &=& 
+\frac{\kappa^2}{\ln\left(z/z_{0m}+1 \right)
+\ln\left(z/z_{0h}+1 \right)}, 
+\end{eqnarray}
+where $\kappa$ is von Karmans constant, $z_{0m}$ is the aerodynamic roughness length for momentum and $z_{0h}$ is the roughness length with respect to scalars.
+
+\subsubsection{Roughness lengths}
+The roughness lengths over land are specified based the orography and vegetation. These are read in from a file with a global map, and assumed to not exceed 1 m. Over snow covered land $z_{0h}$ is set to $10^{-3}$ m. If land is partially covered with snow, the blending height concept is applied by taking a weighted average of the bulk transfer coefficients from each surface type, not by averaging the roughness lengths. Over sea ice $z_{0m}=z_{0h}=10^{-3}$ m. Over open ocean the aerodynamic roughness length is calculated after the \cite{charnock55} formula:
+\begin{equation}
+z_{0m}=\textrm{max}\left[0.018u_*^2/g, 1.5\cdot10^{-5} \textrm{m}\right],
+\end{equation}
+where $u_*$ is the friction velocity and $g$ is gravity. The roughness length for scalars is assumed to be related to the aerodynamic roughness as:
+\begin{equation}
+z_{0h}=z_{0m}\cdot \exp\left(2-86.276z_{0m}^{0.375}\right).
+\end{equation}
+
+\subsubsection{Surface-layer stability functions}
+Under neutral to stably stratified conditions ($Ri\ge 0$) the vertical transfer is reduced according to:
+\begin{eqnarray}
+f_m &=& \frac{1}{1+2c Ri\left(\sqrt{1+Ri}\right)^{-1}} \\
+f_h &=& \frac{1}{1+ 2cRi\sqrt{1+Ri}},
+\end{eqnarray}
+where $c=5$. Under unstable conditions ($Ri<0$), instead the transfer coefficients are enhanced:
+\begin{eqnarray}
+f_m &=& 1-\frac{2c Ri}{1+3c^2 C_{N,m}\sqrt{-Ri\left(\frac{z}{z_{0m}}+1 \right)}} \\
+f_h &=& 1-\frac{3c Ri}{1+3c^2C_{N,m}\sqrt{-Ri \left(\frac{z}{z_{0m}}+1 \right)}}.
+\end{eqnarray}
+
+However, over open ocean and unstable conditions ($Ri<0$), the scalar transfer stability function is defined:
+\begin{eqnarray}
+f_h &=& (1+C_R^\gamma)^{1/\gamma}, \quad \textrm{where} \\
+C_R &=& \beta\frac{\Delta\theta_v^{1/3}}{C_{N,h}|\vec{V}|},
+\end{eqnarray}
+while $\beta=0.001$, $\gamma=1.25$, and $\Delta\theta_v$ is the virtual potential temperature difference between the surface and the lowest model level.
+
+\subsubsection{Accounting for evapotranspiration}
+The surface flux over land of specific humidity $\left(\overline{w'q_v'}\right)_\textrm{sfc}$, and therefore also virtual dry static energy $\left(\overline{w'h_v'}\right)_\textrm{sfc}$, includes evapotranspiration by a modification of equation \eref{5.1}:
+\begin{eqnarray}
+\label{eq:evapotranspiration}
+\left(\overline{w'q_v'}\right)_\textrm{sfc} &=& -C_h|\vec{V}|\left[\beta(z)q_v(z)-\beta_{\textrm{sfc}}q_{v,\textrm{sfc}}\right], \\
+\left(\overline{w'h_v'}\right)_\textrm{sfc} &=& -C_h|\vec{V}|\left[\beta(z)h_v(z)-\beta_{\textrm{sfc}}h_{v,\textrm{sfc}}\right],
+\end{eqnarray}
+where $\beta(z)$ and $\beta_{\textrm{sfc}}$ are introduced to account for evapotranspiration.
+
+\subsubsection{Handling fractional surface coverage}
+The current implementation of the turbulent mixing schemes allows for fractional land, ocean and sea ice coverages. The grid-box mean surface exchange coefficients of momentum and heat are defined as:
+\begin{eqnarray}
+\overline{u'w'}_\textrm{sfc} &=& \sum_{i=1}^{3} F_i 
+\left(C_{m}\left|\Vec{V}-\Vec{V}_{\textrm{sfc},i}\right|\right)_{i}\left[u(z)-u_{\textrm{sfc},i}\right] \\
+\overline{v'w'}_\textrm{sfc} &=& \sum_{i=1}^{3} F_i 
+\left(C_{m}\left|\Vec{V}-\Vec{V}_{\textrm{sfc},i}\right|\right)_{i}\left[v(z)-v_{\textrm{sfc},i}\right] \\
+\overline{w'h'}_\textrm{sfc} &=& \sum_{i=1}^{3} F_i 
+\left(C_{h}\left|\Vec{V}-\Vec{V}_{\textrm{sfc},i}\right|\right)_{i}\left[h(z)-h_{\textrm{sfc},i}\right]
+\label{eqn:coeff_sfc_h}
+\end{eqnarray}
+where $i$ indicates land, ocean and sea ice, respectively, $F_i$ is the surface type fractional cover, $h$ is the dry static energy, $\Vec{V}_{\textrm{sfc},i}=(u_{\textrm{sfc},i},v_{\textrm{sfc},i})$ is the velocity of the ocean surface current, while $\Vec{V}_{\textrm{sfc},i}=0$ over land and sea ice. The surface boundary condition for TKE is obtained analogously to momentum by evaluating Equation \eref{eqn:tke_sfc2} for each surface type and then aggregating. Likewise, the area-weighted grid-box mean friction velocity is then $u_* = \sum_{i=1}^{\nst} F_i \,u_{*,i}$. There is no surface flux of any hydrometeors over any surface type. Other tracers, e.g., aerosols or gas-phase chemical species, can have emission sources at the surface.
+
+
+
+\subsection{Numerical solution}
+\label{sec:numerics}
+The turbulent mixing parameterization is expressed in the height coordinate, $z$, however, ECHAM uses the pressure-based terrain following coordinate. One can then express the Equations \eref{eqn:reynolds_stress} and \eref{eq:1}:
+\begin{eqnarray}
+ \left(\dnd{\psi}{t}\right)_{\turb} 
+ = -\dnd{\overline{\omega'\psi'}}{p} 
+ = \dnd{}{p}\left[\rho gK_{\psi}\left(-\dnd{\psi}{z}\right)\right] 
+ \label{eqn:vdiff_eqn_cont}
+\end{eqnarray}
+
+%------------------------------------------------------------------------
+\subsubsection{Vertical discretization}
+%------------------------------------------------------------------------
+
+We first consider the vertical discretization of Eqn.~\eref{eqn:vdiff_eqn_cont}. ECHAM uses the hybrid vertical coordinate with Lorenz-type staggering. Horizontal wind, temperature and all tracers are defined 
+at the mid level of each vertical layer. A straightforward vertical discretization reads:
+
+%========================================
+% Vdiff equation, spatically discretized
+%++++++++++++++++++++++++++++++++++++++++
+{\footnotesize\begin{equation}\label{eqn:vdiff_rhs_disc}
+%\left(\dnd{\psi}{t}\right)_{\turb,k} = 
+ \dnd{}{p}\left[\rho gK_{\psi}\left(-\dnd{\psi}{z}\right)\right] =
+ \begin{cases}
+ %Top level
+ \dfrac{1}{\Delta p_k} \left[\,
+ \left(\rho g K_{\psi}\right)_{k+1/2}
+ \dfrac{\Delta\psi_{k+1/2}}{\Delta z_{k+1/2}}
+ \,\right]\;, & k=1\\[4mm]
+ %
+ %Interior levels
+ \dfrac{1}{\Delta p_k} \left[\,
+ \left(\rho g K_{\psi}\right)_{k+1/2}
+ \dfrac{\Delta\psi_{k+1/2}}{\Delta z_{k+1/2}}
+-\left(\rho g K_{\psi}\right)_{k-1/2}
+ \dfrac{\Delta\psi_{k-1/2}}{\Delta z_{k-1/2}} 
+ \,\right]\;, & k=2,...,\mbox{nlev}-1\\[4mm]
+ %
+ %Bottom level
+ \dfrac{1}{\Delta p_k} \left[\,
+ \left(\rho g\right)_{k+1/2}(\mbox{surface flux})
+-\left(\rho g K_{\psi}\right)_{k-1/2}
+ \dfrac{\Delta\psi_{k-1/2}}{\Delta z_{k-1/2}}
+ \,\right]\;, & k=\mbox{nlev}
+ \end{cases}
+\end{equation}}
+%++++++++++++++
+where $\Delta   p_{k} = p_{k+1/2} - p_{k-1/2},\ \Delta\psi_{k+1/2} = \psi_{k+1} - \psi_k$ and $\ \Delta   z_{k+1/2} =  z_{k} - z_{k+1}$. Note that $\Delta p_{k}$ and $\Delta z_{k+1/2}$ are both positive 
+by definition.
+
+%------------------------------------------------------------------------
+\subsubsection{Temporal discretization}
+%------------------------------------------------------------------------
+
+Now consider the temporal discretization. Since turbulent mixing is a very fast process compared to the typical time step used by global hydrostatic models, an implicit time stepping scheme is employed. To integrate the model from time instance $t-\Delta t$ to $t+\Delta t$, a trapezoidal method is used.
+The temporal derivative in Equation \eref{eqn:vdiff_eqn_cont} is approximated by:
+\begin{equation}\label{eqn:vdiff_time_disc}
+    \left(\dnd{\psi}{t}\right)_{\turb,k} =
+    \frac{\psi_k^{(t+\Delta t)}-\psi_k^{(t-\Delta t)}}{2\Delta t}\;.
+\end{equation}
+For Equation \eref{eqn:vdiff_rhs_disc}, the temporal average:
+  \begin{equation}\label{eqn:timavg}
+  \hat{\psi} = \alpha\;\psi^{(t+\Delta t)}+(1-\alpha)\;\psi^{(t-\Delta t)},
+  \end{equation}
+is used for the prognostic variable $\psi$ and all the other quantities are computed at the current time step $t\,$. Here $\alpha$ denotes the implicitness factor which is set to a value of 1.5. Note that the time-stepping scheme used to solve the vertical diffusion equation uses only the time steps $t-\Delta t$ and $t+\Delta t$, and not the actual time $t$. We use this notation because ECHAM in general applies a leap-frog time step scheme which involves all three time steps.
+
+
+%------------------------------------------------------------------------
+\subsubsection{The tri-diagonal system}
+%------------------------------------------------------------------------
+
+To keep the formulation compact, let
+
+%================================================
+% the unknown, and the upper and lower boundaries
+%++++++++++++++++++++++++++++++++++++++++++++++++
+{\footnotesize\begin{eqnarray}
+\tilde{\psi}_k &=& \hat{\psi}_k/\alpha \,,\quad k = 1, ..., \mbox{nlev} 
+\label{eqn:lae_unknown}
+\end{eqnarray}}
+%
+and define symbolically
+\begin{equation}\label{eqn:lae_boundary}
+ \tilde{\psi}_{0} = 0 \,,\quad
+ \tilde{\psi}_{\mbox{{\scriptsize nlev+1}}}={\psi}_\B{sfc}/\alpha \,.
+\end{equation}
+%+++++++++++++++++++++++++++++
+%  K* and boundary conditions
+Let 
+{\footnotesize\begin{eqnarray}
+K^*_{k+1/2} &=&
+\begin{cases}
+ 0\,, & k = 0\\[3mm]
+ \dfrac{\alpha 2\Delta t g\left(\rho K\right)_{k+1/2}}{\Delta z_{k+1/2}}, &
+ k=1, ..., \mbox{nlev - 1} \\[4mm]
+ \delta\alpha 2\Delta t g \rho_{k+1/2} C_{\psi}\left|\Vec{V}_k - \Vec{V}_{sfc}\right|\,, & k = \mbox{nlev}
+\end{cases}\label{eqn:coeff_kstar}
+\end{eqnarray}}
+where $\delta = 1$ if surface flux is considered, and $\delta = 0$ otherwise, for example for cloud water and cloud ice, and for horizontal winds if a slip boundary condition is desired. Consider first the simple case in which a grid cell is completely occupied by one surface type. Substitute Eqns.~\eref{eqn:timavg} and \eref{eqn:vdiff_time_disc} into \eref{eqn:vdiff_rhs_disc} and perform some further manipulation, we get
+%
+%=====================
+% Tri-diagonal system
+%+++++++++++++++++++++
+{\footnotesize\begin{eqnarray}
+%
+% upper levels
+-\frac{K^*_{k-1/2}}{\Delta p_k}\,\tilde\psi_{k-1} 
++\left(1+\frac{K^*_{k-1/2}}{\Delta p_k}+\frac{K^*_{k+1/2}}{\Delta p_k}\right)\,\tilde\psi_{k}
+-\frac{K^*_{k+1/2}}{\Delta p_k}\,\tilde\psi_{k+1} 
+= \frac{\psi^{(t-\Delta t)}_k}{\alpha}\,\,, k \le \mbox{nlev}-1 
+\label{eqn:lae_eqn}\\
+%
+% bottom level
+-\frac{K^*_{k-1/2}}{\Delta p_k}\,\tilde\psi_{k-1} 
++\left(1+\frac{K^*_{k-1/2}}{\Delta p_k}+\frac{K^*_{k+1/2}}{\Delta p_k}\beta_{k}\right)\,\tilde\psi_{k}
+-\frac{K^*_{k+1/2}}{\Delta p_k}\beta_{k+1}\,\tilde\psi_{k+1} 
+= \frac{\psi^{(t-\Delta t)}_k}{\alpha}\,\,, k = \mbox{nlev}
+\label{eqn:lae_eqn_btm}
+\end{eqnarray}}
+%++++++++++++++
+%
+A more general version of the bottom level equation~\eref{eqn:lae_eqn_btm} reads
+%
+% bottom level, flux form
+{\footnotesize\begin{eqnarray}
+-\frac{K^*_{k-1/2}}{\Delta p_k}\,\tilde\psi_{k-1} 
++\left(1+\frac{K^*_{k-1/2}}{\Delta p_k}\right)\,\tilde\psi_{k}
+-\frac{2\Delta t\left(\rho g\right)_{k+1/2}}{\Delta p_k}
+ {\mathcal F}_{k+1/2}&=& \frac{\psi^{(t-\Delta t)}_k}{\alpha}, k = \mbox{nlev}
+\label{eqn:lae_eqn_btm_fluxform}
+\end{eqnarray}}
+%
+If either the surface value $\tilde\psi_{k+1/2}$ in Equation \eref{eqn:lae_eqn_btm} 
+or the surface flux ${\mathcal F}_{k+1/2}$ in Equation \eref{eqn:lae_eqn_btm_fluxform} is known, then the system \eref{eqn:lae_boundary} -- \eref{eqn:lae_eqn_btm_fluxform} form a tri-diagonal linear algebraic system with the unknowns being $\tilde\psi_{k}\,$, $(k = 1,\dots,\mbox{nlev})$. Gauss-elimination, followed by back substitution is used to solve the linear problem. After obtaining the this, one can derive the solution: 
+{\footnotesize\begin{eqnarray}
+  {\psi}_k^{\left(t+\Delta t\right)} &=& 
+  \tilde\psi_{k} + \left(1-1/\alpha\right){\psi}_k^{(t-\Delta t)}\\
+  \left(\dnd{\psi}{t}\right)_{\turb,k} &=&
+  \frac{\psi_k^{(t+\Delta t)}-\psi_k^{(t-\Delta t)}}{2\Delta t} \,=\,
+  \dfrac{\tilde\psi_{k} - \psi_k^{(t-\Delta t)}/\alpha}{2\Delta t}
+\end{eqnarray}}
+%++++++++++++++
+
+\noindent for all the layers $k = 1,\dots,\mbox{nlev}\,$.
+
+
+\subsection{Solving the TKE-equation}
+The TKE equation \eref{eqn:TKE_prog} is solved in two steps. First, the local terms, shear production, buoyancy and dissipation terms are applied, second, the non-local vertical transport. 
+
+\noindent{\bf Step 1}: The TKE equation can be rewritten using the closure assumptions to:
+{\small\begin{equation}
+\dnd{E}{t} = \underbrace{\left\{
+             lS_m\left[\left(\dnd{u}{z}\right)^{\!2}\!+\!\left(\dnd{v}{z}\right)^{\!2}\right]
+            -lS_h\left(\frac{g}{\theta_v}\dnd{\theta_v}{z}\right)
+            \right\}}_{\equiv{B}}\sqrt{E}
+           -\underbrace{\left(S_{Nm}^{-3}l\right)^{-1}}_{\equiv{C}}\sqrt{E^3} \,.
+\end{equation}}
+The budget equation can be converted into an equation of $\sqrt{E}$:
+{\small\begin{equation}
+\dnd{\sqrt{E}}{t} = \frac{{B}}{2} - \frac{{C}}{2} \left(\sqrt{E}\right)^2 \;,
+\end{equation}}
+and discretized using implicit time stepping for $\sqrt{E}$ and explicit steps for ${B}$ and ${C}$:
+{\small\begin{equation}
+\frac{\sqrt{E}^{\,(*)} - \sqrt{E}^{(t-\Delta t)}}{2\Delta t} 
+= \frac{{B}^{(t)}}{2} - 
+  \frac{{C}^{(t)}}{2} \left(\sqrt{E}^{\,(*)}\right)^2 \;.
+\end{equation}}
+The equation has an analytical solution reading
+{\small\begin{equation}\label{eqn:tke_star}
+\sqrt{E}^{\,(*)} = \frac{-1+
+\sqrt{1+2\Delta t\,{C}\left(2\Delta t\,{B}+2\sqrt{E}^{(t-\Delta t)}\right)}}{2\Delta t\,{C}}\;.
+\end{equation}}
+%For Eqn.~\eref{eqn:tke_star} all quantities are computed at vertical layer interfaces, 
+%i.e., $k+1/2, k=1,...,N-1$.
+%
+
+\vspace{4mm} %---------- turbulent transport ----------
+\noindent{\bf Step 2}: 
+After obtaining the intermediate value $\sqrt{E}^{\,(*)}$,
+the effect of turbulent transport is taken into account by solving the equation
+{\small\begin{equation}
+ \dnd{E}{t} = -\dnd{\overline{w'E}}{z}.
+\end{equation}}
+The turbulent flux is parameterized in the same way as for the other prognostic variables. Bearing in mind that $\sqrt{E}^{\,(*)}$ is already available, and that the equation needs to be solved at layer interfaces, we get the following discrete equation:
+{\small\begin{eqnarray}
+\frac{E^{\,(t+\Delta t)}_{k+1/2} - E^{\,(*)}_{k+1/2}}{2\Delta t} =
+\frac{g}{\Delta p_{k+1/2}}\left[\,
+\overline{\left(\rho\,K_\B{tke}\right)}^z_{k+1}\,\,
+\frac{\Delta\hat{E}_{k+1}}{\Delta z_{k+1}}
+-\overline{\left(\rho\,K_\B{tke}\right)}^z_{k}\,\,
+\frac{\Delta\hat{E}_{k}}{\Delta z_{k}}\,\right]
+\,, k = 1, \dots, \text{nlev}-1.
+\label{eqn:vdiff_tke_disc}
+\end{eqnarray}}
+%+++++++++++++
+%
+with {\small$
+\Delta p_{k+1/2}  = p_{k+1} - p_{k}\,,\;
+\Delta\hat{E}_{k} = \hat{E}_{k+1/2} - \hat{E}_{k-1/2} \,,\;
+\Delta z_{k} = z_{k-1/2} - z_{k+1/2} \,.$}
+The notation $\overline{()}^z$ 
+denotes a simple arithmetic averaging from half levels to full levels.
+The exchange coefficients are
+%
+%==========================
+% exchange coeff. for TKE
+%++++++++++++++++++++++++++
+{\small\begin{equation}\label{eqn:coeff_K_tke}
+\left(K_\B{tke}\right)_{k+1/2} = \begin{cases}
+0 & \text{for } k = 0 \\
+l_{k+1/2}\,\left(S_{m}\right)_{k+1/2}\,\sqrt{E}^{(*)}_{k+1/2} 
+& \text{for } k = 1, \dots, \text{nlev-1}\\
+(K_m)_\B{sfc} & \text{for } k = \text{nlev}
+\end{cases}
+\end{equation}}
+Using the boundary condition for TKE, Equation \eref{eqn:tke_sfc2}, it is now possible to solve the TKE equation.
+
+
+
+\subsubsection{Solving for virtual dry static energy and specific humidity surface fluxes}
+
+For these two variables we account for evapotranspiration by Equation \eref{eq:evapotranspiration} in the vertical diffusion equation Equation \eref{eqn:lae_eqn}. This is solved separately for each surface type when performing the Gaussian elimination for the lowest model level. The solutions, $\tilde{\psi}_{\B{nlev},i}\,$, are then aggregated by:
+\begin{eqnarray}
+ \tilde{\psi}_\B{nlev} = 
+ \frac{\sum_{i=1}^{3} F_i\,K^*_{nlev+1/2,i}\,\tilde{\psi}_{\B{nlev},i}\beta_{nlev,i}}
+      {\sum_{i=1}^{3} F_i\,K^*_{nlev+1/2,i}\beta_{nlev,i}}
+\label{eqn:psi_nlev_gbm}
+\end{eqnarray}
+with $K^*_{nlev+1/2,i}$ computed from Eqn.~\eref{eqn:coeff_kstar} and $\rho_{k+1/2} = p_{\B{sfc}}/(R_dT_{v,\B{nlev}})$. The resulting grid-box mean value $\tilde{\psi}_\B{nlev}$ is then used in the back-substitution to obtain the solution in the upper layers. Equation \eref{eqn:psi_nlev_gbm} ensures a conservative aggregation of surface fluxes.
+
+%\subsection{Code implementation}
+%The turbulent mixing as described above is done in the subroutine vdiff.f90. 
+%VDIFF
+
+%Integration with JSBACH
+
+%Diagnostic output

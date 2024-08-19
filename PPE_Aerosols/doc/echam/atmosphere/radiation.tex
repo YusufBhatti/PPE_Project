@@ -1,0 +1,220 @@
+
+\newpage
+\newcommand{\Iup}{I^{\uparrow}}
+\newcommand{\Idn}{I^{\downarrow}}
+
+\section{Radiative Transfer}
+
+Beginning with ECHAM 6.2 radiative transfer is computed using PSrad \citep{pincus2013}, a two-stream model that descends from the RRTMG codes \citep{mlawer97,iacono2008} developed by Atmospheric and Environmental Research (AER). Irradiances are computed separately for the longwave and shortwave portions of the spectrum. Scattering is neglected in longwave calculations and sources internal to the atmosphere are neglected in shortwave calculations, both of which simplify the resulting equation sets. Spectral discretization is determined by the ``correlated-$k$'' method used to treat absorption by gases, so that upward and downward irradiances are calculated over a predetermined number of pseudo-wavelengths denoted by $\tilde{\nu}_g$. Below we describe the correlated-$k$ method and why it is adopted, the longwave and shortwave radiative transfer solvers, their required input data and how that is used to determine the radiative (or optical) properties of the atmosphere and surface, as well as details of the numerical implementation.
+
+Below we adopt the radiance/irradiance terminology because it is shorter than referring to radiative intensity/flux.  The radiance at a point is a function of the incident angle of the radiative beam passing through that point, the irradiance is the sum of all beams (integral over angles in the hemisphere) that pass through a unit area.
+
+\subsection{Spectral discretization: the correlated $k$ method for gaseous absorption}
+
+The dynamical equations are sensitive to the divergence of broadband irradiances, with most of the radiant energy being carried in the wavelength interval ranging from 1 mm to 100 nm, and the break between the longwave and shortwave bands is roughly 4 microns.  Formally the broadband irradiance is defined by the intergral of the irradiance spectral density over the wavelengths of interest, so that if one is interested in wavelenghts $\lambda_1 < \nu \le \lambda_2$
+\[
+I = \int_{\lambda_1}^{\lambda_2} I_\lambda \mathrm{d}\lambda.
+\]
+This integral can be approximated by a sum over discrete frequencies, but because the spectral properties of the atmosphere vary strongly as a function of wavelength, with nearly singular line-like features at specific wavelengths, the required number of frequencies to well approximate the integral is prohibitively large given the balance between desired accuracy and computational resources.  
+
+To address this shortcoming the spectrum is divided into bands, and within a band the band-averaged irradiance is approximated by a sum over a discrete set of pseudo wavelengths, $\tilde{\lambda}_{b,g},$ where we have chosen $b$ to index the band and $g$ to index the pseudo wavelength for a particular band.    Psuedo wavelengths are defined by discretizing the distribution of the absorption features, $g_b(k),$ within a band, where here $k$ denotes the magnitude of the absorption.  This method effectively defines pseudo-absorbers that represent the collective effects of different absorbers discretized on the basis of their absorption strength rather than on their basis of the frequency at which they absorb.   The method assumes that through the column over which the radiative transfer is performed the distributions are correlated, so that wavelengths which are strongly absorbing are strongly absorbing throughout the entire column --- hence the correlated $k$ nomenclature.   The correlation requirement can be better satisfied by adopting a band structure that isolates particular absorption features.  Because the discretization is based on the distribution of absorption strengths within a band $k(g_b)$, which is inverted cumulative distribution function, it is smoother than the absorption spectrum $k(\lambda)$ and can be approximated by a smaller number of discrete terms.  Thus it is computationally more efficient.  Because the discretisation is over the cumulative distribution, $g(k),$ as a function of absorption one often speaks of the radiative transfer being calculated over $g$-points, what we call pseudo-wavelengths, $\tilde{\lambda}_{b,g},$ above.
+
+Thus in the correlated $k$-method the integrated irradiance, $I_b,$ in some band, $b,$  is approximated by the sum, such that
+\begin{equation}
+I_b = \sum_{g=1,N_{b}} w_{b,g} I_{b,g} \quad \text{where} \quad  \sum_{g=1,n_{g,b}} w_{b,g} = 1.
+\end{equation}
+The weights, $w_{b,g}$ are chosen based on the relative contribution of each pseudo frequency to the broadband irradiance.  
+
+\begin{table}
+\begin{center}
+\small
+\begin{tabular}{rrrll} \hline 
+$\lambda_b^{-1}$ & $b$ & $N_b$ & \multicolumn{2}{c}{Absorbers} \\ 
+$[cm^{-1}]$ &  &  &  $p>100$ hPa & $p<100$ hPa \\ \hline \hline
+     10-250 &  1 &  8 & H$_{2}$O, SC, FC                & H$_{2}$O, FC \\
+    250-500 &  2 & 14 & H$_{2}$O, SC, FC               & H$_{2}$O, FC \\
+    500-630 &  3 & 16 & H$_{2}$O, CO$_{2}$, N$_{2}$O, SC, FC   & H$_{2}$O, CO$_{2}$, N$_{2}O$, FC\\ 
+    630-700 &  4 & 14 & H$_{2}$O, CO$_{2}$, SC      & O$_{3}$, CO$_{2}$ \\
+    700-820 &  5 & 16 & H$_{2}$O, CO$_{2}$, SC      & O$_{3}$, CO$_{2}$ \\
+    820-980 &  6 &  8 & H$_{2}$O, CO$_{2}$, CFC11, CFC12, SC & CFC11, CFC12  \\
+  980-1080 &  7 & 12 & H$_{2}$O, O$_{3}$, CO$_{2}$, SC       & O$_{3}$, CO$_{2}$ \\ 
+1080-1180 &  8 &   8 & H$_{2}$O, CFC12, CFC22, CO$_{2}$, N$_{2}$O, SC & O$_{3}$, CFC12, CFC22, CO$_{2}$, N$_{2}$O\\ 
+1180-1390 &  9 &  12 & H$_{2}$O, CH$_{4}$, N$_{2}$O, SC      & CH$_{4}$ \\ 
+1390-1480 & 10 &   6 & H$_{2}$O                           & H$_{2}$O \\ 
+1480-1800 & 11 &   8 & H$_{2}$O, SC                     & H$_{2}$O \\ 
+1800-2080 & 12 &   8 & H$_{2}$O, CO$_{2}$, SC      & -        \\ 
+2080-2250 & 13 &   4 & H$_{2}$O, N$_{2}$O, SC      & -        \\
+2250-2380 & 14 &   2 & CO$_{2}$, SC                      & CO$_{2}$ \\
+2380-2600 & 15 &   2 & N$_{2}$O, CO$_{2}$, SC       & -        \\ 
+2600-3000 & 16 &   2 & H$_{2}$O, CH$_{4}$, SC       & -        \\ \hline
+\end{tabular}
+\end{center}
+\rm
+\caption[Band structure for longwave radiative transfer]{Band structure for longwave radiative transfer:  Wavenumbers in band, band number, number of g points in each band, gaseous absorbers used in high and low pressure regions of the atmosphere, SC and FC denote  the self and foreign continuum\label{tbl:RRTMG-LWBands}}
+\end{table}
+
+The band structure used by the RRTMG $k$-distribution (and by PSrad, which adopts this distribution directly)  is given in Table \ref{tbl:RRTMG-LWBands} and \ref{tbl:RRTMG-SWBands} for the long and shortwave spectral regions respectively.  Overall the method requires calculation at 140 $g$-points in the longwave, and 112 $g$-points in the shortwave.  Note that band 29, which is treated by the shortwave solver, is out of sequence (having smaller wavenumbers than band 28), this arises because it was added later to treat the contribution from the solar source in the regions covered by bands 6-15 in the longwave.
+
+\begin{table}
+\begin{center}
+\small
+\begin{tabular}{rrrll} \hline 
+$\lambda_b^{-1}$ & $b$ & $N_b$ & \multicolumn{2}{c}{Absorbers} \\ 
+$[cm^{-1}]$ &  &  &  $p>100$ hPa & $p<100$ hPa \\ \hline \hline
+     820- 2600 & 29 & 12 & H$_{2}$O, CO$_{2}$, SC, FC  & H$_{2}$O, CO$_{2}$  \\
+    2600- 3250 & 16 &  6  & H$_{2}$O, CH$_{4}$, SC, FC  & CH$_{4}$  \\
+    3250- 4000 & 17 & 12 & H$_{2}$O, CO$_{2}$, SC, FC  & H$_{2}$O, CO$_{2}$  \\
+    4000- 4650 & 18 &   8 & H$_{2}$O, CH$_{4}$, SC, FC  & CH$_{4}$  \\ 
+    4650- 5150 & 19 &   8 & H$_{2}$O, CO$_{2}$, SC, FC  & CO$_{2}$  \\
+    5150- 6150 & 20 & 10 & H$_{2}$O , SC, FC                 & H$_{2}$O \\
+    6150- 7700 & 21 & 10 & H$_{2}$O, CO$_{2}$, SC, FC  & H$_{2}$O, CO$_{2}$  \\
+    7700- 8050 & 22 &   2 & H$_{2}$O, O$_{2}$, SC, FC    & O$_{2}$  \\
+   8050-12850 & 23 & 10 & H$_{2}$O , SC, FC                 & - \\
+ 12850-16000 & 24 &   8 & H$_{2}$O, O$_{2}$, O$_{3}$, SC, FC    & O$_{2}$, O$_{3}$  \\ 
+ 16000-22650 & 25 &   6 & H$_{2}$O, O$_{3}$    & O$_{3}$  \\ 
+ 22650-29000 & 26 &   6 & -                            & - \\
+ 29000-38000 & 27 &   8 & O$_{3}$                   & O$_{3}$  \\ 
+ 38000-50000 & 28 &   6 &O$_{2}$, O$_{3}$       & O$_{2}$, O$_{3}$  \\ \hline
+\end{tabular}
+\end{center}
+\rm
+\caption[Band structure for shortwave radiative transfer]{Band structure for shortwave radiative transfer:  Wavenumbers in band, band number, number of g points in each band, gaseous absorbers used in high and low pressure regions of the atmosphere, SC and FC denote  the self and foreign continuum\label{tbl:RRTMG-SWBands}}
+\end{table}
+
+\subsection{Shortwave}\label{sec_shortwave}
+
+In the shortwave part of the spectrum, where sunlight is the external source of radiation and internal sources are negligible the equations for two stream radiative transfer is written as 
+\begin{eqnarray}
+\label{eq:sw-two-stream}
+ \frac{\mathrm{d} \Iup}{\mathrm{d}\tau}  & = &\alpha \Iup - \beta\Idn  - \gamma^{\uparrow} \frac{S}{\mu_0} \\
+ \frac{\mathrm{d} \Idn}{\mathrm{d}\tau}  & = &\beta \Iup  - \alpha \Idn + \gamma^{\downarrow} \frac{S}{\mu_0} \\
+ \frac{\mathrm{d}S}{\mathrm{d}\tau}        & =  &-\frac{S}{\mu_0}.
+\end{eqnarray}
+These equations describes the changes in direct (collimated) solar radiation $S$ and in the diffuse upward and downward irradiances $\Iup$ and $\Idn$ as a function of the optically-relevant vertical coordinate optical depth ($\tau$). The factors $\alpha, \beta$ and $\gamma^{\uparrow,\downarrow}$  parameterize how the scattering effects diffuse irradiance, and are functions the optical properties of the atmosphere (single scattering albedo $\tilde{\omega}$ and asymmetry factor $g$, not to be confused with the cumulative distribution function for the absorption) as well as the solar zenith angle $\mu_0$. 
+
+The relative sizes of cloud drops and the wavelengths of solar radiation mean that diffraction causes much of the light that interacts with clouds to be scattered almost directly forward. In ECHAM, as in most applications, the optical properties of the atmosphere are ``delta-scaled'' to remove this contribution. (Delta-scaling dates to \citet{fritz1954} and became widespread with the introduction of the delta-Eddington approximation of  \citet{josephEtAl1976}). Delta-scaling replaces the original optical properties $\tau$, $\tilde{\omega}$, and $g$ with their scaled counterparts: 
+\begin{equation}
+\label{eq:delta-scale}
+\begin{split}
+\tau_{\delta} & = (1 - \tilde{\omega} f) \tau \\
+\tilde{\omega}_{\delta} & = \tilde{\omega} (1 - f)  / (1 - \tilde{\omega} f)  \\
+g_{\delta} & = (g - f) / (1 - f) 
+\end{split} 
+\end{equation}
+where the forward scattering fraction $f$ is often defined as $f \equiv g^2$.  Rescaling distorts the partitioning of the downward irradiance between the direct and the diffuse beam, it leads to a good representation of the total irradiance.  To the extent that a more accurate representation of the diffuse irradiance is desired it can be estimated by rescaling the direct irradiance and subtracting this from the net.
+
+The two stream equations (\ref{eq:sw-two-stream}) are general \citep[e.g.,][]{meadorWeaver80} but the precise values of the coefficients depend on which particular flavor of two stream algorithm one adopts.  PSrad follows RRTMG in adopting  the practical improved flux method (PIFM) developed by \citet{zdunkowskiEtAl80}, for which
+\begin{equation}
+f = g^2 \quad \text{and} \quad \beta =  \tilde{\omega}\frac{3 (1-g)}{4}
+\end{equation}
+and
+\begin{eqnarray}
+\alpha & = & \beta + 2(1-\tilde{\omega})   \\
+\gamma^\uparrow & = & \beta \left(\frac{2}{3}(1+g) -\mu_0 \right)\\
+\gamma^\downarrow & = & \beta \left(\frac{2}{3}(1+g) +\mu_0\right)
+\end{eqnarray}
+
+To close the mathematical description one must specify at the (total) radiative properties of the atmosphere (in ECHAM, this includes contributions from gases, clouds, and aerosols),  the cosine of the solar zenith angle, and boundary conditions (the top-of-atmosphere incident solar radiation and the surface albedos for direct and diffuse radiation). This description must be determined for each spectral quadrature point. The two stream equations then provide the reflectance and transmittance for direct (collimated) radiation ($R_i, T_i$) and diffuse radiation ($r_i, t_i$) for each layer $i$.  
+
+The two stream equations are solved by specifying a transfer matrix which expresses the transmission and reflectance of diffuse and direct radiation across or from any set of contiguous levels.   The total upward and downward irradiance at any level can then be expressed directly as a function of the reflectance and transmission coefficients for the contiguous layers above and below.  Following \cite{OreopoulosBarker99} 
+\begin{eqnarray}
+\Iup_i & = &\mu_0 S \left\{ \frac{T^{\mathrm{dir}}_{1,i-1} R_{i,N} + \left[T_{1,i-1} - T^{\mathrm{dir}}_{1,i-1} \right]r_{i,n}}{1-r_{i-1,1}r_{i,N}} \right\} \\
+\Idn_i & = &\mu_0 S \left\{ T^{\mathrm{dir}}_{1,i-1}  + \frac{T^{\mathrm{dir}}_{1,i-1} R_{i,N} r_{1,i-1}+ \left[T_{1,i-1} - T^{\mathrm{dir}}_{1,i-1} \right] } {1-r_{i-1,1}r_{i,N}} \right\},
+\end{eqnarray}
+where $i = 1, 2, \ldots, N$ with $i=1$ denoting the upper most level.
+The reflectance and transmission of the direct beam are given
+recursively. Generalizing from the two layer system presented
+by~\cite{OreopoulosBarker99} results in the following equations for
+the transmittance and reflectance with $R_j \equiv R_{j,j}$, $T_j
+\equiv T_{j,j}$, $r_j\equiv r_{j,j}$, and $t_j\equiv t_{j,j}$: 
+\begin{eqnarray}
+T_{1,i-1} & = & T_{1,i-2}^{\mathrm{dir}} T_{i-1} + \frac{t_{i-1} \left\{ \left[ T_{1,i-2} -  T_{1,i-2}^{\mathrm{dir}} \right] +  T_{1,i-2}^{\mathrm{dir}}  R_{i-1}   r_{1,i-2} \right\}}{1- r_{1,i-2}  r_{i-1} } \\
+R_{i,N} & = & R_{i,N-1} + \frac{ t_{1,N-1}\left\{\left[ T_{i,N-1} -  T_{i,N-1}^{\mathrm{dir}} \right]r_N +  T_{i,N-1}^{\mathrm{dir}}  R_N \right\}}{1- r_{i,N-1}  r_{N} }
+\end{eqnarray}
+with 
+\begin{equation}
+ T_{1,i-1}^{\mathrm{dir}}= \prod_{j=1}^{i-1} \exp\left( \frac{-\tau'_j}{\mu_0}\right), 
+\end{equation}
+denoting the transmission of the direct beam only.  Here a single subscript indicates the reflectance or transmittance of a single layer and two subscripts the cumulative property of all layers between the two index values. The total transmission and reflectance of the direct beam also depends on the transmission and reflectance of the diffuse irradiance, which is given for a composite layer as follows:
+\begin{equation}
+t_{i,N-1} = \frac{t_{i,N-2}t_{N-1}}{1-r_{i,N-2}r_{N-1}}, \quad \text{and} \quad r_{1,i-1} = r_{1,i-2} + \frac{t_{1,i-2}^2 r_{i-1}}{1-r_{1,i-2}r_{i-1}}.
+\end{equation}
+Thus given input data the bulk of the radiative solver is spent working upward and downward through all the layers to compute the reflectance and transmission coefficients for each contiguous block of layers that is bounded either by the top of the atmosphere above, or the surface below.  Because these transmission and reflectance coefficients depend on the radiative properties of the atmosphere, they must be computed for each of the $g$-points, which corresponds to 112 calls to the RRTMG shortwave solver.
+
+\subsubsection{Zenith Angle Correction}
+
+The actual shortwave computation is based on an effective solar zenith angle $\theta _{0,\mathrm{eff}}=\arccos(\mu _{0,\mathrm{eff}})$ which accounts for curvature of the atmosphere and its effect on the length of the optical path of the direct solar beam with respect to a plane parallel atmosphere following \cite{paltridge76}. Altitude dependencies as well as refraction are disregarded.  This correction is given as
+\begin{equation}
+\mu _{0,\mathrm{eff}} =\frac{0.001277}{\sqrt{\mu _{0}^{2}+0.001277
+            \cdot (2+0.001277) }-\mu _{0}}
+\end{equation}
+where the numerical factor is the ratio of scale height of the atmosphere and the mean radius of the earth.
+The correction provided by $\mu _{0,\mathrm{eff}}$ is such that the effective solar zenith angle remains lower than $88.56^{\circ }$, so that the shortwave transfer calculation has a minimum irradiation of $2.5\%$ of
+$I_{0}$, except for the variation due to the sun Earth distance.  At zero solar zenith angle $\mu _{0,\mathrm{eff}}$ is identical to $\mu _{0}$.
+
+\subsection{Longwave radiation} 
+
+The treatment of radiative transfer by the longwave solver differs from that in the shortwave by the presence of diffusive sources within the atmosphere, the replacement of the direct external source (the solar beam) with a diffuse external source (Earth's surface). Scattering is neglected, which considerably simplifies the radiative transfer so that for each layer the broadband radiance within a wavelength interval is
+\begin{equation}
+R = \int _{\lambda _{1}}^{\lambda _{2}} \,\mathrm{d}\lambda \left\{ R_{0}(\lambda ) +\int _{t_{v}}^{1}(B(\lambda ,T(t'_{\lambda }) ) -R_{0}(\lambda ) ) \,\mathrm{d}t'\right\} ,
+\end{equation}
+where $R_{0}(\lambda ) $ is the radiance entering the layer and $B(\lambda ,T(t'_{\lambda }) ) $ is the Planck function for the temperature, $T,$ at a point along the optical path. Transmittance, $t$ is used as the coordinate along the path and depends on $\lambda.$
+ 
+In the correlated-$k$ method adopted by RRTMG the integral over wavenumbers is replaced by an integration over the cumulative distribution function, such that the integral for the broadband radiance can be more efficiently replaced by a sum, such that
+\begin{equation}
+R = \sum _{j}w_{j}\cdot \left\{B_{\mathrm{eff},j}+(R_{0,j}-B_{\mathrm{eff},j}) \cdot \exp (-k_{j}\cdot \frac{\rho \delta z}{\cos \phi }) \right\} , \quad \text{where}\quad \sum _{j}w_{j}=\lambda_2-\lambda_1 .
+\end{equation}
+where $B_{\mathrm{eff},j} = B_{\mathrm{eff}}(g,T_{g}) $ is an effective Planck function valid for the group of wavenumbers described by a given $g, $ and is allowed to vary linearly with the layer's transmittance  so as to maintain continuity of the flux across layer boundaries, the absorption coefficient for a given $g$-point,  $k_j = k(g,p,T) $ is dependent on the ambient conditions.   The diffusivity factor $r$ is the secant of  $\phi$.  For bands, 1, 4 and 10-16 the standard diffusivity approximation, with $r=1.66$ is employed.  For the remaining bands $r$ varies with the diffusivity as a function of the water vapor path, $\Upsilon,$ such that
+\begin{equation}
+r = \max\left[1.5,\min\left[1.8, a_0 + a_1 \exp\left(a_w\Upsilon\right)\right]\right]
+\end{equation}
+with constants $a_i$ dependent on band.
+
+\subsection{Radiative Properties}
+
+To perform the radiative transfer calcuations the radiative properties of the atmosphere must be known.  These can be derived given knowledge of the atmospheric state and composition.   The state is determined by the humidity and the temperature of the atmosphere, the composition requires a specification of the amount of radiatively active gases, aerosol particles, cloud liquid and ice.  Precipitating liquid and ice does not presently contribute to the radiative transfer.
+
+%\subsubsection{Gases}
+%\subsubsection{Aerosols}
+
+%\subsubsection{Clouds}
+
+\subsection{Treatment of partial cloudiness}
+
+Two-stream theory is based on the assumption of a homogeneous atmosphere, but columns within ECHAM6 may contain significant internal variability through the presence of partly cloudy layers. 
+
+Partly-cloudy layers require the specification of an ``overlap assumption'' describing the vertical structure of cloudiness -- essentially a prescription as to whether clouds in a given layer lie directly beneath clouds above them or not.  ECHAM6 uses the ``maximum-random'' overlap assumption of \cite{GeleynHollingsworth1976}, in maximum overlap is applied contiguous partly-cloudy layers and random overlap applied when partly-cloudy layers are separated by clear skies.
+
+If only a single layer within a column were partly cloudy one could compute irradiance for clear- and cloudy-skies and weight the result by the cloud fraction. This solution quickly becomes impractical when $n > 1$ layers are partly cloudy, since the number of possible combinations of cloud and clear sky increases as $n!+2$.  Fully sampling the configuration space would make the treatment of radiative transfer in inhomogeneous atmospheres prohibitively expensive.  
+
+PSrad treats cloud overlap using the Monte Carlo Independent Column Approximation \citep[McICA, see][]{pincusEtAl2003}. Discrete samples are constructed, some of which contain cloud and some not, such that a large ensemble reproduces the distribution of cloud fraction at each model level and the overlap assumption being applied. One random sample is constructed for each pseudo-wavelength and spectral integration proceeds as usual. The result is that individual calculations contain unbiased estimates of the all-sky irradiance with random noise superimposed. 
+
+Care must be taken in the generation of random samples for McICA so that results do not depend on the assignment of columns to processors, to the time since the last restart, etc. To this end a high-quality random number generator is seeded at the beginning of each radiation calculation using model time and absolute geographic location. 
+ 
+\subsection{Implementation and Numerical Aspects}
+
+For efficiency reasons the radiative transfer computation in ECHAM6 is called less frequently than the dynamics and other parameterizations. Typically the radiation time step $\Delta t_{\mathrm{rad}}$ is set to 2 hours.  At each radiation time step $t_{\mathrm{rad}}$ the transfer calculation is executed at all grid points of the Gaussian grid used in the GCM.  At each grid point the scheme provides profiles of the net radiative irradiances $I_{\mathrm{SW}}$ and $I_{\mathrm{LW}}$ in the shortwave and longwave spectrum, respectively, based on the profiles of absorber mixing ratios $q_{i}$ and temperature $T$ at the previous time step $t_{\mathrm{rad}}-\Delta t$. For the shortwave computation the radiative transfer calculation uses the effective solar zenith angle $\vartheta _{0,{\textrm eff}}$ at time $t_{\mathrm{rad}}+\Delta t_{\mathrm{rad}}/2$, i.e. halfway across the following radiation time interval, which includes a correction for high zenith angles that maintains a minimal irraditation for zenith angles exceeding $90^{\circ }$. This correction is necessary to provide non-zero irradiances in areas which are crossed by the day/night terminator during the radiation time interval.
+
+\begin{equation}
+I_{\mathrm{LW}}(t_{\mathrm{rad}}) = I_{\mathrm{LW}} (q_{i}(t_{\mathrm{rad}}-\Delta t) , T(t_{\mathrm{rad}}-\Delta t)) 
+\end{equation}
+
+\begin{equation}
+I_{\mathrm{SW}}(t_{\mathrm{rad}}) = I_{\mathrm{SW}}(q_{i}(t_{\mathrm{rad}}-\Delta t) , T(t_{\mathrm{rad}}-\Delta t) ,
+\vartheta _{0eff}(t_{\mathrm{rad}}+\Delta t_{\mathrm{rad}}/2))
+\end{equation}
+
+The resulting longwave irradiances are kept constant over the whole radiation time interval, while the shortwave irradiances are corrected for the local change in solar irradiation at the top of the atmosphere within the radiation time interval. The computation of the current shortwave irradiance is based on the local zenith angle at time $t$ with a cut-off at $90^{\circ }$ zenith angle, $\vartheta_{0,\mathrm{eff}}.$
+
+\begin{equation}
+I_{\mathrm{LW}}(t_{\mathrm{rad}} \leq t < t_{\mathrm{rad}}+\Delta t_{\mathrm{rad}}) = I_{\mathrm{LW}}(t_{\mathrm{rad}}) 
+\end{equation}
+
+\begin{equation}
+I_{\mathrm{SW}}(t_{\mathrm{rad}} \leq t < t_{\mathrm{rad}}+\Delta t_{\mathrm{rad}})
+= I_{\mathrm{SW}}(t_{\mathrm{rad}})\cdot\frac{F_{0}(t\vartheta _{0})}{F_{0}(\vartheta _{0,\mathrm{eff}})}
+\end{equation}
+
+PSrad also implements the capability of using predetermined subsets of spectral quadrature points as a proxy for broadband calculations following \cite{pincus2013}. When this choice is invoked the frequency of radiation calculations should match (or be a small multiple of) the ``physics time step.'' 
+
+The heating rate $Q_{\mathrm{rad}}$ in a cell is computed from the difference of the total net irradiance $F_{\mathrm{rad}}=I_{\mathrm{LW}}+I_{\mathrm{SW}}$ at the lower and upper boundary of a cell,  and the heat capacity $C_{p}$ of moist air\footnote{Within the radiation time interval the longwave cooling $Q_{\mathrm{LW}}(t) $ in a cell of constant mass may vary slightly due to the time dependence of the water vapour mixing ratio $q_{\mathrm{v}}(t) $. In dry air, as for instance above the troposphere, $Q_{\mathrm{LW}}(t) $ is essentially constant over the radiation time interval.}. The mass of air is derived from the pressure difference between the lower and upper boundary of a cell, making use of the hydrostatic assumption.

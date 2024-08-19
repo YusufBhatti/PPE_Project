@@ -1,0 +1,12 @@
+#! @SHELL@
+set -e
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+for ntasks in 1 2 3 4 ; do
+  @abs_top_builddir@/libtool --mode=execute \
+    @MPI_LAUNCH@ -n $ntasks @abs_builddir@/test_ut
+done
+#
+# Local Variables:
+# mode: sh
+# End:
+#

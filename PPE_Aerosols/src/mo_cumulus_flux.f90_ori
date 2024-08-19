@@ -1,0 +1,143 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+MODULE mo_cumulus_flux
+
+  USE mo_kind, ONLY: dp
+
+  IMPLICIT NONE
+
+  ! ----------------------------------------------------------------
+  !
+  ! module *mo_cumulus_flux* - parameters for cumulus massflux scheme
+  !
+  ! ----------------------------------------------------------------
+
+  REAL(dp) :: entrpen      !    entrainment rate for penetrative convection
+  REAL(dp) :: entrscv      !    entrainment rate for shallow convection
+  REAL(dp) :: entrmid      !    entrainment rate for midlevel convection
+  REAL(dp) :: entrdd       !    entrainment rate for cumulus downdrafts
+  REAL(dp) :: centrmax     !
+  REAL(dp) :: cmfctop      !    relat. cloud massflux at level above nonbuoyanc
+  REAL(dp) :: cminbuoy     !    minimum excess buoyancy
+  REAL(dp) :: cmaxbuoy     !    maximum excess buoyancy
+  REAL(dp) :: cbfac        !    factor for std dev of virtual pot temp
+  REAL(dp) :: cmfcmax      !    maximum massflux value allowed for
+  REAL(dp) :: cmfcmin      !    minimum massflux value (for safety)
+  REAL(dp) :: cmfdeps      !    fractional massflux for downdrafts at lfs
+  REAL(dp) :: rhcdd        !    relative saturation in downdrafts
+  REAL(dp) :: cprcon       !    coefficients for determining conversion
+                       !    from cloud water to rain
+  INTEGER :: nmctop    !    max. level for cloud base of mid level conv.
+  LOGICAL :: lmfpen    !    true if penetrative convection is switched on
+  LOGICAL :: lmfscv    !    true if shallow     convection is switched on
+  LOGICAL :: lmfmid    !    true if midlevel    convection is switched on
+  LOGICAL :: lmfdd     !    true if cumulus downdraft      is switched on
+  LOGICAL :: lmfdudv   !    true if cumulus friction       is switched on
+
+CONTAINS
+
+SUBROUTINE cuparam
+
+  ! Description:
+  !
+  ! Defines disposable parameters for massflux scheme
+  !
+  ! Method:
+  !
+  ! This routine is called from *iniphy*
+  !
+  ! Authors:
+  !
+  ! M. Tiedtke, ECMWF, February 1989, original source
+  ! L. Kornblueh, MPI, May 1998, f90 rewrite
+  ! U. Schulzweida, MPI, May 1998, f90 rewrite
+  ! A. Rhodin, MPI, Jan 1999, subroutine cuparam -> module mo_cumulus_flux
+  ! M. Esch, MPI, July 1999, modifications for ECHAM5
+  ! U. Schlese, MPI, August 2000, mid level cloud base *nmctop*
+  ! 
+  ! for more details see file AUTHORS
+  ! 
+
+   USE mo_control,      ONLY: nlev, nlevp1, nvclev, vct, nn, lmidatm
+   USE mo_exception,    ONLY: finish, message, message_text
+
+  IMPLICIT NONE
+
+! local variables
+  REAL(dp)    :: za, zb, zph(nlevp1), zp(nlev)
+  INTEGER :: jk
+
+  !  Executable Statements 
+
+!-- 1. Specify parameters for massflux-scheme
+
+  entrpen = 1.0E-4_dp !
+  entrscv = 3.0E-3_dp 
+  cminbuoy = 0.2_dp
+  cmaxbuoy = 1.0_dp
+  cbfac   = 1.0_dp
+  entrmid = 1.0E-4_dp ! Average entrainment rate for midlevel convection
+  entrdd = 2.0E-4_dp ! Average entrainment rate for downdrafts
+  centrmax= 3.E-4_dp !
+  cmfcmax = 1.0_dp ! Maximum massflux value allowed for updrafts etc
+  cmfcmin = 1.E-10_dp ! Minimum massflux value (for safety)
+  cmfdeps = 0.3_dp ! Fractional massflux for downdrafts at lfs
+
+!
+  IF (nn == 31) THEN
+    cmfctop = 0.2_dp
+    cprcon  = 4.0E-4_dp
+  ELSE IF (nn == 63) THEN
+    cmfctop = 0.2_dp
+    cprcon  = 2.5E-4_dp
+  ELSE IF (nn == 127) THEN
+    cmfctop = 0.2_dp
+    cprcon  = 2.5E-4_dp
+  ELSE IF (nn == 255) THEN
+    cmfctop = 0.2_dp
+    cprcon  = 2.5E-4_dp
+  ELSE
+    CALL finish ('mo_cumulus_flux', 'Truncation not supported.')
+  ENDIF
+
+  ! Next value is relative saturation in downdrafts
+  ! but is no longer used ( formulation implies saturation)
+
+  rhcdd = 1.0_dp
+
+! Determine highest level *nmctop* for cloud base of midlevel convection
+! assuming nmctop=9 (300 hPa) for the standard 19 level model
+
+!-- half level pressure values, assuming 101320. Pa surface pressure 
+
+  DO jk=1,nlevp1
+    za=vct(jk)
+    zb=vct(jk+nvclev)
+    zph(jk)=za+zb*101320.0_dp
+  END DO
+!
+! -- full level pressure
+!
+  DO jk = 1, nlev
+    zp(jk)=(zph(jk)+zph(jk+1))*0.5_dp
+  END DO
+!
+! -- search for 300 hPa level
+!
+  DO jk = 1, nlev
+    nmctop=jk
+    IF(zp(jk).GE.30000.0_dp) EXIT
+  END DO
+!
+  WRITE (message_text,'(a,i0)') &
+       'max. level for cloud base of mid level convection: nmctop = ', nmctop
+  CALL message('',message_text)
+  
+END SUBROUTINE cuparam
+
+END MODULE mo_cumulus_flux

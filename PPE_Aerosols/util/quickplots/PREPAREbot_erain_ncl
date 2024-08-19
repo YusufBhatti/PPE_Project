@@ -1,0 +1,222 @@
+#!/bin/sh 
+set -ex
+#
+TYP=$1
+echo $TYP
+#
+NAME=$2
+#
+RES=$3
+#
+echo $RES
+#
+TO=$4
+#
+echo $TO
+#
+#
+WORKDIR=$5
+# 
+
+echo QUELLE path $QUELLE
+   FIXCODE=/pool/data/ECHAM6/post/FixCodes
+   ERAin=/pool/data/ECHAM6/post/ERAin/T${RES}
+
+#
+
+   cdo=/client/bin/cdo
+
+#
+BOTmod="${WORKDIR}/BOT_${NAME}"
+BOTera="${ERAin}/T${RES}_BOT_1979_${TO}_$TYP"
+#
+###########################################################################
+# var.txt wird in ATM.gs BOT.gs einglesen
+# number of latitudes
+
+nlat=`cdo griddes $BOTmod| grep ysize | cut -d"=" -f2`
+echo $nlat >>var.txt
+ERATIME="(1979-${TO})"
+echo $ERATIME >>var.txt
+
+
+FORMAT="-f nc -t ${QUELLE}/echam6.varCode"
+#
+cp var.txt var1.txt
+head  var1.txt >var.txt
+date >var1.txt
+cut -c5-11,25-32 var1.txt >datum
+cat datum >>var.txt
+#
+###########################################################################
+# 
+#
+set +e
+#
+#----code151---Sea level pressure---
+#
+CODE=151
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,0.01 -selcode,${CODE} $BOTmod Ubusy_c${CODE}.nc
+fi
+#
+#
+#----code151---Sea level pressure--(Model-ERAin)--
+#
+CODE=151
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,0.01 -selcode,${CODE} $BOTmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $BOTera > /dev/null
+   then
+      cdo ${FORMAT} -mulc,0.01 -selcode,${CODE} $BOTera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+rm -f  busy*
+#
+#----code164---Total cloud cover-------------------
+#
+CODE=164
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,100. -smooth9 -selcode,${CODE} $BOTmod Ubusy_c${CODE}.nc
+fi
+#
+#----code167---2m Temperature---(Model-ERAin)--
+#
+CODE=167
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -selcode,${CODE} $BOTmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $BOTera > /dev/null
+   then
+      cdo ${FORMAT} -selcode,${CODE} $BOTera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+rm -f  busy*
+#
+#----code169---Sea surface temperature---
+#
+CODE=169
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -subc,273.15  -selcode,${CODE} $BOTmod Ubusy_c${CODE}.nc
+fi
+#
+#----code180 Zonal wind stress-----
+#
+CODE=180
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,1000.  -selcode,${CODE} $BOTmod busy.nc
+#---only sea
+   cdo -f nc -selcode,172  F_LAND busy2.nc
+   cdo ifnotthen busy2.nc busy.nc Ubusy_c${CODE}.nc
+fi
+#
+#----code180---Zonal wind stress---(ERAin)--
+#
+CODE=180
+if cdo -s showcode -selcode,${CODE}  $BOTera > /dev/null
+then
+   cdo ${FORMAT} -mulc,1000. -selcode,${CODE} $BOTera busy.nc
+#---only sea
+   cdo -f nc -selcode,172  F_LAND busy2.nc
+   cdo ifnotthen busy2.nc busy.nc Ubusy_c${CODE}e.nc
+fi
+rm -f  busy*
+
+#
+#----code4--- Total precipitation----
+#
+CODE=4
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,86400 -selcode,${CODE} $BOTmod Ubusy_c${CODE}.nc 
+else
+##########if code 4 doesn't exits ===> code142 + code143 ##########
+   if cdo -s showcode -selcode,142 $BOTmod > /dev/null
+   then
+      cdo ${FORMAT} -selcode,142 $BOTmod busy1.nc
+      if cdo -s showcode -selcode,143  $BOTmod > /dev/null
+      then
+         cdo ${FORMAT} -selcode,143 $BOTmod busy2.nc
+         cdo -add  busy1.nc busy2.nc busy3.nc
+         cdo -chname,var142,var4 -chcode,142,4 -mulc,86400  busy3.nc Ubusy_c${CODE}.nc
+      fi
+   fi
+fi
+#
+rm -f  busy*
+
+#
+#----code231+code150---Liquid water + ice content----
+#
+CODE=150
+CODE2=231
+CODES=231_150
+if cdo -s showcode -selcode,${CODE2}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -selcode,${CODE2} $BOTmod busy1.nc
+   if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+   then
+      cdo ${FORMAT} -selcode,${CODE} $BOTmod busy2.nc
+      cdo  -smooth9 -mulc,1000. -add busy1.nc busy2.nc Ubusy_c${CODES}.nc
+   fi
+fi
+#
+rm -f  busy*
+
+#
+#----code230 -- Column water vapour --
+#
+CODE=230
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT}  -selcode,${CODE} $BOTmod Ubusy_c${CODE}.nc
+fi
+rm -f  busy*
+
+#
+#----code230 -- Column water vapour -ERAin code137--(Model-ERAin)-
+#
+CODE=230
+CODE2=137
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -selcode,${CODE} $BOTmod busy1.nc
+   if cdo -s showcode -selcode,${CODE2}  $BOTmod > /dev/null
+   then
+      cdo ${FORMAT} -selcode,${CODE2} $BOTera busy2.nc
+      cdo sub busy1.nc busy2.nc Ubusy_d${CODE}.nc
+   fi
+fi
+rm -f  busy*
+#
+#----code140/code229 --only land----Ws/Wsmax ---
+#
+CODE=140
+CODE2=229
+if cdo -s showcode -selcode,${CODE}  $BOTmod > /dev/null
+then
+   cdo ${FORMAT} -mulc,100 -selcode,${CODE} $BOTmod busy1.nc
+   if cdo -s showcode -selcode,${CODE2}  $BOTmod > /dev/null
+   then
+      cdo ${FORMAT} -selcode,${CODE2} $BOTmod busy2.nc
+      cdo -f nc -selcode,172  F_LAND busy3.nc
+#-----only land
+      cdo -setctomiss,0 -mul busy1.nc busy3.nc busy1a.nc
+      cdo -setctomiss,0 -mul busy2.nc busy3.nc busy2a.nc
+      cdo -div busy1a.nc busy2a.nc  Ubusy_c${CODE}.nc
+   fi
+fi
+rm -f  busy*
+exit
+
+
+
+
+
