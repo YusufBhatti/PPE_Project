@@ -1,2 +1,0 @@
-#! @SHELL@
-@MPI_LAUNCH@ -n 3 ./unstruct_halo_exchange_f
