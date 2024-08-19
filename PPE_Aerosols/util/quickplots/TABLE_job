@@ -1,0 +1,132 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+NAME=$2
+#
+EXP=$3
+#
+YY1=$4
+#
+YY2=$5
+#
+WORKDIR=$6
+#
+LONG=$7
+#
+
+echo fractional_mask path $fractional_mask
+echo QUELLE path $QUELLE
+BOTmod=${WORKDIR}/BOT_${NAME}
+
+
+cat > namelist << eon
+ &exper
+ expnam='${EXP}' average='$TYP' year1=$YY1 year2=$YY2 iLONG=$LONG
+ /
+eon
+
+  if [ "$LONG" = "0" ]
+  then
+    cdo selcode,4,97,142,143,150,164,167,178,179,210,211,230,231,191,192 $BOTmod BOTbusy
+    BOTmod=BOTbusy
+  fi
+
+  if cdo -s showcode -selcode,97  $BOTmod  > /dev/null
+  then
+    :
+  else
+    echo '##### Attention #####'
+    echo 'code 97 failt'
+    echo 'please add code 97' 
+    exit
+  fi
+
+if [ "$fractional_mask" = "1" ];then
+  code=194
+  if cdo -s showcode -selcode,${code}  $BOTmod  > /dev/null
+  then
+    cp $BOTmod BOT.grb
+  else
+    cdo -O merge F_LAND $BOTmod BOT.grb
+  fi
+else
+  code=172
+  if cdo -s showcode -selcode,${code}  $BOTmod > /dev/null
+  then
+    cp $BOTmod BOT.grb
+  else
+    cdo -O merge F_LAND $BOTmod BOT.grb
+echo merge F_LAND
+cdo showcode  BOT.grb
+  fi
+fi
+
+cat > namelist << eon
+ &exper
+ expnam='${EXP}' average='$TYP' year1=$YY1 year2=$YY2 iLONG=$LONG landcode=$code
+ /
+eon
+
+if cdo -s showcode -selcode,232  $BOTmod > /dev/null
+then
+  :
+else
+  cdo -O merge F_GLACIER BOT.grb BOT_GLACIER.grb
+  mv BOT_GLACIER.grb BOT.grb 
+fi
+
+
+########## if code 4 doesn't exist ===> code142 + code143 ##########
+if cdo -s showcode -selcode,4  $BOTmod > /dev/null
+then
+  echo 'PRECIP (code4) exist'
+else   
+  if cdo -s showcode -selcode,142  $BOTmod > /dev/null
+  then
+    if cdo -s showcode -selcode,143  $BOTmod > /dev/null
+    then
+      echo 'make precip code142,code143'
+      cdo add -selcode,142 BOT.grb -selcode,143 BOT.grb busy4
+      cdo chcode,142,4  busy4 busy_4
+      cp BOT.grb busy.grb
+      cdo -0 merge busy_4 busy.grb BOT.grb
+      rm busy*
+    else
+      echo 'PRECIP cannot compute, code 143 and 142 miss'
+    fi
+  fi
+fi
+  
+
+#
+
+cdo -f srv -sortcode BOT.grb BOT.srv
+
+#
+  ${QUELLE}/table.x < namelist
+  mv tablecode tablecode_${NAME}
+
+if [ "$LONG" = "0" ];then
+  mv tabelle tabshort_${NAME}
+
+else
+  mv tabelle tabelle_${NAME}
+#
+   case `hostname` in
+   mlogin*|mistral*)
+    enscript -fCourier10 -o tablecode_${NAME}.ps tablecode_${NAME}
+    enscript -fCourier7.1 -r -o tabelle_${NAME}.ps tabelle_${NAME};;
+   *) 
+    enscript -fCourier10 -o tablecode_${NAME}.ps tablecode_${NAME}
+    enscript -fCourier8 -r -o tabelle_${NAME}.ps tabelle_${NAME};;
+   esac
+
+fi
+
+set +e
+rm -f F_LAND F_GLACIER BOTbusy mo_tables.mod mo_util_string.mod
+rm -f BOT.grb BOT.srv  namelist  BBOT.srv
+
+exit

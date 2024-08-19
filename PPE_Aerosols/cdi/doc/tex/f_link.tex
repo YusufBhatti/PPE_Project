@@ -1,0 +1,70 @@
+There are two different interfaces for using {\CDI} functions in Fortran:
+{\tt cfortran.h} and the instrinsic {\tt iso\_c\_binding} module from Fortran
+2003 standard. At  first, the preparations for compilers without F2003
+capabilities are described.\\\\
+Every FORTRAN file that references {\CDI} functions or constants must contain
+an appropriate {\tt INCLUDE} statement before the first such reference:
+
+\begin{verbatim}
+   INCLUDE "cdi.inc"
+\end{verbatim}
+
+Unless the {\tt cdi.inc} file is installed in a standard directory where
+FORTRAN compiler always looks, you must use the {\tt -I} option when invoking
+the compiler, to specify a directory where {\tt cdi.inc} is installed, for example:
+
+\begin{verbatim}
+   f77 -c -I/usr/local/cdi/include myprogram.f
+\end{verbatim}
+
+Alternatively, you could specify an absolute path name in the {\tt INCLUDE}
+statement, but then your program would not compile on another platform
+where {\CDI} is installed in a different location.
+
+Unless the {\CDI} library is installed in a standard directory where the linker
+always looks, you must use the {\tt -L} and {\tt -l} options to links an object file that
+uses the {\CDI} library. For example:
+
+\begin{verbatim}
+   f77 -o myprogram myprogram.o -L/usr/local/cdi/lib -lcdi
+\end{verbatim}
+
+Alternatively, you could specify an absolute path name for the library:
+
+\begin{verbatim}
+   f77 -o myprogram myprogram.o -L/usr/local/cdi/lib/libcdi
+\end{verbatim}
+
+If the {\CDI} library is using other external libraries, you must add this
+libraries in the same way.
+For example with the netCDF library:
+
+\begin{verbatim}
+   f77 -o myprogram myprogram.o -L/usr/local/cdi/lib -lcdi \
+                                -L/usr/local/netcdf/lib -lnetcdf
+\end{verbatim}
+
+For using the {\tt iso\_c\_bindings} two things are necessary in a program or module
+
+\begin{verbatim}
+   USE ISO_C_BINDING
+   USE mo_cdi
+\end{verbatim}
+
+The {\tt iso\_c\_binding} module is included in {\tt mo\_cdi}, but without
+{\tt cfortran.h} characters and character variables have to be handled separately.
+Examples are available in section \ref{examples_f2003}.
+
+After installation {\tt mo\_cdi.o} and {\tt mo\_cdi.mod} are located in the
+library and header directory respectively. {\tt cdilib.o} has to be
+mentioned directly on the command line. It can be found in the
+library directory, too. Depending on the {\CDI} configuration, a compile command
+should look like this:
+
+\begin{verbatim}
+nagf95 -f2003 -g cdi_read_f2003.f90 -L/usr/lib -lnetcdf -o cdi_read_example 
+                                    -I/usr/local/include 
+                                    /usr/local/lib/cdilib.o /usr/local/lib/mo_cdi.o
+\end{verbatim}
+
+

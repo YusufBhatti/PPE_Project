@@ -1,0 +1,39 @@
+In the course of evaluating the MPI--ESM and ECHAM6 simulations
+a number of  bugs have been identified which impact the
+simulations. We list these bugs here and give a description of their
+effects.
+
+\section{Bug in anthropogenic aerosol data set}
+In implementing the new aerosol climatology (see
+Section~\ref{sec.tropaerosols}) a data formatting error
+led to a somewhat weaker anthropogenic aerosol forcing than was
+foreseen in the original data set, with the effect most pronounced
+over the heavily populated regions of the northern hemispheric
+continents. The adjusted all sky aerosol forcing for the AMIP
+period, calculated as the difference between the top--of--atmosphere
+fluxes for the AMIP period with the aerosol load for this period
+(including the formatting bug) and a run for the same period but with
+the pre--industrial tropospheric aerosol loading is \unit[-0.34]{W
+  m$^{-2}$}.  If the calculation is repeated but with the formatting
+bug removed the adjusted forcing increases to \unit[-0.50]{W
+  m$^{-2}$}.  For reference, the difference in the clear sky shortwave
+adjusted forcing between the two simulations is nearly three times as
+large (\unit[0.42]{W m$^{-2}$} ) suggesting that much of the missing
+forcing attributable to the formatting error is offset by additional
+adjustments, compensating effects in the long wave, and cloud masking
+effects. Use of the correct aerosol only has a small impact in the
+representation of the clear sky reflected solar irradiance, decreasing
+the root mean square error relative to CERES from 6.6 to \unit[6.5]{W
+  m$^{-2}$}. This error is present in the external data set version
+{\tt r0001} only, the newer versions have corrected aerosol data.
+
+\section{Energy conservation violation}
+In preparing \echam.2 emphasis was given to achieving energy
+conservation in the physics and surface coupling. This was achieved
+through a number of bug-fixes, including inconsistent use of specific
+heats, the coupling between convection and cloud schemes,
+discretization errors in the convection and turbulent diffusion
+schemes. After these corrections the atmospheric physics conserve
+energy, and the surface energy budget is consistent. However, the
+atmosphere still leaks a small amount of energy, presumably due to
+issues in the dynamical core.  

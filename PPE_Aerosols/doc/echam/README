@@ -1,0 +1,23 @@
+Building the documentation:
+
+You need to have installed pdflatex and bibtex
+
+1) Scientific documentation:
+
+   The command 'make scidoc' builds the scientific documentation.
+
+   'make docclean' deletes all latex generated files (*aux,*dvi,...) 
+   belonging to the scientific documentation
+
+2) Technical user guide:
+
+   Use the command 'make guide'
+   You have to confirm the model and guide version and original creation 
+   date or enter new parameters. These parameters will appear in the document.
+   
+   'make guideclean' deletes all latex generated files (*aux,*dvi,...)
+   belonging to the guide document.
+
+3) 'make' or 'make all' creates both scientific documentation and user guide.
+   'make clean' deletes all latex generated files (*aux,*dvi,...)
+
