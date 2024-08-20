@@ -29,6 +29,7 @@ my_experiments/
 *.sh.*
 *log.txt
 log_tmp.txt
+PPE_tmp.txt
 *.csv
 # binaries
 bin/*
@@ -47,6 +48,7 @@ lib
 *.log
 version.c
 .ipynb_checkpoints
+LHC_Parameters.txt
 # swap
 *.swp
 *.svn
