@@ -49,6 +49,7 @@ lib
 version.c
 .ipynb_checkpoints
 LHC_Parameters.txt
+PPE_values.txt
 # swap
 *.swp
 *.svn
