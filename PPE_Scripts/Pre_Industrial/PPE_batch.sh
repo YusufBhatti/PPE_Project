@@ -68,7 +68,7 @@ rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
-PPEdir='/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/PI_PPE_Experiments/'
+PPEdir='/home/ybhatti/yusufb/Branches/PPE_Aerosols/my_experiments/PI_PPE_Experiments/'
 PPElog=$cwd'..//Logs/PPE_log.txt'
 PPEtmp=$cwd'..//Logs/PPE_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'

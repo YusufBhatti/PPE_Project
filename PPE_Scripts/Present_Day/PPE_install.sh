@@ -41,7 +41,8 @@
 # 2024/06
 #--------------------------------------------------------------------
 #--- run directory for ECHAM-HAM ------------------------------------
-rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/"
+SOURCE='PPE_Aerosols'
+rundir="/home/ybhatti/yusufb/Branches/${SOURCE}/my_experiments/"
 cwd=${PWD}/
 DIR='PPE_Experiments'
 #module purge
@@ -56,7 +57,8 @@ PPEvalues=$cwd'../PPE_values.txt'
 echo ${PPEdir}
 sed -i "s|^PPEdir=.*|PPEdir='${PPEdir}'|" PPE_batch.sh 
 
-#mkdir $PPEdir
+mkdir -p $PPEdir
+
 cd $PPEdir
 echo 'Starting PPE_install script' >$PPElog
 
