@@ -49,7 +49,8 @@ lib
 version.c
 .ipynb_checkpoints
 LHC_Parameters.txt
-PPE_values.txt
+#PPE_values.txt I have used: git update-index --assume-unchanged PPE_values.txt  
+#fix_values.sh
 # swap
 *.swp
 *.svn
