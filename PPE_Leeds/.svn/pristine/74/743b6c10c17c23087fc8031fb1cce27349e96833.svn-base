@@ -1,6 +1,0 @@
-
-[namelists]
-  [[namelist.echam]]
-    [[[parctl]]]
-      nproca = 2
-      nprocb = 1

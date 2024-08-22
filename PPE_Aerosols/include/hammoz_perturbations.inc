@@ -71,7 +71,7 @@ NAMELIST /hammoz_perturbations/ &
 !  scale_inter_mode_coagulation,   & ! Scale the off-diagonal elements of the coagulation kernel matrix
 !--- Convection:
 !  scale_tr_entrainment,     & ! Scale aerosol entrainment rate
-!  scale_vertical_velocity,  & ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
+  scale_vertical_velocity,  & ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
 !--- Aerosol processes:
 !---
 !--- Radiative properties:

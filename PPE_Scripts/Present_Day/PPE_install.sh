@@ -127,5 +127,5 @@ done < "$PPEvalues"
 mv $PPEtmp $PPEvalues 
 
 echo 'Finishing PPE_install script' >>$PPElog
-. $cwd/../Scripts_for_config/mv_tracking_files.sh
 cd $cwd
+. $cwd/../Scripts_for_config/mv_tracking_files.sh

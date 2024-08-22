@@ -395,19 +395,12 @@ CONTAINS
                   !      ccsaut = 900._dp
                   !      ccraut = 10.6_dp
                   !END SELECT
-                  IF (cdnc_min_fixed >= 9.0_dp .AND. cdnc_min_fixed <= 11.0_dp) THEN
+		  ! YAB Added for PPE 
+                  IF (cdnc_min_fixed > 0.0_dp) THEN
                       !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
                      ccsaut = 900._dp
-                     ccraut = 2.8_dp
-
-                  ELSE IF (cdnc_min_fixed >= 39.0_dp .AND. cdnc_min_fixed <= 41.0_dp) THEN
-                      !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
-                      ccsaut = 900._dp
-                      ccraut = 10.6_dp
-
-                  ELSE
-               ! Optional: handle the case where cdnc_min_fixed doesn't match any expected range
-                  PRINT *, 'cdnc_min_fixed value is out of expected ranges: ', cdnc_min_fixed
+                     ccraut = 10.6_dp
+                     PRINT *, 'cdnc_min_fixed value is: ', cdnc_min_fixed
                   END IF
             END SELECT
          ENDIF
@@ -431,19 +424,12 @@ CONTAINS
                   !      ccsaut = 900._dp
                   !      ccraut = 10.6_dp
                   !END SELECT
-                  IF (cdnc_min_fixed >= 9.0_dp .AND. cdnc_min_fixed <= 11.0_dp) THEN
+		  ! YAB Added for PPE 
+                  IF (cdnc_min_fixed > 0.0_dp) THEN
                       !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
                      ccsaut = 900._dp
-                     ccraut = 2.8_dp
-
-                  ELSE IF (cdnc_min_fixed >= 39.0_dp .AND. cdnc_min_fixed <= 41.0_dp) THEN
-                      !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
-                      ccsaut = 900._dp
-                      ccraut = 10.6_dp
-
-                  ELSE
-               ! Optional: handle the case where cdnc_min_fixed doesn't match any expected range
-                  PRINT *, 'cdnc_min_fixed value is out of expected ranges: ', cdnc_min_fixed
+                     ccraut = 10.6_dp
+                     PRINT *, 'cdnc_min_fixed value is: ', cdnc_min_fixed
                   END IF
             END SELECT
          ENDIF

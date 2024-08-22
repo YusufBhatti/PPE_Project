@@ -1,8 +1,8 @@
 #!/bin/bash --login
 #PBS -N PPE_test_run
 #PBS -q genoa
-#PBS -l walltime=25:00:00
-#PBS -l select=2:ncpus=60
+#PBS -l walltime=120:00:00
+#PBS -l select=4:ncpus=80
 #PBS -j oe
 #PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
@@ -60,19 +60,28 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=6  # Maximum number of experiments run concurrently
-nexp_maxran=3      # Maximum number of experiments run by this batch job
+nexp_maxrunning=4  # Maximum number of experiments run concurrently
+nexp_maxran=40      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
-rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
+#rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
 PPEdir='/home/ybhatti/yusufb/Branches/PPE_Aerosols/my_experiments/PI_PPE_Experiments/'
-PPElog=$cwd'..//Logs/PPE_log.txt'
-PPEtmp=$cwd'..//Logs/PPE_tmp.txt'
+PPElog=$cwd'PPE_log.txt'
+PPEtmp=$cwd'PPE_tmp.txt'
 PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'../PPE_values.txt'
+
+#--- set maximum number of qsub runs ---
+max_qsub_runs=4
+#--- maintain qsub run count ---
+if [ ! -f "${cwd}/current_qsub_run.txt" ]; then
+  echo 0 > "${cwd}/current_qsub_run.txt"
+fi
+current_qsub_run=$(cat "${cwd}/current_qsub_run.txt")
+echo "Current Resub is $current_qsub_run out of $max_qsub_runs"
 
 #echo 'Activating python environment'
 #source activate master
@@ -158,5 +167,17 @@ while [ "$nexp_ran" -lt "$nexp_maxran" ] && [ "$batch_finished" == 0 ]; do
 done # nexp_ran > nexp_maxran (outer loop)
 
 echo 'Finishing PPE_batch script' >>$PPElog
-. $cwd/../Scripts_for_config/mv_tracking_files.sh
+#. $cwd/../Scripts_for_config/mv_tracking_files.sh
 cd $cwd
+
+
+#--- run the batch job again if conditions are met ---
+if [[ "$current_qsub_run" -lt "$max_qsub_runs" ]]; then
+  current_qsub_run=$((current_qsub_run + 1))
+  echo $current_qsub_run > "${cwd}/current_qsub_run.txt"
+  qsub PPE_batch.sh
+  echo "Submitted PPE_batch.sh for the $current_qsub_run time out of $max_qsub_runs times" >>$PPElog
+else
+  echo "Max qsub runs of $max_qsub_runs reached. Exiting." >>$PPElog
+  rm ${cwd}/current_qsub_run.txt
+fi

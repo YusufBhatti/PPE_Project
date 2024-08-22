@@ -1,3 +1,0 @@
-#! @SHELL@
-@MPI_LAUNCH@ -n 1 ./tr_gp2fs
-@MPI_LAUNCH@ -n 4 ./tr_gp2fs
