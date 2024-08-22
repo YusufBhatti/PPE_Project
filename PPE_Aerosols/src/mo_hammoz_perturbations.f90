@@ -57,7 +57,8 @@ MODULE mo_hammoz_perturbations
             scale_so4_coating, &
             pH_pert, &
 	    scale_so2_reactions, emi_prim_so4_frac, &
-            scale_kappa_ss, scale_kappa_so4
+            scale_kappa_ss, scale_kappa_so4, &
+	    scale_vertical_velocity
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -121,7 +122,7 @@ MODULE mo_hammoz_perturbations
  !                scale_wetdep_bc_bc_only = 1.0_dp    ! Scale factor for below-cloud wet deposition of BC (independantly of the above scalings)
 
  ! REAL(dp)    :: scale_tr_entrainment = 1.0_dp, & ! Scale aerosol entrainment rate
- !                scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
+   REAL(dp)    :: scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
 
   REAL(dp)    :: bc_rad_ni = 0.71_dp,  &! Absolute value of imaginary part of the refractive index (for BC) at 550 nm (defaul
                  du_rad_ni = 0.001_dp  ! Absolute value of imaginary part of the refractive index (for DUST) at 550 nm (default)
@@ -142,7 +143,7 @@ MODULE mo_hammoz_perturbations
                 ! scale_accretion = 1.0_dp,   &! Scale the accretion (tendency?)
   REAL(dp)    :: pH_pert = 2.5e-06_dp,      &! Absolute pH value (Normally is (2.5e-06_dp) - need to be scaled by   1e-07 for pH of 6, * 3.13e-05_dp = 4.5 
                  scale_kappa_ss = 1.0_dp, &
-                 scale_kappa_so4 = 1.0_dp
+                 scale_kappa_so4 = 0.6_dp
 
   REAL(dp)    :: scale_solar_const = 1.0  ! Scale the (AMIP) solar constant (equally across bands)
 
@@ -261,7 +262,7 @@ CONTAINS
        CALL p_bcast (scale_so4_coating,    p_io)
        CALL p_bcast (pH_pert,      p_io)       
     !   CALL p_bcast (scale_tr_entrainment, p_io)
-    !   CALL p_bcast (scale_vertical_velocity, p_io)
+       CALL p_bcast (scale_vertical_velocity, p_io)
     !   CALL p_bcast (scale_intra_mode_coagulation, p_io)
     !   CALL p_bcast (scale_inter_mode_coagulation, p_io)
        ! Solar constant
@@ -340,7 +341,7 @@ CONTAINS
 
   !  CALL message('','---')
   !  CALL print_value('Entrainment of tracer mass flux scaling factor (scale_tr_entrainment)', scale_tr_entrainment)
-  !  CALL print_value('Vertical velocity scaling factor (scale_vertical_velocity)', scale_vertical_velocity)
+    CALL print_value('Vertical velocity scaling factor (scale_vertical_velocity)', scale_vertical_velocity)
 
     CALL message('', '---')
     CALL print_value('BC imaginary refractive index (bc_rad_ni)', bc_rad_ni)

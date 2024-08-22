@@ -206,6 +206,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_kappa_so4  = V_SCALE_KAPPA_SO4 ! V_SCALE_KAPPA_SO4
   pH_pert          = V_SCALE_PH_PERT ! V_SCALE_PH_PERT
   scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO2_REACTIONS
+  scale_vertical_velocity = V_SCALE_VERTICAL_VELOCITY ! V_SCALE_VERTICAL_VELOCITY
+
 
 /
 EOF

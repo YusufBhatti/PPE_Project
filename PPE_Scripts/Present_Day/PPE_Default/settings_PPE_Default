@@ -46,7 +46,7 @@ make_source_backup=false   # set to true if you want to keep records of the curr
 
 queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
-ncpus=40                                # total number of cpus
+ncpus=80                                # total number of cpus
 walltime="20:00:00"                     # job estimated runtime
 nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
@@ -78,7 +78,7 @@ init_restart_flag=.false.     # echam restart flag at launch of this job
                               #  set when further jobs will be started)
 
 date_start="2009,09,01,0,0,0"  # 20090829234500
-date_stop="2009,09,06,1,0,0"
+date_stop="2009,09,03,1,0,0"
 
 input_files_version="v0002_input"
 scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
@@ -207,6 +207,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_kappa_so4  = V_SCALE_KAPPA_SO4 ! V_SCALE_KAPPA_SO4
   pH_pert          = V_SCALE_PH_PERT ! V_SCALE_PH_PERT
   scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO2_REACTIONS
+  scale_vertical_velocity = V_SCALE_VERTICAL_VELOCITY ! V_SCALE_VERTICAL_VELOCITY
+
 
 /
 EOF
