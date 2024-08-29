@@ -16,7 +16,7 @@ os.chdir(cwd)
 
 
 '''
-This file first edits your PPE_values.txt to ensure the headers match your parameters list.
+This file first edits your PPE_values_template.txt to ensure the headers match your parameters list.
 
 We then read your parameter list, establish what each parameter is called, and its minimum value (left) and maximum value (right) as a list.
 
@@ -29,7 +29,7 @@ This is then saved as a .txt. file. We also save a csv file for ease of analysis
 '''
 
 
-input_file = f"{cwd}/PPE_values.txt"
+input_file = f"{cwd}/PPE_values_template.txt"
 parameters_file = f"{cwd}/parameters_for_script.txt"
 
 

@@ -1,4 +1,4 @@
-
+import shutil
 from subprocess import run
 from os import rename
 import os
@@ -12,7 +12,7 @@ sys.path.append(utils_path)
 from utils import *
 os.chdir(cwd)
 
-input_file = f"{cwd}/PPE_values.txt"
+input_file = f"{cwd}/PPE_values_template.txt"
 output_file = f"{cwd}/PPE_values_new.txt"
 parameters_file = f"{cwd}/parameter_values_data/LHC_Parameters.txt"
 with open(parameters_file, 'r') as file:
@@ -86,14 +86,19 @@ print(f"New PPE values generated and saved to {input_file}")
 
 print(f"We will now check if any rows contain duplicates in the PPE values generated")
 
-parameters_file = f"{cwd}/PPE_values.txt"
+parameters_file = f"{cwd}/PPE_values_template.txt"
 check_column_duplicates(parameters_file, header_array)
-print(f"The number of decimal places defined is: {decimal}. If there are duplicated identified, increase this number.")
+print(f"The number of decimal places defined is: {decimal}. If there are duplicated identified, increase this number on line 34.")
 
 # Define the path to the input and output files
-input_file_path = f"{cwd}/PPE_values.txt"
+input_file_path = f"{cwd}/PPE_values_template.txt"
 output_file_path = f"{cwd}/parameter_values_data/PPE_values.csv"
 txt_to_csv(input_file_path, output_file_path)
+
+# Copy the PPE_values file into the Present_Day and Pre_Industrial, for their own PPE.
+output_file = f"{cwd}/Present_Day/PPE_values.txt"
+shutil.copy(input_file, output_file)
+
 #############################
 """ This following script is just when you want all values to be '1' except for the perturbed parameter"""
 #############################
