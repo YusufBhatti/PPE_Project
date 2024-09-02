@@ -99,6 +99,8 @@ txt_to_csv(input_file_path, output_file_path)
 output_file = f"{cwd}/Present_Day/PPE_values.txt"
 shutil.copy(input_file, output_file)
 
+output_file = f"{cwd}/Pre_Industrial/PPE_values.txt"
+shutil.copy(input_file, output_file)
 #############################
 """ This following script is just when you want all values to be '1' except for the perturbed parameter"""
 #############################

@@ -48,7 +48,7 @@ queue_name="genoa"                         # queue name to use on current batch 
 jobname="$exp"                          # batch job name
 ncpus=192                                # total number of cpus
 walltime="10:00:00"                     # job estimated runtime
-nproma=16                               # vector length (don't modify if you don't know about it)
+nproma=40                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
 exp_dir="/home/ybhatti/prjs1076/PPE_Output/PI_PPE_Experiments/${exp}/"
@@ -68,7 +68,7 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=100                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 
 faked_restart=true
 parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_PI_18490901_Restart_Control"
@@ -107,8 +107,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'days','last',0
- trigfiles      = 1,'days','first',0
- putrerun       = 1,'days','last',0
+ trigfiles      = 4,'months','first',0
+ putrerun       = 4,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .false.
@@ -181,6 +181,65 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  nudgdamp        = 1.
  nudgdsize       = 0.5
  ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&set_stream
+  stream='accw'
+  lpost=0 
+/
+&set_stream
+  stream='co2'
+  lpost=0
+/
+&set_stream
+  stream='conv'
+  lpost=0
+/
+&set_stream
+  stream='drydep'
+  lpost=0
+/
+&set_stream
+  stream='wetdep'
+  lpost=0
+/
+&set_stream
+  stream='land'
+  lpost=0
+/
+&set_stream
+  stream='nudg'
+  lpost=0
+/
+&set_stream
+  stream='sedi'
+  lpost=0
+/
+&set_stream
+  stream='echamm'
+  lpost=0 
+/
+&set_stream
+  stream='jsbash'
+  lpost=0
+/
+&set_stream
+  stream='veg'
+  lpost=0
+/
+&set_stream
+  stream='activ'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
 /
 &HAMMOZ_PERTURBATIONS
   scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT

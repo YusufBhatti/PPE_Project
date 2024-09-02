@@ -1,6 +1,6 @@
 #!/bin/bash --login
 #PBS -N PPE_run
-#PBS -q genoa
+#PBS -q rome
 #PBS -l walltime=10:00:00
 #PBS -l select=4
 #PBS -j oe
@@ -60,8 +60,8 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=4  # Maximum number of experiments run concurrently
-nexp_maxran=4      # Maximum number of experiments run by this batch job
+nexp_maxrunning=2  # Maximum number of experiments run concurrently
+nexp_maxran=1      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 #rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"

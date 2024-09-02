@@ -183,6 +183,60 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  nudgdsize       = 0.5
  ndg_file_nc    = "ndg%y4%m2.nc"
 /
+&set_stream
+  stream='accw'
+  lpost=0 
+/
+&set_stream
+  stream='co2'
+  lpost=0
+/
+&set_stream
+  stream='conv'
+  lpost=0
+/
+&set_stream
+  stream='drydep'
+  lpost=0
+/
+&set_stream
+  stream='wetdep'
+  lpost=0
+/
+&set_stream
+  stream='land'
+  lpost=0
+/
+&set_stream
+  stream='nudg'
+  lpost=0
+/
+&set_stream
+  stream='sedi'
+  lpost=0
+/
+&set_stream
+  stream='echamm'
+  lpost=0 
+/
+&set_stream
+  stream='jsbash'
+  lpost=0
+/
+&set_stream
+  stream='veg'
+  lpost=0
+/
+&set_stream
+  stream='activ'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
 &HAMMOZ_PERTURBATIONS
   scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
   scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF

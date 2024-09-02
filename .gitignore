@@ -50,8 +50,9 @@ version.c
 .ipynb_checkpoints
 LHC_Parameters.txt
 current_qsub_run.txt
-#PPE_values.txt I have used: git update-index --assume-unchanged PPE_values.txt  
-#fix_values.sh I have used:  git update-index --assume-unchanged PPE_Scripts/Scripts_for_config/fix_values.sh
+PPE_values.txt #I have used: git update-index --assume-unchanged PPE_values.txt  
+PPE_values_template.txt
+###fix_values.sh I have used:  git update-index --assume-unchanged PPE_Scripts/Scripts_for_config/fix_values.sh
 # I have used:  git update-index --assume-unchanged PPE_Scripts/paramaters_for_script.txt
 # swap
 *.swp

@@ -1,7 +1,8 @@
 #!/bin/bash --login
 #PBS -N PPE_test_run
-#PBS -l walltime=20:00:00
-#PBS -l select=4
+#PBS -q genoa
+#PBS -l walltime=125:00:00
+#PBS -l select=11
 #PBS -j oe
 #PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
@@ -59,8 +60,8 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=2  # Maximum number of experiments run concurrently
-nexp_maxran=4      # Maximum number of experiments run by this batch job
+nexp_maxrunning=10  # Maximum number of experiments run concurrently
+nexp_maxran=40      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 #rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
@@ -74,7 +75,7 @@ PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 
 #--- set maximum number of qsub runs ---
-max_qsub_runs=1
+max_qsub_runs=($nexp_maxran/$nexp_maxrunning) -1
 #--- maintain qsub run count ---
 if [ ! -f "${cwd}/current_qsub_run.txt" ]; then
   echo 0 > "${cwd}/current_qsub_run.txt"
@@ -128,10 +129,9 @@ while [ "$nexp_ran" -lt "$nexp_maxran" ] && [ "$batch_finished" == 0 ]; do
 
      # Start experiment if not too many experiments already running
       if [ "$nexp_running" -lt "$nexp_maxrunning" ]; then
-      #	cd $PPEdir
         # Launch job
+#	srun --nodes=2 $expid/echam_jobscript_$expid.sh &
         $expid/echam_jobscript_$expid.sh &
-#	cd $cwd
         echo '    Started  experiment '$expid >>$PPElog
 	echo $expid'/echam_jobscript_'$expid'.sh' >>$PPElog
         nexp_running=`expr $nexp_running + 1`
