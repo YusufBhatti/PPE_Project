@@ -48,7 +48,7 @@ queue_name="genoa"                         # queue name to use on current batch 
 jobname="$exp"                          # batch job name
 ncpus=192                                # total number of cpus
 walltime="10:00:00"                     # job estimated runtime
-nproma=16                               # vector length (don't modify if you don't know about it)
+nproma=40                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
 exp_dir="/home/ybhatti/prjs1076/PPE_Output/PPE_Experiments/${exp}/"
@@ -68,7 +68,7 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=100                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 
 faked_restart=true
 parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control"
@@ -234,6 +234,11 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 /
 &set_stream
   stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
   lpost=1
   interval = 1,'months','last',0
 /

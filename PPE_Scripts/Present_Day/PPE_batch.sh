@@ -1,8 +1,8 @@
 #!/bin/bash --login
-#PBS -N PPE_run
-#PBS -q rome
-#PBS -l walltime=10:00:00
-#PBS -l select=4
+#PBS -N PPE_test_run
+#PBS -q genoa
+#PBS -l walltime=125:00:00
+#PBS -l select=11
 #PBS -j oe
 #PBS -A srsei9480 
 #PBS -M y.bhatti@sron.nl
@@ -60,8 +60,8 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=2  # Maximum number of experiments run concurrently
-nexp_maxran=1      # Maximum number of experiments run by this batch job
+nexp_maxrunning=10  # Maximum number of experiments run concurrently
+nexp_maxran=40      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 #rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
@@ -75,7 +75,7 @@ PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 
 #--- set maximum number of qsub runs ---
-max_qsub_runs=0
+max_qsub_runs=($nexp_maxran/$nexp_maxrunning) -1
 #--- maintain qsub run count ---
 if [ ! -f "${cwd}/current_qsub_run.txt" ]; then
   echo 0 > "${cwd}/current_qsub_run.txt"
