@@ -75,7 +75,8 @@ PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 
 #--- set maximum number of qsub runs ---
-max_qsub_runs=($nexp_maxran/$nexp_maxrunning) -1
+#max_qsub_runs=$((nexp_maxran / nexp_maxrunning - 1))
+max_qsub_runs = 3 # I will want this script to run 4 times (0-3) = 40 * 4 simulations)
 #--- maintain qsub run count ---
 if [ ! -f "${cwd}/current_qsub_run.txt" ]; then
   echo 0 > "${cwd}/current_qsub_run.txt"
