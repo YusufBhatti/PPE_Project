@@ -832,6 +832,8 @@ CONTAINS
         CALL message('','-> 2D CCN + CN diagnostics + burdens',level=em_param)
       CASE (6)
         CALL message('','-> 3D CCN + CN diagnostics + burdens',level=em_param)
+      CASE (7)
+        CALL message('','-> 2D CCN (Surface) + CN Burden',level=em_param)
       CASE DEFAULT
         WRITE (message_text,*) 'nccndiag = ',nccndiag,' not supported.'
         CALL message('setham',message_text, level=em_error)

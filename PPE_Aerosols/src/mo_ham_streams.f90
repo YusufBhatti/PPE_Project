@@ -116,7 +116,6 @@ MODULE mo_ham_streams
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: sc(:)
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: rc_strat(:,:)
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: rc_conv(:,:)
-
 !<<SF
 
   !-- mo_ham_ccn diagnostics
@@ -136,6 +135,7 @@ MODULE mo_ham_streams
   TYPE (vmem3d), PUBLIC :: nr_mode(nmaxclass,Nwv_tot)
   TYPE (vmem3d), PUBLIC :: ni_mode(nmaxclass,Nwv_tot)
 
+!  TYPE (vmem2d), PUBLIC :: tau_2d_mode(nmaxclass,Nwv_tot)
   TYPE (vmem2d), PUBLIC :: sigma_2d_mode(nmaxclass,Nwv_tot)
   TYPE (vmem2d), PUBLIC :: omega_2d_mode(nmaxclass,Nwv_tot)
   TYPE (vmem2d), PUBLIC :: asym_2d_mode(nmaxclass,Nwv_tot)
@@ -457,7 +457,7 @@ MODULE mo_ham_streams
         WRITE(csat,'(F7.3)') zsat(jsat)*100.0
 
         SELECT CASE (nccndiag)
-           CASE (1,3,5)
+           CASE (1,3,5,7)
              CALL add_stream_element (stream_ham, 'CCN_'//TRIM(ADJUSTL(csat)),              &
                                       ccn_2d(jsat)%ptr, units='m-3',                        &
                                       longname='Cloud Condensation Nuclei at S='//csat//'%' )
@@ -490,7 +490,7 @@ MODULE mo_ham_streams
                                         ccn_burden(jsat)%ptr, units='m-2',                  &
                                         longname='Cloud Condensation Nuclei burden at S='//csat//'%' )
             ENDDO
-   
+   	  CASE (7)
             CALL add_stream_element (stream_ham, 'CN_BURDEN', cn_burden, units='m-2', &
                                      longname='Condensation Nuclei Burden'            )
       END SELECT
@@ -601,10 +601,22 @@ MODULE mo_ham_streams
 
                  IF (nraddiag>0) THEN
 
+                    ! THANOS
+!                    IF (jwv <= Nwv_sw+Nwv_sw_opt) THEN
+!                      CALL add_stream_element(rad,'TAU_2D_MODE_'//TRIM(sizeclass(jclass)%shortname)//'_'//cwv, &
+!                                     tau_2d_mode(jclass,jwv)%ptr, units='1',       &
+!                                     longname='Optical thickness'//TRIM(sizeclass(jclass)%shortname)//' '//cwv )
+!                    END IF
+
                     CALL add_stream_element(rad, 'SIGMA_2D_MODE_'//TRIM(sizeclass(jclass)%shortname)//'_'//cwv, &
                                             sigma_2d_mode(jclass,jwv)%ptr,units='m-2', &
                                             longname='Extinction cross section per particle 2D '//cwv, &
                                             contnorest=.TRUE.)
+
+!                    CALL add_stream_element(rad, 'TAU_2D_MODE_'//TRIM(sizeclass(jclass)%shortname)//'_'//cwv, &
+!                                            tau_2d_mode(jclass,jwv)%ptr,units='m-2', &
+!                                            longname='Mode optical thickness 2D '//cwv, &
+!                                            contnorest=.TRUE.)
 
                     CALL add_stream_element(rad, 'OMEGA_2D_MODE_'//TRIM(sizeclass(jclass)%shortname)//'_'//cwv, &
                                             omega_2d_mode(jclass,jwv)%ptr,units='1',   &
