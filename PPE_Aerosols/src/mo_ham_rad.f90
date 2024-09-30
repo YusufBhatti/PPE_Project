@@ -985,7 +985,7 @@ CONTAINS
 
     REAL(dp) :: zaer_tau_sw_vr(kbdim,klev,Nwv_sw_tot,nclass),& ! SW optical depth for each band and mode
                 zaer_tau_lw_vr(kbdim,klev,Nwv_lw,nclass)       ! LW optical depth for each band and mode
-
+                !tau_2d_mode(kbdim,klev,Nwv_lw,nclass)       ! 
 !>>gf: needed to avoid architecture-dependent problems (Cray XT5)
     REAL(dp) :: znr2d(kbdim,klev),                         & ! 2D subset of 4D array nr
                 zni2d(kbdim,klev),                         & ! 2D subset of 4D array ni
@@ -1843,7 +1843,7 @@ CONTAINS
 !<<DN
                                nr_mode,  ni_mode,                                        &
                                omega_2d_mode, sigma_2d_mode, asym_2d_mode,               &
-                               nr_2d_mode,    ni_2d_mode,                                &
+                               nr_2d_mode,    ni_2d_mode,                    &
 !>>NAJS: lidar backscatter
                                attbeta_tot_space, attbeta_tot_earth, beta_tot,           &
                                alfa_aer, alfa_gas, lidar_ratio_aer
@@ -1940,10 +1940,16 @@ CONTAINS
 
                 !--- 2) Vertical integral summed over all modes:
 
-
+                !tau_2d_mode(jclass,jwv)%ptr(1:kproma,krow) = 0._dp
+!                PRINT *, 'tau_2d_mode at jk=', jk, ' is:'
                 DO jk=1, klev
+!                   tau_2d_mode(jclass,jwv)%ptr(1:kproma,krow) = tau_2d_mode(jclass,jwv)%ptr(1:kproma,krow) + tau_p(1:kproma,jk,krow)
+!                   PRINT *, 'MODIFIED TAU IS ', tau_2d_mode(jclass,jwv)%ptr(jl,krow)
+!		   PRINT *, 'tau_2d_mode at jk=', jk, ' is:'
+
                    DO jl=1, kproma
                       tau_2d_p(jl,krow)=tau_2d_p(jl,krow)+tau_p(jl,jk,krow)
+!        	      PRINT *, tau_2d_mode(jclass,jwv)%ptr(jl,krow)
                    END DO
                 END DO
 

@@ -3,7 +3,7 @@
 .svn
 # /
 autom4te.cache*
-config.status
+#config.status
 Makefile
 build_echam6.sh
 blas/*.lo
@@ -11,18 +11,17 @@ blas/*libblas.la
 blas/.libs
 libtool
 # /config/
-config/config.*
 *stamp-h*
-config.*
+
 .libs
-table*
+#table*
 # /contrib/
 contrib/generate-scripts/*thunder*
 
 # /src/
 src/*.mod
 src/*.lst
-
+compile
 # /experiments/
 my_experiments/
 #my_experiments/*/*/*
