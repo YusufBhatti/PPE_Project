@@ -1,0 +1,10 @@
+#! @SHELL@
+set -e
+export SCT_PROC_CHOICE=SCT_SELECT_ALL
+export SCT_CALLSTATS=1
+@MPI_LAUNCH@ -n 1 @abs_builddir@/perf_idxsection_get_positions_of_indices "$@"
+#
+# Local Variables:
+# mode: sh
+# End:
+#

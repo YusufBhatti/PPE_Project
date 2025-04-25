@@ -1,0 +1,35 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+MODULE mo_param_switches
+
+  IMPLICIT NONE
+
+  ! M.A. Giorgetta, March 2000, lrad added
+  !
+  ! ----------------------------------------------------------------
+  !
+  ! module *mo_param_switches* switches related to the parameterisations of
+  !                            diabatic processes except for radiation.
+  !
+  ! ----------------------------------------------------------------
+
+  LOGICAL :: lphys        !   *true for parameterisation of diabatic processes.
+  LOGICAL :: lrad         !   *true for radiation.
+  LOGICAL :: lvdiff       !   *true for vertical diffusion.
+  LOGICAL :: lcond        !   *true for large scale condensation scheme.
+  LOGICAL :: lsurf        !   *true for surface exchanges.
+  LOGICAL :: lconv        !   *true to allow convection
+  LOGICAL :: lgwdrag      !   *true for gravity wave drag scheme
+  LOGICAL :: lice         !   *true for sea-ice temperature calculation
+  LOGICAL :: lconvmassfix !   *false for switching off aerosol mass fixer in conv
+
+  INTEGER :: iconv = 1    !   *1,2,3 for different convection schemes
+  INTEGER :: icover = 1   !   *1 for default cloud cover scheme
+                          !   *2 for prognostic cloud cover scheme
+
+END MODULE mo_param_switches

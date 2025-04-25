@@ -1,0 +1,244 @@
+\documentclass[12pt,a4paper]{book}
+\textwidth17cm
+\textheight24.5cm
+\oddsidemargin-0.5cm
+\evensidemargin-0.5cm
+\topmargin-1cm
+\usepackage{natbib}
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+\usepackage[bf]{caption}
+\usepackage{listings}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\CODE}[1]{\code{\MakeUppercase{#1}}} 
+\newcommand{\cvar}[1]{\emph{#1}}
+\newcommand{\tvar}[1]{<#1>}
+%\usepackage{colortbl}
+\usepackage[dvips]{color}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[squaren]{SIunits}
+\usepackage{ifpdf}
+\usepackage[pdftex,colorlinks]{hyperref}
+\usepackage{epsfig,colordvi}
+\usepackage{longtable}
+\newlength{\DUtablewidth} % internal use in tables
+\usepackage[latin1]{inputenc}
+\usepackage{tikz}
+\usepackage{makeidx}
+\usetikzlibrary{shapes,arrows}
+\sloppy
+%GREY FOR THE LSTLISTINGS
+\definecolor{dgray}{gray}{0.9}
+\setlength{\parindent}{0cm}
+%\newcommand{\pfaw}[3]{\begin{tabular*}{9cm}{c}
+%\psfig{figure=#1,angle=#2,width=#3cm}
+%\end{tabular*}}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%FOR USE WITH LSTLISTING
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+  \lstset{basicstyle=\normalsize\ttfamily,
+%           frame=lines,
+           backgroundcolor=\color{dgray},
+           breaklines=true,
+           language=fortran,
+           escapechar=?
+           } 
+
+%\newcommand{\pctthree}[3]{\begin{center}
+%\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c}
+%#1 & #2\\
+%\multicolumn{2}{c}{#3}
+%\end{tabular*}
+%\end{center}}
+
+\definecolor{mpggreen}{RGB}{0,119,112}
+\newcommand{\mpimet}{Max Planck Institute for Meteorology}
+\newcommand{\echamf}{\color{mpggreen}\texttt{ECHAM5}\color{black}}
+\newcommand{\echam}{\color{mpggreen}\texttt{ECHAM6}\color{black}}
+\newcommand{\echambw}{\texttt{ECHAM6}}
+\newcommand{\blizzard}{{\it blizzard.dkrz.de}}
+\newcommand{\thunder}{{\it thunder}}
+\newcommand{\echamversion}{6.3.02}
+\newcommand{\guideversion}{3.1}
+\newcommand{\creationdate}{2015-08-27}
+\newcommand{\inir}{{\tt /pool/data/ECHAM6/input/r0001\{RES\}/}}
+\newcommand{\ini}{{\tt /pool/data/ECHAM6/input/r0001/}}
+\newcommand{\ftswc}{F^{\top}_{\rm sw, clear}}
+\newcommand{\fbswc}{F^{\bot}_{\rm sw, clear}}
+\newcommand{\ftswa}{F^{\top}_{\rm sw, all}}
+\newcommand{\fbswa}{F^{\bot}_{\rm sw, all}}
+\newcommand{\ftlwc}{F^{\top}_{\rm lw, clear}}
+\newcommand{\fblwc}{F^{\bot}_{\rm lw, clear}}
+\newcommand{\ftlwa}{F^{\top}_{\rm lw, all}}
+\newcommand{\fblwa}{F^{\bot}_{\rm lw, all}}
+\newcommand{\ftswco}{F^{\top,0}_{\rm sw, clear}}
+\newcommand{\fbswco}{F^{\bot,0}_{\rm sw, clear}}
+\newcommand{\ftswao}{F^{\top,0}_{\rm sw, all}}
+\newcommand{\fbswao}{F^{\bot,0}_{\rm sw, all}}
+\newcommand{\ftlwco}{F^{\top,0}_{\rm lw, clear}}
+\newcommand{\fblwco}{F^{\bot,0}_{\rm lw, clear}}
+\newcommand{\ftlwao}{F^{\top,0}_{\rm lw, all}}
+\newcommand{\fblwao}{F^{\bot,0}_{\rm lw, all}}
+\newcommand{\ft}{F^{\top}}
+\newcommand{\fb}{F^{\bot}}
+\newcommand{\gm}{$\overline{\rm g}$}
+\newcommand{\om}{\raisebox{-1.5ex}[1.5ex]{ --- }}
+\newcommand{\cw}[1]{\textcolor{white}{#1}}
+\newcommand{\tcr}[1]{\textcolor{red}{#1}}
+\newcommand{\ditem}[1][]{\item[{#1}]\hfill}
+\newcommand{\sm}{$\overline{\rm s}$}
+
+% begin new commands for graphics
+\newcommand{\arrays}{\renewcommand{\arraystretch}{0.5}}
+
+\newcommand{\pfaw}[3]{\begin{tabular*}{9cm}{c}
+\includegraphics[width=#3cm]{#1.pdf}
+%\includegraphics[width=#3cm,angle=#2cm]{#1.pdf}
+\end{tabular*}}
+
+\newcommand{\pcttwo}[2]{\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c}
+#1 & #2\\
+\end{tabular*}
+\end{center}}
+
+\newcommand{\pctthree}[3]{\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}cc}
+#1 & #2 & #3\\
+\end{tabular*}
+\end{center}}
+
+\newcommand{\pctthreetop}[3]{\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c}
+\multicolumn{2}{c}{#1}\\
+#2 & #3\\
+\end{tabular*}
+\end{center}}
+
+\newcommand{\pctfour}[4]{\arrays
+\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c}
+#1 & #2\\
+#3 & #4
+\end{tabular*}
+\end{center}}
+
+\newcommand{\pctsix}[6]{\arrays
+\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c}
+#1 & #2\\
+#3 & #4\\
+#5 & #6
+\end{tabular*}
+\end{center}}
+
+\newcommand{\pctsixt}[6]{\arrays
+\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c@{\extracolsep\fill}c}
+#1 & #2 & #3\\
+#4 & #5 & #6
+\end{tabular*}
+\end{center}}
+
+\newcommand{\pcteight}[8]{\arrays
+\begin{center}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}c}
+#1 & #2\\
+#3 & #4\\
+#5 & #6\\
+#7 & #8
+\end{tabular*}
+\end{center}}
+
+%newcommands for putting view graphs into comptes rendus
+\newcommand{\igcrtwzeonfozefizenirjs}[2]{\includegraphics[#1]{guide/cr/cr2014_05_09_rjs/#2}}
+
+% end new commands for graphics
+
+\makeindex
+
+\begin{document}
+
+\title{User manual for \echam}
+\author{Sebastian Rast\thanks{Max
+    Planck Institute of Meteorology, Hamburg, e--mail:
+    sebastian.rast@mpimet.mpg.de}, Tobias Becker, Renate Brokopf, Suvarchal--Kumar
+  Cheedela, \\
+    Monika Esch, Irina Fast
+    Veronika Gayler, Ingo Kirchner, \\Luis Kornblueh, Dagmar Popke, Andreas Rhodin,
+    Hauke Schmidt, \\ Uwe Schulzweida, Aiko Voigt, Karl--Hermann Wieners}  
+\date{\today, (\creationdate), version~echam--\echamversion--guide--\guideversion}
+
+\frontmatter
+
+\maketitle
+
+%\rule{0cm}{1cm}
+%\newpage
+
+
+\tableofcontents
+
+\listoftables
+\newpage
+
+\mainmatter
+\chapter{Introduction}\label{capintroduction}
+   \input{guide/ECHAM.guide.introduction}
+
+\chapter{User guide}\label{capuserguide}
+
+  \section[Compiling \echambw]{Compiling \echam}\label{seccompiling}
+     \input{guide/ECHAM.guide.compiling}
+
+  \section[Running \echambw]{Running \echam}\label{secrunning}
+     \input{guide/ECHAM.guide.running}
+
+  \section{Input namelists}\label{secnamelist}
+     \input{guide/ECHAM.guide.namelistecham}
+     \input{guide/ECHAM.guide.namelistjsbach_intro}
+     \input{../jsbach/namelists/namelists_jsbach}
+     \input{guide/ECHAM.guide.namelistother}
+
+  \section{Input data}\label{secinputfiles}
+     \input{guide/ECHAM.guide.inputfiles}
+
+  \section{Output files and variables}\label{secoutputfiles}
+     \input{guide/ECHAM.guide.outputfiles}
+
+  \section{Run scripts}\label{secrunscripts}
+     \input{guide/ECHAM.guide.runscripts}
+
+  \section{Postprocessing}\label{secpostprocessing}
+     \input{guide/ECHAM.guide.postprocessing}
+
+  \section{Special model configurations}
+     \input{guide/ECHAM.guide.specialconfiguration}
+
+\chapter{Technical Documentation}\label{captechguide}
+  \section{Parallelization}
+     \input{guide/ECHAM.guide.parallel}
+
+  \section{Data structures and memory use}\label{secstreams}
+
+     \input{guide/ECHAM.guide.memory}
+
+  \section{Date and time variables}
+     \input{guide/ECHAM.guide.timemanager}
+
+  \section{Submodel interface}
+     \input{guide/ECHAM.guide.submodel}
+
+%Appendix
+
+  \input{guide/ECHAM.guide.appendix}
+
+  \bibliography{guide/echam6_userguide_lit,guide/cr/cr2014_07_15_rjs/cr2014_07_15_rjs,guide/cr/cr2014_05_09_rjs/cr2014_05_09_rjs}
+  \bibliographystyle{echam}
+
+\printindex
+\end{document}

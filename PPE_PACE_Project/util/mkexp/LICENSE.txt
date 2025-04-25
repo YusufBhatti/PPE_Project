@@ -1,0 +1,5 @@
+Copyright (c) 2013 Max-Planck-Institut fuer Meteorologie, Hamburg, Germany
+
+Copying and distribution of this package, with or without modification, are
+permitted in any medium without royalty provided the copyright notice and this
+notice are preserved. This package is offered as-is, without any warranty.

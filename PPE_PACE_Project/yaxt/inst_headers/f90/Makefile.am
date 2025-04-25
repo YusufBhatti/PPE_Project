@@ -1,0 +1,124 @@
+#
+# Keywords:
+# Maintainer: Jörg Behrens <behrens@dkrz.de>
+#             Moritz Hanke <hanke@dkrz.de>
+#             Thomas Jahns <jahns@dkrz.de>
+# URL: https://doc.redmine.dkrz.de/yaxt/html/
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are  permitted provided that the following conditions are
+# met:
+#
+# Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+# Neither the name of the DKRZ GmbH nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+# IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+if FC_MOD_UPPERCASE
+##UPPERCASE_MODULE_NAME_MARKER do not remove##
+XT_XMAP_INTERSECTION_MOD_NAME=XT_XMAP_INTERSECTION
+XT_IDXLIST_COLLECTION_MOD_NAME=XT_IDXLIST_COLLECTION
+XT_REDIST_BASE_MOD_NAME=XT_REDIST_BASE
+XT_MPI_MOD_NAME=XT_MPI
+XT_XMAP_ABSTRACT_MOD_NAME=XT_XMAP_ABSTRACT
+XT_IDXSECTION_MOD_NAME=XT_IDXSECTION
+XT_IDXLIST_ABSTRACT_MOD_NAME=XT_IDXLIST_ABSTRACT
+XT_CORE_MOD_NAME=XT_CORE
+XT_IDXVEC_MOD_NAME=XT_IDXVEC
+XT_IDXSTRIPES_MOD_NAME=XT_IDXSTRIPES
+XT_UT_MOD_NAME=XT_UT
+YAXT_MOD_NAME=YAXT
+else
+##LOWERCASE_MODULE_NAME_MARKER do not remove##
+XT_XMAP_INTERSECTION_MOD_NAME=xt_xmap_intersection
+XT_IDXLIST_COLLECTION_MOD_NAME=xt_idxlist_collection
+XT_REDIST_BASE_MOD_NAME=xt_redist_base
+XT_MPI_MOD_NAME=xt_mpi
+XT_XMAP_ABSTRACT_MOD_NAME=xt_xmap_abstract
+XT_IDXSECTION_MOD_NAME=xt_idxsection
+XT_IDXLIST_ABSTRACT_MOD_NAME=xt_idxlist_abstract
+XT_CORE_MOD_NAME=xt_core
+XT_IDXVEC_MOD_NAME=xt_idxvec
+XT_IDXSTRIPES_MOD_NAME=xt_idxstripes
+XT_UT_MOD_NAME=xt_ut
+YAXT_MOD_NAME=yaxt
+endif
+
+$(XT_UT_MOD_NAME).$(FCMODEXT): ../../src/$(XT_UT_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_UT_MOD_NAME).$(FCMODEXT) .
+
+$(YAXT_MOD_NAME).$(FCMODEXT): ../../src/$(YAXT_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(YAXT_MOD_NAME).$(FCMODEXT) .
+
+$(XT_IDXVEC_MOD_NAME).$(FCMODEXT): ../../src/$(XT_IDXVEC_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_IDXVEC_MOD_NAME).$(FCMODEXT) .
+
+$(XT_IDXSTRIPES_MOD_NAME).$(FCMODEXT): ../../src/$(XT_IDXSTRIPES_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_IDXSTRIPES_MOD_NAME).$(FCMODEXT) .
+
+$(XT_CORE_MOD_NAME).$(FCMODEXT): ../../src/$(XT_CORE_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_CORE_MOD_NAME).$(FCMODEXT) .
+
+$(XT_IDXLIST_ABSTRACT_MOD_NAME).$(FCMODEXT): ../../src/$(XT_IDXLIST_ABSTRACT_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_IDXLIST_ABSTRACT_MOD_NAME).$(FCMODEXT) .
+
+$(XT_IDXSECTION_MOD_NAME).$(FCMODEXT): ../../src/$(XT_IDXSECTION_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_IDXSECTION_MOD_NAME).$(FCMODEXT) .
+
+$(XT_XMAP_ABSTRACT_MOD_NAME).$(FCMODEXT): ../../src/$(XT_XMAP_ABSTRACT_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_XMAP_ABSTRACT_MOD_NAME).$(FCMODEXT) .
+
+$(XT_MPI_MOD_NAME).$(FCMODEXT): ../../src/$(XT_MPI_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_MPI_MOD_NAME).$(FCMODEXT) .
+
+$(XT_REDIST_BASE_MOD_NAME).$(FCMODEXT): ../../src/$(XT_REDIST_BASE_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_REDIST_BASE_MOD_NAME).$(FCMODEXT) .
+
+$(XT_IDXLIST_COLLECTION_MOD_NAME).$(FCMODEXT): ../../src/$(XT_IDXLIST_COLLECTION_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_IDXLIST_COLLECTION_MOD_NAME).$(FCMODEXT) .
+
+$(XT_XMAP_INTERSECTION_MOD_NAME).$(FCMODEXT): ../../src/$(XT_XMAP_INTERSECTION_MOD_NAME).$(FCMODEXT)
+	$(LN_S) ../../src/$(XT_XMAP_INTERSECTION_MOD_NAME).$(FCMODEXT) .
+
+##MODULE_RECIPE_MARKER do not remove ##
+
+##INCLUDE_HEADER_MARKER do not remove ##
+include_HEADERS= \
+	$(XT_XMAP_INTERSECTION_MOD_NAME).$(FCMODEXT) \
+	$(XT_IDXLIST_COLLECTION_MOD_NAME).$(FCMODEXT) \
+	$(XT_REDIST_BASE_MOD_NAME).$(FCMODEXT) \
+	$(XT_MPI_MOD_NAME).$(FCMODEXT) \
+	$(XT_XMAP_ABSTRACT_MOD_NAME).$(FCMODEXT) \
+	$(XT_IDXSECTION_MOD_NAME).$(FCMODEXT) \
+	$(XT_IDXLIST_ABSTRACT_MOD_NAME).$(FCMODEXT) \
+	$(XT_CORE_MOD_NAME).$(FCMODEXT) \
+	$(XT_IDXVEC_MOD_NAME).$(FCMODEXT) \
+	$(XT_IDXSTRIPES_MOD_NAME).$(FCMODEXT) \
+	$(XT_UT_MOD_NAME).$(FCMODEXT) \
+	$(YAXT_MOD_NAME).$(FCMODEXT)
+
+dist-hook:
+	for nondistfile in $(noinst_HEADERS) $(include_HEADERS) ; do \
+	  rm -f $(distdir)/$$nondistfile ; done
+
+clean-local:
+	rm -f *.$(FCMODEXT)

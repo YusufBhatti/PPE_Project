@@ -1,0 +1,464 @@
+#_____________________________________________________________________________
+#
+# Linux
+#
+#_____________________________________________________________________________
+#
+SRCDIRS     = support blas lapack 
+#
+SUPPORTROOT = ..
+SUPPORT_LIB = '-L$(SUPPORTROOT)/lib -lsupport'
+#
+#_____________________________________________________________________________
+#
+CC          = gcc
+CFLAGS      = -std=gnu99 -msse2 -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+ccversion   = $(gcc --version 2>&1 | awk 'NR==1') 
+#
+case $fortran_compiler in
+    default|nag)
+        configured_compiler = nag
+        compiler_version    = $(nagfor -v 2>&1 | awk 'NR==1{split($5,v,"."); printf("nag%1d%1d", v[1],substr(v[2],1,1))}')
+        CFLAGS      = $CFLAGS -DNAGf90Fortran
+        FC          = nagfor
+        FCFLAGS     = -maxcontin=512 -colour -O0 -C=all -f2003 -float-store -nan -gline -g -D__NAG -DARGCHECK -wmismatch=mpi_bcast,mpi_send,mpi_recv,mpi_isend,mpi_irecv,mpi_allreduce,mpi_get_address,mpi_gather,nf_get_var_double,nf_put_var_double,nf_def_var,nf_put_vara_double,dgemm -Wc,-pthread
+        F77         = nagfor
+        FFLAGS      = -w=obs -O -dcfuns -mismatch_all
+ 	WLFLAG      = -Wl,-Wl,
+        LDFLAGS     = -g
+        ;;
+    gcc)
+        configured_compiler = gcc
+        compiler_version    = $(gfortran --version | awk 'NR==1{split($NF,v,"."); printf("gcc%1d%1d", v[1], v[2])}')
+        CFLAGS      = $CFLAGS -DgFortran
+        FC          = gfortran
+        FCFLAGS     = -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -ffree-line-length-none -g -finit-real=nan -march=native -O -fomit-frame-pointer -ffast-math
+        F77         = gfortran
+        FFLAGS      = -march=native -O -fomit-frame-pointer -ffast-math
+ 	WLFLAG      = -Wl
+        LDFLAGS     = -g
+        ;;
+    pgi)
+        configured_compiler = pgi
+        compiler_version    = $(pgfortran -V | awk 'NR==2{split($2,v,"."); printf("pgi%1d", v[1])}')
+        CFLAGS      = $CFLAGS -DgFortran
+        FC          = pgfortran 
+        FCFLAGS     = -O3 -Kieee -Mallocatable=03
+        F77         = $FC
+        FFLAGS      = -O3 -Kieee
+ 	WLFLAG      = -Wl
+        ;;
+    intel|ftnintel)
+        configured_compiler = intel
+        compiler_version    = $(ifort -V 2>&1 | awk -F "," 'NR==1{split($2,v," "); printf("intel%d",v[2])}')
+        CFLAGS      = $CFLAGS -DgFortran
+        FC          = ifort
+        FCFLAGS     = -O3 -fp-model source -fast-transcendentals -no-prec-sqrt -no-prec-div -xHOST -diag-disable 15018
+        F77         = $FC
+        FFLAGS      = -O3 -fp-model source -fast-transcendentals -no-prec-sqrt -no-prec-div -xHOST -diag-disable 15018
+ 	WLFLAG      = -Wl
+        ;;
+#>>csld #443
+    intel_tectest|ftnintel_tectest)   # less harsh opt options to allow running the technical test with intel 
+        configured_compiler = intel
+        compiler_version    = $(ifort -V 2>&1 | awk -F "," 'NR==1{split($2,v," "); printf("intel%d",v[2])}')
+        CFLAGS      = $CFLAGS -DgFortran
+        FC          = ifort
+        FCFLAGS     = -O3 -fp-model source -xHOST -diag-disable 15018
+        F77         = $FC
+        FFLAGS      = -O3 -fp-model source -xHOST -diag-disable 15018
+        WLFLAG      = -Wl
+        ;;
+#<<csld #443
+    *)
+        echo
+        echo
+        echo "Unknown fortran selected (supported: nag | gcc | pgi | intel) ..."
+        echo
+        exit
+        ;;
+esac
+
+#>>SF for HAMMOZ
+FCFLAGS = $FCFLAGS -DHAMMOZ
+#<<SF
+#
+#_____________________________________________________________________________
+#
+# Define site dependent settings
+#
+case $ac_sitename in
+    dkrz.de|*bullx)
+        case $(lsb_release -cs) in
+  	    Santiago)
+                dist_codename = rhel6
+                ;;
+            *)
+                echo
+                echo
+                echo Unknown Linux system type at DKRZ ...
+                echo
+                exit
+                ;;        
+        esac		
+        software_tree = /sw/$dist_codename-x64
+
+        case $ac_hostname in 
+            mlogin*)
+                MPI_LAUNCH = srun
+                case $configured_compiler in
+                    intel)
+                        CC          = icc
+	                CFLAGS      = -std=gnu99 -O3 -march=native -g -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+	                ccversion   = $(icc --version 2>&1 | awk 'NR==1') 
+                        NETCDFFROOT = $software_tree/netcdf/netcdf_fortran-4.4.2-intel14
+                        NETCDFROOT  = $software_tree/netcdf/netcdf_c-4.3.2-gcc48
+                        HDF5ROOT    = $software_tree/hdf5/hdf5-1.8.14-threadsafe-gcc48
+                        SZIPROOT    = $software_tree/sys/libaec-0.3.2-gcc48
+                        ZLIBROOT    = /usr
+                        mpi_version=bullxmpi_mlx-1.2.8.3
+                        #mpi_version=impi-5.1.0.038_dapl2.1.6
+                        case $mpi_version in
+                            impi*)
+     		                MPIROOT    = $software_tree/intel/impi/5.1.0.038_dapl2.1.6/compilers_and_libraries_2016.0.079/linux/mpi/intel64
+                                MPI_LIB    = -Wl,--disable-new-dtags -L$MPIROOT/lib/release_mt -Wl,-rpath,$MPIROOT/lib/release_mt -L$MPIROOT/lib -Wl,-rpath,$MPIROOT/lib -lmpifort -lmpi -lmpigi -ldl -lrt -lpthread
+                                ;;
+                            bullxmpi*)
+                                MPIROOT    = /opt/mpi/${mpi_version%%-[0-9]*}/${mpi_version##*-}
+                                MPI_LIB    = "$($MPIROOT/bin/mpif90 -show |sed -e 's/^[^ ]*//' -e 's/-[I][^ ]*//g')"
+                                ;;
+		        esac
+                        ;;
+                    nag)
+                        c_compiler_version = $(gcc --version | awk 'NR==1{split($NF,v,"."); printf("gcc%1d%1d", v[1], v[2])}')
+                        NETCDFFROOT = $software_tree/netcdf/netcdf_fortran-4.4.2-static-$compiler_version
+                        NETCDFROOT  = $software_tree/netcdf/netcdf_c-4.3.2-static-gcc48
+                        HDF5ROOT    = $software_tree/hdf5/hdf5-1.8.14-static-threadsafe-gcc48
+                        SZIPROOT    = $software_tree/sys/libaec-0.3.2-static-gcc48
+                        ZLIBROOT    = /usr
+                        mpi_version = mvapich2-1.9b-static
+                        MPIROOT     = $software_tree/mpi/${mpi_version}-$compiler_version
+                        IB_LIBS     = -lmpl -libmad -lrdmacm -libumad -libverbs 
+                        SYS_LIBS    = -lhwloc -lxml2 -lnuma -lrt -lutil -lpthread -lm -ldl
+                        MPI_LIB     = -lmpichf90 -lmpich -lopa $IB_LIBS $SYS_LIBS
+                        # static libraries needed for hdf5/netcdf
+                        LIBS=-L${SZIPROOT}/lib -laec -ldl -lcurl
+                        # linking statically also prevents us from creating meaningful shared objects
+                        enable_shared=no
+                        enable_static=yes
+                        # also threading flags are no longer passed properly for nagfor 5.3 and later
+                        FC=$(cd $srcdir ; pwd -P)/contrib/nagfor_fail_wrapper/nagfor
+                        ;;
+                esac
+		;;
+	esac	   
+        ;;  
+    zmaw.de)
+        dist_codename = $(lsb_release -cs)
+        software_tree = /sw/$dist_codename-x64
+        # static libraries needed for hdf5/netcdf
+        LIBS=-ldl
+        case $dist_codename in
+            squeeze)
+                NETCDFFROOT = $software_tree/netcdf_fortran-4.4.2-static-$compiler_version
+                NETCDFROOT  = $software_tree/netcdf-4.3.3.1-static
+                HDF5ROOT    = $software_tree/hdf5-1.8.12-static
+                SZIPROOT    = $software_tree/szip-2.1-static
+                ZLIBROOT    = /usr
+                ;;      
+            wheezy)
+                NETCDFFROOT = $software_tree/netcdf_fortran-4.4.2-static-$compiler_version
+                NETCDFROOT  = $software_tree/netcdf-4.3.3.1-static-gccsys
+                HDF5ROOT    = $software_tree/hdf5-1.8.13-static-gccsys
+                SZIPROOT    = $software_tree/szip-2.1-static-gccsys
+                ZLIBROOT    = /usr
+                ;;
+        esac
+        case $host in
+            x86_64-*-linux-*)
+                # linking statically also prevents us from creating meaningful shared objects
+                enable_shared=no
+                enable_static=yes
+                case $configured_compiler in
+                    nag)
+                        # threading flags are no longer passed properly for nagfor 5.3 and later
+                        FC=$(cd $srcdir ; pwd -P)/contrib/nagfor_fail_wrapper/nagfor
+                        ;;
+                    intel)
+                        CC          = icc
+	                CFLAGS      = -std=gnu99 -O3 -march=native -g -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+	                ccversion   = $(icc --version 2>&1 | awk 'NR==1') 
+                        ;;                      
+                    gcc|pgi)
+                        # nothing extra to do
+                        ;;
+                        esac                            
+                case $dist_codename in
+                    squeeze)
+                        mpi_version=openmpi-1.6.5-static
+                        MPIROOT=$software_tree/mpilib/${mpi_version}-$compiler_version
+                        IB_LIBS  = -lrdmacm -libverbs 
+                        SYS_LIBS = -lnuma -lrt -lnsl -lutil -lpthread -lm -ldl
+                        MPI_LIB  = -lmpi_f90 -lmpi_f77 -lmpi $IB_LIBS $SYS_LIBS
+                        MPI_LAUNCH = ${MPIROOT}/bin/mpiexec
+                        ;;
+                    wheezy)
+                        MPIROOT = $software_tree/mpilib/mvapich2-2.1a-static-$compiler_version
+                        IB_LIBS  = -lrdmacm -libverbs	
+                        SYS_LIBS = -lnuma -lxml2 -ldl -lrt -lm -lpthread
+                        MPI_LIB  = -lmpifort -lmpi $IB_LIBS $SYS_LIBS
+                        MPI_LAUNCH = ${MPIROOT}/bin/mpiexec
+                        ;;
+                esac
+                MPI_LAUNCH = ${MPIROOT}/bin/mpiexec
+                ;;
+            *)
+                echo
+                echo
+                echo Unknown Linux system type - currently not supported ...
+                echo
+                exit
+                ;;        
+        esac
+        ;;
+    ethz.ch) #clusters, ETH
+        NETCDFROOT  = $NETCDFROOT
+        NETCDFFROOT = $NETCDFROOT
+        HDF5ROOT    = $HDF5ROOT
+        SZIPROOT    = $SZIPROOT
+        ZLIBROOT    = $ZLIBROOT
+        MPIROOT     = $MPIROOT
+        YAXTROOT    = $YAXTROOT
+        CDIROOT     = $CDIROOT
+        MPI_LIB     = $MPI_LIB
+
+        enable_shared=no
+        enable_static=yes
+
+        case $fortran_compiler in
+            nag)
+                # threading flags are no longer passed properly for nagfor 5.3 and later:
+                #SF additional note: this only works if FC is not defined in your env
+                #   (e.g. through a module load)                
+                FC = $(cd $srcdir ; pwd -P)/contrib/nagfor_fail_wrapper/nagfor
+                ;;
+            intel|intel_tectest) 
+                CC          = icc
+	            CFLAGS      = -std=gnu99 -O3 -march=native -g -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+                ccversion   = $(icc --version 2>&1 | awk 'NR==1') 
+
+                case $ac_hostname in
+                     aerosol*) # AMD aerosol cluster
+                         FCFLAGS = $FCFLAGS -march=corei7-avx
+                     ;;
+                     eu-login*) #euler cluster
+                         #>>SF 202203 for euler 6/7
+                         CFLAGS  = $CFLAGS -march=core-avx2
+                         FCFLAGS = $FCFLAGS -march=core-avx2
+                         FFLAGS  = $FFLAGS -march=core-avx2
+                         #<<SF 202203
+                     ;;
+                esac
+                ;;                      
+            gcc)
+                FCFLAGS = $FCFLAGS -O3
+                FFLAGS  = $FFLAGS  -O3 
+                case $ac_hostname in
+                    eu-login*) #euler cluster
+                        CFLAGS  = $CFLAGS -march=core-avx2
+                        FCFLAGS = $FCFLAGS -march=core-avx2
+                        FFLAGS = $FFLAGS -march=core-avx2
+                        ;;
+                esac
+                ;; 
+        esac
+
+    ;;
+
+    cscs.ch) # Cray XC30 (daint) as of 2016.05.02
+        NETCDFROOT = $NETCDF_DIR
+        HDF5ROOT   = $HDF5_DIR
+        SZIPROOT   = $SZIP_DIR
+        ZLIBROOT   = $ZLIB_DIR
+        MPIROOT    = $MPICH_DIR
+        YAXTROOT   = $YAXT_DIR
+        CDIROOT    = $CDI_DIR
+
+        CFLAGS = $CFLAGS -D__XC30__
+
+        enable_shared=no
+        enable_static=yes
+
+        CC  = cc
+        FC  = ftn
+        F77 = $FC
+    ;;
+
+    ################
+    ### Snellius
+    ################
+    sron.nl|surf.nl|surfsara.nl)
+        echo ""
+        case $configured_compiler in
+          gcc)
+          echo "GCC DETECTED!"
+
+          compiler_version    = $(gfortran --version | awk 'NR==1{split($NF,v,"."); printf("gcc%1d%1d", v[1], v[2])}')
+          echo "compiler_version: ${compiler_version}"
+
+                                        MPIROOT        = /home/${USER}/TOOLS/MPI/mpich-4.0.3
+          IB_LIBS        = -lmpl -libmad -lrdmacm -libumad -libverbs
+          SYS_LIBS       = -lhwloc -lxml2 -lnuma -lrt -lutil -lpthread -lm -ldl
+          MPI_LIB        = -lmpichf90 -lmpich -lopa $IB_LIBS $SYS_LIBS
+          MPI_LAUNCH     = ${MPIROOT}/bin/mpiexec
+
+                                        dir_tools      = /home/ybhatti/yusufb/ECHAM/tools/general/installed/mpich-4
+          FC             = ${MPIROOT}/bin/mpif90
+          CC             = ${MPIROOT}/bin/mpicc
+          FC7            = ${MPIROOT}/bin/mpif77
+                                        H5CC           = $dir_tools/hdf5-1.12.1/bin/h5pcc
+
+                                        F77            = $FC
+                                        CFLAGS         = -std=gnu99 -msse2 -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+                                        if [ ${compiler_version} = gcc85 ]; then
+            FCFLAGS        = $FCFLAGS -DHAMMOZ -w -Wno-argument-mismatch -O2
+            FFLAGS         = -w -Wno-argument-mismatch -O2
+          else
+            FCFLAGS        = $FCFLAGS -DHAMMOZ -w -fallow-argument-mismatch -O2
+            FFLAGS         = -w -fallow-argument-mismatch -O2
+            fi
+            IB_LIBS        = -lmpl -libmad -lrdmacm -libumad -libverbs 
+            SYS_LIBS       = -lhwloc -lxml2 -lnuma -lrt -lutil -lpthread -lm -ldl
+            MPI_LIB        = -lmpichf90 -lmpich -lopa $IB_LIBS $SYS_LIBS
+            NETCDFFROOT    = ${dir_tools}/netcdf4-fortran-4.6.0
+            NETCDFROOT     = ${dir_tools}/netcdf4-4.9.0
+            HDF5ROOT       = ${dir_tools}/hdf5-1.12.1
+            SZIPROOT       = ${dir_tools}/szip-2.1
+            ZLIBROOT       = ${dir_tools}/zlib-1.2.13
+            YAXTROOT       = ${dir_tools}/yaxt-0.9.3.1
+            CDIROOT        = ${dir_tools}/cdi-1.7.0 
+
+#           NETCDFFROOT    = ${software_tree}/netCDF-Fortran/4.6.1-gompi-2023a
+#           NETCDFROOT     = ${software_tree}/netCDF/4.9.2-gompi-2023a
+#           HDF5ROOT       = ${software_tree}/HDF5/1.14.0-gompi-2023a
+#           SZIPROOT       = ${software_tree}/Szip/2.1.1-GCCcore-12.3.0
+#           ZLIBROOT       = ${software_tree}/zlib/1.2.13-GCCcore-12.3.0
+#           YAXTROOT       = ${dir_tools}/yaxt-0.9.3.1
+#           CDIROOT        = ${software_tree}/CDO/2.2.2-gompi-2023a
+
+        esac
+        ;;
+
+
+
+esac
+
+# Some systems (e.g. ARCHER) can't resolve the unqualified output of
+# "hostname" with "host", because they have no configured DNS domain name,
+# leading to $ac_sitename being empty; use $ac_hostname in such
+# cases.
+case $ac_hostname in
+    eslogin[0-9][0-9][0-9]) # Cray XC30 (ARCHER) as of 2015.04, see also https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/ARCHER
+        NETCDFROOT = $NETCDF_DIR
+        HDF5ROOT   = $HDF5_DIR
+        SZIPROOT   = $SZIP_DIR
+        ZLIBROOT   = $ZLIB_DIR
+        MPIROOT    = $MPICH_DIR
+
+        CFLAGS = $CFLAGS -D__XE6__
+
+        # Use the compiler wrappers, regardless of the real compiler
+        CC                  = cc
+        FC                  = ftn
+        F77                 = $FC
+
+        # Compiler wrapper sets architecture automatically; don't try to
+        # overide it as this produces an error.
+        CFLAGS = ${CFLAGS/-msse2/}
+
+        # Appropriate BLAS and LAPACK libraries are automatically linked
+        # in under the default programming environments; don't explicitly
+        # override this with the bundled ones.
+        LAPACK_ROOT =
+        LAPACK_LIB =
+        SRCDIRS = ${SRCDIRS/blas/}
+        SRCDIRS = ${SRCDIRS/lapack/}
+
+        case $configured_compiler in
+            gcc)
+                # Compiler wrapper sets architecture automatically
+                FCFLAGS = ${FCFLAGS/-march=native/}
+                FFLAGS = ${FFLAGS/-march=native/}
+
+                # Also, -fassociative-math (implied by -ffast-math or
+                # -funsafe-math-optimizations) seems to cause a hang during
+                # initialization
+                FCFLAGS = $FCFLAGS -fno-associative-math
+                FFLAGS = $FFLAGS -fno-associative-math
+            ;;
+            intel)
+                # Compiler wrapper sets architecture automatically
+                FCFLAGS = ${FCFLAGS/-xHOST/}
+                FFLAGS = ${FFLAGS/-xHOST/}
+
+                # Also, disable a warning from the Intel C compiler
+                CFLAGS = $CFLAGS -diag-disable 167
+            ;;
+        esac
+    ;;
+esac
+
+# And not everywhere is uniquely defined by the last two domain components
+# (e.g. there are a lot of different sites in *.ac.uk)...
+case "$fqdn" in
+    *.arcus.arc.local|*.atm.ox.ac.uk)  # ARCUS-B @ Advanced Research Computing / Oxford Supercomputing Centre, UK
+        case "$host" in 
+            x86_64-*-linux-*)
+            # Use the MPI, HDF5 and NetCDF libraries selected via the modules
+        # system.
+        if test -n "$I_MPI_ROOT"; then
+            MPIROOT = "$I_MPI_ROOT/intel64"
+            # The find-based automagic likes to find a gfortran .mod rather
+            # than the intel one...
+            MPI_INCLUDE = "-I$MPIROOT/include"
+            MPI_LIB = -lmpi -lmpigf -lmpigi
+        elif type -t ompi_info >/dev/null; then
+                       MPIROOT    = $(ompi_info | awk '/Prefix:/ {print $2}')
+            MPI_LIB    = -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi
+        else
+                       MPIROOT    = $(which mpicc | sed -e 's:/bin[0-9]*/mpicc::')
+            MPI_LIB    = -lmpichf90 -lmpich -lmpl
+        fi
+                   HDF5ROOT   = $({ h5pcc -showconfig 2>/dev/null || h5cc -showconfig; } | awk '/Installation point:/ {print $3}')
+                   NETCDFROOT = $(nc-config --prefix)
+        
+        # Use system zlib
+                ZLIBROOT = /usr
+
+        # SZIP support is hardwired into the HDF5 library, so we don't
+        # need to reference it explicitly.
+                #SZIPROOT =
+                #
+        MPI_LIB = -Wl,-rpath,$MPIROOT/lib $MPI_LIB
+        OTHER_LIB = $OTHER_LIB -Wl,-rpath,$NETCDFROOT/lib
+        OTHER_LIB = $OTHER_LIB -Wl,-rpath,$HDF5ROOT/lib
+
+        # Ensure Intel runtime libraries in RPATH
+        case "${fortran_compiler}" in
+            intel*)
+            OTHER_LIB = $OTHER_LIB -Wl,-rpath,$(which ifort | sed -e 's:/bin/ifort$:/lib/intel64:')
+            ;;
+        esac
+
+        # Allowing AVX2 breaks bit-reproduciblity, even with
+        # strongest -align options
+        INTEL_CPU_OPTION=-xCORE-AVX-I
+
+        # As does using anything other than the reference BLAS/LAPACK
+        # (e.g. ATLAS or Intel MKL)
+        OTHER_LIB = -L/lib64 -L/usr/lib64 -Wl,-rpath,/lib64:/usr/lib64 -llapack -lblas $OTHER_LIB
+                ;;
+        esac
+        ;;
+
+esac
