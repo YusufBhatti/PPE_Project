@@ -303,7 +303,7 @@ CONTAINS
     USE mo_submodel,          ONLY: laerocom_diag
     USE mo_hammoz_aerocom_diags, ONLY: lHEaci
     USE mo_hammoz_aerocom_HEaci, ONLY: rsut_tmp, rlut_inst, rsutcs_tmp, rlutcs_inst, &
-         rsutnoa_tmp, rsutcsnoa_tmp, rlutnoa_inst, rlutcsnoa_inst
+         rsutnoa_tmp, rsutcsnoa_tmp, rsdt_tmp, rlutnoa_inst, rlutcsnoa_inst
     !<<DN
 
     INTEGER, INTENT(IN)  :: kproma, kbdim, klev, klevp1, krow, ktrac, ktype(kbdim)
@@ -557,17 +557,18 @@ CONTAINS
 
     !>>DN
     IF (laerocom_diag.AND.lHEaci) THEN
-       IF (iaero_call == 0) THEN !aerosol-free call
+!       IF (iaero_call == 0) THEN !aerosol-free call
           rsutnoa_tmp(1:kproma,krow)   = flx_upsw(1:kproma,1)*flux_factor(1:kproma) !TOA
           rsutcsnoa_tmp(1:kproma,krow) = flx_upsw_clr(1:kproma,1)*flux_factor(1:kproma) !TOA
           rlutnoa_inst(1:kproma,krow)   = flx_uplw(1:kproma,1)!TOA
           rlutcsnoa_inst(1:kproma,krow) = flx_uplw_clr(1:kproma,1)!TOA
-       ELSE
+ !      ELSE
           rsut_tmp(1:kproma,krow)    = flx_upsw(1:kproma,1)*flux_factor(1:kproma) !TOA
           rlut_inst(1:kproma,krow)   = flx_uplw(1:kproma,1) !TOA
           rsutcs_tmp(1:kproma,krow)  = flx_upsw_clr(1:kproma,1)*flux_factor(1:kproma) !TOA
           rlutcs_inst(1:kproma,krow) = flx_uplw_clr(1:kproma,1) !TOA
-       ENDIF
+          !rsdt_tmp(1:kproma,krow)= flx_dnsw(1:kproma,1)*flux_factor(1:kproma) !TOA
+  !     ENDIF
     ENDIF
     !<<DN
 

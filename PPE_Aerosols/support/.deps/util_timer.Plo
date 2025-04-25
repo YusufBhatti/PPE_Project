@@ -4,8 +4,8 @@ util_timer.lo: util_timer.c /usr/include/stdc-predef.h \
  /usr/include/bits/wordsize.h /usr/include/bits/timesize.h \
  /usr/include/sys/cdefs.h /usr/include/bits/long-double.h \
  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stddef.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stdarg.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stddef.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stdarg.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/bits/time64.h /usr/include/bits/types/__fpos_t.h \
  /usr/include/bits/types/__mbstate_t.h \
@@ -28,7 +28,7 @@ util_timer.lo: util_timer.c /usr/include/stdc-predef.h \
  /usr/include/bits/pthreadtypes-arch.h /usr/include/bits/struct_mutex.h \
  /usr/include/bits/struct_rwlock.h /usr/include/alloca.h \
  /usr/include/bits/stdlib-bsearch.h /usr/include/bits/stdlib-float.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stdbool.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stdbool.h \
  /usr/include/unistd.h /usr/include/bits/posix_opt.h \
  /usr/include/bits/environments.h /usr/include/bits/confname.h \
  /usr/include/bits/getopt_posix.h /usr/include/bits/getopt_core.h \
@@ -38,8 +38,8 @@ util_timer.lo: util_timer.c /usr/include/stdc-predef.h \
  /usr/include/bits/types/locale_t.h /usr/include/bits/types/__locale_t.h \
  /usr/include/sys/time.h /usr/include/sys/times.h \
  /usr/include/sys/param.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/limits.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/syslimits.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/limits.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/syslimits.h \
  /usr/include/limits.h /usr/include/bits/posix1_lim.h \
  /usr/include/bits/local_lim.h /usr/include/linux/limits.h \
  /usr/include/bits/pthread_stack_min-dynamic.h \
@@ -69,8 +69,8 @@ util_timer.lo: util_timer.c /usr/include/stdc-predef.h \
 /usr/include/bits/long-double.h:
 /usr/include/gnu/stubs.h:
 /usr/include/gnu/stubs-64.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stddef.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stdarg.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stddef.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stdarg.h:
 /usr/include/bits/types.h:
 /usr/include/bits/typesizes.h:
 /usr/include/bits/time64.h:
@@ -112,7 +112,7 @@ util_timer.lo: util_timer.c /usr/include/stdc-predef.h \
 /usr/include/alloca.h:
 /usr/include/bits/stdlib-bsearch.h:
 /usr/include/bits/stdlib-float.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stdbool.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stdbool.h:
 /usr/include/unistd.h:
 /usr/include/bits/posix_opt.h:
 /usr/include/bits/environments.h:
@@ -129,8 +129,8 @@ util_timer.lo: util_timer.c /usr/include/stdc-predef.h \
 /usr/include/sys/time.h:
 /usr/include/sys/times.h:
 /usr/include/sys/param.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/limits.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/syslimits.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/limits.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/syslimits.h:
 /usr/include/limits.h:
 /usr/include/bits/posix1_lim.h:
 /usr/include/bits/local_lim.h:

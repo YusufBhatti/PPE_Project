@@ -345,14 +345,25 @@ case $ac_sitename in
           else
             FCFLAGS        = $FCFLAGS -DHAMMOZ -w -fallow-argument-mismatch -O2
             FFLAGS         = -w -fallow-argument-mismatch -O2
-          fi
-                                        NETCDFFROOT    = $dir_tools/netcdf4-fortran-4.6.0
-          NETCDFROOT     = $dir_tools/netcdf4-4.9.0
-          HDF5ROOT       = $dir_tools/hdf5-1.12.1
-          SZIPROOT       = $dir_tools/szip-2.1
-          ZLIBROOT       = $dir_tools/zlib-1.2.13
-          YAXTROOT       = $dir_tools/yaxt-0.9.3.1
-          CDIROOT        = $dir_tools/cdi-1.7.0
+            fi
+            IB_LIBS        = -lmpl -libmad -lrdmacm -libumad -libverbs 
+            SYS_LIBS       = -lhwloc -lxml2 -lnuma -lrt -lutil -lpthread -lm -ldl
+            MPI_LIB        = -lmpichf90 -lmpich -lopa $IB_LIBS $SYS_LIBS
+            NETCDFFROOT    = ${dir_tools}/netcdf4-fortran-4.6.0
+            NETCDFROOT     = ${dir_tools}/netcdf4-4.9.0
+            HDF5ROOT       = ${dir_tools}/hdf5-1.12.1
+            SZIPROOT       = ${dir_tools}/szip-2.1
+            ZLIBROOT       = ${dir_tools}/zlib-1.2.13
+            YAXTROOT       = ${dir_tools}/yaxt-0.9.3.1
+            CDIROOT        = ${dir_tools}/cdi-1.7.0 
+
+#           NETCDFFROOT    = ${software_tree}/netCDF-Fortran/4.6.1-gompi-2023a
+#           NETCDFROOT     = ${software_tree}/netCDF/4.9.2-gompi-2023a
+#           HDF5ROOT       = ${software_tree}/HDF5/1.14.0-gompi-2023a
+#           SZIPROOT       = ${software_tree}/Szip/2.1.1-GCCcore-12.3.0
+#           ZLIBROOT       = ${software_tree}/zlib/1.2.13-GCCcore-12.3.0
+#           YAXTROOT       = ${dir_tools}/yaxt-0.9.3.1
+#           CDIROOT        = ${software_tree}/CDO/2.2.2-gompi-2023a
 
         esac
         ;;

@@ -106,6 +106,8 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: dry3Dso2_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: dry3Dso4_inst(:,:,:)
 
+  REAL(dp), PUBLIC, POINTER :: rsdt_inst(:,:)
+  REAL(dp), PUBLIC, POINTER :: rsdt_tmp(:,:)
   CONTAINS
 
   !------------------------------------------------
@@ -550,8 +552,8 @@ MODULE mo_hammoz_aerocom_HEaci
   SUBROUTINE update_HEaci_diags(kproma, kbdim, klev, krow, pi0)
 
     USE mo_vphysc,        ONLY: vphysc
-    USE mo_memory_g3b,    ONLY: tpot, geosp
-    USE mo_memory_g1a,    ONLY: tm1, xlm1, xim1
+    USE mo_memory_g3b,    ONLY: tpot, geosp, tsurf_na, relhum
+    USE mo_memory_g1a,    ONLY: tm1, xlm1, xim1, xtm1
     USE mo_time_control,  ONLY: delta_time
     USE mo_ham_streams,   ONLY: tau_2d
     USE mo_ham_rad_data,  ONLY: Nwv_sw
@@ -560,7 +562,7 @@ MODULE mo_hammoz_aerocom_HEaci
 
     INTEGER, INTENT(in) :: kproma, kbdim, klev, krow
     REAL(dp), INTENT(IN )  :: pi0(kbdim)
-    INTEGER :: jl,jk
+    INTEGER :: jl,jk,jt
     INTEGER :: icld_top(kbdim) !< highest cloud top index (strat or conv)
     INTEGER :: itmp(kbdim), zindarr(kbdim)
     REAL(dp) :: zeps
@@ -625,11 +627,11 @@ MODULE mo_hammoz_aerocom_HEaci
     END DO
 
     !-- cod
-    cod3d(1:kproma,:,krow)=cisccp_cldtau3d(1:kproma,:,krow)*f3d(1:kproma,:,krow)
-    cod_inst(1:kproma,krow)     = 0._dp
-    DO jk=1,klev
-       cod_inst(1:kproma,krow) = cod_inst(1:kproma,krow) + cod3d(1:kproma,jk,krow)
-    END DO
+    !cod3d(1:kproma,:,krow)=cisccp_cldtau3d(1:kproma,:,krow)*f3d(1:kproma,:,krow)
+    !cod_inst(1:kproma,krow)     = 0._dp
+    !DO jk=1,klev
+    !   cod_inst(1:kproma,krow) = cod_inst(1:kproma,krow) + cod3d(1:kproma,jk,krow)
+    !END DO
 
     !-- phase3d
     phase3d(1:kproma,:,krow) = xlm1(1:kproma,:,krow) / &
@@ -656,12 +658,13 @@ MODULE mo_hammoz_aerocom_HEaci
             dpg(1:kproma,jk,krow)
     END DO
  
-    !-- rsut, rsutcs, rsutnoa, rsutcsnoa
+    !-- rsut, rsutcs, rsutnoa, rsutcsnoa, rsdt
     rsut_inst(1:kproma,krow)      = pi0(1:kproma) * rsut_tmp(1:kproma,krow) 
     rsutcs_inst(1:kproma,krow)    = pi0(1:kproma) * rsutcs_tmp(1:kproma,krow) 
     rsutnoa_inst(1:kproma,krow)   = pi0(1:kproma) * rsutnoa_tmp(1:kproma,krow) 
-    rsutcsnoa_inst(1:kproma,krow) = pi0(1:kproma) * rsutcsnoa_tmp(1:kproma,krow) 
-
+    rsutcsnoa_inst(1:kproma,krow) = pi0(1:kproma) * rsutcsnoa_tmp(1:kproma,krow)
+    !rsdt_inst(1:kproma,krow)      = pi0(1:kproma) * rsdt_tmp(1:kproma,krow)
+    
   END SUBROUTINE update_HEaci_diags
 
 END MODULE mo_hammoz_aerocom_HEaci
