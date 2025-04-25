@@ -1,0 +1,56 @@
+#! @SHELL@
+NM="@NM@"
+lt_cv_nm_interface="@lt_cv_nm_interface@"
+abs_builddir="@abs_builddir@"
+abs_top_builddir="@abs_top_builddir@"
+if [ x"$lt_cv_nm_interface" = x"BSD nm" ]; then
+  exp_sym_prefix='[0-9a-fA-F]*[ 	][ 	]*[TDBGRSVW][ 	]'
+  badsyms=$("$abs_top_builddir"/libtool --mode=clean --silent \
+    ls "$abs_top_builddir"/src/*.la 2>/dev/null \
+    | grep '\.\(so.*\|a\)$' | xargs $NM \
+    | sed -n "
+# select exported symbols of any kind for further investigation
+/^${exp_sym_prefix}[^ 	]*/{
+# disregard STABS debugging symbols
+/^${exp_sym_prefix}\.*@[0-9]*@/b
+# disregard xlf bogus module USE symbols
+/^${exp_sym_prefix}&&/b
+# disregard AIX relocations
+/^${exp_sym_prefix}\./b
+# ignore symbols mpi.h introduces into our namespace
+/^${exp_sym_prefix}[Mm][Pp][Ii]fc/b
+/^${exp_sym_prefix}[Mm][Pp][Ii]_/b
+/^${exp_sym_prefix}[Mm][Pp][Ii]priv/b
+# ignore initialize/finish symbols from ELF shared objects
+/^${exp_sym_prefix}__*fini/b
+/^${exp_sym_prefix}__*init/b
+/^${exp_sym_prefix}__*e\{0,1\}data/b
+/^${exp_sym_prefix}__*end/b
+/^${exp_sym_prefix}__*bss_start/b
+# ignore symbols nagfor injects into our shared objects
+/^${exp_sym_prefix}\(__NAGf90_\|f90_\)/b
+# ignore symbols pgfortran/pgcc injects into our shared objects
+/^${exp_sym_prefix}\(__get_xmmreg\|__pgdbg_stub\|__pgi_trace\|__set_xmmreg\)/b
+# skip symbols that conform to name prefix xt_
+/^${exp_sym_prefix}_*[Xx][Tt]_/b
+# also skip symbols in Fortran yaxt module
+/^${exp_sym_prefix}_*[Yy][Aa][Xx][Tt]\.*_/b
+# skip $-symbols that the Cray compiler puts in
+/^${exp_sym_prefix}.*\\\$.*/b
+p
+}")
+  if [ -n "$badsyms" ]; then
+    echo "Failure in created libraries!" >&2
+    echo "Unexpected symbols exported from library!" >&2
+    echo "$badsyms" >&2
+    exit 1
+  fi
+else
+  exit 77
+fi
+
+#
+# Local Variables:
+# mode: sh
+# End:
+#

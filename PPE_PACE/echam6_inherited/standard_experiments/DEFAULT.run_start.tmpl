@@ -1,0 +1,42 @@
+#! /bin/bash
+#
+# For start of CMIP5 experiments, copy the restart files and submit run script
+#
+
+#%include 'standard_environments/'+ENVIRONMENT+'.tmpl' ignore missing
+#
+
+DEBUG_LEVEL=%{DEBUG_LEVEL|default(0)}
+
+# Bail out on error
+set -e
+trap 'echo Error at line $LINENO: $BASH_COMMAND >&2' ERR
+# Print command info
+[ $DEBUG_LEVEL -ge 2 ] && set -x
+
+exp_id=%{EXP_ID}
+
+# Copy restart files into experiment's working directory
+(
+  work_dir=%{WORK_DIR}
+  mkdir -p $work_dir
+  cd $work_dir
+
+  # Define correct restart file set
+  prefix=%{PARENT_PREFIX}
+  suffix=%{PARENT_SUFFIX}
+
+  restart_dir=%{PARENT_DIR}
+
+  # Copy restart files, create symlinks with name expected by echam
+  for file in ${restart_dir}/${prefix}_*${suffix}
+  do
+    base=$(basename $file)
+    tag=$(echo $base | sed "s,^${prefix},,;s,${suffix}\$,,")
+    cp ${file} ${base}
+    ln -sf ${base} restart_${exp_id}${tag}.nc
+  done
+)
+
+# Submit actual run script
+%{JOB.batch_command|replace('%x', '$exp_id.run')}

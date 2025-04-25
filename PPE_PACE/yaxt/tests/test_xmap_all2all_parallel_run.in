@@ -1,0 +1,14 @@
+#! @SHELL@
+set -e
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+for nproc in 1 2 3 4 8 ; do
+  @abs_top_builddir@/libtool --mode=execute \
+    @MPI_LAUNCH@ -n $nproc @abs_builddir@/test_xmap_all2all_parallel
+  @abs_top_builddir@/libtool --mode=execute \
+    @MPI_LAUNCH@ -n $nproc @abs_builddir@/test_xmap_all2all_parallel_f
+done
+#
+# Local Variables:
+# mode: sh
+# End:
+#

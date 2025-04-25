@@ -1,0 +1,58 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+AEXP=$2
+#
+BEXP=$3
+#
+PRINTERC=$4
+
+echo QUELLE path $QUELLE
+
+##---------------ATM------------------------
+pwd
+
+#
+prefix=atmlog_${TYP}_${AEXP}_${BEXP}
+if [ -s ${prefix}_c130.eps ]; then
+cp ${QUELLE}/dummy.eps ${prefix}_c130i.eps
+fi
+if [ -s ${prefix}_c130.eps ]; then
+cp ${QUELLE}/dummy.eps ${prefix}_c131i.eps
+fi
+if [ -s ${prefix}_c130.eps ]; then
+cp ${QUELLE}/dummy.eps ${prefix}_c132i.eps
+fi
+pwd
+ls *eps
+afiles=$(ls ${prefix}_* )
+
+
+${QUELLE}/sixplot_latex.sh ATMlog_${TYP}_${AEXP}_${BEXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv ATMlog_${TYP}_${AEXP}_${BEXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname ATMlog_${TYP}_${AEXP}_${BEXP}.ps
+else
+lpr -P${PRINTERC} -o sides=one-sided ATMlog_${TYP}_${AEXP}_${BEXP}.ps 
+fi
+rm ATMlog_${TYP}_${AEXP}_${BEXP}.dvi ATMlog_${TYP}_${AEXP}_${BEXP}.aux ATMlog_${TYP}_${AEXP}_${BEXP}.log
+
+#remove dummy 
+if [ -s ${prefix}_c130.eps ]; then
+rm -f  ${prefix}_c130i.eps
+fi
+if [ -s ${prefix}_c130.eps ]; then
+rm -f  ${prefix}_c131i.eps
+fi
+if [ -s ${prefix}_c130.eps ]; then
+rm -f  ${prefix}_c132i.eps
+fi
+
+
+exit

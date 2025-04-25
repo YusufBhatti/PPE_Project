@@ -1,0 +1,247 @@
+
+
+\subsection{Get number of variable attributes: {\tt vlistInqNatts}}
+\index{vlistInqNatts}
+\label{vlistInqNatts}
+
+The function {\tt vlistInqNatts} gets the number of variable attributes assigned to this variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqNatts(INTEGER vlistID, INTEGER varID, INTEGER nattsp)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt nattsp}]
+Pointer to location for returned number of variable attributes.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get information about an attribute: {\tt vlistInqAtt}}
+\index{vlistInqAtt}
+\label{vlistInqAtt}
+
+The function {\tt vlistInqAtt} gets information about an attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAtt(INTEGER vlistID, INTEGER varID, INTEGER attnum, 
+                                 CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt attnum}]
+Attribute number (from 0 to natts-1).
+\item[{\tt name}]
+Pointer to the location for the returned attribute name. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+\item[{\tt typep}]
+Pointer to location for returned attribute type.
+\item[{\tt lenp}]
+Pointer to location for returned attribute number.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Define an integer attribute: {\tt vlistDefAttInt}}
+\index{vlistDefAttInt}
+\label{vlistDefAttInt}
+
+The function {\tt vlistDefAttInt} defines an integer attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttInt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                    INTEGER ip)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt name}]
+Attribute name.
+\item[{\tt type}]
+External data type ({\tt DATATYPE\_INT16} or {\tt DATATYPE\_INT32}).
+\item[{\tt len}]
+Number of values provided for the attribute.
+\item[{\tt ip}]
+Pointer to one or more integer values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the value(s) of an integer attribute: {\tt vlistInqAttInt}}
+\index{vlistInqAttInt}
+\label{vlistInqAttInt}
+
+The function {\tt vlistInqAttInt} gets the values(s) of an integer attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttInt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, INTEGER ip)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt name}]
+Attribute name.
+\item[{\tt mlen}]
+Number of allocated values provided for the attribute.
+\item[{\tt ip}]
+Pointer location for returned integer attribute value(s).
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Define a floating point attribute: {\tt vlistDefAttFlt}}
+\index{vlistDefAttFlt}
+\label{vlistDefAttFlt}
+
+The function {\tt vlistDefAttFlt} defines a floating point attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttFlt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                    REAL*8 dp)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt name}]
+Attribute name.
+\item[{\tt type}]
+External data type ({\tt DATATYPE\_FLT32} or {\tt DATATYPE\_FLT64}).
+\item[{\tt len}]
+Number of values provided for the attribute.
+\item[{\tt dp}]
+Pointer to one or more floating point values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the value(s) of a floating point attribute: {\tt vlistInqAttFlt}}
+\index{vlistInqAttFlt}
+\label{vlistInqAttFlt}
+
+The function {\tt vlistInqAttFlt} gets the values(s) of a floating point attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttFlt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, REAL*8 dp)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt name}]
+Attribute name.
+\item[{\tt mlen}]
+Number of allocated values provided for the attribute.
+\item[{\tt dp}]
+Pointer location for returned floating point attribute value(s).
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Define a text attribute: {\tt vlistDefAttTxt}}
+\index{vlistDefAttTxt}
+\label{vlistDefAttTxt}
+
+The function {\tt vlistDefAttTxt} defines a text attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttTxt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER len, 
+                                    CHARACTER*(*) tp)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt name}]
+Attribute name.
+\item[{\tt len}]
+Number of values provided for the attribute.
+\item[{\tt tp}]
+Pointer to one or more character values.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the value(s) of a text attribute: {\tt vlistInqAttTxt}}
+\index{vlistInqAttTxt}
+\label{vlistInqAttTxt}
+
+The function {\tt vlistInqAttTxt} gets the values(s) of a text attribute.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttTxt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, 
+                                    CHARACTER*(*) tp)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier, or {\tt CDI\_GLOBAL} for a global attribute.
+\item[{\tt name}]
+Attribute name.
+\item[{\tt mlen}]
+Number of allocated values provided for the attribute.
+\item[{\tt tp}]
+Pointer location for returned text attribute value(s).
+
+\end{deflist}
+\end{minipage}

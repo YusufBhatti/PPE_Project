@@ -1,0 +1,406 @@
+\documentclass[landscape, 11pt]{article}
+\usepackage{geometry}
+\geometry{a4paper}
+\usepackage[cm]{fullpage}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{epstopdf}
+\usepackage{longtable}
+\usepackage[table]{xcolor}
+\usepackage[pdftex]{hyperref}
+\hypersetup{
+        colorlinks,
+        citecolor=black,
+        filecolor=black,
+        linkcolor=black,
+        pagebackref=true,
+        urlcolor=blue,
+        }
+
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+
+\textwidth = 24cm
+\textheight = 16.5cm
+\setlength{\parindent}{0cm} % Default is 15pt.
+
+\definecolor{lightgrey}{rgb}{.9,.9,.9}
+\definecolor{blue1}{rgb}{0,0.635,0.769}
+\definecolor{blue2}{rgb}{0.603921568627, 0.756862745098, 0.803921568627}
+
+\title{ECHAM-HAMMOZ namelist documentation}
+\date{\today}                                           % Activate to display a given date or no date
+
+\begin{document}
+
+\maketitle
+\begin{center}
+{\Large ECHAM6.3.0-HAM2.3-MOZ1.0}\\[0.5cm]
+{\bf \url{https://svn.iac.ethz.ch/external/echam-hammoz/echam6-hammoz/trunk@3947}}\\[1cm]
+Sylvaine Ferrachat, ETH Zurich\\
+Martin Schultz (FZ J\"ulich)\\
+Colombe Siegenthaler - Le Drian (C2SM)
+\end{center}
+~\\
+
+\noindent\rule{\linewidth}{0.5mm}\\[1cm]
+\tableofcontents
+
+\rowcolors{1}{white}{lightgrey}
+
+\newpage
+
+\section{Preamble}
+The main purpose is to cover the HAMMOZ specific namelists, as well as the submodel specific namelists. For convenience, the ECHAM \texttt{physctl} (physics) and \texttt{radctl} (radiation) namelists have also been documented here, because they are also central to making decisions in setting up an HAMMOZ experiment. For a complete description of ECHAM namelist controls, see  the echam6\_userguide.pdf.\\
+
+The tables in this document have been (mostly) automatically created by parsing the ECHAM-HAMMOZ code (for the switches documentation) and by diagnosing switches values at run time with two barebone experiments:
+\begin{itemize}
+        \item one with setting only \texttt{lham = .true.} in the \texttt{submodelctl} namelist and leaving all other possible namelist entries empty (except for basic \texttt{runctl} namelist entries);
+        \item the second with doing the same but with \texttt{lmoz=.true.}.
+\end{itemize}
+The idea is to reflect here the default values associated with HAM and MOZ respectively. The actual standard setups (as given by creating experiments with the jobscript toolkit, for HAM with M7, HAM with SALSA or MOZ) are not documented here.\\
+
+{\it Please keep in mind that not all combinations of switches and settings are reasonable and not every reasonable combination has been tested. If you encounter errors we appreciate your feedback.}\\
+
+\newpage
+\section{ECHAM physics and radiation}
+\subsection{physctl} 
+This namelist is used to specify parameters and switches for the ECHAM physics.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: physctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: physctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+lphys & True for parameterisation of diabatic processes. & .true. & .true. \\ 
+lrad & True for radiation scheme & .true. & .true. \\ 
+lvdiff & True for vertical diffusion & .true. & .true. \\ 
+lcond & True for large scale condensation scheme & .true. & .true. \\ 
+lsurf & True for surface exchanges & .true. & .true. \\ 
+lconv & True to allow convection & .true. & .true. \\ 
+lmfpen & True to switch on penetrative convection & .true. & .true. \\ 
+lgwdrag & True for gravity wave drag scheme & .true. & .true. \\ 
+lice & True for sea-ice temperature calculation & .true. & .true. \\ 
+lconvmassfix & True for switching on aerosol mass fixer in conv & .true. & .true. \\ 
+lcdnc\_progn & True for prognostic cloud activation scheme & .false. & .false. \\ 
+ncd\_activ & \begin{minipage}[t]{7.5cm} \raggedright Select cloud droplet activation scheme:\\ 0: off (lcdnc\_progn=false) \\ 1: Lohmann et al. (1999) + Lin and Leaitch (1997) \\ 2: Lohmann et al. (1999) + Abdul-Razzak and Ghan (2000) \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+nactivpdf & \begin{minipage}[t]{7.5cm} \raggedright Sub-grid scale pdf of updraft velocities in activation scheme:\\ 0: Mean updraft from TKE scheme without pdf \\ 1: Coupling of updraft pdf with 20 bins to TKE scheme (West et al., 2013)\\ $>$1: as 1, but use the specified number of bins\\ $<$0: as positive value, but output per-bin supersaturation diagnostics etc. \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+nic\_cirrus & \begin{minipage}[t]{7.5cm} \raggedright Select ice crystal cirrus scheme:\\ 0: off (lcdnc\_progn=false) \\ 1: Lohmann JAS 2002 \\ 2: Kaercher \ Lohmann JGR 2002 \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+nauto & \begin{minipage}[t]{7.5cm} \raggedright  Select autoconversion scheme for clouds:\\ 1:  Beheng (1994) - ECHAM5 Standard \\ 2:  Khairoutdinov and Kogan (2000) \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+lsecprod & True for secondary ice production & .false. & .false. \\ 
+lorocirrus & True for orographic cirrus clouds & .false. & .false. \\ 
+ldyn\_cdnc\_min & Turn on dynamical setting of the min cloud droplet number concentration & .false. & .false. \\ 
+cdnc\_min\_fixed & \begin{minipage}[t]{7.5cm} \raggedright Fixed value for min CDNC in $cm^{-3}$ (used when ldyn\_cdnc\_min is FALSE) \\ Warning! So far only values of 40 or 10 are accepted. ~\\[0.2cm] \end{minipage} & 40 & 40 \\
+\hline 
+\end{longtable}
+\newpage 
+\subsection{radctl} 
+This namelist is used to specify parameters and switches for the ECHAM radiation.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: radctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: radctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+nmonth & \begin{minipage}[t]{7.5cm} \raggedright  index for annual cycle or perpetual month experiments\\ 0      : annual cycle on \\ 1 - 12 : perpetual month January - December \\ (only with PCMDI-Orbit) \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+ldiur & true for diurnal cycle on & .true. & .true. \\ 
+trigrad & frequency of full radiation & \begin{minipage}[t]{6.0cm} \raggedright trigrad\%counter = 2\\ trigrad\%unit = hours\\ trigrad\%adjustment = first\\ trigrad\%offset = 0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright trigrad\%counter = 2\\ trigrad\%unit = hours\\ trigrad\%adjustment = first\\ trigrad\%offset = 0\\ ~\\[0.2cm] \end{minipage} \\ 
+isolrad & \begin{minipage}[t]{7.5cm} \raggedright 0: rrtm solar constant\\ 1: dependent spectrally resolved solar constant read from file \\ 2: solar constant \\ 3: constant for amip runs \\ 4: constant for rad.-conv. eq. runs with diurnal cycle \\ 5: constant for rad.-conv. eq. runs without diurnal cycle \\ ~\\[0.2cm] \end{minipage} & 3 & 3 \\ 
+ih2o & \begin{minipage}[t]{7.5cm} \raggedright 0: no H2O in radiation computation\\ 1: use prognostic specific humidity cloud water and cloud ice \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+ico2 & \begin{minipage}[t]{7.5cm} \raggedright 0: no CO2 in radiation computation\\ 1: use prognostic CO2 mass mixing ratio of tracer co2 \\ 2: uniform volume mixing ratio co2vmr \\ 4: uniform volume mixing ratio in scenario run (ighg) \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+ich4 & \begin{minipage}[t]{7.5cm} \raggedright 0: no CH4 in radiation computation\\ 2: uniform volume mixing ratio ch4vmr \\ 3: troposphere: ch4vmr; decay with elevation above \\ 4: uniform volume mixing ratio in scenario run (ighg) \\ ~\\[0.2cm] \end{minipage} & 2 & 3 \\ 
+io3 & \begin{minipage}[t]{7.5cm} \raggedright 0: no O3 in radiation computation\\ 1 : use prognostic O3 mass mixing ratio of tracer O3\\ 2: spectral climatology as in  ECHAM4 \\ 3: gridpoint climatology from NetCDF file \\ 4: gridpoint climatology from IPCC-NetCDF file \\ ~\\[0.2cm] \end{minipage} & 3 & 3 \\ 
+io2 & \begin{minipage}[t]{7.5cm} \raggedright 0: no O2 in radiation computation\\ 2: O2    volume mixing ratio o2vmr \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+in2o & \begin{minipage}[t]{7.5cm} \raggedright 0: no N2O in radiation computation\\ 2: uniform volume mixing ratio n2ovmr \\ 3: troposphere: n2ovmr; decay with elevation above \\ 4: uniform volume mixing ratio in scenario run (ighg) \\ ~\\[0.2cm] \end{minipage} & 2 & 3 \\ 
+icfc & \begin{minipage}[t]{7.5cm} \raggedright 0: no CFCs in radiation computation\\ 2: uniform volume mixing ratios cfcvmr(1:2) for : \\ CFC11     CFC12 \\ 4: uniform volume mixing ratios in scenario run (ighg) \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+ighg & \begin{minipage}[t]{7.5cm} \raggedright 0: no scenario\\ 1: scenario A1B \\ 2: scenario B1 \\ 3: scenario A2 \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+iaero & \begin{minipage}[t]{7.5cm} \raggedright 0: no aerosols in radiation computation\\ 1: prognostic aerosol of a submodel (HAM) \\ 2: climatological Tanre aerosols \\ 3: aerosol climatology compiled by S. Kinne \\ 5: S. Kinne + volcanic aerosols of G. Stenchikov \\ 6: S. Kinne + G. Stenchikov + plus additional (stratospheric) aerosols from submodels \\ 7: S. Kinne + volcanic aerosols from lookup table (T. Crowley) \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+fco2 & factor for external co2 scenario (ighg=1 and ico2=4) & 1.0 & 1.0 \\ 
+co2vmr & CO2 volume mixing ratio for ico2=2 & 0.0003539 & 0.0003539 \\ 
+ch4vmr & CH4 volume mixing ratio for ich4=23 & 1.6936e-06 & 1.6936e-06 \\ 
+o2vmr & O2  volume mixing ratio for io2=2 & 0.20946 & 0.20946 \\ 
+n2ovmr & N2O volume mixing ratio for in2o=23 & 3.095e-07 & 3.095e-07 \\ 
+cfcvmr & CFC volume mixing ratios for icfc=2 & 2.528000000000000e-010 4.662000000000000e-010 & 2.528000000000000e-010 4.662000000000000e-010 \\ 
+cecc & eccentricity of the earth's orbit & 0.016715 & 0.016715 \\ 
+cobld & obliquity in degrees & 23.441 & 23.441 \\ 
+clonp & longitude of perihelion measured from vernal equinox & 282.7 & 282.7 \\ 
+yr\_perp & year AD for orbit VSOP87-orbit only & -99999 & -99999 \\ 
+lradforcing & \begin{minipage}[t]{7.5cm} \raggedright  switch on/off diagnostic of instantaneous aerosol\\ solar (lforcing(1)) and thermal (lforcing(2)) radiation forcing \\ ~\\[0.2cm] \end{minipage} & 2*.false. & 2*.false. \\ 
+lw\_spec\_samp & \begin{minipage}[t]{7.5cm} \raggedright 1: broadband\\ 2: MCSI \\ 3 and up: teams \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+sw\_spec\_samp   \ &  &   &   \\ 
+lw\_gpts\_ts & Number of g-points per time step using MCSI & 1 & 1 \\ 
+sw\_gpts\_ts     \ &  &   &   \\ 
+rad\_perm & Integer for perturbing random number seeds & 0 & 0 \\ 
+i\_overlap & \begin{minipage}[t]{7.5cm} \raggedright 1: max-ran\\ 2: max \\ 3: ran \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+l\_do\_sep\_clear\_sky & True for: compute clear-sky fluxes by removing clouds & .true. & .true. \\ 
+\hline 
+\end{longtable}
+\newpage 
+\section{General submodel control and switches}
+\subsection{submodelctl} 
+This namelist defines general submodel switches which are needed in the interface layer (\texttt{mo\_submodel\_interface} or other parts of the standard ECHAM code). Also included are switches which define the coupling between various submodels (for example in HAMMOZ, which coupled aerosol and gas-phase chemical processes). Other submodel-specific switches should be defined and maintained in extra namelists which carry the name of the submodel itself (e.g. mozctl or hamctl).\\
+
+Definition and handling of these controls is in \texttt{mo\_submodel.f90}.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: submodelctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: submodelctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+lxt & switch generic test tracer submodule & .false. & .false. \\ 
+lmethox & switch for upper atmospheric H2O production from methane & .false. & .false. \\ 
+ltransdiag & switch to turn on atmospheric energy transport diagnostics & .false. & .false. \\ 
+lco2 & switch for CO2 submodel (JSBACH related) & .false. & .false. \\ 
+lham & switch HAM aerosol module & .true. & .false. \\ 
+lmoz & switch MOZART & .false. & .true. \\ 
+lhammoz & \begin{minipage}[t]{7.5cm} \raggedright  switch HAM and MOZ  together with the coupling between the two\\ note: lhammoz overrides lham and lmoz \\ ~\\[0.2cm] \end{minipage} & .false. & .false. \\ 
+lhammonia & switch HAMMONIA & .false. & .false. \\ 
+llght & switch lightning emissions & .false. & .false. \\ 
+lbioemi\_stdalone & \begin{minipage}[t]{7.5cm} \raggedright  switch biogenic emissions model as a standalone submodel\\ (ie not embedded in HAM or MOZ) \\ ~\\[0.2cm] \end{minipage} & .false. & .false. \\ 
+losat & satellite simulator & .false. & .false. \\ 
+loisccp & isccp diagnostics & .false. & .false. \\ 
+lhmzphoto & hammoz photolysis frequency coupling & .false. & .false. \\ 
+lhmzoxi & hammoz coupling of oxidant fields & .false. & .false. \\ 
+lhmzhet & hammoz heterogeneous chemistry coupling & .false. & .false. \\ 
+lchemfeedback & \begin{minipage}[t]{7.5cm} \raggedright  combi-switch for interactive chemistry:\\ for moz: lchemrad and linterh2o = true \\ for hammonia: as above plus lchemheat atmospheric mass and cp \\ ~\\[0.2cm] \end{minipage} & .false. & .false. \\ 
+lchemrad & chemistry interacts with radiation & .false. & .false. \\ 
+linterh2o & feedback water content from MOZ to ECHAM and vice versa & .false. & .true. \\ 
+lchemheat & chemical heating & .false. & .false. \\ 
+lccnclim & activate CCN climatology as submodel & .false. & .false. \\ 
+linteram & hammonia air mass from chemistry & .false. & .false. \\ 
+lintercp & hammonia specific heat from chemistry & .false. & .false. \\ 
+lemissions & switch emissions & .true. & .true. \\ 
+lchemistry & switch chemistry calculations & .true. & .true. \\ 
+ldrydep & switch dry deposition & .true. & .true. \\ 
+lwetdep & switch wet deposition & .true. & .true. \\ 
+lsedimentation & switch sedimentation & .true. & .true. \\ 
+laero\_micro & switch aerosol microphysical processes & .true. & .true. \\ 
+lburden & activate burden (column integral) diagnostics for mass mixing ratio tracers & .false. & .false. \\ 
+emi\_basepath & path to emission files specified in emi\_spec.txt & /some/local/path/ & /some/local/path/ \\ 
+emi\_scenario & RCP (Representative Concentration Pathway) to be modelled & UNDEF & UNDEF \\ 
+laoa & switch for age-of-air tracer submodel & .false. & .false. \\ 
+\hline 
+\end{longtable}
+\newpage 
+\subsection{submdiagctl} 
+This namelist controls diagnostic output for generic submodel variables and streams:
+\begin{itemize}
+  \item vphysc: physical ECHAM variables not contained in standard ECHAM output
+  \item wetdep: variables used in the calculation of wet deposition and extra diagnostics
+  \item drydep: variables used in the calculation of dry deposition and deposition rates
+  \item sedi: diagnostics of sedimentation rates
+  \item emi: diagnostics of emission fluxes
+\end{itemize}
+Definition and handling of these controls is in \texttt{mo\_submodel\_streams.f90}.
+
+The vphysc-stream collects ECHAM (physical) variables that are used in submodels, but not normally stored outside the parallel environment in physc, and it allows saving these variables to file.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: submdiagctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: submdiagctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+vphysc\_lpost & true for output of vphysc stream false otherwise & .true. & .true. \\ 
+vphysc\_tinterval & output interval & \begin{minipage}[t]{6.0cm} \raggedright vphysc\_tinterval\%counter = 12\\ vphysc\_tinterval\%unit = minutes\\ vphysc\_tinterval\%adjustment = last\\ vphysc\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright vphysc\_tinterval\%counter = 450\\ vphysc\_tinterval\%unit = seconds\\ vphysc\_tinterval\%adjustment = first\\ vphysc\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} \\ 
+vphyscnam & \begin{minipage}[t]{7.5cm} \raggedright  names of variables you like to have in output\\ special names: 'ALL' and 'DEFAULT' \\ ~\\[0.2cm] \end{minipage} & geom1 geohm1 aphm1 grmassm1 & geom1 geohm1 aphm1 grmassm1 \\ 
+wetdep\_lpost & true for output of wetdep stream false otherwise & .true. & .true. \\ 
+wetdep\_tinterval & output interval & \begin{minipage}[t]{6.0cm} \raggedright wetdep\_tinterval\%counter = 12\\ wetdep\_tinterval\%unit = minutes\\ wetdep\_tinterval\%adjustment = last\\ wetdep\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright wetdep\_tinterval\%counter = 450\\ wetdep\_tinterval\%unit = seconds\\ wetdep\_tinterval\%adjustment = first\\ wetdep\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} \\ 
+wetdepnam & \begin{minipage}[t]{7.5cm} \raggedright  names of variables (diagnostic quantities) you like to have in output\\ special names: 'ALL' 'DETAIL' and 'DEFAULT' \\ ~\\[0.2cm] \end{minipage} & wdep & wdep \\ 
+wetdep\_gastrac & \begin{minipage}[t]{7.5cm} \raggedright  names of gas-phase tracers to be included in wetdep diagnostic output\\ aerosol tracers will always be output -- potentially aggregated (see below) \\ ~\\[0.2cm] \end{minipage} & so2 so4\_gas & so2 hno3 \\ 
+wetdep\_keytype & \begin{minipage}[t]{7.5cm} \raggedright  aggregation level of output:\\ 1: BYTRACER \\ 2: BYSPECIES \\ 3: BYMODE \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+drydep\_lpost & true for output of drydep stream false otherwise & .true. & .true. \\ 
+drydep\_tinterval & output interval & \begin{minipage}[t]{6.0cm} \raggedright drydep\_tinterval\%counter = 12\\ drydep\_tinterval\%unit = minutes\\ drydep\_tinterval\%adjustment = last\\ drydep\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright drydep\_tinterval\%counter = 450\\ drydep\_tinterval\%unit = seconds\\ drydep\_tinterval\%adjustment = first\\ drydep\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} \\ 
+drydepnam & \begin{minipage}[t]{7.5cm} \raggedright  names of variables (diagnostic quantities) you like to have in output\\ special names: 'ALL' (= 'DETAIL') and 'DEFAULT' \\ ~\\[0.2cm] \end{minipage} & ddep vddep & ddep vddep \\ 
+drydep\_gastrac & \begin{minipage}[t]{7.5cm} \raggedright  names of gas-phase tracers to be included in drydep diagnostic output\\ aerosol tracers will always be output -- potentially aggregated (see below) \\ ~\\[0.2cm] \end{minipage} & so2 so4\_gas & so2 hno3 o3 no2 \\ 
+drydep\_keytype & \begin{minipage}[t]{7.5cm} \raggedright  aggregation level of output:\\ 1: BYTRACER \\ 2: BYSPECIES \\ 3: BYMODE \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+drydep\_ldetail & detailed output of dry deposition diagnostics & .false. & .false. \\ 
+drydep\_trac\_detail & tracer (only one at a run) for detailed drydep output (drydep\_ldetail=.true.) & undef & undef \\ 
+sedi\_lpost & true for output of sedi stream false otherwise & .true. & .true. \\ 
+sedi\_tinterval & output interval & \begin{minipage}[t]{6.0cm} \raggedright sedi\_tinterval\%counter = 12\\ sedi\_tinterval\%unit = minutes\\ sedi\_tinterval\%adjustment = last\\ sedi\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright sedi\_tinterval\%counter = 450\\ sedi\_tinterval\%unit = seconds\\ sedi\_tinterval\%adjustment = first\\ sedi\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} \\ 
+sedinam & \begin{minipage}[t]{7.5cm} \raggedright  names of variables (diagnostic quantities) you like to have in output\\ special names: 'ALL' 'DETAIL' and 'DEFAULT' \\ ~\\[0.2cm] \end{minipage} & sed vsedi & default \\ 
+sedi\_keytype & \begin{minipage}[t]{7.5cm} \raggedright  aggregation level of output:\\ 1: BYTRACER \\ 2: BYSPECIES \\ 3: BYMODE \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+emi\_lpost & true for output of emi stream false otherwise & .true. & .true. \\ 
+emi\_lpost\_sector & true for output of detailed (per sector) emission diagnostics & .false. & .false. \\ 
+emi\_tinterval & output interval & \begin{minipage}[t]{6.0cm} \raggedright emi\_tinterval\%counter = 12\\ emi\_tinterval\%unit = minutes\\ emi\_tinterval\%adjustment = last\\ emi\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright emi\_tinterval\%counter = 450\\ emi\_tinterval\%unit = seconds\\ emi\_tinterval\%adjustment = first\\ emi\_tinterval\%offset = 0\\ ~\\[0.2cm] \end{minipage} \\ 
+eminam & \begin{minipage}[t]{7.5cm} \raggedright  names of variables (diagnostic quantities) you like to have in output\\ special names: 'ALL' (= 'DETAIL') and 'DEFAULT' \\ ~\\[0.2cm] \end{minipage} & emi & emi \\ 
+emi\_gastrac & \begin{minipage}[t]{7.5cm} \raggedright  names of gas-phase tracers to be included in emi diagnostic output\\ aerosol tracers will always be output -- potentially aggregated (see below) \\ ~\\[0.2cm] \end{minipage} & so2 so4\_gas dms & so2 dms no no2 \\ 
+emi\_keytype & \begin{minipage}[t]{7.5cm} \raggedright  aggregation level of output:\\ 1: BYTRACER \\ 2: BYSPECIES \\ 3: BYMODE \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+\hline 
+\end{longtable}
+\newpage 
+\section{Settings for HAM aerosol submodel}
+\subsection{hamctl} 
+This namelist is used to specify parameter values for the HAM aerosol model. These switches control behavior that is independent of the exact representation of the aerosols (i.e. modal scheme versus bin scheme or bulk scheme).\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: hamctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: hamctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+nham\_subm & \begin{minipage}[t]{7.5cm} \raggedright  Choice of aerosol microphysics scheme\\ 1: Bulk scheme (not yet implemented) \\ 2: Modal scheme (M7) \\ 3: Sectional scheme (SALSA) \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+nseasalt & \begin{minipage}[t]{7.5cm} \raggedright  Choice of the Sea Salt emission scheme\\ 1: Monahan (1986) \\ 2: Schulz et al. (2002) \\ 3: not used (Martensson) \\ 4: Monahan (1986) bin scheme \\ 5: Guelle (2001) \\ 6: Gong (2003) \\ 7: Long et al. (2011) \\ 8: Gong et al. (2003) + T-dep. \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+npist & \begin{minipage}[t]{7.5cm} \raggedright  Choice of the air-sea exchange scheme for DMS (piston velocity)\\ 1: Liss \ Merlivat (1986) \\ 2: Wanninkhof (1992) \\ 3: Nightingale (2000) \\ ~\\[0.2cm] \end{minipage} & 3 & 3 \\ 
+ndrydep & \begin{minipage}[t]{7.5cm} \raggedright  Choice of dry deposition scheme (if ldrydep == .true.)\\ 1: prescribed vd \\ 2: interactive \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+nwetdep & \begin{minipage}[t]{7.5cm} \raggedright  Choice of wet deposition scheme (if lwetdep == .true.)\\ 0: wetdep (scavenging) off \\ 1: standard class-wise prescribed scavenging parameters \\ 2: standard in-cloud scav. + aerosol size-dep below-cloud scav. \\ 3: size-dep in-cloud and below-cloud scav \\ WARNING: size-dep IC not yet implemented \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+ndust & \begin{minipage}[t]{7.5cm} \raggedright  Different version based on BGC dust scheme\\ 2: Cheng et al. (2008) \\ 3: Stier et al. (2005) \\ 4: Stier et al. (2005) + East Asia soil properties \\ 5: Stier et al. (2005) + MSG-based Saharan dust sources \\ (Schepanski et al. GRL 2007; RSE 2012) + East Asia soil properties \\ ~\\[0.2cm] \end{minipage} & 5 & 5  \\ 
+naerorad & \begin{minipage}[t]{7.5cm} \raggedright  Choice for radiatively active aerosols\\ 0: HAM aerosol radiation deactivated (requires iaero/=1) \\ 1: HAM aerosol radiation prognostic \\ 2: HAM aerosol radiation diagnostic only \\ ~\\[0.2cm] \end{minipage} & 2 & 1 \\ 
+laerocom\_diag & Extended aerosol diagnostics & .false. & .false. \\ 
+nrad & \begin{minipage}[t]{7.5cm} \raggedright  Radiation calculation (array to specify each class)\\ 0: No    radiation calculation \\ 1: SW    radiation calculation \\ 2: LW    radiation calculation \\ 3: SW+LW radiation calculation \\ ~\\[0.2cm] \end{minipage} & 0 19*3 & 20*0 \\ 
+nradmix & \begin{minipage}[t]{7.5cm} \raggedright  Mixing scheme for refractive indices (array to specify class)\\ 1: volume weighted mixing \\ 2: Maxwell-Garnet mixing \\ 3: Bruggeman mixing \\ ~\\[0.2cm] \end{minipage} & 20*1 & 20*0 \\ 
+nraddiag & \begin{minipage}[t]{7.5cm} \raggedright  Extended radiation diagnostics\\ 0: off \\ 1: 2D diagnostics \\ 2: 2D+3D diagnostics \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+lhetfreeze & Switch to set heterogeneous freezing below 235K (cirrus scheme) & .false. & .false. \\ 
+nsoa & \begin{minipage}[t]{7.5cm} \raggedright Choice for Secondary Organic Aerosols\\ 0: no SOA scheme\\ 1: SOA scheme from O'Donnell et all, ACP 2011\\ 2: SOA scheme with VBS approach from Farina et al, JGR 2010 (curr. SALSA only) \end{minipage} & 0 & 0 \\ 
+nsoalumping & SOA lumping scheme to apply & 0 & 0 \\ 
+nlai\_drydep\_ef\_type & \begin{minipage}[t]{7.5cm} \raggedright  Choice of lai external field type in the drydep scheme\\ 2 (EF\_FILE): from external input file \\ 3 (EF\_MODULE): online from jsbach \\ ~\\[0.2cm] \end{minipage} & 3 & 3 \\ 
+lscond & Switch for condensation of H2SO4 & .true. & .true. \\ 
+lscoag & Switch for coagulation & .true. & .true. \\ 
+lgcr & Switch for galactic cosmic ray ionization & .true. & .true. \\ 
+nsolact & \begin{minipage}[t]{7.5cm} \raggedright  Solar activity parameter [-1;1]; if outside of\\ this range (as per default) then the model will \\ determine the solar activity based on the model \\ calendar date; otherwise it will use the user \\ set solar activity parameter throughout the run. \\ -1 is solar minimum 1 solar maximum. \\ ~\\[0.2cm] \end{minipage} & -99.99 & -99.99 \\ 
+lmass\_diag & Switch for mass balance check in m7\_interface & .false. & .false. \\ 
+nccndiag & \begin{minipage}[t]{7.5cm} \raggedright  (C)CN diagnostics at fixed supersaturations\\ 0: OFF \\ 1: 2D CCN diagnostics \\ 2: 3D CCN diagnostics \\ 3: 2D CCN + CN diagnostics \\ 4: 3D CCN + CN diagnostics \\ 5: 2D CCN + CN diagnostics + burdens \\ 6: 3D CCN + CN diagnostics + burdens \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
+burden\_keytype & \begin{minipage}[t]{7.5cm} \raggedright  Aggregation level of output:\\ 0: no output \\ 1: BYTRACER \\ 2: BYSPECIES \\ 3: BYMODE \\ ~\\[0.2cm] \end{minipage} & 2 & 0 \\ 
+bc\_oh & Tracer boundary condition for OH &   &   \\ 
+bc\_o3 & Tracer boundary condition for O3 &   &   \\ 
+bc\_h2o2 & Tracer boundary condition for H2O2 &   &   \\ 
+bc\_no2 & Tracer boundary condition for NO2 &   &   \\ 
+bc\_no3 & Tracer boundary condition for NO3 &   &   \\ 
+\hline 
+\end{longtable}
+\newpage 
+\subsection{ham\_m7ctl} 
+This namelist controls settings that are specific to the modal aerosol scheme M7.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: ham\_m7ctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: ham\_m7ctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+nwater & \begin{minipage}[t]{7.5cm} \raggedright  Aerosol water uptake scheme\\ 0: Jacobson et al. JGR 1996 \\ 1: Kappa-Koehler theory based approach (Petters and Kreidenweis ACP 2007) \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+nsnucl & \begin{minipage}[t]{7.5cm} \raggedright  Choice of the sulfate aerosol nucleation scheme:\\ 0: off \\ 1: Vehkamaeki et al. JGR 2002 \\ 2: Kazil and Lovejoy ACP 2007 \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+nonucl & \begin{minipage}[t]{7.5cm} \raggedright  Choice of the organic aerosol nucleation scheme:\\ 0: off \\ 1: Activation nucleation Kulmala et al. ACP 2006 \\ 2: Kinetic nucleation Laakso et al. ACP 2004 \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+lnucl\_stat & \begin{minipage}[t]{7.5cm} \raggedright  True for sampling the cloud-free volume as function of T RH [H2SO4(g)]\\ H2SO4 condensation sink and ionization rate (memory intensive) \\ ~\\[0.2cm] \end{minipage} & .false. & .false. \\ 
+\hline 
+\end{longtable}
+\newpage 
+\subsection{ham\_salsactl} 
+This namelist controls settings that are specific to the sectional aerosol scheme SALSA.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: ham\_salsactl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: ham\_salsactl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+nsnucl & \begin{minipage}[t]{7.5cm} \raggedright  Choice of the sulfate aerosol nucleation scheme\\ 1:  Binary \\ 2:  activation type nucleation \\ 3:  Kinetic \\ 4:  Ternary \\ 5:  nucleation with ORGANICs \\ 6:  activation type of nucleation with H2SO4+ORG \\ 7:  heteromolecular nucleation with H2SO4*ORG \\ 8:  homomolecular nucleation of  H2SO4 + \\ heteromolecular nucleation with H2SO4*ORG \\ 9:  homomolecular nucleation of  H2SO4 and ORG + \\ heteromolecular nucleation with H2SO4*ORG \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+locgas & Organic carbon emisison in gas phase & .false. & .false. \\ 
+lsol2b & Repartition soluble material from b-regions to a-regions & .false. & .false. \\ 
+nj3 & \begin{minipage}[t]{7.5cm} \raggedright  Choice of the particle formation scheme\\ 1: Kerminen and Kulmala \\ 2: Lehtinen et al. (2007) \\ 3: Anttila et al. (2010) \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+act\_coeff & Activation coefficient [unit?] & 1e-07 & 1e-07 \\ 
+\hline 
+\end{longtable}
+\newpage 
+\section{Settings for MOZ chemistry submodel}
+\subsection{mozctl} 
+This namelist is used to specify parameter values for the MOZ gas-phase chemistry model.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: mozctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: mozctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+lchemsolv & activate chemistry solver & .false. & .true. \\ 
+lphotolysis & activate photolysis calculation & .false. & .true. \\ 
+lfastj & use fastJ photolysis code instead of WACCM & .false. & .false. \\ 
+lfastjaero & use fastJ photolysis code without aerosols & .false. & .false. \\ 
+lfastjcloud & use fastJ photolysis code without clouds & .false. & .false. \\ 
+lstrathet & heterogeneous chemistry in stratosphere on/off & .true. & .true. \\ 
+lbc\_species & list of species for tropospheric lower boundary condition & undef & default \\ 
+ubc\_species & list of species for stratospheric/mesospheric upper boundary condition & undef & undef \\ 
+out\_species & list of species which shall be output in \_tracer file & undef & c2h6 c3h8 c5h8 ch2o \\ 
+budget\_species & list of species for which budget diag. shall be run & undef & undef \\ 
+burden\_species & list of species for which burden diagnostics is done & undef & o3 no no2 co \\ 
+photovars & list of variables in photo stream (or "all") & undef & default \\ 
+uvalbedo\_file & file name for UV albedo data (green and white) & undef & moz\_uvalbedo.\%t0.nc \\ 
+bc\_ch4 & (lower) boundary condition for methane & \begin{minipage}[t]{6.0cm} \raggedright bc\_ch4\%ef\_type = 0\\ bc\_ch4\%ef\_template = undef\\ bc\_ch4\%ef\_varname = undef\\ bc\_ch4\%ef\_geometry = 0\\ bc\_ch4\%ef\_timedef = 1\\ bc\_ch4\%ef\_timeoffset = 0.0\\ bc\_ch4\%ef\_timeindex = 0\\ bc\_ch4\%ef\_interpolate = 0\\ bc\_ch4\%ef\_factor = 1.0\\ bc\_ch4\%ef\_units = undef\\ bc\_ch4\%ef\_value = 0.0\\ bc\_ch4\%bc\_domain = 0\\ bc\_ch4\%bc\_minlev = -1\\ bc\_ch4\%bc\_maxlev = 10000\\ bc\_ch4\%bc\_mode = 1\\ bc\_ch4\%bc\_relaxtime = 0.0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright bc\_ch4\%ef\_type = 0\\ bc\_ch4\%ef\_template = undef\\ bc\_ch4\%ef\_varname = undef\\ bc\_ch4\%ef\_geometry = 0\\ bc\_ch4\%ef\_timedef = 1\\ bc\_ch4\%ef\_timeoffset = 0.0\\ bc\_ch4\%ef\_timeindex = 0\\ bc\_ch4\%ef\_interpolate = 0\\ bc\_ch4\%ef\_factor = 1.0\\ bc\_ch4\%ef\_units = undef\\ bc\_ch4\%ef\_value = 0.0\\ bc\_ch4\%bc\_domain = 0\\ bc\_ch4\%bc\_minlev = -1\\ bc\_ch4\%bc\_maxlev = 10000\\ bc\_ch4\%bc\_mode = 1\\ bc\_ch4\%bc\_relaxtime = 0.0\\ ~\\[0.2cm] \end{minipage} \\ 
+bc\_lbc & (lower) boundary conditions for tracers (strato. run/HAMMONIA) & \begin{minipage}[t]{6.0cm} \raggedright bc\_lbc\%ef\_type = 0\\ bc\_lbc\%ef\_template = undef\\ bc\_lbc\%ef\_varname = undef\\ bc\_lbc\%ef\_geometry = 0\\ bc\_lbc\%ef\_timedef = 1\\ bc\_lbc\%ef\_timeoffset = 0.0\\ bc\_lbc\%ef\_timeindex = 0\\ bc\_lbc\%ef\_interpolate = 0\\ bc\_lbc\%ef\_factor = 1.0\\ bc\_lbc\%ef\_units = undef\\ bc\_lbc\%ef\_value = 0.0\\ bc\_lbc\%bc\_domain = 0\\ bc\_lbc\%bc\_minlev = -1\\ bc\_lbc\%bc\_maxlev = 10000\\ bc\_lbc\%bc\_mode = 1\\ bc\_lbc\%bc\_relaxtime = 0.0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright bc\_lbc\%ef\_type = 2\\ bc\_lbc\%ef\_template = moz\_lbc.\%t0.nc\\ bc\_lbc\%ef\_varname = *\\ bc\_lbc\%ef\_geometry = 0\\ bc\_lbc\%ef\_timedef = 1\\ bc\_lbc\%ef\_timeoffset = 0.0\\ bc\_lbc\%ef\_timeindex = 0\\ bc\_lbc\%ef\_interpolate = 0\\ bc\_lbc\%ef\_factor = 1.0\\ bc\_lbc\%ef\_units = mole mole-1\\ bc\_lbc\%ef\_value = 0.0\\ bc\_lbc\%bc\_domain = 1\\ bc\_lbc\%bc\_minlev = -1\\ bc\_lbc\%bc\_maxlev = 10000\\ bc\_lbc\%bc\_mode = 1\\ bc\_lbc\%bc\_relaxtime = 0.0\\ ~\\[0.2cm] \end{minipage} \\ 
+bc\_ubc & (upper) boundary condition for tracers (tropospheric run) & \begin{minipage}[t]{6.0cm} \raggedright bc\_ubc\%ef\_type = 0\\ bc\_ubc\%ef\_template = undef\\ bc\_ubc\%ef\_varname = undef\\ bc\_ubc\%ef\_geometry = 0\\ bc\_ubc\%ef\_timedef = 1\\ bc\_ubc\%ef\_timeoffset = 0.0\\ bc\_ubc\%ef\_timeindex = 0\\ bc\_ubc\%ef\_interpolate = 0\\ bc\_ubc\%ef\_factor = 1.0\\ bc\_ubc\%ef\_units = undef\\ bc\_ubc\%ef\_value = 0.0\\ bc\_ubc\%bc\_domain = 0\\ bc\_ubc\%bc\_minlev = -1\\ bc\_ubc\%bc\_maxlev = 10000\\ bc\_ubc\%bc\_mode = 1\\ bc\_ubc\%bc\_relaxtime = 0.0\\ ~\\[0.2cm] \end{minipage} & \begin{minipage}[t]{6.0cm} \raggedright bc\_ubc\%ef\_type = 0\\ bc\_ubc\%ef\_template = moz\_ubc.\%t0\%l0.nc\\ bc\_ubc\%ef\_varname = *\\ bc\_ubc\%ef\_geometry = 3\\ bc\_ubc\%ef\_timedef = 2\\ bc\_ubc\%ef\_timeoffset = 0.0\\ bc\_ubc\%ef\_timeindex = 0\\ bc\_ubc\%ef\_interpolate = 0\\ bc\_ubc\%ef\_factor = 1.0\\ bc\_ubc\%ef\_units = vmr\\ bc\_ubc\%ef\_value = 0.0\\ bc\_ubc\%bc\_domain = 3\\ bc\_ubc\%bc\_minlev = 2\\ bc\_ubc\%bc\_maxlev = 10\\ bc\_ubc\%bc\_mode = 3\\ bc\_ubc\%bc\_relaxtime = 864000.0\\ ~\\[0.2cm] \end{minipage} \\ 
+ltrophet & Tropospheric heterogeneous chemistry (if ltrophet == .true.) & .true. & .true. \\ 
+\hline 
+\end{longtable}
+\newpage 
+\section{Emission-related namelists}
+\subsection{ham\_dustctl} 
+This namelist is used to specify parameter values for the dust emission scheme.\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: ham\_dustctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: ham\_dustctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+ndurough & \begin{minipage}[t]{7.5cm} \raggedright  Global surface roughness length parameter\\ 0: A monthly mean satellite derived (Prigent et al.JGR 2005) \\ surface roughness length map is used \\ $>$0: The globally constant surface roughness length ndurough (cm) us used \\ ~\\[0.2cm] \end{minipage} & 0.001 & 0.001 \\ 
+nduscale\_reg & \begin{minipage}[t]{7.5cm} \raggedright  Regional threshold wind friction velocity parameter\\ This is an array of shape/dim (8) \\ The indices correspond to the following regions:\\ 1: All the other locations than the following regions\\ 2: North america \\ 3: South America\\ 4: North Africa\\ 5:South Africa\\ 6: Middle East\\ 7: Asia\\ 8: Australia\\ ~\\[0.2cm] \end{minipage} & 1.05,1.45,1.45,1.05,1.05,1.05,1.45,1.05 & 1.05,1.45,1.45,1.05,1.05,1.05,1.45,1.05 \\ 
+r\_dust\_lai & Parameter for the threshold lai value & 1e-1 & 1e-1 \\ 
+r\_dust\_umin & Minimum U* for dust mobilization & 21.0 & 21.0 \\ 
+r\_dust\_z0s & Surface roughness length for smooth surfaces & 0.001 & 0.001 \\ 
+r\_dust\_scz0 & Scale factor of surface roughness length & 1.0 & 1.0 \\ 
+r\_dust\_z0min & Minimum surface roughness length & 1e-05 & 1e-05 \\ 
+k\_dust\_smst & \begin{minipage}[t]{7.5cm} \raggedright  Effect of soil moisture on threshold wind velocity of dust emission\\ 0: on (WARNING opposite to standard meaning) \\ 1: off (WARNING opposite to standard meaning) \\ ~\\[0.2cm] \end{minipage} & 1 & 1 \\ 
+k\_dust\_easo & \begin{minipage}[t]{7.5cm} \raggedright  New soil type for East Asia region\\ 0: on (WARNING: opposite to standard meaning) \\ 1: off (WARNING: opposite to standard meaning) \\ 2: on bug-removed-version 0 \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+r\_dust\_sf13 & Parameter of the duscale value over Takelimakan desert & 1.0 & 1.0 \\ 
+r\_dust\_sf14 & Parameter of the duscale value over Loess & 1.0 & 1.0 \\ 
+r\_dust\_sf15 & Parameter of the duscale value over Gobi desert & 1.0 & 1.0 \\ 
+r\_dust\_sf16 & Parameter of the duscale value over other mixture soils & 1.0 & 1.0 \\ 
+r\_dust\_sf17 & Parameter of the duscale value over desert and sand land & 1.0 & 1.0 \\ 
+r\_dust\_af13 & Parameter for the alfa value over Takelimakan desert (unitless) & 1.9e-06 & 1.9e-06 \\ 
+r\_dust\_af14 & Parameter for the alfa value over Loess (unitless) & 0.00019 & 0.00019 \\ 
+r\_dust\_af15 & Parameter for the alfa value over Gobi desert  (unitless) & 3.9e-05 & 3.9e-05 \\ 
+r\_dust\_af16 & Parameter for the alfa value over other mixture soils (unitless) & 3.1e-05 & 3.1e-05 \\ 
+r\_dust\_af17 & Parameter for the alfa value over desert and sand land  (unitless) & 2.8e-06 & 2.8e-06 \\ 
+\hline 
+\end{longtable}
+\newpage 
+\subsection{biogenic\_emissionsctl} 
+This namelist is used to specify parameter values for the Model of Emissions of Gases and Aerosols from Nature (Guenther et al., 2006).\\
+
+\begin{longtable}{p{3.0cm}|p{7.5cm}|p{6.0cm}|p{6.0cm}}
+\hline 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: biogenic\_emissionsctl}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endfirsthead 
+\multicolumn{4}{c}{\cellcolor{blue1} \bf Namelist: biogenic\_emissionsctl {\it (continued)}}\\ 
+\cellcolor{blue2} Switch name & \cellcolor{blue2} Description& \cellcolor{blue2} Defaults when only lham=.true.& \cellcolor{blue2} Defaults when only lmoz=.true.\\ 
+\hline \endhead 
+nlai\_biogenic\_ef\_type & \begin{minipage}[t]{7.5cm} \raggedright  Choice of lai external field type in the\\ biogenic emission module (MEGAN) \\ 2 (EF\_FILE): from external input file \\ 3 (EF\_MODULE): online from jsbach \\ ~\\[0.2cm] \end{minipage} & 3 & 3 \\ 
+nef\_pft & \begin{minipage}[t]{7.5cm} \raggedright  Choice of PFT fractions from MEGAN-CLM4 or JSBACH\\ 2 (EF\_FILE): PFT fractions from MEGAN-CLM4 \\ 3 (EF\_MODULE): fractions from JSBACH \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
+emifact\_files\_species & \begin{minipage}[t]{7.5cm} \raggedright  Choice of emission factors\\ read from specific file or calculated with PFT fractions \\ ~\\[0.2cm] \end{minipage} & undef & undef \\ 
+ldebug\_bioemi & \begin{minipage}[t]{7.5cm} \raggedright Switch on detailed output for bioemi diagnostics \\ ~\\[0.2cm] \end{minipage} & .false. & .false. \\ 
+\hline 
+\end{longtable}
+\newpage 
+
+\end{document}

@@ -1,0 +1,130 @@
+#!/bin/bash
+#
+#  Postprocessing of ECHAM
+#
+
+#%include 'standard_environments/'+ENVIRONMENT+'.tmpl' ignore missing
+#
+
+DEBUG_LEVEL=%{DEBUG_LEVEL|default(0)}
+
+# Bail out on error
+trap 'echo Error at line $LINENO${BASH_COMMAND:+: $BASH_COMMAND} >&2' ERR
+set -e
+# Print command info
+[ $DEBUG_LEVEL -ge 2 ] && set -x
+
+# Template variables to be filled by echam (subjob)
+#DPATH
+#EXP
+#DAY
+#MONTH
+#YEAR
+
+# Template variables to be filled by mkexp
+data=%{DATA_DIR}
+
+#%if JOB.modules is defined:
+. $MODULESHOME/init/ksh
+module rm %{JOB.modules}
+module add %{JOB.modules}
+#%endif
+#%#
+
+# Check preliminaries, allow easy setting of global options
+#%if JOB.threads_per_task|default('1')|int > 1:
+cdo="`type -p %{JOB.cdo}` -O -P %{JOB.threads_per_task}"
+#%else:
+cdo="`type -p %{JOB.cdo}` -O"
+#%endif
+
+#
+# Actual process chain
+#
+
+# Post-process for full years only
+if [[ $MONTH == 12 ]]
+then
+
+    # Show time stamp
+    echo "`date`: running post-processing on output files"
+
+    # Change to working directory
+    cd $DPATH
+
+    # Create temporary output directory
+    mkdir -p $data
+    post_dir=`mktemp -d -p $data post_${YEAR}_XXXXXXXX`
+
+    # Process files for each month
+    for mm in 01 02 03 04 05 06 07 08 09 10 11 12
+    do
+        name=${EXP}_${YEAR}${mm}
+        input=$name.01_%{POST_FILETAG|default('echam')}
+
+        $cdo after $input $post_dir/BOT_$name << EOF
+%{AFTERBURNER_BOT}
+EOF
+
+        $cdo after $input $post_dir/ATM_1_$name << EOF
+%{AFTERBURNER_ATM}
+EOF
+        $cdo after $input $post_dir/ATM_2_$name << EOF
+%{AFTERBURNER_ATM_FILTERED}
+EOF
+
+        #%if LEVELS|int == 47:
+        $cdo after $input $post_dir/LOG_$name << EOF
+%{AFTERBURNER_LOG_47}
+EOF
+        #%endif
+
+        #%if LEVELS|int == 95:
+        $cdo after $input $post_dir/LOG_$name << EOF
+%{AFTERBURNER_LOG_95}
+EOF
+        $cdo after $input $post_dir/QBO_$name << EOF
+%{AFTERBURNER_QBO}
+EOF
+        #%endif
+
+	# Post-process accw stream
+	$cdo -f nc2 -setmisstoc,0.0 -monmean \
+	    $name.01_accw $post_dir/ACCW_$name.nc
+
+    done
+
+    # Show time stamp
+    echo "`date`: concatenating post-processed files"
+
+    # Change to temporary output directory
+    cd $post_dir
+
+    $cdo cat BOT_${EXP}_${YEAR}?? BOT
+    $cdo -f grb cat ACCW_${EXP}_${YEAR}??.nc ACCW
+    $cdo merge BOT ACCW $data/BOT_${EXP}_${YEAR}
+    #%if LEVELS|int == 47 or LEVELS|int == 95:
+    rm -f $data/LOG_${EXP}_${YEAR}
+    $cdo cat LOG_${EXP}_${YEAR}?? $data/LOG_${EXP}_${YEAR}
+    #%endif
+    #%if LEVELS|int == 95
+    rm -f $data/QBO_${EXP}_${YEAR}
+    $cdo cat QBO_${EXP}_${YEAR}?? $data/QBO_${EXP}_${YEAR}
+    #%endif
+    $cdo cat ATM_1_${EXP}_${YEAR}?? ATM_1
+    $cdo cat ATM_2_${EXP}_${YEAR}?? ATM_2
+    $cdo merge ATM_1 ATM_2 $data/ATM_${EXP}_${YEAR}
+
+    # Free temporary output directory
+    cd -
+    rm -rf $post_dir
+
+    # Show time stamp
+    echo "`date`: finished"
+
+    if [ "$SUBJOB2" ]; then
+        ./$SUBJOB2
+    fi
+
+fi # Post-process for full years only
+

@@ -1,0 +1,43 @@
+\subsection{Compiling without parallel I/O}
+
+The following commands have to be executed in order to compile the
+\echam{} model on the supercomputer platform \blizzard{} at Deutsches
+Klimarechenzentrum (DKRZ):
+
+\begin{itemize}
+\item Checkout a model version with command:\newline
+{\tt svn checkout
+  http://svn.zmaw.de/svn/echam6/tags/echam-$<$version\_tag$>$}\newline
+of a certain tagged version.
+\item Load the appropriate compiler version used for \echam, e.g.:\newline
+{\tt module load IBM/xlf13.1.0.8}\newline
+\item Go into the directory {\tt echam-$<$version\_tag$>$} and execute
+  the command \newline
+% TODO: OpenMP disabled temporarily (Issue #4104) % {\tt ./configure --with-openmp}
+{\tt ./configure}
+\item Start the actual compilation with the command\newline
+  {\tt make}
+\end{itemize}
+
+\subsection{Compiling including parallel I/O}
+
+The \echam{} model can use parallel~I/O facilities when it is compiled
+on either the supercomputer platform \blizzard{}
+({\it passat.dkrz.de}\/) at Deutsches 
+Klimarechenzentrum (DKRZ) or at \thunder{} of the Max Planck
+Institute for Meteorology, Hamburg.
+For the compilation, it is sufficient to execute the script {\tt
+  ./contrib/build\_echam6\_io.sh}.
+
+This script includes the special ``configure'' command for the
+creation of the main Makefile.
+Special CDI and YAXT libraries have to be available on the platform
+and are included into the configure command:
+\begin{lstlisting}
+./configure --enable-cdi-pio YAXTROOT=<yaxtdir> CDIROOT=<cdidir>
+\end{lstlisting}
+In order to use the parallel~I/O feature, several namelist parameters
+have to be set that are described in Table~\ref{tabparctl}.
+
+
+ 

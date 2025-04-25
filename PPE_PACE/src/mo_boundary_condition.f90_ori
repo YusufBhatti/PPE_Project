@@ -1,0 +1,1083 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+!! handling of boundary conditions
+!!
+!! concepts of the routines:
+!! see document: "ECHAM6 Boundary condition scheme" by M. G. Schultz, S. Schroeder, et al. - August 2009
+!! see also: http://hammoz.icg.fz-juelich.de/data/BoundaryConditions
+!!
+!! @author S. Schroeder, FZ-Juelich
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+!! @par Copyright
+!! 2009 by MPI-M and FZJ
+!! This software is provided for non-commercial use only.
+!!
+MODULE mo_boundary_condition
+  USE mo_kind,                     ONLY: dp
+  USE mo_external_field_processor, ONLY: external_field, EF_INACTIVE, &
+                                         EF_UNDEFINED, EF_TIMERESOLVED, &
+                                         EF_NOINTER
+
+  IMPLICIT NONE
+
+  PRIVATE
+
+  CHARACTER(len=*), PARAMETER :: version = '1.0'
+
+! flags of bc_domain
+
+  INTEGER, PARAMETER :: BC_EVERYWHERE = 0
+  INTEGER, PARAMETER :: BC_BOTTOM     = 1
+  INTEGER, PARAMETER :: BC_TOP        = 2
+  INTEGER, PARAMETER :: BC_LEVEL      = 3
+  INTEGER, PARAMETER :: BC_ALTITUDE   = 4
+  INTEGER, PARAMETER :: BC_PRESSURE   = 5
+
+! flags of bc_mode
+
+  INTEGER, PARAMETER :: BC_REPLACE  = 1
+  INTEGER, PARAMETER :: BC_ADD      = 2
+  INTEGER, PARAMETER :: BC_RELAX    = 3
+  INTEGER, PARAMETER :: BC_SPECIAL  = 4
+
+  TYPE, PUBLIC :: bc_nml
+  ! external field properties:
+    ! source of the boundary condition
+    INTEGER               :: ef_type = EF_INACTIVE   
+                             ! possible values:
+                             ! EF_INACTIVE = 0
+                             ! EF_VALUE = 1 
+                             ! EF_FILE = 2
+                             ! EF_MODULE = 3
+    ! information for type=ef_file
+    ! template for filename. Example: bc_ch4.%Y4.%T0.nc
+    CHARACTER(LEN=512)    :: ef_template = ''
+    ! variable name in file
+    CHARACTER(LEN=512)    :: ef_varname= ''
+    ! geometry of the file variable
+    INTEGER               :: ef_geometry = EF_UNDEFINED
+                             ! possible values:
+                             ! EF_UNDEFINED = 0
+                             ! EF_3D        = 1
+                             ! EF_LONLAT    = 2
+                             ! EF_LATLEV    = 3
+                             ! EF_LEV       = 4
+                             ! EF_LAT       = 5
+                             ! EF_SINGLE    = 6
+    ! definition of the time values in the file
+    INTEGER               :: ef_timedef = EF_TIMERESOLVED  
+                             ! possible values:
+                             ! EF_TIMERESOLVED = 1
+                             ! EF_IGNOREYEAR   = 2
+                             ! EF_CONSTANT     = 3
+    ! offset to time values (e.g. to shift from mid-month to 1st day)
+    REAL(dp)              :: ef_timeoffset = 0.0_dp  ! (time unit)
+    ! fixed record number to select a specific time in the file
+    INTEGER               :: ef_timeindex = 0
+    ! time interpolation
+    INTEGER               :: ef_interpolate = EF_NOINTER
+                             ! possible values:
+                             ! EF_NOINTER = 0
+                             ! EF_LINEAR  = 1
+                             ! EF_CUBIC   = 2
+    ! scaling factor
+    REAL(dp)              :: ef_factor = 1.0_dp 
+    ! expected unit string in netcdf file
+    CHARACTER(LEN=30)     :: ef_units = ''
+    ! information for type=ef_value
+    ! globally uniform boundary condition value
+    REAL(dp)              :: ef_value = 0.0_dp
+  ! define application of boundary condition
+    ! (vertical) domain where field should be applied
+    INTEGER              :: bc_domain       = 0
+                             ! possible values:
+                             ! BC_EVERYWHERE = 0
+                             ! BC_BOTTOM     = 1
+                             ! BC_TOP        = 2
+                             ! BC_LEVEL      = 3
+                             ! BC_ALTITUDE   = 4
+                             ! BC_PRESSURE   = 5
+    ! minimum and maximum model level where field shall be applied
+    INTEGER              :: bc_minlev       = -1
+    INTEGER              :: bc_maxlev       = 10000
+    ! mode of application
+    INTEGER              :: bc_mode         = BC_REPLACE
+                             ! possible values:
+                             ! BC_REPLACE  = 1
+                             ! BC_ADD      = 2
+                             ! BC_RELAX    = 3
+                             ! BC_SPECIAL  = 4
+    ! relaxation time for mode = bc_relax
+    REAL(dp)             :: bc_relaxtime    = 0._dp
+  END TYPE bc_nml
+
+
+! PUBLIC :: bc_expand
+  PUBLIC :: bc_list_read
+  PUBLIC :: bc_define
+  PUBLIC :: bc_set
+  PUBLIC :: bc_apply
+  PUBLIC :: bc_query
+  PUBLIC :: bc_modify      ! ++mgs 2010-02-25
+  PUBLIC :: bc_find
+  PUBLIC :: p_bcast_bc
+
+! the following two lines are not supported via ICON style rules...
+
+  PUBLIC :: BC_EVERYWHERE, BC_BOTTOM, BC_TOP, BC_LEVEL, BC_ALTITUDE, BC_PRESSURE ! flags of bc_domain
+  PUBLIC :: BC_REPLACE, BC_ADD, BC_RELAX, BC_SPECIAL ! flags of bc_mode
+
+  INTEGER, PARAMETER             :: MAXNBC = 256
+
+  TYPE :: boundary_condition
+    CHARACTER(LEN=128)   :: bc_name = ''             ! just for logging interests
+    TYPE(external_field) :: bc_ef
+    INTEGER              :: bc_domain       = BC_EVERYWHERE
+    INTEGER              :: bc_minlev       = -1
+    INTEGER              :: bc_maxlev       = -1
+    INTEGER              :: bc_mode         = BC_REPLACE
+    REAL(dp)             :: bc_relaxtime    = 0._dp
+    INTEGER              :: bc_values_index = -1
+    INTEGER              :: bc_ndim         = -1
+    LOGICAL              :: bc_ldefined     = .false.
+  END TYPE boundary_condition
+
+  TYPE(boundary_condition), SAVE :: bc_list(MAXNBC) 
+
+  REAL(dp), ALLOCATABLE, SAVE    :: values2d(:,:,:)
+  REAL(dp), ALLOCATABLE, SAVE    :: values3d(:,:,:,:)
+
+  REAL(dp), POINTER              :: tmp_glob_values2d(:,:)
+  REAL(dp), POINTER              :: tmp_glob_values3d(:,:,:)
+
+  INTEGER, SAVE                  :: nbc = 0
+  INTEGER, SAVE                  :: n2d = 0
+  INTEGER, SAVE                  :: n3d = 0
+
+  LOGICAL, SAVE                  :: lfirst = .TRUE.
+
+  INTERFACE bc_set
+    MODULE PROCEDURE bc_set1d
+    MODULE PROCEDURE bc_set2d
+  END INTERFACE
+
+  INTERFACE bc_apply
+    MODULE PROCEDURE bc_apply1d
+    MODULE PROCEDURE bc_apply2d
+  END INTERFACE
+
+  INTERFACE bc_expand
+    MODULE PROCEDURE bc_expand0d
+    MODULE PROCEDURE bc_expand1d
+    MODULE PROCEDURE bc_expand2d
+    MODULE PROCEDURE bc_expand3d
+  END INTERFACE
+
+  ! subprograms
+
+  CONTAINS
+
+!-----------------------------------------------------------------------
+!>
+!! expand newly read external field (0d = single) to boundary condition dimension needed
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_expand0d(jbc,value)
+  USE mo_control,                  ONLY: nlon, nlev, ngl
+
+  INTEGER,  INTENT(in) :: jbc
+  REAL(dp), INTENT(in) :: value
+
+  SELECT CASE(bc_list(jbc)%bc_domain)
+  CASE (BC_BOTTOM, BC_TOP)
+    ALLOCATE(tmp_glob_values2d(nlon,ngl))
+    tmp_glob_values2d(:,:) = value
+  CASE (BC_LEVEL)
+    ALLOCATE(tmp_glob_values3d(nlon,nlev,ngl))
+    tmp_glob_values3d(:,:,:) = value
+  END SELECT
+  END SUBROUTINE bc_expand0d
+
+!>
+!! expand newly read external field to boundary condition dimension needed
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_expand1d(jbc,values)
+  USE mo_control,                  ONLY: nlon, nlev, ngl
+  USE mo_external_field_processor, ONLY: EF_LAT, EF_LEV
+  USE mo_exception,                ONLY: message, em_error
+
+  INTEGER,  INTENT(in) :: jbc
+  REAL(dp), INTENT(in) :: values(:)
+
+  INTEGER  :: ilat, ilev
+
+  SELECT CASE(bc_list(jbc)%bc_ef%ef_geometry)
+  CASE (EF_LAT)
+    CALL message ('bc_expand', TRIM(bc_list(jbc)%bc_name)//' bc_domain=BC_LEVEL && ef_geometry=EF_LAT not possible!', &
+                  level=em_error)
+    ALLOCATE(tmp_glob_values2d(nlon,ngl))
+    DO ilat = 1, ngl
+      tmp_glob_values2d(:,ilat) = values(ilat)
+    ENDDO
+  CASE (EF_LEV)
+    ALLOCATE(tmp_glob_values3d(nlon,nlev,ngl))
+    DO ilev = 1, nlev
+      tmp_glob_values3d(:,ilev,:) = values(ilev)
+    ENDDO
+  END SELECT
+  END SUBROUTINE bc_expand1d
+
+!>
+!! expand newly read external field to boundary condition dimension needed
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_expand2d(jbc,values)
+  USE mo_control,                  ONLY: nlon, nlev, ngl
+  USE mo_external_field_processor, ONLY: EF_LONLAT, EF_LATLEV
+
+  INTEGER,  INTENT(in) :: jbc
+  REAL(dp), INTENT(in) :: values(:,:)
+
+  INTEGER  :: ilev, ilon
+
+  IF (bc_list(jbc)%bc_ndim == 2) THEN
+    ALLOCATE(tmp_glob_values2d(nlon,ngl))
+  ELSE
+    ALLOCATE(tmp_glob_values3d(nlon,nlev,ngl))
+  ENDIF
+  SELECT CASE(bc_list(jbc)%bc_domain)
+  CASE (BC_BOTTOM)
+    IF (bc_list(jbc)%bc_ndim == 2) THEN
+      tmp_glob_values2d(:,:) = values(:,:)
+    ELSE
+      tmp_glob_values3d(:,1,:) = values(:,:)
+    ENDIF
+  CASE (BC_TOP)
+    IF (bc_list(jbc)%bc_ndim == 2) THEN
+      tmp_glob_values2d(:,:) = values(:,:)
+    ELSE
+      tmp_glob_values3d(:,nlev,:) = values(:,:)
+    ENDIF
+  CASE (BC_LEVEL)
+    SELECT CASE (bc_list(jbc)%bc_ef%ef_geometry)
+    CASE (EF_LONLAT)
+      DO ilev = bc_list(jbc)%bc_minlev, bc_list(jbc)%bc_maxlev
+        tmp_glob_values3d(:,ilev,:) = values(:,:)
+      ENDDO
+    CASE (EF_LATLEV)
+      DO ilon = 1, nlon
+        DO ilev = bc_list(jbc)%bc_minlev, bc_list(jbc)%bc_maxlev
+          tmp_glob_values3d(ilon,ilev,:) = values(:,ilev)
+        ENDDO
+      ENDDO
+    END SELECT
+  CASE (BC_EVERYWHERE)
+    IF (bc_list(jbc)%bc_ndim == 2) THEN
+      tmp_glob_values2d(:,:) = values(:,:)
+    ELSE
+      SELECT CASE (bc_list(jbc)%bc_ef%ef_geometry)
+      CASE (EF_LONLAT)
+        DO ilev = 1, nlev
+          tmp_glob_values3d(:,ilev,:) = values(:,:)
+        ENDDO
+      CASE (EF_LATLEV)
+        DO ilon = 1, nlon
+          tmp_glob_values3d(ilon,:,:) = TRANSPOSE(values(:,:))
+        ENDDO
+      END SELECT
+    ENDIF
+  END SELECT
+  END SUBROUTINE bc_expand2d
+
+!>
+!! expand newly read external field to boundary condition dimension needed
+!!
+!! Description?
+!!  
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_expand3d(jbc,values)
+  USE mo_control,                  ONLY: nlon, nlev, ngl
+
+  INTEGER,  INTENT(in) :: jbc
+  REAL(dp), INTENT(in) :: values(:,:,:)
+
+  INTEGER :: ilev
+
+  ALLOCATE(tmp_glob_values3d(nlon,nlev,ngl))
+  DO ilev = bc_list(jbc)%bc_minlev, bc_list(jbc)%bc_maxlev
+    tmp_glob_values3d(:,ilev,:) = values(:,:,ilev)
+  ENDDO
+  END SUBROUTINE bc_expand3d
+
+!>
+!! update all boundary conditions (if needed: read new ones from external fields)
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_list_read 
+  USE mo_control,                  ONLY: nlev, nlon, ngl
+  USE mo_mpi,                      ONLY: p_io, p_parallel, p_parallel_io, p_bcast
+  USE mo_external_field_processor, ONLY: EF_FILE, EF_SINGLE, EF_LAT, EF_LEV, EF_LONLAT, EF_LATLEV, EF_3D, &
+                                         ef_read, ef_get_next_timestep, ef_get_first_timestep
+  USE mo_time_control,             ONLY: current_date
+  USE mo_time_conversion,          ONLY: time_days, OPERATOR(==), OPERATOR(>)
+  USE mo_decomposition,            ONLY: gl_dc => global_decomposition, lc_dc => local_decomposition
+  USE mo_transpose,                ONLY: scatter_gp
+  USE mo_exception,                ONLY: finish, number_of_errors, message, em_error
+
+  INTEGER               :: jbc, ind_val
+  TYPE(time_days)       :: znexttime
+  REAL(dp)              :: value
+  REAL(dp), ALLOCATABLE :: value1d(:)
+  REAL(dp), ALLOCATABLE :: value2d(:,:)
+  REAL(dp), ALLOCATABLE :: value3d(:,:,:)
+  REAL(dp), ALLOCATABLE :: tmp_loc_values2d(:,:)
+  REAL(dp), ALLOCATABLE :: tmp_loc_values3d(:,:,:)
+  LOGICAL               :: lread
+
+  IF (lfirst) THEN
+    IF (n2d > 0) ALLOCATE(values2d(lc_dc%nproma,n2d,lc_dc%ngpblks))
+    IF (n3d > 0) ALLOCATE(values3d(lc_dc%nproma,nlev,n3d,lc_dc%ngpblks))
+  ENDIF
+  DO jbc = 1, nbc
+    lread = .FALSE.
+    ! cycle if ef_type is not ef_file
+    IF (bc_list(jbc)%bc_ef%ef_type /= EF_FILE) CYCLE
+
+    IF (p_parallel_io) THEN
+
+! store to local temporary arrays -- data is finally stored to values2d/values3d in bc_expand
+
+      IF (lfirst) THEN
+! in the special case that the data for the first model timestep is in the "previous" file,
+! the routine must know about lfirst
+! handling of first and next timestep is slightly different -- call special routine for first
+! timestep (only once called per bc), so ef_get_next_timestep (called frequently during model run)
+! hasn't to deal with lfirst
+        CALL ef_get_first_timestep(bc_list(jbc)%bc_ef)
+      ENDIF
+
+      IF (bc_list(jbc)%bc_ef%ef_timeindex == 0) THEN
+        CALL message('bc_list_read', 'No data found in file '//TRIM(bc_list(jbc)%bc_ef%ef_file)//'!', level=em_error)
+      ELSE
+        znexttime = bc_list(jbc)%bc_ef%ef_times(bc_list(jbc)%bc_ef%ef_timeindex)
+
+        IF (lfirst .OR. ((current_date > znexttime) .OR. (current_date == znexttime))) THEN
+          lread = .TRUE.
+          SELECT CASE(bc_list(jbc)%bc_ef%ef_geometry)
+          CASE (EF_SINGLE)
+            CALL ef_read (bc_list(jbc)%bc_ef, value)
+            CALL bc_expand(jbc,value)
+          CASE (EF_LAT)
+            ALLOCATE(value1d(ngl))
+            CALL ef_read (bc_list(jbc)%bc_ef, value1d)
+            CALL bc_expand(jbc,value1d)
+            DEALLOCATE(value1d)
+          CASE (EF_LEV)
+            ALLOCATE(value1d(nlev))
+            CALL ef_read (bc_list(jbc)%bc_ef, value1d)
+            CALL bc_expand(jbc,value1d)
+            DEALLOCATE(value1d)
+          CASE (EF_LONLAT)
+            ALLOCATE(value2d(nlon,ngl))
+            CALL ef_read (bc_list(jbc)%bc_ef, value2d)
+            CALL bc_expand(jbc,value2d)
+            DEALLOCATE(value2d)
+          CASE (EF_LATLEV)
+            ALLOCATE(value2d(ngl,nlev))
+            CALL ef_read (bc_list(jbc)%bc_ef, value2d)
+            CALL bc_expand(jbc,value2d)
+            DEALLOCATE(value2d)
+          CASE (EF_3D)
+            ALLOCATE(value3d(nlon,ngl,nlev))
+            CALL ef_read (bc_list(jbc)%bc_ef, value3d)
+            CALL bc_expand(jbc,value3d)
+            DEALLOCATE(value3d)
+          END SELECT
+!IF (changed) WRITE(0,*) 'INFO: bc_list_read: read and updated ',TRIM(bc_list(jbc)%bc_name),', ef_geometry=', &
+!bc_list(jbc)%bc_ef%ef_geometry
+          IF ((bc_list(jbc)%bc_domain == BC_ALTITUDE) .or. (bc_list(jbc)%bc_domain == BC_PRESSURE)) CALL bc_vertint
+          CALL ef_get_next_timestep(bc_list(jbc)%bc_ef)
+        ENDIF
+      ENDIF
+    ENDIF
+    IF (p_parallel) THEN
+      call p_bcast(lread, p_io)
+    ENDIF
+    IF (lread) THEN
+      ind_val = bc_list(jbc)%bc_values_index
+      IF (bc_list(jbc)%bc_ndim == 2) THEN
+        ALLOCATE(tmp_loc_values2d(lc_dc%nproma,lc_dc%ngpblks))
+        CALL scatter_gp(tmp_glob_values2d,tmp_loc_values2d,gl_dc)
+        values2d(1:lc_dc%nproma,ind_val,1:lc_dc%ngpblks) = tmp_loc_values2d(1:lc_dc%nproma,1:lc_dc%ngpblks)
+        DEALLOCATE(tmp_loc_values2d)
+        IF (p_parallel_io) DEALLOCATE(tmp_glob_values2d)
+      ELSE
+        ALLOCATE(tmp_loc_values3d(lc_dc%nproma,nlev,lc_dc%ngpblks))
+        tmp_loc_values3d = 0.0_dp
+        CALL scatter_gp(tmp_glob_values3d,tmp_loc_values3d,gl_dc)
+        values3d(1:lc_dc%nproma,1:nlev,ind_val,1:lc_dc%ngpblks) = tmp_loc_values3d(1:lc_dc%nproma,1:nlev,1:lc_dc%ngpblks)
+        DEALLOCATE(tmp_loc_values3d)
+        IF (p_parallel_io) DEALLOCATE(tmp_glob_values3d)
+      ENDIF
+    ENDIF
+    bc_list(jbc)%bc_ldefined = .true.  !! ignore read errors, because program will stop then anyway...
+  ENDDO
+
+  !-- abort model run if errors were found
+  IF (number_of_errors > 0) CALL finish('bc_list_read', 'Abort run because errors were encountered.')
+
+  lfirst = .FALSE.
+  END SUBROUTINE bc_list_read
+
+  SUBROUTINE bc_vertint
+  END SUBROUTINE bc_vertint
+
+!>
+!! interpolate boundary conditions vertically to the levels needed
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE p_bcast_bc (bc_struc, p_source, comm)
+  USE mo_mpi, ONLY: p_bcast, p_all_comm
+
+  TYPE(bc_nml),      INTENT(INOUT) :: bc_struc
+  INTEGER,           INTENT(in)    :: p_source
+  INTEGER, OPTIONAL, INTENT(in)    :: comm
+
+  INTEGER :: p_comm
+
+  IF (PRESENT(comm)) THEN
+     p_comm = comm
+  ELSE
+     p_comm = p_all_comm
+  ENDIF
+
+  CALL p_bcast(bc_struc%ef_type,    p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_template, p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_varname,     p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_geometry,     p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_timedef,      p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_timeoffset,   p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_timeindex,    p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_interpolate,  p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_value,        p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_factor,       p_source, p_comm)
+  CALL p_bcast(bc_struc%ef_units,        p_source, p_comm)
+  CALL p_bcast(bc_struc%bc_domain,       p_source, p_comm)
+  CALL p_bcast(bc_struc%bc_mode,         p_source, p_comm)
+  CALL p_bcast(bc_struc%bc_maxlev,       p_source, p_comm)
+  CALL p_bcast(bc_struc%bc_minlev,       p_source, p_comm)
+
+  END SUBROUTINE p_bcast_bc
+
+  SUBROUTINE bc_printstat (bc, out)
+  USE mo_io_units,                 ONLY: nerr
+  USE mo_external_field_processor, ONLY: EF_INACTIVE, EF_VALUE, EF_FILE, EF_MODULE, &
+                                         EF_UNDEFINED, EF_3D, EF_LONLAT, EF_LAT, EF_LEV, EF_LATLEV, EF_SINGLE, &
+                                         EF_TIMERESOLVED, EF_IGNOREYEAR, EF_CONSTANT, &
+                                         EF_NOINTER, EF_LINEAR, EF_CUBIC
+  USE mo_exception,                ONLY: message, message_text
+
+  !! print value of all bc fields ... ###
+  !! private routine: called from bc_define if lverbose=.true. (debugging help)
+
+  TYPE(boundary_condition), INTENT(IN) :: bc
+  INTEGER, INTENT(in), OPTIONAL        :: out ! choice of output unit. Default: error and log file
+
+  INTEGER           :: iout
+  CHARACTER(LEN=24) :: cc, cc2
+
+  IF (PRESENT(out)) THEN
+    iout = out 
+  ELSE
+    iout = nerr
+  END IF
+  
+  WRITE (message_text, *) 'Boundary condition number ',bc%bc_values_index,':'
+  CALL message('',message_text,iout)
+  SELECT CASE (bc%bc_mode)
+    CASE (BC_REPLACE)
+      cc = ' BC_REPLACE'
+    CASE (BC_ADD)
+      cc = ' BC_ADD'
+    CASE (BC_RELAX)
+      cc = ' BC_RELAX'
+    CASE (BC_SPECIAL)
+      cc = ' BC_SPECIAL'
+  END SELECT
+  WRITE (message_text, *) '...name: ',TRIM(bc%bc_name),', ndims: ',bc%bc_ndim,', mode: ',TRIM(cc)
+  CALL message('',message_text,iout)
+
+  SELECT CASE (bc%bc_domain)
+    CASE (BC_EVERYWHERE)
+      cc = ' BC_EVERYWHERE'
+    CASE (BC_BOTTOM)
+      cc = ' BC_BOTTOM'
+    CASE (BC_TOP)
+      cc = ' BC_TOP'
+    CASE (BC_LEVEL)
+      cc = ' BC_LEVEL'
+    CASE (BC_ALTITUDE)
+      cc = ' BC_ALTITUDE'
+    CASE (BC_PRESSURE)
+      cc = ' BC_PRESSURE'
+  END SELECT
+  WRITE (message_text, *) '...ldefined: ',bc%bc_ldefined, ', domain: ',TRIM(cc),      &
+                ' minlev/maxlev : ',bc%bc_minlev,bc%bc_maxlev
+  CALL message('',message_text,iout)
+  IF (bc%bc_mode == BC_RELAX) THEN
+    WRITE (message_text, *) '...relaxtime:', bc%bc_relaxtime
+    CALL message('',message_text,iout)
+  ENDIF
+  SELECT CASE (bc%bc_ef%ef_type)
+    CASE (EF_INACTIVE) 
+      cc = ' EF_INACTIVE'
+    CASE (EF_VALUE)    
+      cc = ' EF_VALUE'
+    CASE (EF_FILE)     
+      cc = ' EF_FILE'
+    CASE (EF_MODULE)   
+      cc = ' EF_MODULE'
+  END SELECT
+  WRITE (message_text, *) '...external field type:', cc
+  CALL message('',message_text,iout)
+
+  IF (bc%bc_ef%ef_type == EF_FILE) THEN
+    WRITE (message_text, *) '...ef_template: ', TRIM(bc%bc_ef%ef_template)
+    CALL message('',message_text,iout)
+    WRITE (message_text, *) '...ef_varname:  ', TRIM(bc%bc_ef%ef_varname),   &
+                  ', units: ', TRIM(bc%bc_ef%ef_units),            &
+                  ', scale factor : ',bc%bc_ef%ef_factor
+    CALL message('',message_text,iout)
+    SELECT CASE (bc%bc_ef%ef_geometry)
+      CASE (EF_UNDEFINED)
+        cc = ' EF_UNDEFINED'
+      CASE (EF_3D)
+        cc = ' EF_3D'
+      CASE (EF_LONLAT)
+        cc = ' EF_LONLAT'
+      CASE (EF_LATLEV)
+        cc = ' EF_LATLEV'
+      CASE (EF_LEV)
+        cc = ' EF_LEV'
+      CASE (EF_LAT)
+        cc = ' EF_LAT'
+      CASE (EF_SINGLE)
+        cc = ' EF_SINGLE'
+    END SELECT
+    WRITE (message_text, *) '...ef_geometry: ', cc
+    CALL message('',message_text,iout)
+    SELECT CASE (bc%bc_ef%ef_timedef)
+      CASE (EF_TIMERESOLVED)
+        cc = ' EF_TIMERESOLVED'
+      CASE (EF_IGNOREYEAR)
+        cc = ' EF_IGNOREYEAR'
+      CASE (EF_CONSTANT)
+        cc = ' EF_CONSTANT'
+    END SELECT
+    SELECT CASE (bc%bc_ef%ef_interpolate)
+      CASE (EF_NOINTER)
+        cc2 = ' EF_NOINTER'
+      CASE (EF_LINEAR)
+        cc2 = ' EF_LINEAR'
+      CASE (EF_CUBIC)
+        cc2 = ' EF_CUBIC'
+    END SELECT
+    WRITE (message_text, *) '...ef_timedef: ', TRIM(cc), ', ef_timeoffset: ',bc%bc_ef%ef_timeoffset,  &
+                  ', ef_timeindex: ', bc%bc_ef%ef_timeindex, ', time interpolation: ', TRIM(cc2)
+    CALL message('',message_text,iout)
+  ELSE IF (bc%bc_ef%ef_type == EF_VALUE) THEN
+    WRITE (message_text, *) '... constant BC value: ', bc%bc_ef%ef_value
+    CALL message('',message_text,iout)
+  END IF
+
+  END SUBROUTINE bc_printstat
+
+!++mgs 2010-03-01
+  SUBROUTINE bc_find (name, ibc, ierr)
+
+  USE mo_exception,           ONLY: finish, message, message_text, em_info, em_error
+  USE mo_util_string,         ONLY: tolower
+
+  CHARACTER(len=*), INTENT(in)   :: name
+  INTEGER, INTENT(out)           :: ibc   ! index in bc_list
+  INTEGER, OPTIONAL, INTENT(out) :: ierr  ! error status
+
+  INTEGER     :: i
+
+  !-- Initialize and check validity of arguments
+  ibc = 0
+  IF (PRESENT(ierr)) THEN
+    ierr = 0
+  END IF
+  IF (TRIM(name) == '') CALL finish('bc_find', 'Invalid (empty) name string!')
+
+  DO i=1, nbc
+    IF (TRIM(tolower(name)) == TRIM(tolower(bc_list(i)%bc_name))) ibc = i
+  END DO
+
+  IF (ibc > 0) THEN
+    WRITE(message_text,*) 'Located boundary condition for "'//TRIM(name)//'" as index ', ibc
+    CALL message('bc_find', message_text, level=em_info)
+  ELSE
+    IF (PRESENT(ierr)) THEN
+      ierr = 1
+    ELSE
+      CALL message('bc_find', 'Cannot find index for boundary condition '//TRIM(name),   &
+                   level=em_error)
+    END IF
+  END IF
+
+  END SUBROUTINE bc_find
+!--mgs
+
+!++mgs
+  SUBROUTINE bc_query (ibc, name, ef_type)
+
+  USE mo_exception,         ONLY: finish
+
+  INTEGER, INTENT(in)                      :: ibc   ! index in bc_list
+  CHARACTER(len=*), INTENT(out), OPTIONAL  :: name
+  INTEGER,          INTENT(out), OPTIONAL  :: ef_type
+
+  !-- check validity of arguments
+  IF (ibc < 0 .OR. ibc > nbc) CALL finish('bc_query', 'Invalid index to bc_list!')
+
+  IF (PRESENT(name)) THEN
+    name = bc_list(ibc)%bc_name
+  END IF
+  IF (PRESENT(ef_type)) THEN
+    ef_type = bc_list(ibc)%bc_ef%ef_type
+  END IF
+
+  END SUBROUTINE bc_query
+!--mgs
+
+!++mgs  2010-02-25
+  SUBROUTINE bc_modify (ibc, name, ef_type, bc_domain, bc_ndims)
+
+  USE mo_exception,         ONLY: finish
+
+  INTEGER, INTENT(in)                      :: ibc   ! index in bc_list
+  CHARACTER(len=*), INTENT(in), OPTIONAL   :: name
+  INTEGER,          INTENT(in), OPTIONAL   :: ef_type
+  INTEGER,          INTENT(in), OPTIONAL   :: bc_domain
+  INTEGER,          INTENT(in), OPTIONAL   :: bc_ndims
+
+  !-- check validity of arguments
+  IF (ibc < 0 .OR. ibc > nbc) CALL finish('bc_query', 'Invalid index to bc_list!')
+
+  IF (PRESENT(name)) THEN
+    bc_list(ibc)%bc_name = TRIM(name)
+  END IF
+  IF (PRESENT(ef_type)) THEN
+    bc_list(ibc)%bc_ef%ef_type = ef_type     ! add error checks (?)
+  END IF
+  IF (PRESENT(bc_domain)) THEN
+    bc_list(ibc)%bc_domain = bc_domain       ! add error checks (?)
+  END IF
+  IF (PRESENT(bc_ndims)) THEN
+    bc_list(ibc)%bc_ndim = bc_ndims         ! add error checks (?)
+    ! may need to do more here to ensure consistency...
+  END IF
+
+  END SUBROUTINE bc_modify
+!--mgs
+
+!>
+!! function to define a new boundary condition and return its index in the
+!! boundary condition list
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  FUNCTION bc_define(bc_name,bc_struc,bc_ndim,lverbose) RESULT(ibc)
+  USE mo_external_field_processor, ONLY: EF_LAT, EF_LEV, EF_LATLEV, &
+                                         EF_INACTIVE, EF_VALUE, EF_FILE, EF_MODULE
+  USE mo_exception,                ONLY: finish, message, message_text, em_error, em_warn
+  USE mo_control,                  ONLY: nlev
+  USE mo_mpi,                      ONLY: p_parallel_io
+
+  CHARACTER(LEN=*),  INTENT(in) :: bc_name
+  TYPE(bc_nml),      INTENT(in) :: bc_struc
+  INTEGER, INTENT(in)           :: bc_ndim
+  LOGICAL, OPTIONAL, INTENT(in) :: lverbose
+
+  CHARACTER(LEN=24)            :: cc
+  INTEGER                      :: ibc
+
+  ibc = -1
+
+! not to be used in this way bc_name(CHARACTER(128)), message_text(CHARACTER(132))
+! WRITE (message_text, *) 'Boundary condition ' // TRIM(bc_name) // ' of type'
+  SELECT CASE (bc_struc%ef_type)
+    CASE (EF_INACTIVE) 
+      cc = ' EF_INACTIVE'
+    CASE (EF_VALUE)    
+      cc = ' EF_VALUE'
+    CASE (EF_FILE)     
+      cc = ' EF_FILE'
+    CASE (EF_MODULE)   
+      cc = ' EF_MODULE'
+    CASE DEFAULT       
+      cc = ' INVALID'
+      CALL message('bc_define', 'Invalid value of EF_TYPE for boundary condition ' &
+                   // TRIM(bc_name) //'!', level=em_error)
+      RETURN
+  END SELECT
+! not to be used in this way bc_name(CHARACTER(128)), message_text(CHARACTER(132))
+! CALL message('bc_define', TRIM(message_text) // cc, level=em_info)
+  IF (bc_struc%ef_type == EF_INACTIVE) RETURN  ! nothing to be done
+
+  nbc = nbc + 1
+  ! Error checks
+  IF (nbc > MAXNBC) THEN
+    WRITE (message_text, *) 'Too many boundary conditions (MAXNBC=', MAXNBC, ')'
+    CALL finish('bc_define', message_text)
+  END IF
+  ibc = nbc
+  ! bc_mode
+  IF (bc_struc%bc_mode < BC_REPLACE .OR. bc_struc%bc_mode > BC_SPECIAL) THEN
+    WRITE (message_text, *) 'Invalid value for bc_mode : ', bc_struc%bc_mode
+    CALL message('bc_define', message_text, level=em_error)
+  END IF
+  ! bc_domain
+  IF (bc_struc%bc_domain < BC_EVERYWHERE .OR. bc_struc%bc_domain > BC_PRESSURE) THEN
+    WRITE (message_text, *) 'Invalid value for bc_domain : ', bc_struc%bc_domain
+    CALL message('bc_define', message_text, level=em_error)
+  END IF
+  ! bc_relaxtime
+  IF (bc_struc%bc_relaxtime < 0._dp) THEN
+    WRITE (message_text, *) 'Invalid value for bc_relaxtime : ', bc_struc%bc_relaxtime
+    CALL message('bc_define', message_text, level=em_error)
+  END IF
+  IF ((bc_struc%bc_mode == BC_RELAX) .AND. (bc_struc%bc_relaxtime == 0._dp)) &
+    CALL message('bc_define', 'value for bc_relaxtime must be set if bc_mode=BC_RELAX!', level=em_error)
+
+  ! settings for all ef_type values
+  bc_list(nbc)%bc_name              = bc_name
+  bc_list(nbc)%bc_ef%ef_type        = bc_struc%ef_type
+  bc_list(nbc)%bc_domain            = bc_struc%bc_domain
+  bc_list(nbc)%bc_minlev            = MAX(bc_struc%bc_minlev, 1)  ! i.e. also 1 if "undefined"
+  bc_list(nbc)%bc_maxlev            = MIN(bc_struc%bc_maxlev, nlev)
+  IF (bc_list(nbc)%bc_maxlev < 1) bc_list(nbc)%bc_maxlev = nlev   ! any value < 1 could otherwise cause segfault
+  bc_list(nbc)%bc_mode              = bc_struc%bc_mode  
+  bc_list(nbc)%bc_relaxtime         = bc_struc%bc_relaxtime
+
+  SELECT CASE (bc_struc%ef_type)
+    CASE (EF_VALUE)    
+      bc_list(nbc)%bc_ef%ef_value       = bc_struc%ef_value
+
+      ! note: scale factor always = 1.0 (=default) !
+      IF (bc_struc%ef_factor /= 1.0_dp) CALL message ('bc_define',  &
+          ' ef_factor is set though ef_type is EF_VALUE (the factor is ignored!!)', level=em_warn)
+
+    CASE (EF_FILE)     
+      bc_list(nbc)%bc_ef%ef_template    = bc_struc%ef_template
+      bc_list(nbc)%bc_ef%ef_varname     = bc_struc%ef_varname
+      bc_list(nbc)%bc_ef%ef_geometry    = bc_struc%ef_geometry
+      bc_list(nbc)%bc_ef%ef_timedef     = bc_struc%ef_timedef
+      bc_list(nbc)%bc_ef%ef_timeoffset  = bc_struc%ef_timeoffset
+      bc_list(nbc)%bc_ef%ef_timeindex   = bc_struc%ef_timeindex
+      bc_list(nbc)%bc_ef%ef_interpolate = bc_struc%ef_interpolate
+      bc_list(nbc)%bc_ef%ef_factor      = bc_struc%ef_factor
+      bc_list(nbc)%bc_ef%ef_units       = bc_struc%ef_units
+      IF ( ( ((bc_struc%bc_domain == BC_BOTTOM) .OR. (bc_struc%bc_domain == BC_TOP)) &
+           .AND. ((bc_struc%ef_geometry == EF_LEV) .OR. (bc_struc%ef_geometry == EF_LATLEV)) ) &
+         .OR. ( (bc_struc%bc_domain == BC_LEVEL) .AND. (bc_struc%ef_geometry == EF_LAT) ) ) &
+        CALL message ('bc_define', ' bc_domain and ef_geometry do not fit!', level=em_error)
+
+    CASE (EF_MODULE)   
+      ! nothing to be done here. Module must call bc_set to set BC value. Reserve memory in bc_list ==> bc_ndim must be set!
+  END SELECT
+
+  bc_list(nbc)%bc_ndim = bc_ndim
+  IF (bc_list(nbc)%bc_ndim == 2) THEN
+    n2d = n2d + 1
+    bc_list(nbc)%bc_values_index = n2d
+  ELSE
+    n3d = n3d + 1
+    bc_list(nbc)%bc_values_index = n3d
+  ENDIF
+
+  IF (PRESENT(lverbose)) THEN
+    IF (lverbose .AND. p_parallel_io) CALL bc_printstat(bc_list(nbc))
+  ENDIF
+
+  END FUNCTION bc_define
+
+!>
+!! set boundary condition from ECHAM module (2D)
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_set1d(jbc,kproma,jrow,values)
+  USE mo_external_field_processor, ONLY: EF_MODULE
+
+  INTEGER,  INTENT(in)    :: jbc, kproma, jrow
+  REAL(dp), INTENT(inout) :: values(:)
+
+  INTEGER  :: ind_val
+
+  ! overwrite bc value only if ef_type=EF_MODULE
+  IF (bc_list(jbc)%bc_ef%ef_type /= EF_MODULE) RETURN
+
+  ! check SHAPE of incoming array
+  ! careful with nproma ...
+  ! in the end do
+  ind_val = bc_list(jbc)%bc_values_index
+  values2d(1:kproma,ind_val,jrow)=values(1:kproma)
+  bc_list(jbc)%bc_ldefined = .true.
+
+  END SUBROUTINE bc_set1d
+
+!>
+!! set boundary condition in ECHAM module (3D)
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_set2d(jbc,kproma, jrow,values)
+  USE mo_external_field_processor, ONLY: EF_MODULE
+
+  INTEGER,  INTENT(in)    :: jbc, kproma, jrow
+  REAL(dp), INTENT(inout) :: values(:,:)
+
+  INTEGER  :: ind_val
+
+  ! overwrite bc value only if ef_type=EF_MODULE
+  IF (bc_list(jbc)%bc_ef%ef_type /= EF_MODULE) RETURN
+
+  ! check SHAPE of incoming array
+  ! careful with nproma ...
+  ! in the end do
+  ind_val = bc_list(jbc)%bc_values_index
+  values3d(1:kproma,:,ind_val,jrow) = values(1:kproma,:)
+  bc_list(jbc)%bc_ldefined = .true.
+
+  END SUBROUTINE bc_set2d
+
+
+!>
+!! apply boundary condition to user field (1D - vertical column)
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_apply1d(jbc,kproma,jrow,values)
+  USE mo_time_control,             ONLY: delta_time
+  USE mo_exception,                ONLY: finish
+  USE mo_external_field_processor, ONLY: EF_VALUE
+
+  INTEGER,  INTENT(in)    :: jbc, kproma, jrow
+  REAL(dp), INTENT(inout) :: values(:)
+
+  INTEGER  :: ind_val
+  REAL(dp) :: factor
+
+!! write(0,*) 'bc_apply1d: jbc, bc_list(jbc)%bc_ldefined = ', jbc, bc_list(jbc)%bc_ldefined
+  IF ( .NOT. bc_list(jbc)%bc_ldefined ) &
+    CALL finish('bc_apply', TRIM(bc_list(jbc)%bc_name)//' has no values defined yet!')
+
+!!!!  - following de-activated because BC_BOTTOM or BC_TOP should be valid conditions here
+!!   IF ( .NOT. (bc_list(jbc)%bc_domain == BC_EVERYWHERE) ) &
+!!     CALL finish('bc_apply', TRIM(bc_list(jbc)%bc_name)//' bc_domain indicates 3d field, but 2d field passed!')
+  ind_val = bc_list(jbc)%bc_values_index
+  SELECT CASE(bc_list(jbc)%bc_mode)
+  CASE (BC_REPLACE)
+    IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+      values(1:kproma) = bc_list(jbc)%bc_ef%ef_value
+    ELSE
+      values(1:kproma) = values2d(1:kproma,ind_val,jrow)
+    ENDIF
+  CASE (BC_ADD)
+    IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+      values(1:kproma) = values(1:kproma) + bc_list(jbc)%bc_ef%ef_value
+    ELSE
+      values(1:kproma) = values(1:kproma) + values2d(1:kproma,ind_val,jrow)
+    ENDIF
+  CASE (BC_RELAX)
+    factor = exp(-(delta_time/bc_list(jbc)%bc_relaxtime))
+    IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+      values(1:kproma) = factor * values(1:kproma) + (1.0_dp - factor) * bc_list(jbc)%bc_ef%ef_value
+    ELSE
+      values(1:kproma) = factor * values(1:kproma) + (1.0_dp - factor) * values2d(1:kproma,ind_val,jrow)
+    ENDIF
+  CASE (BC_SPECIAL)
+! user should pass a temporary field (not the real boundary condition array)
+    IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+      values(1:kproma) = bc_list(jbc)%bc_ef%ef_value
+    ELSE
+      values(1:kproma) = values2d(1:kproma,ind_val,jrow)
+    ENDIF
+  END SELECT
+  END SUBROUTINE bc_apply1d
+
+!>
+!! apply boundary condition to user field (2D)
+!!
+!! Description?
+!!
+!! @par Revision History
+!! code implementation by S. Schroeder (2009-08-25)
+!!
+  SUBROUTINE bc_apply2d(jbc,kproma,jrow,values,minlev,maxlev)
+  USE mo_time_control,             ONLY: delta_time
+  USE mo_exception,                ONLY: finish
+  USE mo_control,                  ONLY: nlev
+  USE mo_external_field_processor, ONLY: EF_VALUE
+
+  INTEGER,  INTENT(in)    :: jbc, kproma, jrow
+  REAL(dp), INTENT(inout) :: values(:,:)
+  INTEGER,  OPTIONAL,  INTENT(out) :: minlev, maxlev  ! return minlev and maxlev from structure for SPECIAL mode
+
+  INTEGER  :: ind_val, k, kmin, kmax
+  REAL(dp) :: factor
+
+!! write(0,*) 'bc_apply2d: jbc, bc_list(jbc)%bc_ldefined = ', jbc, bc_list(jbc)%bc_ldefined
+  IF ( .NOT. bc_list(jbc)%bc_ldefined ) &
+    CALL finish('bc_apply', TRIM(bc_list(jbc)%bc_name)//' has no values defined yet!')
+  ind_val = bc_list(jbc)%bc_values_index
+  SELECT CASE(bc_list(jbc)%bc_domain)
+  CASE (BC_EVERYWHERE)
+    kmin = 1
+    kmax = nlev
+  CASE (BC_BOTTOM)
+    kmin = nlev
+    kmax = nlev
+  CASE (BC_TOP)
+    kmin = 1
+    kmax = 1
+  CASE (BC_LEVEL)
+    kmin =bc_list(jbc)%bc_minlev
+    kmax =bc_list(jbc)%bc_maxlev
+  CASE (BC_ALTITUDE)
+    CALL finish('bc_apply', TRIM(bc_list(jbc)%bc_name)//' bc_domain=BC_ALTITUDE not yet implemented!')
+  CASE (BC_PRESSURE)
+    CALL finish('bc_apply', TRIM(bc_list(jbc)%bc_name)//' bc_domain=BC_PRESSURE not yet implemented!')
+  END SELECT
+
+  IF (bc_list(jbc)%bc_ndim == 2) THEN
+! now apply a 1d field to the 2d argument field
+    SELECT CASE(bc_list(jbc)%bc_mode)
+    CASE (BC_REPLACE)
+      IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+        values(1:kproma,kmin:kmax) = bc_list(jbc)%bc_ef%ef_value
+      ELSE
+        DO k=kmin,kmax
+          values(1:kproma,k) = values2d(1:kproma,ind_val,jrow)
+        END DO
+      ENDIF
+    CASE (BC_ADD)
+      IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+        DO k=kmin,kmax
+          values(1:kproma,k) = values(1:kproma,k) + bc_list(jbc)%bc_ef%ef_value
+        END DO
+      ELSE
+        DO k=kmin,kmax
+          values(1:kproma,k) = values(1:kproma,k) + values2d(1:kproma,ind_val,jrow)
+        END DO
+      ENDIF
+    CASE (BC_RELAX)
+      factor = exp(-(delta_time/bc_list(jbc)%bc_relaxtime))
+      IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+        DO k=kmin,kmax
+          values(1:kproma,k) = factor * values(1:kproma,k) + (1.0_dp - factor) * bc_list(jbc)%bc_ef%ef_value
+        END DO
+      ELSE
+        DO k=kmin,kmax
+          values(1:kproma,k) = factor * values(1:kproma,k) + (1.0_dp - factor) * values2d(1:kproma,ind_val,jrow)
+        END DO
+      ENDIF
+    CASE (BC_SPECIAL)
+! user passed a temporary 2d field, but would get a 1d field back
+      CALL finish('bc_apply', TRIM(bc_list(jbc)%bc_name)//' a 3d field was passed, but bc_list contains a 2d field!')
+    END SELECT
+  ELSE
+! now apply a 2d field to the 2d argument field
+    SELECT CASE(bc_list(jbc)%bc_mode)
+    CASE (BC_REPLACE)
+      IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+        DO k=kmin,kmax
+          values(1:kproma,k) = bc_list(jbc)%bc_ef%ef_value
+        END DO
+      ELSE
+        DO k=kmin,kmax
+          values(1:kproma,k) = values3d(1:kproma,k,ind_val,jrow)
+        END DO
+      ENDIF
+    CASE (BC_ADD)
+      IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+        DO k=kmin,kmax
+          values(1:kproma,k) = values(1:kproma,k) + bc_list(jbc)%bc_ef%ef_value
+        END DO
+      ELSE
+        DO k=kmin,kmax
+          values(1:kproma,k) = values(1:kproma,k) + values3d(1:kproma,k,ind_val,jrow)
+        END DO
+      ENDIF
+    CASE (BC_RELAX)
+      factor = exp(-(delta_time/bc_list(jbc)%bc_relaxtime))
+      IF (bc_list(jbc)%bc_ef%ef_type == EF_VALUE) THEN
+        DO k=kmin,kmax
+          values(1:kproma,k) = factor * values(1:kproma,k) + (1.0_dp - factor) * bc_list(jbc)%bc_ef%ef_value
+        END DO
+      ELSE
+        DO k=kmin,kmax
+          values(1:kproma,k) = factor * values(1:kproma,k) + (1.0_dp - factor) * values3d(1:kproma,k,ind_val,jrow)
+        END DO
+      ENDIF
+    CASE (BC_SPECIAL)
+      DO k=kmin,kmax
+! user should pass a temporary field (not the real boundary condition array)
+        values(1:kproma,k) = values3d(1:kproma,k,ind_val,jrow)
+      END DO
+    END SELECT
+  ENDIF
+  !! return kmin and kmax as minlev, maxlev if requested
+  IF (PRESENT(minlev)) minlev = kmin
+  IF (PRESENT(maxlev)) maxlev = kmax
+  END SUBROUTINE bc_apply2d
+
+END MODULE mo_boundary_condition
