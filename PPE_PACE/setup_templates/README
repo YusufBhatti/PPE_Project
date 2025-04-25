@@ -1,0 +1,16 @@
+#-------------------------------------------------------------------------------
+# Sylvaine Ferrachat 2016-03
+#
+#-------------------------------------------------------------------------------
+
+This directory contains all templates for building experiments by means of the jobscript toolkit. It contains:
+
+* emi_spec_examples/: various emi_spec files
+* run_examples/: complete sets of experiment directories (settings file, symlink script and, if relevant, em_spec file)
+* symlinks_examples/: symlinks scripts examples
+
+!!Important remark:!!
+
+Please make sure that the jobscript toolkit version you're using is at least recent enough (the minimum jobscript toolkit version required for this model version is to be found in [model_distrib]/jobscript_toolkit_ancillaries/backward_compatibility_info.sh, variable 'minimum_version').
+
+
