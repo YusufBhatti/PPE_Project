@@ -114,8 +114,8 @@ SUBROUTINE init_aerocom
         CALL p_bcast (lHEaci_activ, p_io)
         CALL p_bcast (lHEpro, p_io)
         CALL p_bcast (lMMPPE, p_io)
-        CALL p_bcast (lAP3M, p_io)
         CALL p_bcast (lAP3D, p_io)
+        CALL p_bcast (lAP3M, p_io)
     END IF
 
     !-- Security for dependencies
@@ -128,8 +128,8 @@ SUBROUTINE init_aerocom
         CALL print_value('init_aerocom, lHEaci_activ', lHEaci)
         CALL print_value('init_aerocom, lHEpro', lHEpro)
         CALL print_value('init_aerocom, lMMPPE', lMMPPE)
-        CALL print_value('init_aerocom, lAP3M', lAP3M)
         CALL print_value('init_aerocom, lAP3D', lAP3D)
+        CALL print_value('init_aerocom, lAP3M', lAP3M)
     ENDIF
     IF (lHEaci) THEN
        CALL init_HEaci
@@ -164,7 +164,7 @@ SUBROUTINE init_aerocom_streams
     USE mo_hammoz_aerocom_Traj,  ONLY: construct_Trajg_stream
     USE mo_hammoz_aerocom_Traj,  ONLY: construct_Traj_stream
     USE mo_hammoz_aerocom_HEmon, ONLY: construct_HEmon_stream
-    USE mo_hammoz_aerocom_HEaci, ONLY: construct_HEaci_stream
+    USE mo_hammoz_aerocom_HEaci, ONLY: construct_HEaci_stream!, init_HEaci
     USE mo_hammoz_aerocom_HEpro, ONLY: construct_HEpro_stream
     USE mo_hammoz_aerocom_MMPPE, ONLY: construct_MMPPE_stream
     USE mo_hammoz_aerocom_AP3M,  ONLY: construct_AP3M_stream
@@ -174,12 +174,16 @@ SUBROUTINE init_aerocom_streams
     IF (lTraj)         CALL construct_Trajg_stream
     IF (lTraj)         CALL construct_Traj_stream
     IF (lHEmon)        CALL construct_HEmon_stream
-    IF (lHEaci)        CALL construct_HEaci_stream
+    IF (lHEaci) THEN
+       CALL construct_HEaci_stream
+       !CALL init_HEaci
+    END IF
 
     IF (lHEpro)        CALL construct_HEpro_stream
     IF (lMMPPE)        CALL construct_MMPPE_stream
-    IF (lAP3M)         CALL construct_AP3M_stream
     IF (lAP3D)         CALL construct_AP3D_stream
+    IF (lAP3M)         CALL construct_AP3M_stream
+
 
 END SUBROUTINE init_aerocom_streams
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

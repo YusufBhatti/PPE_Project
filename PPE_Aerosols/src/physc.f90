@@ -1400,7 +1400,7 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
   !>>DN AeroCom diagnostics
 #ifdef HAMMOZ
   IF (laerocom_diag) THEN
-      CALL update_aerocom_diags(nproma, nbdim, nlev, krow, zi0)
+  CALL update_aerocom_diags(nproma, nbdim, nlev, krow, zi0)
   ENDIF
 #endif
   !<<DN

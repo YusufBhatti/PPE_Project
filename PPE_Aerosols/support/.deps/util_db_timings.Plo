@@ -4,8 +4,8 @@ util_db_timings.lo: util_db_timings.c /usr/include/stdc-predef.h \
  /usr/include/bits/wordsize.h /usr/include/bits/timesize.h \
  /usr/include/sys/cdefs.h /usr/include/bits/long-double.h \
  /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stddef.h \
- /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stdarg.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stddef.h \
+ /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stdarg.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/bits/time64.h /usr/include/bits/types/__fpos_t.h \
  /usr/include/bits/types/__mbstate_t.h \
@@ -40,8 +40,8 @@ util_db_timings.lo: util_db_timings.c /usr/include/stdc-predef.h \
 /usr/include/bits/long-double.h:
 /usr/include/gnu/stubs.h:
 /usr/include/gnu/stubs-64.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stddef.h:
-/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/Centos8/EB_production/2021/software/GCCcore/10.3.0/lib/gcc/x86_64-pc-linux-gnu/10.3.0/include/stdarg.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stddef.h:
+/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0/include/stdarg.h:
 /usr/include/bits/types.h:
 /usr/include/bits/typesizes.h:
 /usr/include/bits/time64.h:

@@ -102,6 +102,7 @@ USE mo_memory_g3b,        ONLY: tradsu_na, trad0_na,  traf0_na, sradsu_na, &
                                 rsuscs_na,                                 &
                                 !<<DN AeroCom
                                 sraf0_na,  trads_na,  trafs_na
+USE mo_hammoz_aerocom_diags, ONLY: lAP3D
 !>>DN AeroCom
 USE mo_hammoz_aerocom_AP3D, ONLY: rsuscs, rsnscs
 USE mo_memory_cfdiag,       ONLY: locfdiag, srsucs
@@ -296,9 +297,9 @@ INTEGER :: jrow, jk, jl
        psraf0(jl) = psraf0(jl) + zdtime*sraf0_na(jl,krow)
        psrafs(jl) = psrafs(jl) + zdtime*srafs_na(jl,krow)
        !>>DN AeroCom
-       IF (locfdiag) THEN
-       rsnscs(jl,krow) = rsnscs(jl,krow) + zdtime*srafs_na(jl,krow)
-       rsuscs(jl,krow) = rsuscs(jl,krow) + zdtime*rsuscs_na(jl,krow)
+       IF(lAP3D)THEN
+          rsnscs(jl,krow) = rsnscs(jl,krow) + zdtime*srafs_na(jl,krow)
+          rsuscs(jl,krow) = rsuscs(jl,krow) + zdtime*rsuscs_na(jl,krow)
        END IF
        !<<DN AeroCom
 510  END DO

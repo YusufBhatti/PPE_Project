@@ -95,8 +95,8 @@ CONTAINS
     !<<SF #345
     USE mo_param_switches, ONLY: nactivpdf !ZK
 !    !>>dwp Added perturbed physics setup:
-!    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-!                                     scale_vertical_velocity
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+                                     scale_vertical_velocity
 !    !<<dwp
 
 
@@ -142,9 +142,9 @@ CONTAINS
        !--- Turbulent vertical velocity:
        pw(1:kproma,:,1) = MAX(w_min,w_large(1:kproma,:,krow)+w_turb(1:kproma,:,krow))
 !       !>> dwp scale total vertical velocity
-!       IF (lo_hammoz_perturbations) THEN
-!           pw(1:kproma,:,1) = pw(1:kproma,:,1) * scale_vertical_velocity
-!       ENDIF
+       IF (lo_hammoz_perturbations) THEN
+           pw(1:kproma,:,1) = pw(1:kproma,:,1) * scale_vertical_velocity
+       ENDIF
        !<< dwp
        w(1)%ptr(1:kproma,:,krow) = pw(1:kproma,:,1)
        ! Only one "bin", with probability of 1. The actual value doesn't

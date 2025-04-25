@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #----------------------------------------------------------------------------
-# Sylvaine Ferrachat 2016
+# Sylvaine Ferrachat / Grazia Frontoso 2011
 #
 # Script to perform the linking of input files into the experiment directory
 # for echam6-hammoz (and echam6) 
@@ -29,16 +29,16 @@
 #    flag_stenchikov_aerosols="[flag to use Stenchikov volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
 #    flag_crowley_aerosols="[flag to use crowley volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
 #    flag_submclim_aerosols="[flag to use submodel climatology volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
-#    scenario="[climate 'scenarios' for GHG, ozone: 'historical' (case sensitive)]"
+#    scenario="[future climate scenarios for GHG, ozone and aerosol climatology: RCP45, XXX (case insensitive)]"
 #    flag_nudg="[flag to switch on nudging: 'false' (no nudging) or 'true']"
 #    flag_nudg_netcdf="[flag to switch on netcdf format for nudging: 'false' (binary) or 'true' (netcdf)]"
+#    flag_hd="[flag to switch on hydrology in jsbach: 'false' (no hydrology) or 'true']"
 #    aero_micro_scheme="[aerosol microphysics scheme: 'M7' or 'salsa']" --> only if echam6-hammoz
 #    flag_ham="[flag to use HAM-specific files: 'false' or 'true']"
 #    flag_moz="[flag to use MOZ-specific files: 'false' or 'true']"
 #    flag_photolysis="[flag to use photolysis: 'false' or 'true']" --> only relevant for MOZ
 #    flag_fastj="[flag to use fastj: 'false' or 'true']" --> only relevant for MOZ
 #    trac_init_date="[date for tracer intialization: 'jan2003' or other date with similar pattern]" --> only relevant for MOZ
-#    flag_hd="[flag to switch on hydrology in jsbach: 'false' (no hydrology) or 'true']"
 #
 #----------------------------------------------------------------------------
 
@@ -211,7 +211,7 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
 
       # scenario is defined in the settings file:
 
-      possible_values=( "rcp[0-9][0-9]" "historical" ) # add additional patterns in case you want to use an 
+      possible_values=( "rcp[0-9][0-9]" "historic" ) # add additional patterns in case you want to use an 
                                           # alternate scenario
       case_insensitive=true
       if [ ! -z $scenario ] ; then
@@ -258,7 +258,7 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
          exit 1
       fi
 
-  #-- flag_hd
+ #-- flag_hd
 
       # flag_hd is automatically set prior to executing this script, based on lnudge:
       # if with_hd=.true.  --> flag_hd=true
@@ -441,16 +441,8 @@ cd $exp_dir
 
 #SF this should not be necessary, but is conserved for security (in case 'ln' is not GNU ln)
 #SF exclude the links to restart files
-#Restart_file = '/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control'
-#Restart_Model = 'restart_PPE_ENS_Control'
-#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
-find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" \
-               -and -not -name "flxatm*" \
-               -and -not -name "sstoce*" \
-               -and -not -name "hdrestart*" \
-     -exec \rm -f {} \;
 
-#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
+find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
 
 #--------
 # ECHAM6  
@@ -466,9 +458,21 @@ ln -sf  ${input_basepath}/echam6/rrtmg_sw.nc               rrtmg_sw.nc
 ln -sf  ${input_basepath}/echam6/rrtmg_lw.nc               rrtmg_lw.nc
 ln -sf  ${input_basepath}/echam6/ECHAM6_CldOptProps.nc     ECHAM6_CldOptProps.nc
 
+ln -sf ${input_basepath}/echam6/greenhouse_${scenario}.nc  greenhouse_gases.nc
 
-   #-- For pure atm setup:
-#if ! $this_model_flag_with_coupl ; then
+#---------
+# JS-BACH  
+#---------
+
+ln -sf  ${input_basepath}/echam6/jsbach/lctlib_nlct21.def_rev7624 lctlib.def
+ln -sf  ${input_basepath}/jsbach/${hres}/jsbach_${hres}${oceres}_${ntiles}tiles_5layers_2005.nc jsbach.nc
+
+if $flag_hd ; then
+
+    ln -sf  ${input_basepath}/jsbach/HD/hdpara.nc          hdpara.nc
+    ln -sf  ${input_basepath}/jsbach/HD/hdstart.nc         hdstart.nc
+
+fi
 
 #-----------------------------------------------------------------
 #-- Handle the restart file management in case of a faked restart
@@ -482,7 +486,7 @@ ln -sf  ${input_basepath}/echam6/ECHAM6_CldOptProps.nc     ECHAM6_CldOptProps.nc
 
 if $faked_restart ; then
 
-   parent_exp="PPE_PI_Control"
+   parent_exp="PPE_ENS_Control"
    parent_restart_dir=$(eval "echo $parent_restart_dir")
 
    echo "Reminder: you are using a faked restart setup, with:\n"
@@ -514,14 +518,13 @@ fi
    #                   `ln`, otherwise the original restart files will be overwritten at end of the
    #                   cycle.
 
+#--------------------------
+# Climatologic SST and SIC
+#--------------------------
 
-      #--------------------------
-      # Climatologic SST and SIC
-      #--------------------------
+ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsst_1979-2008_mean.nc unit.20
+ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsic_1979-2008_mean.nc unit.96
 
-ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsst_1870.nc unit.20
-ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsic_1870.nc unit.96
-#fi
 #----------------------------
 # Time-dep SST & SIC 
 #----------------------------
@@ -580,8 +583,7 @@ if $flag_CMIP5_ozon ; then  # ie io3=4
           ln -sf ${input_basepath}/echam6/${hres}/ozone/${hres}_ozone_CMIP5_${scenario_str}${year}.nc ozon${year}
 
        else # fake year-dep input for using the CMIP5 climatology
-          ozone_year_range="picontrol"
-          ln -sf ${input_basepath}/echam6/${hres}/ozone/${hres}_ozone_${ozone_year_range}.nc ozon${year}
+          ln -sf ${input_basepath}/echam6/${hres}/${hres}_ozone_CMIP5_1979-1988.nc ozon${year}
        fi
    done
 
@@ -613,8 +615,7 @@ if $flag_kinne_aerosols ; then
           scenario_str=`echo $scenario | tr '[:upper:]' '[:lower:]' `"_"
        fi
 
-       kinne_aero_fixed_year="1865"
-       ln -sf ${input_basepath}/echam6/${hres}/aero/${hres}_aeropt_kinne_sw_b14_fin_${scenario_str}${kinne_aero_fixed_year}.nc aero_fine_${year}.nc
+       ln -sf ${input_basepath}/echam6/${hres}/aero/${hres}_aeropt_kinne_sw_b14_fin_${scenario_str}${year}.nc aero_fine_${year}.nc
        ln -sf ${input_basepath}/echam6/${hres}/aero/${hres}_aeropt_kinne_sw_b14_coa.nc aero_coarse_${year}.nc
        ln -sf ${input_basepath}/echam6/${hres}/aero/${hres}_aeropt_kinne_lw_b16_coa.nc aero_farir_${year}.nc
 
@@ -633,16 +634,10 @@ if $flag_stenchikov_aerosols ; then
 
    for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
 
-       ln -sf /pf/b/b300002/inputfiles/echam6/${hres}/volcano_aerosols/strat_aerosol_sw_${hres}_1850-2014_mean.nc strat_aerosol_sw_${year}.nc
-       ln -sf /pf/b/b300002/inputfiles/echam6/${hres}/volcano_aerosols/strat_aerosol_ir_${hres}_1850-2014_mean.nc strat_aerosol_ir_${year}.nc
-#          ln -sf ${input_basepath}/echam6/${hres}/volcano_aerosols/strat_aerosol_sw_${hres}_${year}.nc strat_aerosol_sw_${year}.nc
-#          ln -sf ${input_basepath}/echam6/${hres}/volcano_aerosols/strat_aerosol_ir_${hres}_${year}.nc strat_aerosol_ir_${year}.nc
+       ln -sf ${input_basepath}/echam6/${hres}/volcano_aerosols/strat_aerosol_sw_${hres}_${year}.nc strat_aerosol_sw_${year}.nc
+       ln -sf ${input_basepath}/echam6/${hres}/volcano_aerosols/strat_aerosol_ir_${hres}_${year}.nc strat_aerosol_ir_${year}.nc
 
-      done
-#      ln -sf ${input_basepath}/echam6/${hres}/volcano_aerosols/strat_aerosol_sw_${hres}_1850.nc strat_aerosol_sw_1849.nc
-#      ln -sf ${input_basepath}/echam6/${hres}/volcano_aerosols/strat_aerosol_ir_${hres}_1850.nc strat_aerosol_ir_1849.nc
-      ln -sf /pf/b/b300002/inputfiles/echam6/${hres}/volcano_aerosols/strat_aerosol_sw_${hres}_1850-2014_mean.nc strat_aerosol_sw_1849.nc
-      ln -sf /pf/b/b300002/inputfiles/echam6/${hres}/volcano_aerosols/strat_aerosol_ir_${hres}_1850-2014_mean.nc strat_aerosol_ir_1849.nc
+   done
 
 fi
 
@@ -844,15 +839,6 @@ if $this_model_flag_with_hammoz ; then # echam6-hammoz specific
             ln -sf ${input_basepath}/hammoz/moz_FJX_spec.dat   FJX_spec.dat
             ln -sf ${input_basepath}/hammoz/moz_chem_Js.dat    chem_Js.dat
          fi
-
-      if $flag_time_dep_sol_irr ; then
-
-          for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
-              ln -sf ${input_basepath}/hammoz/photolysis/etfphot_${year}.nc etfphot_${year}.nc
-          done
-
-      fi
-
       fi
 
    fi
@@ -969,42 +955,6 @@ if $flag_nudg ; then
    done
 
 fi # end nudging
-
-
-#---------
-# JS-BACH  
-#---------
-
-jsbach_fixed_year="1850"
-
-
-   #-- main jsbach
-ln -sf  ${input_basepath}/jsbach/${hres}/jsbach_${hres}${oceres}_${ntiles}tiles_5layers_${jsbach_fixed_year}_dynveg.nc jsbach.nc
-
-ln -sf  ${input_basepath}/echam6/jsbach/lctlib_nlct21.def_rev7624 lctlib.def
-
-
-   #-- hydrology
-if $flag_hd ; then
-  ln -sf  ${input_basepath}/jsbach/HD/hdpara.nc             hdpara.nc
-  ln -sf  ${input_basepath}/jsbach/HD/hdstart.nc            hdstart.nc
-#  ln -sf  ${input_basepath}/jsbach/HD/rmp_${hres}_to_hd.nc  rmp_hd.nc
-fi
-
-   #-- Spitfire
-#ln -sf  ${input_basepath}/jsbach/${hres}/spitfire/a_nd_${hres}.nc                    a_nd_file.nc
-#ln -sf  ${input_basepath}/jsbach/${hres}/spitfire/LISOTD_HRMC_V2.2_${hres}.nc        lightning.nc
-#ln -sf  ${input_basepath}/jsbach/${hres}/spitfire/population_density_HYDE_${hres}.nc population_density.nc
-
-#infile_nitrogen="${input_basepath}/jsbach/${hres}/${hres}_ndepo_CMIP_NCAR_CCMI-1-0_gr_185001-185012-clim.nc"
-
-#for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
-
-#    ln -sf ${input_basepath}/jsbach/${hres}/New_Hampshire_LCC/hist/LUH_harvest_${hres}_${jsbach_fixed_year}.nc landuseHarvest.${year}.nc
-#    ln -sf ${input_basepath}/jsbach/${hres}/New_Hampshire_LCC/no_LUH_transitions_${hres}.nc landuseTransitions.${year}.nc
-
-#done
-
 
 #--------------------------------
 # Get back to previous directory

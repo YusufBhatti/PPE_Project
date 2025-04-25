@@ -1,4 +1,4 @@
-!>
+!i>
 !! @par Copyright
 !! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
 !! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
@@ -525,10 +525,10 @@ CONTAINS
           DO jk=1,klev
              jkb = klev+1-jk
              DO jl=1,kproma
-                od550aer3d(jl,jk,krow) = aer_tau_sw_vr(jl,jkb,9)
+!                od550aer3d(jl,jk,krow) = aer_tau_sw_vr(jl,jkb,9)
                 IF(jk == klev) THEN
-                   ec550aer_int(jl,krow)  = aer_tau_sw_vr(jl,jkb,9)
-                   abs550aer_int(jl,krow) = (1._wp - aer_piz_sw_vr(jl,jkb,9)) * aer_tau_sw_vr(jl,jkb,9)
+                   !ec550aer_int(jl,krow)  = aer_tau_sw_vr(jl,jkb,9)
+!                   abs550aer_int(jl,krow) = (1._wp - aer_piz_sw_vr(jl,jkb,9)) * aer_tau_sw_vr(jl,jkb,9)
                 END IF
              END DO
           END DO
