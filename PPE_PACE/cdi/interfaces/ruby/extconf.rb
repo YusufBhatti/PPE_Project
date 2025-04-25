@@ -1,4 +1,0 @@
-$INCFLAGS = "#{ENV['INCFLAGS']} #{$INCFLAGS}"
-$CFLAGS   = "#{ENV['CFLAGS']} #{$CFLAGS}"
-$LDFLAGS  = "#{ENV['LDFLAGS']} #{$LDFLAGS}"
-$LIBS     = "#{ENV['LIBS']} #{$LIBS}"
