@@ -1,0 +1,370 @@
+
+
+\subsection{Create a vertical Z-axis: {\tt zaxisCreate}}
+\index{zaxisCreate}
+\label{zaxisCreate}
+
+The function {\tt zaxisCreate} creates a vertical Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisCreate(INTEGER zaxistype, INTEGER size)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxistype\ }
+\item[{\tt zaxistype}]
+The type of the Z-axis, one of the set of predefined {\CDI} Z-axis types.
+                      The valid {\CDI} Z-axis types are {\tt ZAXIS\_GENERIC}, {\tt ZAXIS\_SURFACE},
+                      {\tt ZAXIS\_HYBRID}, {\tt ZAXIS\_SIGMA}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
+                      {\tt ZAXIS\_ISENTROPIC}, {\tt ZAXIS\_ALTITUDE}, {\tt ZAXIS\_MEANSEA}, {\tt ZAXIS\_TOA},
+                      {\tt ZAXIS\_SEA\_BOTTOM}, {\tt ZAXIS\_ATMOSPHERE}, {\tt ZAXIS\_CLOUD\_BASE},
+                      {\tt ZAXIS\_CLOUD\_TOP}, {\tt ZAXIS\_ISOTHERM\_ZERO}, {\tt ZAXIS\_SNOW},
+                      {\tt ZAXIS\_LAKE\_BOTTOM}, {\tt ZAXIS\_SEDIMENT\_BOTTOM}, {\tt ZAXIS\_SEDIMENT\_BOTTOM\_TA},
+                      {\tt ZAXIS\_SEDIMENT\_BOTTOM\_TW}, {\tt ZAXIS\_MIX\_LAYER},
+                      {\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
+\item[{\tt size}]
+Number of levels.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisCreate} returns an identifier to the Z-axis.
+
+
+\subsubsection*{Example}
+
+Here is an example using {\tt zaxisCreate} to create a pressure level Z-axis:
+
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    INCLUDE 'cdi.h'
+       ...
+    #define  nlev    5
+       ...
+    REAL*8 levs(nlev) = (/101300, 92500, 85000, 50000, 20000/)
+    INTEGER zaxisID
+       ...
+    zaxisID = zaxisCreate(ZAXIS_PRESSURE, nlev)
+    CALL zaxisDefLevels(zaxisID, levs)
+       ...
+\end{lstlisting}
+
+
+\subsection{Destroy a vertical Z-axis: {\tt zaxisDestroy}}
+\index{zaxisDestroy}
+\label{zaxisDestroy}
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDestroy(INTEGER zaxisID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the type of a Z-axis: {\tt zaxisInqType}}
+\index{zaxisInqType}
+\label{zaxisInqType}
+
+The function {\tt zaxisInqType} returns the type of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqType(INTEGER zaxisID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqType} returns the type of the Z-axis,
+one of the set of predefined {\CDI} Z-axis types.
+The valid {\CDI} Z-axis types are {\tt ZAXIS\_GENERIC}, {\tt ZAXIS\_SURFACE},
+{\tt ZAXIS\_HYBRID}, {\tt ZAXIS\_SIGMA}, {\tt ZAXIS\_PRESSURE}, {\tt ZAXIS\_HEIGHT},
+{\tt ZAXIS\_ISENTROPIC}, {\tt ZAXIS\_ALTITUDE}, {\tt ZAXIS\_MEANSEA}, {\tt ZAXIS\_TOA},
+{\tt ZAXIS\_SEA\_BOTTOM}, {\tt ZAXIS\_ATMOSPHERE}, {\tt ZAXIS\_CLOUD\_BASE},
+{\tt ZAXIS\_CLOUD\_TOP}, {\tt ZAXIS\_ISOTHERM\_ZERO}, {\tt ZAXIS\_SNOW},
+{\tt ZAXIS\_LAKE\_BOTTOM}, {\tt ZAXIS\_SEDIMENT\_BOTTOM}, {\tt ZAXIS\_SEDIMENT\_BOTTOM\_TA},
+{\tt ZAXIS\_SEDIMENT\_BOTTOM\_TW}, {\tt ZAXIS\_MIX\_LAYER},
+{\tt ZAXIS\_DEPTH\_BELOW\_SEA} and {\tt ZAXIS\_DEPTH\_BELOW\_LAND}.
+
+
+
+\subsection{Get the size of a Z-axis: {\tt zaxisInqSize}}
+\index{zaxisInqSize}
+\label{zaxisInqSize}
+
+The function {\tt zaxisInqSize} returns the size of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqSize(INTEGER zaxisID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqSize} returns the number of levels of a Z-axis.
+
+
+
+\subsection{Define the levels of a Z-axis: {\tt zaxisDefLevels}}
+\index{zaxisDefLevels}
+\label{zaxisDefLevels}
+
+The function {\tt zaxisDefLevels} defines the levels of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+\item[{\tt levels}]
+All levels of the Z-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get all levels of a Z-axis: {\tt zaxisInqLevels}}
+\index{zaxisInqLevels}
+\label{zaxisInqLevels}
+
+The function {\tt zaxisInqLevels} returns all levels of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+\item[{\tt levels}]
+Pointer to the location into which the levels are read.
+                    The caller must allocate space for the returned values.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqLevels} saves all levels to the parameter {\tt levels}.
+
+
+\subsection{Get one level of a Z-axis: {\tt zaxisInqLevel}}
+\index{zaxisInqLevel}
+\label{zaxisInqLevel}
+
+The function {\tt zaxisInqLevel} returns one level of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    REAL*8 FUNCTION zaxisInqLevel(INTEGER zaxisID, INTEGER levelID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+\item[{\tt levelID}]
+Level index (range: 0 to nlevel-1).
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqLevel} returns the level of a Z-axis.
+
+
+\subsection{Define the name of a Z-axis: {\tt zaxisDefName}}
+\index{zaxisDefName}
+\label{zaxisDefName}
+
+The function {\tt zaxisDefName} defines the name of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+\item[{\tt name}]
+Name of the Z-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the name of a Z-axis: {\tt zaxisInqName}}
+\index{zaxisInqName}
+\label{zaxisInqName}
+
+The function {\tt zaxisInqName} returns the name of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+\item[{\tt name}]
+Name of the Z-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqName} returns the name of the Z-axis to the parameter name.
+
+
+
+\subsection{Define the longname of a Z-axis: {\tt zaxisDefLongname}}
+\index{zaxisDefLongname}
+\label{zaxisDefLongname}
+
+The function {\tt zaxisDefLongname} defines the longname of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+\item[{\tt longname}]
+Longname of the Z-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the longname of a Z-axis: {\tt zaxisInqLongname}}
+\index{zaxisInqLongname}
+\label{zaxisInqLongname}
+
+The function {\tt zaxisInqLongname} returns the longname of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+\item[{\tt longname}]
+Longname of the Z-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqLongname} returns the longname of the Z-axis to the parameter longname.
+
+
+
+\subsection{Define the units of a Z-axis: {\tt zaxisDefUnits}}
+\index{zaxisDefUnits}
+\label{zaxisDefUnits}
+
+The function {\tt zaxisDefUnits} defines the units of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisDefUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+\item[{\tt units}]
+Units of the Z-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the units of a Z-axis: {\tt zaxisInqUnits}}
+\index{zaxisInqUnits}
+\label{zaxisInqUnits}
+
+The function {\tt zaxisInqUnits} returns the units of a Z-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE zaxisInqUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt zaxisID\ }
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}} or {\htmlref{\tt vlistInqVarZaxis}{vlistInqVarZaxis}}.
+\item[{\tt units}]
+Units of the Z-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt zaxisInqUnits} returns the units of the Z-axis to the parameter units.
+

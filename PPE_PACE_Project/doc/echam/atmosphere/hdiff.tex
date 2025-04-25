@@ -1,0 +1,75 @@
+\section{Horizontal diffusion\label{sec:hordif}}\label{c4}
+
+Unlike the other physical parameterizations which are computed in grid 
+point space, the horizontal diffusion can conveniently be formulated in 
+spectral space. Moreover, the treatment of horizontal diffusion differs 
+from that of the other processes in that it does not involve a physical 
+model of subgrid-scale processes, but rather a numerically convenient form 
+of scale selective diffusion with coefficients determined empirically to 
+ensure a realistic behavior of the resolved scales. As in many other 
+models, the horizontal diffusion tendency is expressed in the form of a 
+hyper-Laplacian,
+
+\begin{equation}
+\dnd{\chi}{t}=-(-1)^qK_{\chi}\nabla^{2q}\chi	
+\label{4.1}
+\end{equation}
+
+where $\chi$ is vorticity, divergence or temperature (no horizontal
+diffusion is applied to water components or trace constituents),
+$K_{\chi}$ is a constant diffusion coefficient for the respective
+variable, and $q > 0$ is an integer. The time rate of change of
+spectral component $\chi_{n}$ is given by
+
+\begin{equation}
+\dnd{\chi_{n}}{t}=-K_{\chi}\left \{n(n+1)a^{-2}\right\}^q\chi_{n}	
+\label{4.2}	
+\end{equation}
+
+where $a$ is the Earth's radius and $n$ is wavenumber. For
+convenience, $K_{\chi}$ can be replaced by the e-folding damping time
+$\tau$ of the highest resolvable wavenumber $n_{0}$
+
+\begin{equation}
+\tau(n_{0})\equiv\tau_{0}=K_{\chi}^{-1}\left\{n_{0}(n_{0}+1)a^{-2}
+	\right\}^{-q}
+	\label{4.3}
+\end{equation}
+
+so that \eref{4.2} can be expressed in terms of the order of the
+scheme, $2q$, and damping time $\tau_{0}$. The scale selectivity of
+the scheme increases with increasing $q$. Both damping time and order
+depend on the horizontal resolution. Furthermore, in order to avoid
+spurious wave reflection at the upper boundary of the model, the
+diffusion is enhanced in the upper layers by gradually decreasing the
+order of the scheme (Table \ref{t4.1}).
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{c@{\extracolsep\fill}cccc}\hline\hline
+\caption[Horizontal diffusion]{Damping time $\tau_{0}$ in hours (independent of model level) 
+and order, $2q$, of horizontal diffusion scheme applied at different model 
+levels}\\\hline\label{t4.1}
+\endfirsthead
+\caption[]{{\tt horizontal diffusion} --- continued}\\\hline
+\endhead
+\hline\multicolumn{5}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Level&T31            & T63      & T127                     & T255\\
+&($\tau_{0}=12$) &($\tau_{0}=7$) & ($\tau_{0}=1.5$)      &($\tau_{0}=0.5$)\\ 
+\hline
+\multicolumn{5}{c}{version with 47 levels}\\\hline
+1--4 & 2 & 2 & --- & --- \\
+5--7 & 4 & 4 & --- & --- \\
+8--9 & 6 & 6 & --- & --- \\
+10--11 & 8 & 8 & --- & ---\\
+12--47 & 10 & 8 & --- & ---\\\hline
+\multicolumn{5}{c}{version with 95 levels}\\\hline
+1--10 & --- & 2 & 2 & 2 \\
+11--20 & --- & 4 & 4 & 4 \\
+21--25 & --- & 6 & 4 & 4 \\
+26--95 & --- & 8 & 6 & 6\\\hline\hline
+\end{longtable}

@@ -1,0 +1,119 @@
+# HAMMOZ emission matrix
+#
+# This is an example emi_spec file for echam-hammoz with HAM switched on, with:
+#   * GFAS biomassburning
+#   * ACCMIP interpolated for most of the other sectors that are read from files
+#   * prescribed SOA
+#   * transient conditions
+#
+# See all references and details about the HAMMOZ emission dataset on redmine:
+# https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_References#HAMMOZ-emissions
+#
+# Authors:
+# Martin Schultz and Sabine Schroeder, FZ Juelich
+# Grazia Frontoso, C2SM / ETH Zurich
+# Sylvaine Ferrachat (cleanup), ETH Zurich
+# Colombe Siegenthaler - Le Drian, C2SM / ETH Zurich
+#
+# 1. Sectors
+# Notes:
+#
+#  a) format is: EF_TYPE, parameters
+#      - for EF_FILE (reading from file),            paramaters are: filename, variable name, options, emission type
+#      - for EF_MODULE (using a module in the code), parameters are: emission type (mandatory)
+#      - for EF_VALUE (using a constant),            parameters are: a constant value, emission type
+#      - for EF_INACTIVE (sector switch off),        parameters are: none 
+#
+#  b) %C0 will be replaced by species name to identify the correct file
+#
+#  c) %T0 will be replaced by the horizontal resolution
+#
+#  d) %Y4 will be replaced by the actual year of the model run
+#
+#  e) the path to files is prepended by the value of 'emi_basepath' (which is set in the SUBMODELCTL namelist)
+#     unless it starts with '/' (absolute path).
+#  f) %R0 will be replaced by "emi_scenario" of namelist "submodel"
+#
+#  g) Valid tags for emission type are:
+#      - surface  (mass flux will be added to pxtems array)
+#      - level50m (mass flux will be added to 2nd lowest model level)
+#      - volume   (mass flux will be defined as 3D field and added to pxtte at all levels)
+#      - fire     (specific handling of vertical mass flux distribution for fire emissions)
+# 
+#  h) for more infos, please read the Boundary Condition Scheme manual, available on redmine here:
+#      https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_Technical_Documentation#ECHAM
+#
+
+# Agricultural:
+AGR=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_agr,  EF_LONLAT,  surface
+# Agricultural waste burning:
+AWB=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_awb,  EF_LONLAT,  surface
+# Aircraft:
+AIRC=EF_FILE,     accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_aircraft_%Y4_%T0.nc,      emiss_air,  EF_3D,      volume
+# Biogenic:
+BIOGENIC=EF_FILE, aerocom_II/%T0/2000/emiss_aerocom_%C0_monthly_2000_%T0.nc, emiss_biogenic,  EF_LONLAT, EF_IGNOREYEAR, surface
+# Domestic:
+DOM=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_dom,  EF_LONLAT,  surface
+# Energy:
+ENE=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ene,  EF_LONLAT,  level50m
+# Fire:
+FIRE=EF_FILE,    gfas/%T0/daily/%Y4/emiss_GFAS_%C0_wildfire_%Y4_%T0.nc,emiss_fire,  EF_LONLAT,  fire
+# Industry:
+IND=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_ind,  EF_LONLAT,  surface
+# Ships:
+SHIPS=EF_FILE,    accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_ships_%Y4_%T0.nc,         emiss_shp,  EF_LONLAT,  level50m
+# Solvent:
+SLV=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_slv,  EF_LONLAT,  surface
+# Terrestrial:
+TERR=EF_FILE,     aerocom_II/%T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc, DMS_terr,   EF_LONLAT, EF_IGNOREYEAR, surface
+# Transport:
+TRA=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_tra,  EF_LONLAT,  surface
+# Waste:
+WST=EF_FILE,      accmip_interpolated/%T0/%Y4/accmip_interpolated_emissions_%R0_%C0_anthropogenic_%Y4_%T0.nc, emiss_wst,  EF_LONLAT,  surface
+
+# Dust:
+DUST=EF_MODULE,    surface
+# Oceanic: 
+OCEANI=EF_MODULE,  surface
+# Sea salt:
+SEASALT=EF_MODULE, surface
+# Volcanic (continuous):
+VOLCC=EF_MODULE,   volume
+# Volcanic (explosive):
+VOLCE=EF_MODULE,   volume
+
+#
+# 2. Species-sector-matrix
+#
+# Values in this matrix are interpreted as a scale factor
+# Use 0 to switch off emissions usually present
+# Use a minus sign (-) to indicate a missing sector for a specific species
+# You can enter decimal values here, but the default is to use 1 or zero to make the table look less cluttered
+# The MATRIX keyword is mandatory
+#
+# Notes:
+# (1) Units for DMS and SO2 in the input files need to be "Kg m-2 s-1".
+# (2) Diagnostics ("_emi") for SO2 emissions contains the fraction that is emitted as SO4.
+#
+
+MATRIX
+  SPEC   AGR AWB AIRC BIOGENIC DOM ENE FIRE IND SHIPS SLV TERR TRA WST DUST OCEANI SEASALT VOLCE VOLCC
+  BC      -   1    1     -      1   1  3.4   1    1    -   -    1   1  -     -      -       -     -
+  DMS     -   -    -     -      -   -  3.4   -    -    -   1    -   -  -     1      -       -     -
+  DU      -   -    -     -      -   -   -    -    -    -   -    -   -  1     -      -       -     -
+  OC      -   1    -     1      1   1  3.4   1    1    -   -    1   1  -     -      -       -     -	
+  SO2     -   1    -     -      1   1  3.4   1    1    -   -    1   1  -     -      -       1     1	
+  SS      -   -    -     -      -   -   -    -    -    -   -    -   -  -     -      1       -     -
+ 
+# 2.b translation table for emission matrix
+#
+# 1. column: species name in emission matrix
+# 2. column: species name in filename
+# 3. column: list of sectors which the alias name should be applied to
+
+ALIAS
+# HAMMOZ_name       | species_in_filename            | apply_to_sectors (default: all)
+BC                  bc                               FIRE
+DMS                 c2h6s                            FIRE
+OC                  oc                               FIRE
+SO2                 so2                              FIRE

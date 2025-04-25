@@ -1,0 +1,118 @@
+# AEROCOM_II emission matrix, 2013.02.18
+#
+# This is an example of an emi_spec file for echam-hammoz with MOZ switched on
+# See all references and details about the AEROCOM_II emission dataset on redmine:
+# https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_References#AEROCOM_II-emissions
+#
+# Authors:
+# Martin Schultz and Sabine Schroeder, FZ Juelich
+# Grazia Frontoso, C2SM / ETH Zurich
+# Sylvaine Ferrachat (cleanup), ETH Zurich
+#
+# 1. Sectors
+# Notes:
+#
+#  a) %C0 will be replaced by species name to identify the correct file
+#
+#  b) %T0 will be replaced by the horizontal resolution
+#
+#  c) %L0 will be replaced by the vertical resolution
+#
+#  d) format is: EF_TYPE, parameters
+#      - for EF_FILE (reading from file),            paramaters are: filename, variable name, options, emission type
+#      - for EF_MODULE (using a module in the code), parameters are: emission type (mandatory)
+#      - for EF_VALUE (using a constant),            parameters are: a constant value, emission type
+#      - for EF_INACTIVE (sector switch off),        parameters are: none 
+#
+#
+#  f) Valid tags for emission type are:
+#      - surface  (mass flux will be added to pxtems array)
+#      - level50m (mass flux will be added to 2nd lowest model level)
+#      - volume   (mass flux will be defined as 3D field and added to pxtte at all levels)
+#      - fire     (specific handling of vertical mass flux distribution for fire emissions)
+# 
+#  g) for more infos, please read the Boundary Condition Scheme manual, available on redmine here:
+#      https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_Technical_Documentation#ECHAM
+#
+
+# Agricultural:
+AGR=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_agr,      EF_LONLAT, EF_IGNOREYEAR, surface
+# Agricultural waste burning:
+AWB=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_awb,      EF_LONLAT, EF_IGNOREYEAR, surface
+# Aircraft:
+AIRC=EF_FILE,     %T0/2000/emiss_aerocom_II_%C0_aircraft_2000_%T0.nc,      emiss_air,      EF_3D,     EF_IGNOREYEAR, EF_TIMEOFFSET=-14.0, volume
+# Domestic:
+DOM=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_dom,      EF_LONLAT, EF_IGNOREYEAR, surface
+# Energy:
+ENE=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_ene,      EF_LONLAT, EF_IGNOREYEAR, level50m
+# Forest fire:
+FFIRE=EF_FILE,    %T0/2000/emiss_aerocom_II_%C0_wildfire_2000_%T0.nc,      emiss_ffire,    EF_LONLAT, EF_IGNOREYEAR, EF_TIMEOFFSET=-14.0, fire
+# Grass fire:
+GFIRE=EF_FILE,    %T0/2000/emiss_aerocom_II_%C0_wildfire_2000_%T0.nc,      emiss_gfire,    EF_LONLAT, EF_IGNOREYEAR, EF_TIMEOFFSET=-14.0, fire
+# Industry:
+IND=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_ind,      EF_LONLAT, EF_IGNOREYEAR, surface
+# Ships:
+SHIPS=EF_FILE,    %T0/2000/emiss_aerocom_II_%C0_ships_2000_%T0.nc,         emiss_shp,      EF_LONLAT, EF_IGNOREYEAR, level50m
+# Solvent:
+SLV=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_slv,      EF_LONLAT, EF_IGNOREYEAR, surface
+# Terrestrial:
+TERR=EF_FILE,     %T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc,               DMS_terr,       EF_LONLAT, EF_IGNOREYEAR, surface
+# Transport:
+TRA=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_tra,      EF_LONLAT, EF_IGNOREYEAR, surface
+# Waste:
+WST=EF_FILE,      %T0/2000/emiss_aerocom_II_%C0_anthropogenic_2000_%T0.nc, emiss_wst,      EF_LONLAT, EF_IGNOREYEAR, surface
+
+# Biogenic:
+BIOGENIC=EF_MODULE, surface
+# Dust:
+DUST=EF_MODULE,    surface
+# Oceanic: 
+OCEANI=EF_MODULE,  surface
+# Sea salt:
+SEASALT=EF_MODULE, surface
+# Volcanic (continuous):
+VOLCC=EF_MODULE,   volume
+# Volcanic (explosive):
+VOLCE=EF_MODULE,   volume
+
+#
+# 2. Species-sector-matrix
+#
+# Values in this matrix are interpreted as a scale factor
+# Use 0 to switch off emissions usually present
+# Use a minus sign (-) to indicate a missing sector for a specific species
+# You can enter decimal values here, but the default is to use 1 or zero to make the table look less cluttered
+# The MATRIX keyword is mandatory
+#
+# Notes:
+# (1) Units for DMS and SO2 in the input files need to be "Kg m-2 s-1".
+# (2) Diagnostics ("_emi") for SO2 emissions contains the fraction that is emitted as SO4.
+# (3) ** still need to clarify "TERR" emissions for NO, CO, CH4 -- are these "BIOGENIC" and dealt with in MEGAN?
+#
+
+MATRIX
+  SPEC   AGR AWB AIRC BIOGENIC DOM ENE FFIRE GFIRE IND SHIPS SLV TERR TRA WST DUST OCEANI SEASALT VOLCC VOLCE 
+  BC       -   1    1    -      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  DMS      -   -    -    -      -   -   -     -     -    -    -   1    -   -   -    1      -       -     -    
+  DU       -   -    -    -      -   -   -     -     -    -    -   -    -   -   1    -      -       -     -    
+  OC       -   1    -    -      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  SO2      -   1    -    -      1   1   1     1     1    1    -   -    1   1   -    -      -       1     1    
+  SS       -   -    -    -      -   -   -     -     -    -    -   -    -   -   -    -      1       -     -   
+  BENZ     1   1    -    -      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -
+  BIGALK   1   1    -    -      1   1   1     1     1    -    -   -    1   1   -    -      -       -     -    
+  C10H16   -   -    -    1      -   -   1     1     -    -    -   -    -   -   -    -      -       -     -    
+  C2H4     1   1    -    0      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  C2H6     1   1    -    0      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  C3H6     1   1    -    0      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  C3H8     1   1    -    -      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  CH2O     1   1    -    0      1   1   1     1     1    -    -   -    1   1   -    -      -       -     -    
+  CH3CHO   1   1    -    0      1   1   1     1     1    -    -   -    1   1   -    -      -       -     -    
+  CH3COCH3 1   1    -    0      1   1   1     1     1    -    1   -    1   1   -    -      -       -     -    
+  CH3OH    1   1    -    0      1   1   1     1     1    -    1   -    -   1   -    -      -       -     -    
+  CH4      1   1    -    -      1   1   1     1     0    1    -   -    1   1   -    -      -       -     -    
+  CO       1   1    -    0      1   1   1     1     1    1    1   -    1   1   -    -      -       -     -    
+  ISOP     -   -    -    1      -   -   1     1     -    -    -   -    -   -   -    -      -       -     -    
+  NO       1   1    1    -      1   1   1     1     1    1    -   -    1   1   -    -      -       -     -    
+  NO2      -   -    -    -      -   -   1     1     -    -    -   -    -   -   -    -      -       -     -    
+  TOL      1   1    -    -      1   1   1     1     1    1    1   -    1   1   -    -      -       -     -  
+  XYL      1   1    -    -      1   1   1     1     1    1    1   -    1   1   -    -      -       -     -

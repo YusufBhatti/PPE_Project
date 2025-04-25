@@ -1,0 +1,113 @@
+\section[cr2009\_03\_31\_rjs: Debug stream]{cr2014\_03\_31\_rjs: Debug stream}\label{cr20090331}
+
+The debug stream {\tt \_debugs}
+allows to write two-- and three--dimensional real grid--point 
+fields on either full or half levels into a stream at any place in the
+\echam{} program environment  
+without
+defining that stream explicitly.
+In order to enable the stream, you have to set\newline 
+{\tt LDEBUGS=.TRUE.} !default: {\tt .FALSE.}\newline
+in the {\tt RUNCTL} name list. The frequency at which a stream 
+{\tt \_debugs} will be written can be specified in an extra namelist group
+{\tt DEBUGSCTL} by setting the {\tt putdebug\_stream} variable. 
+Example:\newline
+\begin{lstlisting}
+&DEBUGSCTL
+  putdebug_stream = 1,'steps','first',0
+/
+\end{lstlisting}
+prints the debug stream at every time step. The default is:\newline
+{\tt putdebug\_stream = 6,'hours','first',0}. 
+
+The debug stream contains 14~predefined two--, and 14~predefined
+three--dimensional 
+real grid--point variables on full model levels (layer centres), and
+6~three--dimensional grid--point variables on half levels (layer interfaces)
+named
+{\tt zdf01, $\dots$, zdf14, ddf01, $\dots$, ddf14,} and {\tt ddfh01, $\dots$,
+ddfh06},  
+respectively. They can be set at any place in the code as any other
+two-- or three--dimensional grid--point variable. They are shaped by the {\tt 
+nproma} 
+related mapping procedure ${\cal T}^{(nproma)}_g$ in the respective code pieces. 
+
+Additional variables in the debug stream can be defined by requesting
+them in the {\tt DEBUGSCTL} name--list group. 
+Set {\tt nzdf = nz}, {\tt nddf = nd}, or {\tt nddfh = nh} to the
+number of {\tt nz}, {\tt nd}, or {\tt nh} {\it additional}
+two--dimensional variables ({\tt nz}), or three--dimensional variables either 
+on full levels (layer
+centres, {\tt nd}), or half levels (layer interfaces, {\tt nh}), respectively. 
+This will create the additional
+variables {\tt vzdf[0]1,~$\dots$,~vzdf\{nz\}}, {\tt
+  vddf[0]1,~$\dots$,~vddf\{nd\}}, and {\tt vddfh[0]1,~$\dots$,~vddfh\{nh\}} 
+in the debugs stream, respectively. In each variable name, 
+there are as many leading zeros as
+needed to have 
+the same number of digits as {\tt nz}, {\tt nd}, or {\tt nh} have,
+respectively. The default values are {\tt nz=nd=nh=0}.
+
+In order to set the variables of the debug stream inside \echam,
+always use the {\tt ldebugs} switch together with the debugs module itself:
+
+\begin{lstlisting}
+USE mo_control, ONLY: ldebugs
+USE mo_debugs
+\end{lstlisting}
+
+Then, include the setting of the debug--stream variables in an
+if--clause {\tt if(ldebugs)}. When you switch off the debug stream,
+this prevents \echam{} to crash because of the use of undefined
+variables. Be aware that the last dimension of the variable is the
+block index that is called {\tt krow} or {\tt jrow} depending on where
+you are in \echam. 
+
+The additional variables {\tt vzdf..}, {\tt vddf..}, and {\tt vddfh..}
+can be accessed by pointers directly. The {\tt nz} variables {\tt
+  vzdf} can be accessed by {\tt pvzdf(1:nz)\%v}, the {\tt nd}
+variables {\tt vddf} by {\tt pvddf(1:nz)\%v}, and the {\tt nh}
+variables {\tt vddfh} by {\tt pvddfh(1:nz)\%v}. For the following
+example, the name--list group {\tt debugsctl} was set to
+
+\begin{lstlisting}
+&debugsctl
+  putdebug_stream = 1, 'steps', 'first', 0
+  nddf=1
+  nddfh=3
+  nzdf=10
+/
+\end{lstlisting}
+
+This means that one additional 3--d variable, three additional
+3d--variables for values at the layer interfaces, and 10 additional
+2--d variables are created. Only the names of the 2--d variables 1 to
+9 contain leading zeros: {\tt vzdf01, vzdf02, $\dots$, vzdf09, vzdf10}. 
+The variables can be set by the following
+piece of code:
+
+\begin{lstlisting}
+USE mo_control, ONLY: ldebugs
+USE mo_debugs
+...
+IF (ldebugs) THEN
+  ddf01(1:kproma,1:klev,krow)=zaod_sw(1:kproma,1:klev,10)
+  zdf05(1:kproma,krow)=alake(jl,krow)
+  ddfh01(1:nproma,:,krow)=aphm1(1:nproma,:)
+  pvddf(1)%v(1:nproma,:,krow)=apm1(1:nproma,:)
+  pvddfh(3)%v(1:nproma,:,krow)=aphm1(1:nproma,:)
+  pvzdf(2)%v(1:nproma,krow)=tm1(1:nproma,nlev,krow)
+END IF
+\end{lstlisting}
+
+This writes the 10th element of the 4--d variable {\tt zaod\_sw} which
+is in fact a 3--d variable in longitude, levels, and latitude into the
+3--d variable {\tt ddf01} and {\tt alake} into the 2--d 
+variable {\tt zdf05}. {\tt aphm1} is
+written onto {\tt ddfh01} that can accommodate variables with values
+at layer interfaces. In the following three lines, values are written
+to the 1st, 3rd, and 2nd additional variables {\tt vddf1}, {\tt
+  vddfh3}, and {\tt vzdf02}, respectively. Only the name of the last
+variable contains a leading zero because 10 additional 2--d variables
+were required by ${\tt nzdf}=10$ whereas the number of the additional
+variables for all others is a one--digit number.

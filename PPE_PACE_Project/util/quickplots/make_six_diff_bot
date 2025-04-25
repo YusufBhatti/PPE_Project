@@ -1,0 +1,34 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+AEXP=$2
+#
+BEXP=$3
+#
+PRINTERC=$4
+
+echo QUELLE path $QUELLE
+
+##---------------ATM-------------------------
+
+#
+prefix=bot_${TYP}_${AEXP}_${BEXP}_
+afiles=$(ls  ${prefix}*.eps )
+
+#
+${QUELLE}/sixplot_latex.sh BOT_${TYP}_${AEXP}_${BEXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv BOT_${TYP}_${AEXP}_${BEXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname BOT_${TYP}_${AEXP}_${BEXP}.ps
+else
+lpr -P${PRINTERC} -o sides=one-sided BOT_${TYP}_${AEXP}_${BEXP}.ps 
+fi
+
+rm   BOT_${TYP}_${AEXP}_${BEXP}.aux  BOT_${TYP}_${AEXP}_${BEXP}.dvi  BOT_${TYP}_${AEXP}_${BEXP}.log
+exit

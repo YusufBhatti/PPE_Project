@@ -1,0 +1,39 @@
+\subsection{The JSBACH Namelists \texttt{namelist.jsbach}} \label{sec:input_namelist.jsbach}
+%---------------------------------------------
+\hypertarget{sec:input_namelist.jsbach}
+In our standard setup the JSBACH namelist file \texttt{namelist.jsbach} is generated as a here document by the run script. This assures that the namelists are up-to-date and the JSBACH configuration matches the configurations of the other Earth System component models, if running in a coupled configuration.
+The JSBACH namelist file includes several independent Fortran namelists.
+\begin{description}
+  \item[\hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl}] defines the basic settings of a JSBACH simulation. The namelist includes parameters to switch on or off JSBACH modules, and controls IO.
+  \item[\hyperlink{apdx:albedo_ctl}{\tt albedo\_ctl}] defines parameters that are used in the albedo scheme
+  \item[\hyperlink{apdx:bethy_ctl}{\tt bethy\_ctl}] controls the photosynthesis (BETHY) module
+  \item[\hyperlink{apdx:cbalance_ctl}{\tt cbalance\_ctl}] controls the carbon modules
+  \item[\hyperlink{apdx:cbal_parameters_ctl}{\tt cbal\_parameters\_ctl}] defines parameters of the carbon module
+  \item[\hyperlink{apdx:climbuf_ctl}{\tt climbuf\_ctl}] defines parameters for multi-year climate variable calculation
+  \item[\hyperlink{apdx:disturbance_ctl}{\tt disturbance\_ctl}] controls the disturbance modules, i.e.~fire and windthrow calculations
+  \item[\hyperlink{apdx:dynveg_ctl}{\tt dynveg\_ctl}] controls the dynamic vegetation
+  \item[\hyperlink{apdx:fire_jsbach_ctl}{\tt fire\_jsbach\_ctl}] defines parameters for the 'jsbach' fire scheme
+  \item[\hyperlink{apdx:soil_ctl}{\tt soil\_ctl}] defines parameters used in the soil module
+  \item[\hyperlink{apdx:windbreak_jsbach_ctl}{\tt windbreak\_jsbach\_ctl}] defines parameters for the 'jsbach' windthrow scheme
+\end{description}
+
+The hydrology module (HD model) is currently not included in JSBACH. It is active only in runs with ECHAM6. As soil hydrology and river routing is strongly linked to the land surface it makes sense to document the module within the JSBACH documentation.
+\begin{description}
+  \item[\hyperlink{apdx:hydrology_ctl}{\tt hydrology\_ctl}] controls the hydrology module
+  \item[\hyperlink{apdx:hdalone_ctl}{\tt hdalone\_ctl}] is a namelist needed for stand-alone HD model simulations
+\end{description}
+
+The following namelists are used only in JSBACH stand-alone runs.
+\begin{description}
+  \item[\hyperlink{apdx:jsbalone_ctl}{\tt jsbalone\_ctl}] controls the flow of the JSBACH stand-alone experiment. In a coupled JSBACH/ECHAM run these parameters are defined in the ECHAM namelist {\tt runctl}.
+  \item[\hyperlink{apdx:jsbalone_parctl}{\tt jsbalone\_parctl}] corresponds to the ECHAM namelist {\tt parctl}. It defines parameters for parallelization.
+  \item[\hyperlink{apdx:forcing_ctl}{\tt forcing\_ctl}] defines the type and frequency of the atmospheric forcing 
+  \item[\hyperlink{apdx:jsbgrid_ctl}{\tt jsbgrid\_ctl}] includes parameters to specify the model grid and parallelization issues
+\end{description}
+
+The CBALANCE offline model again has a special namelist. 
+\begin{description}
+  \item[\hyperlink{apdx:cbalone_ctl}{\tt cbalone\_ctl}] specifies a CBALANCE experiment. It corresponds to {\tt runctl} of JSBACH/ECHAM or {\tt jsbalone\_ctl} of JSBACH stand-alone experiments.
+\end{description}
+
+The tables in the following subsections list the parameters of the different JSBACH namelists. Each parameter is listed in alphabetical order and is briefly described. Besides, the Fortran type and the default values are given.

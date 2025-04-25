@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+#  Postprocessing of ECHAM
+#
+#  Merge and store files by year
+#
+
+DEBUG_LEVEL=%{DEBUG_LEVEL|default(0)}
+
+# Bail out on error and unset variables
+trap 'echo Error at line $LINENO${BASH_COMMAND:+: $BASH_COMMAND} >&2' ERR
+set -eu
+# Print command info
+[ $DEBUG_LEVEL -ge 2 ] && set -x
+
+# Template variables to be filled by echam (subjob)
+#DPATH
+#EXP
+#DAY
+#MONTH
+#YEAR
+
+# Template variables to be filled by mkexp
+data=%{DATA_DIR}
+
+#
+# Actual process chain
+#
+
+# Save data for full years only
+#
+if [ $MONTH -eq 12 ]
+then
+
+    # Show time stamp
+    echo "`date`: storing raw output data by year"
+
+    # Change to working directory
+    cd $DPATH
+
+    # Create output directory if needed
+    mkdir -p $data
+
+    # Probe existing output files
+    filetags=$(ls ${EXP}_${YEAR}??.??_*.codes |
+               sed "s/^${EXP}_${YEAR}..\..._//;s/\.codes\$//" |
+               sort -u)
+
+    # Concatenate output files per year
+    # Make sure that code files are available with data
+    # Remove source files when possible
+    for tag in $filetags; do
+
+        cat ${EXP}_${YEAR}??.??_${tag} > $data/${EXP}_${tag}_${YEAR}.grb
+        rm -f ${EXP}_${YEAR}??.??_${tag}
+
+        code_src=$(ls ${EXP}_${YEAR}??.??_${tag}.codes | head -1)
+        code_dst=$data/${EXP}_${tag}.codes
+        [ -e $code_dst ] || mv $code_src $code_dst
+        rm -f ${EXP}_${YEAR}??.??_${tag}.codes
+
+    done
+
+    # Define the name of the tar file which will contain the restart files
+    restart_tar_file=$data/${EXP}_restart${YEAR}${MONTH}.tar
+
+    # Always 'tar' files; overhead is small and so process is always the same
+    if tar cvf $restart_tar_file restart_${EXP}_${YEAR}*_*.nc
+    then
+        echo "Restart tar file '${restart_tar_file}' created"
+    else
+        exec >&2
+        echo "Creation of restart tar file ${restart_tar_file} failed"
+        exit 1
+    fi
+
+    # Show time stamp
+    echo "`date`: finished"
+
+fi # 
+

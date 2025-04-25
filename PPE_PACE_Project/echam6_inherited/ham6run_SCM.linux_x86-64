@@ -1,0 +1,228 @@
+#!/bin/bash
+#
+####################################################################################################
+#
+# ECHAM6 run-script for use on x86-64 Linux workstations with MPI
+#
+#-----------------------------------------------------------------------------
+#
+# experiment identifier: your given experimenter-id according to
+# http://svn.zmaw.de/dokuwiki/doku.php?id=listofids:list_of_experimenter_ids
+# followed by a number for the current experiment
+#
+EXP_USER=$(id -un)
+#
+EXP="mbe9999"  # experiment identifier
+#
+RERUN=.false.  # Rerun switch; .false. for initial run, .true. else
+#
+NPROMA=48      # Blocking length, should be large for vector architecture
+#
+NPROCA=1
+NPROCB=1
+NPROCIO=0
+IOMODE=2
+(( NCPUS = NPROCA + NPROCB + NPROCIO ))
+#
+# take care: OpenMP threads must be set before in the LoadLeveler (ConsumableCpus(4))
+#            and the following OMP_NUM_THREADS
+# NTHREADS=4
+#
+RES=63           # spectral truncation of run
+LEVELS=47        # number of levels
+OCERES=GR15      # ocean resolution used for the land-sea mask
+#
+#-----------------------------------------------------------------------------
+#-- Paths and directories ----------------------------------------------------
+#
+WORK_DIR=/scratch/local1/${EXP_USER}/echam-dev
+#
+# absolute path to directory with job scripts:
+SCRIPTDIR=$WORK_DIR/run
+#
+# absolute path to directory with plenty of space:
+EXPDIR=/scratch/local1/${EXP_USER}/experiments/mbe9999
+#
+# absolute path to directory with initial data:
+INI_DATA=/pool/data/ECHAM6/input/r0002
+INIECH=/pool/data/ECHAM6/input/r0002/T${RES}
+#
+# absolute path to directory with SST and sea ice files:
+BOUNDARY_DATA=${INI_DATA}/T${RES}/amip
+#
+# absolute path to directory with initial data for JSBACH:
+INIJSB=/pool/data/JSBACH/T${RES}
+INIJSBTRANS=/pool/data/JSBACH/T${RES}/New_Hampshire_LCC/hist
+#
+# absolute path to model binary, including the executable
+MODEL=${WORK_DIR}/bin/echam6
+#
+#-----------------------------------------------------------------------------
+#
+# the directory for the experiment will be created, if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+#
+#-----------------------------------------------------------------------------
+#
+cd $EXPDIR           #  output and rerun files are written into $EXPDIR
+
+#-----------------------------------------------------------------------------
+#
+# specification of files for ECHAM
+#
+#-----------------------------------------------------------------------------
+#
+rm -f unit.?? sst* ice* lctlib.def jsbach.nc rrtmg_lw.nc
+rm -f ECHAM6_CldOptProps.nc aero* swflux* ozon* greenhouse_gases.nc strat_aerosol_*
+rm -f landuse*
+#
+ln -s  ${INIECH}/T${RES}L${LEVELS}_jan_spec.nc                       unit.23
+ln -s  ${INIECH}/T${RES}${OCERES}_jan_surf.nc                        unit.24
+#
+ln -s  ${INIECH}/T${RES}${OCERES}_VLTCLIM.nc                         unit.90
+ln -s  ${INIECH}/T${RES}${OCERES}_VGRATCLIM.nc                       unit.91
+ln -s  ${INIECH}/T${RES}_TSLCLIM2.nc                                 unit.92
+#
+ln -s  ${INI_DATA}/rrtmg_lw.nc                                       rrtmg_lw.nc
+ln -s  ${INI_DATA}/rrtmg_sw.nc                                       rrtmg_sw.nc
+ln -s  ${INI_DATA}/ECHAM6_CldOptProps.nc                             ECHAM6_CldOptProps.nc
+##
+#ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sst_clim.nc                    unit.20
+#ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sic_clim.nc                    unit.96
+##
+year=1975
+while [[ $year -lt 1980 ]]
+do
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sst_${year}.nc                  sst${year}
+ln -s  ${BOUNDARY_DATA}/T${RES}_amip2sic_${year}.nc                  ice${year}
+# aerosols
+ln -s ${INIECH}/aero/T${RES}_aeropt_kinne_sw_b14_coa.nc             aero_coarse_${year}.nc
+ln -s ${INIECH}/aero/T${RES}_aeropt_kinne_sw_b14_fin_${year}.nc     aero_fine_${year}.nc
+ln -s ${INIECH}/aero/T${RES}_aeropt_kinne_lw_b16_coa.nc             aero_farir_${year}.nc
+# ozone
+ln -s ${INIECH}/ozone/T${RES}_ozone_CMIP5_${year}.nc ozon${year}
+# solar irradiance
+ln -s ${INI_DATA}/solar_irradiance/swflux_14band_${year}.nc          swflux_${year}.nc
+# volcanic aerosols
+ln -s ${INIECH}/volcano_aerosols/strat_aerosol_ir_T${RES}_${year}.nc strat_aerosol_ir_${year}.nc
+ln -s ${INIECH}/volcano_aerosols/strat_aerosol_sw_T${RES}_${year}.nc strat_aerosol_sw_${year}.nc
+# jsbach transitions
+ln -s ${INIJSBTRANS}/LUH_harvest_T${RES}_${year}.nc                  landuseHarvest.${year}.nc
+ln -s ${INIJSBTRANS}/LUH_transitions_T${RES}_${year}.nc              landuseTransitions.${year}.nc
+ (( year = year+1 ))
+done
+#
+# possible forcing files for SCM (examples only)
+#
+cp /pool/data/ECHAM6/SCM/* .
+#
+# greenhouse gases
+#
+ln -s ${INI_DATA}/greenhouse_rcp45.nc                                greenhouse_gases.nc
+#
+#-----------------------------------------------------------------------------
+#
+# specification of files for JSBACH
+# jsbach.nc has to fit the first year of transitions (e.g. 1976)
+#
+#-----------------------------------------------------------------------------
+ln -s  /pool/data/ECHAM6/jsbach/lctlib_nlct21.def_rev6597            lctlib.def
+#ln -s  ${INIJSB}/jsbach_T${RES}${OCERES}_fractional_11tiles_5layers_1976.nc  jsbach.nc
+ln -s  ${INIJSB}/jsbach_T${RES}${OCERES}_11tiles_5layers_1976.nc  jsbach.nc
+#-----------------------------------------------------------------------------
+#
+# ECHAM6 namelist
+#
+cat > namelist.echam << EOF
+&parctl
+  nproca       = ${NPROCA}
+  nprocb       = ${NPROCB}
+  nprocio      = ${NPROCIO}
+  iomode       = ${IOMODE}
+  lyaxt_transposition = .false.
+/
+&runctl
+  out_datapath = "${EXPDIR}/"
+  out_expname  = "${EXP}"
+  out_filetype = 2                  ! 1 - GRIB1, 2 - netCDF
+  rerun_filetype = 4
+  lresume      = $RERUN
+  lamip        = .true.
+  dt_start     = 1978,08,30,00,0,0
+  dt_stop      = 1978,09,19,00,0,0
+  putrerun     = 1, 'years', 'first',0
+  putdata      = 3, 'hours', 'first', 0
+  nproma       = ${NPROMA}
+  lmidatm      = .true.
+  lcolumn      = .true.
+/
+&radctl
+  iaero        = 5
+  isolrad      = 1
+  io3          = 4
+  ighg         = 1
+  ico2         = 4
+  in2o         = 4
+  ich4         = 4
+  icfc         = 4
+/
+&submodelctl
+  lmethox      = .true.
+!  ltransdiag   = .true.  
+/
+&columnctl
+  forcingfile = "echam_gate.nc"
+  nfor_omega  = 1,0
+  nfor_t  = 1,0,0
+  nfor_q  = 1,0,0
+  nfor_uv = 0,1,0
+  nfor_ts = 1,0
+/
+EOF
+#
+cat > namelist.jsbach <<EOF
+&jsbach_ctl
+  standalone    = .false.
+  ntiles        = 11                   ! --- number of tiles ---
+  ! --- options to activate the different jsbach modules --- 
+  use_bethy     = .true.
+  use_phenology = .true.
+  use_albedo    = .true.
+  use_dynveg    = .false.
+  use_disturbance = .true.
+  with_nitrogen = .false.
+  lcc_forcing_type = "transitions"
+  ! --- output options ---
+  file_type     = 1
+  file_ztype    = 0
+  lpost_echam   = .false.
+  debug         = .false.
+  test_cconservation = .true.
+  use_roughness_lai = .true.
+  use_roughness_oro = .false.
+/
+&albedo_ctl
+  use_albedocanopy = .false.
+/
+&cbalance_ctl
+  read_cpools = .false.
+/
+&dynveg_ctl
+  read_fpc = .false.
+  dynveg_feedback = .false.
+/
+&climbuf_ctl
+  init_running_means = .false.
+/
+&soil_ctl
+    nsoil = 5
+/
+EOF
+#-----------------------------------------------------------------------------
+# Start the run:
+#
+$MODEL
+#
+exit

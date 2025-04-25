@@ -1,0 +1,73 @@
+#%# -*- mode: sh -*-
+#
+# Setup for blizzard (IBM Tivoli Workload Scheduler LoadLeveler)
+#
+# @ shell                = %{JOB.shell}
+# @ job_name             = %{EXP_ID}_%{JOB.id}
+# @ job_type             = %{JOB.job_type}
+#%if JOB.queue is defined: 
+# @ class                = %{JOB.queue}
+#%endif
+# @ node_usage           = %{JOB.node_usage}
+#%if JOB.nodes is defined: 
+# @ node                 = %{JOB.nodes}
+#%endif
+#%if JOB.tasks_per_node is defined: 
+#%  if JOB.nodes is defined and JOB.nodes|int*JOB.tasks_per_node|int == JOB.tasks|int:
+# @ tasks_per_node       = %{JOB.tasks_per_node}
+#%  else
+# @ total_tasks          = %{JOB.tasks}
+#%  endif
+#%endif
+# @ resources            = ConsumableMemory(%{JOB.memory})
+#%if JOB.hardware_threads|default('f')|lower|first == 't': 
+# @ task_affinity        = cpu(%{JOB.threads_per_task})
+#%else:
+# @ task_affinity        = core(%{JOB.threads_per_task})
+#%endif
+#%if JOB.threads_per_task is defined and JOB.threads_per_task|int > 1: 
+# @ parallel_threads     = %{JOB.threads_per_task}
+#%endif
+#%if JOB.job_type == 'parallel':
+# @ rset                 = rset_mcm_affinity
+# @ mcm_affinity_options = mcm_distribute
+#%endif
+# @ network.MPI          = sn_all,%{JOB.node_usage},us
+# @ wall_clock_limit     = %{JOB.time_limit}
+# @ output               = $(job_name)_$(jobid).log
+# @ error                = $(output)
+# @ notification         = error
+#%if EMAIL is defined:
+# @ notify_user          = %{EMAIL}
+#%endif
+#%if ACCOUNT is defined:
+# @ account_no           = %{ACCOUNT}
+#%endif
+# @ environment          = $SUBJOB3
+# @
+# @ queue
+
+#%if JOB.job_type == 'parallel':
+export MP_INFOLEVEL=0
+export MP_PRINTENV=no
+export MP_LABELIO=no
+export MP_SHARED_MEMORY=yes
+export MP_SHM_ATTACH_THRESH=256000
+export MP_USE_BULK_XFER=yes
+export MP_BULK_MIN_MSG_SIZE=128k
+export MP_RDMA_MTU=4k
+export MP_EAGER_LIMIT=64k
+export MP_BUFFER_MEM=32m,512m
+export MP_FIFO_MTU=4k
+export MP_RFIFO_SIZE=16m
+export MP_SINGLE_THREAD=no
+export OMP_STACKSIZE=64M
+export OMP_NUM_THREADS=%{JOB.threads_per_task}
+export XLFRTEOPTS="intrinthds=1:err_recovery=no:langlvl=2003std"
+# Tuning for runs with I/O servers
+export MP_CSS_INTERRUPT=no
+export MP_WAIT_MODE=poll # behavior of message polling
+export MP_EUIDEVELOP=min # internal MPI argument checking off
+export LAPI_DEBUG_QP_NOTIFICATION=no # interrupts during RDMA transfer off(=no)
+export MP_POLLING_INTERVAL=100000
+#%endif
