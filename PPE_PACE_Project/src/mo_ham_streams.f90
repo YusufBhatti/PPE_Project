@@ -15,6 +15,7 @@
 !! \revision_history
 !!   -# Martin G. Schultz (FZ Juelich) - original code (2009-09-30)
 !!   -# T. Bergman (FMI) - nmod->nclass to facilitate new aerosol models (2013-02-05)
+!!   -# Philip Stier (University of Oxford) - additional radiation diagnostics (2014-04-04)
 !!
 !! \limitations
 !! None
@@ -42,8 +43,14 @@ MODULE mo_ham_streams
 
   USE mo_kind,          ONLY: dp
   USE mo_submodel_diag, ONLY: vmem2d, vmem3d
-  USE mo_ham_rad_data,  ONLY: Nwv_tot
-  USE mo_ham,           ONLY: nmaxclass, lccnclim_diag
+  USE mo_ham_rad_data,  ONLY: Nwv_tot, &
+!>>NAJS: optical properties of dry aerosol
+                              Niwv_sw_dry, iraddry, &
+!<<NAJS
+!>>NAJS: lidar backscatter
+                              Niwv_sw_beta
+!<<NAJS
+  USE mo_ham,           ONLY: nmaxclass
   USE mo_ham_ccnctl,    ONLY: nsat
 
   IMPLICIT NONE
@@ -109,6 +116,7 @@ MODULE mo_ham_streams
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: sc(:)
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: rc_strat(:,:)
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: rc_conv(:,:)
+
 !<<SF
 
   !-- mo_ham_ccn diagnostics
@@ -118,19 +126,6 @@ MODULE mo_ham_streams
   REAL(dp), PUBLIC, POINTER :: cn_2d(:,:)
   REAL(dp), PUBLIC, POINTER :: cn_burden(:,:)
   REAL(dp), PUBLIC, POINTER :: cn_3d(:,:,:)
-
-!>>SF #333
-  !-- diagnostics for preparing a CCN/IN climatology
-  REAL(dp), PUBLIC, POINTER :: ccn_strat(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: ccn_conv(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: fracdusol_acc(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: fracduai_acc(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: fracduci_acc(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: fracbcsol_acc(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: rwetai_acc(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: rwetci_acc(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: rwetas_acc(:,:,:)
-!<<SF #333
 
   !-- ham radiation diagnostics (former mo_aero_rad_mem)
   TYPE (vmem3d), PUBLIC :: tau_mode(nmaxclass,Nwv_tot)
@@ -149,12 +144,29 @@ MODULE mo_ham_streams
   TYPE (vmem2d), PUBLIC :: tau_2d(Nwv_tot)
   TYPE (vmem2d), PUBLIC :: abs_2d(Nwv_tot)
   TYPE (vmem2d), PUBLIC :: ant_2d(Nwv_tot)
+!>>NAJS: optical properties of dry aerosol
+  TYPE (vmem2d), PUBLIC :: tau_dry(Niwv_sw_dry)
+  TYPE (vmem2d), PUBLIC :: abs_dry(Niwv_sw_dry)
+  TYPE (vmem3d), PUBLIC :: ext_dry(Niwv_sw_dry)
+!<<NAJS
+!>>DN: AeroCom
+  TYPE (vmem3d), PUBLIC :: abs_lev_dry(Niwv_sw_dry)
+!<<DN
 
   TYPE (vmem2d), ALLOCATABLE, PUBLIC :: tau_comp(:,:)
   TYPE (vmem2d), ALLOCATABLE, PUBLIC :: abs_comp(:,:)
 
   REAL(dp), PUBLIC, POINTER :: ang(:,:)
+  REAL(dp), PUBLIC, POINTER :: ai(:,:)
 
+!>>NAJS: lidar backscatter
+  TYPE (vmem3d), PUBLIC :: attbeta_tot_space(Niwv_sw_beta) ! 3D attenuated aerosol and gas backscatter from space
+  TYPE (vmem3d), PUBLIC :: attbeta_tot_earth(Niwv_sw_beta) ! 3D attenuated aerosol and gas backscatter from earth
+  TYPE (vmem3d), PUBLIC :: beta_tot(Niwv_sw_beta) ! 3D aerosol and gas backscatter
+  TYPE (vmem3d), PUBLIC :: alfa_aer(Niwv_sw_beta) ! 3D aerosol extinction
+  TYPE (vmem3d), PUBLIC :: alfa_gas(Niwv_sw_beta) ! 3D gaseous extinction
+  TYPE (vmem3d), PUBLIC :: lidar_ratio_aer(Niwv_sw_beta) ! 3D LIDAR ratio for aerosol
+!<<NAJS
 
 
 !----------------------------------------------------------------------------------------------------------------
@@ -269,7 +281,7 @@ MODULE mo_ham_streams
                                 longname='wet density'//TRIM(sizeclass(jt)%shortname),                 &
                                 units='kg m-3' )
 
-    END DO
+    ENDDO
 
     !--- Ionisation rate (non accumulated)
     CALL add_stream_element (stream_ham, 'ipr', ipr,                                   &
@@ -341,37 +353,6 @@ MODULE mo_ham_streams
     CALL add_stream_element (stream_ham,   'NDUINSOL_DIAG',   nduinsol_diag,                     &
                              longname='Number of externally mixed dust particles',units='m-3')
 
-    !>>SF #333
-    IF (lccnclim_diag) THEN
-       CALL add_stream_element (stream_ham, 'CCN_STRAT', ccn_strat, &
-            longname='Number of activated aerosols in stratiform clouds (acc.)', units='m-3')
-   
-       CALL add_stream_element (stream_ham, 'CCN_CONV', ccn_conv, & 
-            longname='Number of activated aerosols in convective clouds (acc.)', units='m-3')
-
-       CALL add_stream_element (stream_ham, 'FRACDUSOL', fracdusol_acc, &
-            longname='Fraction of dust in soluble modes (acc.)', units='1')
-
-       CALL add_stream_element (stream_ham, 'FRACDUAI', fracduai_acc, &
-            longname='Fraction of dust in accumulation insoluble mode (acc.)', units='1')
-
-       CALL add_stream_element (stream_ham, 'FRACDUCI', fracduci_acc, &
-            longname='Fraction of dust in coarse insoluble mode (acc.)', units='1')
-
-       CALL add_stream_element (stream_ham, 'FRACBCSOL', fracbcsol_acc, &
-            longname='Fraction of black carbon in soluble modes (acc.)', units='1')
-
-       CALL add_stream_element (stream_ham, 'RWETAI', rwetai_acc, &
-            longname='Wet radius for accumulation insoluble mode (acc.)', units='m')
-
-       CALL add_stream_element (stream_ham, 'RWETCI', rwetci_acc, &
-            longname='Wet radius for coarse insoluble mode (acc.)', units='m')
-
-       CALL add_stream_element (stream_ham, 'RWETAS', rwetas_acc, &
-            longname='Wet radius for accumulation soluble mode (acc.)', units='m')
-    ENDIF
-    !<<SF #333
-  
     CALL default_stream_setting (stream_ham, laccu=.FALSE.)
 
     CALL add_stream_element (stream_ham,   'NBCSOL_STRAT', nbcsol_strat,            &
@@ -393,7 +374,7 @@ MODULE mo_ham_streams
          longname='total number of insoluble AP for frz in stream_ham', units='m-3')
 
     CALL default_stream_setting (stream_ham, lrerun=.FALSE.)
-
+  
     DO jclass=1, nclass
        !>>dod #377
        IF (sizeclass(jclass)%lactivation) THEN
@@ -445,13 +426,13 @@ MODULE mo_ham_streams
                                         rc_conv(jclass,jw)%ptr,                                         &
                                         longname='critical radius convective, vertical velocity bin '//TRIM(cbin), &
                                         units='m', lrerun=.TRUE.)
-                END DO
+                ENDDO
              END IF
   
           END IF
        END IF
        !<<dod
-    END DO
+    ENDDO
    
 !<<SF
 
@@ -486,7 +467,7 @@ MODULE mo_ham_streams
                                       longname='Cloud Condensation Nuclei at S='//csat//'%' )
         END SELECT
 
-      END DO ! jsat
+      ENDDO ! jsat
 
       ! CN diagnostics if nccndiag in {3,4,5,6}
       ! (surface if in {3,5}; 3D if in {4,6})
@@ -508,7 +489,7 @@ MODULE mo_ham_streams
                CALL add_stream_element (stream_ham, 'CCN_BURDEN_'//TRIM(ADJUSTL(csat)),     &
                                         ccn_burden(jsat)%ptr, units='m-2',                  &
                                         longname='Cloud Condensation Nuclei burden at S='//csat//'%' )
-            END DO
+            ENDDO
    
             CALL add_stream_element (stream_ham, 'CN_BURDEN', cn_burden, units='m-2', &
                                      longname='Condensation Nuclei Burden'            )
@@ -541,12 +522,16 @@ MODULE mo_ham_streams
   USE mo_linked_list,   ONLY: t_stream, SURFACE, HYBRID
   USE mo_filename,      ONLY: trac_filetype
   USE mo_species,       ONLY: speclist
-  USE mo_ham,           ONLY: nrad
   USE mo_ham_rad_data,  ONLY: lambda, nradang
-  USE mo_ham_rad_data,  ONLY: Nwv_tot, nraddiagwv
-  USE mo_ham,           ONLY: subm_naerospec, subm_aerospec
+  USE mo_ham_rad_data,  ONLY: Nwv_tot, nraddiagwv, iradbeta, Niwv_sw_beta
   USE mo_exception,     ONLY: finish
-  USE mo_ham,           ONLY: nclass, nraddiag, sizeclass
+  USE mo_ham,           ONLY: nclass, nraddiag, sizeclass, nrad, subm_naerospec, subm_aerospec, &
+!>>NAJS: optical properties of dry aerosol
+                              nraddry,                                                          &
+!<<NAJS
+!>>NAJS: lidar backscatter
+                              nradbeta
+!<<NAJS
 
 
   IMPLICIT NONE
@@ -672,7 +657,7 @@ MODULE mo_ham_streams
               END IF !nraddiagwv>1
 
            END IF
-        END DO
+        ENDDO
 
         !--- 2.3) 2D fields:
 
@@ -700,7 +685,7 @@ MODULE mo_ham_streams
                                       abs_comp(jn,jwv)%ptr,     units='1', &
                                       longname='Absorption optical thickness '//TRIM(ADJUSTL(comp_str))//' '//cwv )
 
-           END DO
+           ENDDO
 
            !--- 2.3) 2D total fields:
 
@@ -711,7 +696,40 @@ MODULE mo_ham_streams
         END IF !nraddiagwv>1
 
      END IF !nraddiagwv>0
-  END DO !jwv
+  ENDDO !jwv
+
+!>>NAJS: optical properties of dry aerosol
+  IF (nraddry.GT.0) THEN 
+    DO jwv=1,Niwv_sw_dry 
+      IF (iraddry(jwv)/=0) THEN
+
+        WRITE(cwv,'(I6)') INT(lambda(iraddry(jwv))*1.E9_dp)
+        cwv=TRIM(ADJUSTL(cwv))//'nm'
+
+        CALL default_stream_setting (rad, leveltype = SURFACE )
+        CALL add_stream_element(rad, 'TAU_DRY_2D'//'_'//cwv,     tau_dry(jwv)%ptr,     units='1',  &
+                                longname='Dry optical thickness '//cwv                            )
+
+        IF (nraddry.GT.1) THEN
+          CALL add_stream_element(rad, 'ABS_DRY_2D'//'_'//cwv,     abs_dry(jwv)%ptr,     units='1',  &
+                                  longname='Dry absorption optical thickness '//cwv               )
+        ENDIF
+
+        IF (nraddry.GT.2) THEN
+          CALL default_stream_setting (rad, leveltype = HYBRID )
+          CALL add_stream_element(rad, 'ALFA_AER_DRY'//'_'//cwv,     ext_dry(jwv)%ptr,     units='1/m',  &
+                                  longname='Dry extinction '//cwv                              )
+!>>DN: AeroCom
+          CALL add_stream_element(rad, 'ABS_AER_DRY'//'_'//cwv,     abs_lev_dry(jwv)%ptr,     units='1/m',  &
+                                  longname='Dry absorption '//cwv                              )
+!<<DN
+        ENDIF
+
+      ENDIF
+    ENDDO ! jwv
+  ENDIF
+!<<NAJS
+
 
   CALL default_stream_setting (rad, leveltype = SURFACE )
 
@@ -728,12 +746,47 @@ MODULE mo_ham_streams
         CALL add_stream_element(rad, 'ANG_'//TRIM(ADJUSTL(cwv))//'_'//TRIM(ADJUSTL(cwv2)), ang, units='1', &
                                longname='Angstroem parameter between '//TRIM(ADJUSTL(cwv))//' and '//TRIM(ADJUSTL(cwv2)) )
 
+        CALL add_stream_element(rad, 'AI_'//TRIM(ADJUSTL(cwv))//'_'//TRIM(ADJUSTL(cwv2)), ai, units='1', &
+                               longname='Aerosol index corresponding to '//TRIM(ADJUSTL(cwv))//' and '//TRIM(ADJUSTL(cwv2)) )        
+
      ELSE
         CALL finish('construct_stream_ham_rad:','Angstroem parameter between '//TRIM(ADJUSTL(cwv))  &
                     //' and '//TRIM(ADJUSTL(cwv2))//' requested but inconsistent nraddiagwv')
      END IF
 
   END IF
+
+!>>NAJS: lidar backscatter
+  !--- 3) Aerosol and gaseous backscatter:
+  IF (nradbeta.GT.0) THEN
+    CALL default_stream_setting (rad, leveltype = HYBRID )
+    DO jwv=1,Niwv_sw_beta 
+      IF (iradbeta(jwv)/=0) THEN
+  
+        WRITE(cwv,'(I6)') INT(lambda(iradbeta(jwv))*1.E9_dp)
+        cwv=TRIM(ADJUSTL(cwv))//'nm'
+    
+        CALL add_stream_element(rad, 'ALFA_AER'//'_'//cwv, alfa_aer(jwv)%ptr, units='1/m', &
+                                longname='Aerosol extinction at '//TRIM(ADJUSTL(cwv)) )
+        IF (nradbeta.GT.1) THEN
+          CALL add_stream_element(rad, 'BETA_TOT'//'_'//cwv, beta_tot(jwv)%ptr, units='1/m/sr', &
+                                  longname='Aerosol & gas backscatter at '//TRIM(ADJUSTL(cwv)) )
+          CALL add_stream_element(rad, 'ALFA_GAS'//'_'//cwv, alfa_gas(jwv)%ptr, units='1/m', &
+                                  longname='Gaseous extinction at '//TRIM(ADJUSTL(cwv)) )
+          CALL add_stream_element(rad, 'LIDAR_RATIO_AER'//'_'//cwv, lidar_ratio_aer(jwv)%ptr, units='sr', &
+                                  longname='Aerosol LIDAR ratio at '//TRIM(ADJUSTL(cwv)) )
+        ENDIF ! nradbeta.GT.1
+        IF (nradbeta.GT.2) THEN
+          CALL add_stream_element(rad, 'ATTBETA_TOT_SPACE'//'_'//cwv, attbeta_tot_space(jwv)%ptr, units='1/m/sr', &
+                                  longname='Attenuated aerosol & gas backscatter from space at '//TRIM(ADJUSTL(cwv)) )
+          CALL add_stream_element(rad, 'ATTBETA_TOT_EARTH'//'_'//cwv, attbeta_tot_earth(jwv)%ptr, units='1/m/sr', &
+                                  longname='Attenuated aerosol & gas backscatter from Earth at '//TRIM(ADJUSTL(cwv)) )
+        ENDIF ! nradbeta.GT.2
+ 
+      ENDIF ! iradbeta(jwv).GT.0
+    ENDDO ! jwv
+  ENDIF ! nradbeta.GT.0
+!<<NAJS
 
   END SUBROUTINE new_stream_ham_rad
 

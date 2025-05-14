@@ -41,13 +41,15 @@ MODULE mo_vphysc
 
   ! type definition
   TYPE t_vphysc
-    REAL(wp), POINTER          :: geom1(:,:,:)       ! geopotential at mid points [m2 s-2]
-    REAL(wp), POINTER          :: geohm1(:,:,:)      ! geopotential at interfaces [m2 s-2]
+    REAL(wp), POINTER          :: geom1(:,:,:)       ! geopotential height at mid points [m]
+    REAL(wp), POINTER          :: geohm1(:,:,:)      ! geopotential height at interfaces [m]
     REAL(wp), POINTER          :: aphm1(:,:,:)       ! air pressure at interfaces
+    REAL(wp), POINTER          :: apm1(:,:,:)        ! air pressure at mid-layers
     REAL(wp), POINTER          :: grmassm1(:,:,:)    ! grid box mass at t-dt [kg]
     REAL(wp), POINTER          :: grvolm1(:,:,:)     ! grid box volume at t-dt [m3]
     REAL(wp), POINTER          :: grheightm1(:,:,:)  ! grid box height [m]
     REAL(wp), POINTER          :: rhoam1(:,:,:)      ! dry air mass density [kg m-3]
+    REAL(wp), POINTER          :: rhoam1_moist(:,:,:)! moist air mass density [kg m-3]
     REAL(wp), POINTER          :: trpwmo(:,:)        ! tropopause model level index
     REAL(wp), POINTER          :: trpwmop1(:,:)      ! one level below the tropopause
     REAL(wp), POINTER          :: pbl(:,:)           ! PBL height model level
@@ -55,6 +57,7 @@ MODULE mo_vphysc
     REAL(wp), POINTER          :: tsw(:,:)           ! sea water temperature
     REAL(wp), POINTER          :: smelt(:,:)         ! snow melt rate [ m s-1 ???]
     REAL(wp), POINTER          :: precip(:,:)        ! total precipitation rate [mm]
+    REAL(wp), POINTER          :: precip_na(:,:)     ! total precipitation rate non accum. [kg m-2 s-1]
     REAL(wp), POINTER          :: precipinsoil(:,:)  ! accumulated precipitation minus drying (see dust emissions)
     REAL(wp), POINTER          :: precipconv(:,:)    ! convective precipitation at surface [mm]
     REAL(wp), POINTER          :: precipstrat(:,:)   ! convective precipitation at surface [mm]
@@ -67,15 +70,17 @@ MODULE mo_vphysc
 
   ! vphysc_stream
   ! vphyscvars is used to check namelist input for valid names
-  INTEGER, PARAMETER           :: nvphyscvars=22 ! s.stadtler
+  INTEGER, PARAMETER           :: nvphyscvars=25 ! s.stadtler
   CHARACTER(LEN=32)            :: vphyscvars(1:nvphyscvars)= &
                                 (/'geom1            ', &
                                   'geohm1           ', &
                                   'aphm1            ', &
+                                  'apm1             ', &
                                   'grmassm1         ', &  
                                   'grvolm1          ', &  
                                   'grheightm1       ', &  
                                   'rhoam1           ', &  
+                                  'rhoam1_moist     ', &  
                                   'trpwmo           ', &  
                                   'trpwmop1         ', &  
                                   'pbl              ', &  
@@ -83,6 +88,7 @@ MODULE mo_vphysc
                                   'tsw              ', &  
                                   'smelt            ', &  
                                   'precip           ', &  
+                                  'precip_na        ', &  
                                   'precipinsoil     ', &  
                                   'precipconv       ', &  
                                   'precipstrat      ', &
@@ -148,20 +154,26 @@ MODULE mo_vphysc
     !-- add individual variables to stream
     lpost = st1_in_st2_proof( 'geom1', vphyscnam)
     CALL add_stream_element (vphysc_stream, 'geom1', vphysc%geom1, &
-         longname = 'geopotential', &
-         units = 'm2 s-2', lpost = lpost)
+         longname = 'geopotential height', &
+         units = 'm3 s-2', lpost = lpost)
     
     lpost = st1_in_st2_proof( 'geohm1', vphyscnam)
     CALL add_stream_element (vphysc_stream, 'geohm1', vphysc%geohm1, &
          klev=nlev+1,                                                &
-         longname = 'geopotential at interfaces', &
-         units = 'm2 s-2', lpost = lpost)
+         longname = 'geopotential height at interfaces', &
+         units = 'm3 s-2', lpost = lpost)
     
     lpost = st1_in_st2_proof( 'aphm1', vphyscnam)
     CALL add_stream_element (vphysc_stream, 'aphm1', vphysc%aphm1, &
          klev=nlev+1,                                                &
          longname = 'atmospheric pressure at interfaces', &
          units = 'Pa', lpost = lpost)
+
+    lpost = st1_in_st2_proof( 'apm1', vphyscnam)
+    CALL add_stream_element (vphysc_stream, 'apm1', vphysc%apm1, &
+         klev=nlev,                                                &
+         longname = 'atmospheric pressure at mid-layers', &
+         units = 'Pa', lpost = lpost)    
     
     lpost = st1_in_st2_proof( 'grmassm1', vphyscnam)
     CALL add_stream_element (vphysc_stream, 'grmassm1', vphysc%grmassm1, &
@@ -180,6 +192,11 @@ MODULE mo_vphysc
     
     lpost = st1_in_st2_proof( 'rhoam1', vphyscnam)
     CALL add_stream_element (vphysc_stream, 'rhoam1', vphysc%rhoam1, &
+         longname = 'air density', &
+         units = 'kg m-3', lpost=lpost)
+    
+    lpost = st1_in_st2_proof( 'rhoam1_moist', vphyscnam)
+    CALL add_stream_element (vphysc_stream, 'rhoam1_moist', vphysc%rhoam1_moist, &
          longname = 'air density', &
          units = 'kg m-3', lpost=lpost)
     
@@ -218,6 +235,11 @@ MODULE mo_vphysc
          longname = 'precipitation at surface', &
          units = 'mm', lpost=lpost)
     
+    lpost = st1_in_st2_proof( 'precip_na', vphyscnam)
+    CALL add_stream_element (vphysc_stream, 'precip_na', vphysc%precip_na, &
+         longname = 'precipitation at surface (non-accumulated)', &
+         units = 'kg m-2 s-1', lpost=lpost)
+
     lpost = st1_in_st2_proof( 'precipinsoil', vphyscnam)
     CALL add_stream_element (vphysc_stream, 'precipinsoil', vphysc%precipinsoil, &
          longname = 'precipitation penetrated into soil layers', &
@@ -269,22 +291,28 @@ MODULE mo_vphysc
                             paphm1,        papm1,          ptvm1,     &
                             ppbl,          ktrpwmo,        ktrpwmop1, &
                             prflconv,      psflconv,                  &
-                            prflstrat,     psflstrat,      pcdnc,     &
-                            pclw,          paclc        )! s.stadtler
+                            prflstrat,     psflstrat,      pprecip_na, &
+                            pcdnc,     &
+                            pclw,          paclc        , & ! s.stadtler
+                            pqm1 )
 
-    USE mo_physical_constants,    ONLY: rgrav, rd, rhoh2o
+    USE mo_physical_constants,    ONLY: rgrav, rd, rv, rhoh2o
     USE mo_geoloc,       ONLY: gboxarea
     USE mo_time_control, ONLY: delta_time
 
     INTEGER,  INTENT(in) :: kproma, klev, krow
     REAL(wp), INTENT(in), OPTIONAL :: paphm1(:,:), papm1(:,:), ptvm1(:,:), ppbl(:) 
     REAL(wp), INTENT(in), OPTIONAL :: prflconv(:), psflconv(:), prflstrat(:), psflstrat(:)
+    REAL(wp), INTENT(in), OPTIONAL :: pprecip_na(:)
     REAL(wp), INTENT(in), OPTIONAL :: pcdnc(:,:), pclw(:,:), paclc(:,:) ! s.stadtler
+    REAL(wp), INTENT(in), OPTIONAL :: pqm1(:,:)
     INTEGER,  INTENT(in), OPTIONAL :: ktrpwmo(:), ktrpwmop1(:)
 
     LOGICAL, SAVE :: linit = .TRUE.
 
     INTEGER :: jlev
+
+    REAL(wp) :: zrmoist(1:kproma,klev) !DN gas constant of moist air
 
     IF (linit) THEN
       IF (PRESENT(paphm1)) vphysc%grmassm1(:,:,krow) = 0.0_wp
@@ -294,6 +322,7 @@ MODULE mo_vphysc
             vphysc%grvolm1(:,:,krow)    = 0.0_wp
             vphysc%grheightm1(:,:,krow) = 0.0_wp
          END IF
+         IF (PRESENT(pqm1)) vphysc%rhoam1_moist(:,:,krow) = 0.0_wp
       END IF
       IF (PRESENT(ppbl))       vphysc%pbl(:,krow) = 0.0_wp
       IF (PRESENT(ktrpwmo))    vphysc%trpwmo(:,krow) = 0.0_wp
@@ -318,6 +347,13 @@ MODULE mo_vphysc
        DO jlev = 1, klev
           vphysc%rhoam1(1:kproma,jlev,krow) = papm1(1:kproma,jlev)/(rd * ptvm1(1:kproma,jlev))
        END DO
+       !>>DN
+       IF (PRESENT(pqm1)) THEN
+           zrmoist(1:kproma,:) = rd*(1._wp - pqm1(1:kproma,:)) + rv*pqm1(1:kproma,:)
+           vphysc% rhoam1_moist(1:kproma,:,krow) = papm1(1:kproma,:) &
+               / (zrmoist(1:kproma,:) * ptvm1(1:kproma,:))
+       ENDIF
+       !<<DN
        IF (PRESENT(paphm1)) THEN
           DO jlev = 1, klev
              vphysc%grvolm1(1:kproma,jlev,krow) = &
@@ -345,6 +381,10 @@ MODULE mo_vphysc
       vphysc%precip(1:kproma,krow)=vphysc%precip(1:kproma,krow)+vphysc%precipstrat(1:kproma,krow)
     END IF
     
+    IF (PRESENT(pprecip_na)) THEN
+      vphysc%precip_na(1:kproma,krow) = pprecip_na(1:kproma)
+    END IF
+
     ! cloud droplet number concentration cdnc
     IF (PRESENT(pcdnc)) THEN
       DO jlev =1, klev

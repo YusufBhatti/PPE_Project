@@ -177,14 +177,6 @@ if $this_model_flag_with_hammoz ; then
         ;;
    esac
 
-   #-- parse from namelist (laeroclim)
-   flag_aeroclim=$(parse_fortran_logical ${script_dir}/namelist_${exp}.echam hamctl laeroclim)
-   
-   #-- security in case 'laeroclim' was not found in namelist
-   if [ -z $flag_aeroclim ] ; then
-      flag_aeroclim=false
-   fi
-
    #-- parse from namelist (lmoz)
    flag_moz=$(parse_fortran_logical ${script_dir}/namelist_${exp}.echam submodelctl lmoz)
 

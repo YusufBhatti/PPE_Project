@@ -329,8 +329,10 @@ MODULE mo_hammoz_emissions
   INTEGER, PARAMETER             :: ndefault = 1
   CHARACTER(LEN=32)              :: defnam(1:ndefault)   = &   ! default output
                               (/ 'emi             ' /)         ! total emission mass flux
-
-  CHARACTER(len=ln)              :: defaultgas(8)        = &   ! default gas-phase tracers for diagnostics
+!>>DN AeroCom
+!  CHARACTER(len=ln)              :: defaultgas(8)        = &   ! default gas-phase tracers for diagnostics
+  CHARACTER(len=ln)              :: defaultgas(10)       = &   ! default gas-phase tracers for diagnostics
+!<<DN AeroCom
                               (/ 'SO2     ',               &
                                  'H2SO4   ',               &
                                  'DMS     ',               &
@@ -338,6 +340,10 @@ MODULE mo_hammoz_emissions
                                  'NO2     ',               &
                                  'CO      ',               &
                                  'C5H8    ',               &
+                                 !>>DN AeroCom
+                                 'CO      ',               &
+                                 'RN222   ',               &
+                                 !<<DN AeroCom
                                  'CH4     '           /)
   LOGICAL                        :: tracflag(ntrac), specflag(nspec)
   CHARACTER(LEN=ln)              :: tracname(ntrac), specname(nspec)
@@ -573,6 +579,10 @@ MODULE mo_hammoz_emissions
   USE mo_vphysc,                ONLY: vphysc
   USE mo_geoloc,                ONLY: gboxarea
   USE mo_physical_constants,    ONLY: grav
+  !>>DN
+  USE mo_hammoz_aerocom_diags,  ONLY: lHEaci
+  USE mo_hammoz_aerocom_HEaci,  ONLY: emiso2_inst
+  !<<DN
 ! arguments
 
   INTEGER,  INTENT(in)    :: kproma                   ! geographic block number of locations
@@ -623,6 +633,10 @@ MODULE mo_hammoz_emissions
   ! store mass fluxes from interactive ocean emissions in boundary condition
   IF (lhas_oceani) CALL oceani_emissions(kproma, kbdim, krow, npist)
   IF (lbioemi_dyn) CALL calc_biogenic_emissions(kproma, kbdim, krow, loland, ptm1(:,klev))
+
+  !>>DN
+  IF (lHEaci) emiso2_inst(1:kproma,krow)=0._dp
+  !<<DN
   
 !-- Sector loop: Prepare species-independent stuff that may be sector-dependent
   DO jsec = 1, nsectors
@@ -704,6 +718,9 @@ MODULE mo_hammoz_emissions
               zemidiag(1:kproma) = zemidiag(1:kproma) + zxtems3d(1:kproma,i) * dens(1:kproma,i) * height(1:kproma,i)
             ENDDO
           END IF
+          !>>DN
+          IF (lHEaci .AND. jspec == id_so2) emiso2_inst(1:kproma,krow)=emiso2_inst(1:kproma,krow)+zemidiag(1:kproma)
+          !<<DN
           ! total mass flux
           CALL get_diag_pointer(emi_diag, fld2d, jt, ierr=ierr)
           IF (ierr == 0) fld2d(1:kproma,krow)=fld2d(1:kproma,krow)          &

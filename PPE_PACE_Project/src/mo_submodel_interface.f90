@@ -96,6 +96,8 @@ MODULE mo_submodel_interface
                                     !
   PUBLIC :: cloud_subm_2            ! called from cloud / cloud_cdnc, etc.: aerosol wet chemistry
                                     ! 
+  PUBLIC :: cloud_subm_3            ! called from cloud / cloud_cdnc, etc.: exports for AeroCom diags
+
   PUBLIC :: physc_subm_3            ! called from physc. 
                                     ! aerosol and chemistry interface:
                                     ! m7 or salsa, MOZART chemistry, sedimentation, etc.
@@ -200,9 +202,10 @@ MODULE mo_submodel_interface
                                  lemissions,       &
                                  lflighttrack,     &
                                  laoa,             &
+                                 laerocom_diag,    &
                                  id_ham,           &
                                  id_moz,           &
-                                 id_ccnclim 
+                                 id_ccnclim
   USE mo_sub_nml,          ONLY: request_tracer_nml, set_tracer_nml
   USE mo_aoa,              ONLY: init_aoa
   USE mo_exception,        ONLY: message, em_error
@@ -213,9 +216,8 @@ MODULE mo_submodel_interface
   USE mo_moz_lightning,    ONLY: start_lightning
 !<<<mgs
   USE mo_hammoz,           ONLY: hammoz_initialize
-  USE mo_ham,              ONLY: print_aerocomp_info, laeroclim
-  USE mo_ham_aeroclim,     ONLY: set_prescribed_tracer_list, set_prescribed_tracer_bc, &
-                                 reset_tracer
+  USE mo_ham,              ONLY: print_aerocomp_info
+  USE mo_hammoz_aerocom_diags, ONLY: init_aerocom
 #endif
 
   USE mo_hyb,              ONLY: cetah
@@ -225,7 +227,7 @@ MODULE mo_submodel_interface
   USE mo_ccnclim,          ONLY: init_ccnclim_submodel, & !SF CCN climatology
                                  ccnclim_define_tracer
   USE mo_activ,            ONLY: activ_initialize         !SF
-  USE mo_param_switches,   ONLY: lclmi_progn              !SF
+  USE mo_param_switches,   ONLY: lcdnc_progn              !SF
 
 #ifdef HAMMOZ
   USE mo_hammoz_drydep,    ONLY: drydep_init !gf #244
@@ -235,17 +237,9 @@ MODULE mo_submodel_interface
   USE mo_hammoz_emi_biogenic, ONLY: start_biogenic_emissions
   !<<dod
   !>>dod split of mo_timer (redmine #51)
-  USE mo_hammoz_timer,     ONLY: init_hammoz_timers, & !>>UP adding new ham timers
-                                 timer_ham_totsum, &
-                                 timer_ham_ifdef, &
-                                 timer_start, &
-                                 timer_stop
-                                 !<<UP
+  USE mo_hammoz_timer,     ONLY: init_hammoz_timers
   !<<dod
 #endif
-  !>>UP adding new cmp timers
-  USE mo_cmp_timer,     ONLY: init_cmp_timers
-  !<<UP 
   USE mo_control,          ONLY: ltimer, &
                                  lforcererun !SF (#141): disable internal rerun in case of HAMMOZ
   USE mo_flighttrack,      ONLY: flighttrack_initialize, flighttrack_init_stream_elements
@@ -264,13 +258,6 @@ MODULE mo_submodel_interface
   ! 1) --- Start various submodels
 
 #ifdef HAMMOZ
-!>>UPdbg
-  !---start submodel timers: need to do this before using timer_start
-  IF (ltimer) CALL init_hammoz_timers
-  !<<UPdbg
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  !<<UP
   !-- disable internal reruns (SF, #141)
   IF (lforcererun) THEN
      CALL message('init_subm', "lforcererun set to FALSE, as internal reruns are incompatible with HAMMOZ", &
@@ -284,9 +271,6 @@ MODULE mo_submodel_interface
 
   ! -- initialize chemistry module and its species
   IF (lmoz) CALL start_moz(lchemistry, lhmzoxi)   !moz chemistry module !mgs #249
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #else
   ! -- give warnings in the non-HAMMOZ version of ECHAM if ham or moz are activated
   IF (lham) THEN
@@ -307,19 +291,15 @@ MODULE mo_submodel_interface
 
 
   ! Test prognostic cdnc switch (cannot be done in setsubmodel, because setphys is called afterwards!)
-  IF (lclmi_progn .AND. .NOT. (lham .OR. lccnclim)) THEN
-    CALL message('init_subm', 'Cannot run with lclmi_progn=true and neither lham nor lccnclim active!', &
+  IF (lcdnc_progn .AND. .NOT. (lham .OR. lccnclim)) THEN
+    CALL message('init_subm', 'Cannot run with lcdnc_progn=true and neither lham nor lccnclim active!', &
                  level=em_error)
-    lclmi_progn = .FALSE.
+    lcdnc_progn = .FALSE.
   END IF
 
 !>>SF Initialize boundary conditions necessary for 2-moment cloud microphysics
-  IF (lclmi_progn) THEN
+  IF (lcdnc_progn) THEN
      CALL init_cloud_micro_2m
-     !>>UP
-     !---prepare submodel timers
-     IF (ltimer) CALL init_cmp_timers
-     !<<UP
   ENDIF
 !<<SF
 
@@ -346,20 +326,10 @@ MODULE mo_submodel_interface
   END IF
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  !<<UP
   ! -- HAM aerosol module
   IF (lham) THEN
     CALL starttracdef(id_ham)
     CALL ham_define_tracer
-
-    !-- Aerosol climatology: amend HAM tracers
-    IF (laeroclim) THEN
-        CALL set_prescribed_tracer_list
-        CALL set_prescribed_tracer_bc
-        CALL reset_tracer
-    ENDIF 
     CALL endtracdef(id_ham)
   END IF
 
@@ -376,10 +346,12 @@ MODULE mo_submodel_interface
   !!mgs!!    ! Simple tracer module (former XT_ functionality)
   !!mgs!!    IF (lxt) CALL xt_init
 
+ !--- For AeroCom diags
+  IF (laerocom_diag) CALL init_aerocom
+
   ! -- HAM aerosol module
   IF (lham) THEN
     CALL ham_initialize
-    ! UP TODO: include this in the timer_ham_totsum? The timer only gets initialised further down, so I would need to move that up.
   END IF
 
   ! -- MOZ chemistry module
@@ -421,25 +393,16 @@ MODULE mo_submodel_interface
   !--- parse emission matrix and prepare use of emissions
   IF (lemissions) CALL init_emissions
 
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
  
-  IF (lclmi_progn) CALL activ_initialize
+  IF (lcdnc_progn) CALL activ_initialize
 
   IF (laoa) CALL init_aoa !initialization of age of air tracers
 
   !>>dod
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  !<<UP
-!UPdbg  !---start submodel timers
-!UPdbg  IF (ltimer) CALL init_hammoz_timers
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
+  !---start submodel timers
+  IF (ltimer) CALL init_hammoz_timers
 #endif
   !<<dod
   IF (lflighttrack) THEN
@@ -480,8 +443,7 @@ MODULE mo_submodel_interface
     USE mo_submodel,         ONLY: lco2, lham, lmoz, llght,  &
                                    lemissions, lflighttrack, lwetdep, ldrydep, &
                                    lsedimentation, lanysubmodel, ltransdiag, &
-                                   laoa, lcmptend
-                           !<<UP: add lcmptend
+                                   laoa, laerocom_diag
 !--mgs
     USE mo_tracdef,          ONLY: trlist
 
@@ -493,16 +455,14 @@ MODULE mo_submodel_interface
     USE mo_hammoz_drydep,    ONLY: init_drydep_stream
     USE mo_hammoz_sedimentation,   ONLY: init_sedi_stream
     USE mo_hammoz_emissions, ONLY: init_emi_stream
+    USE mo_hammoz_aerocom_diags, ONLY: init_aerocom_streams
 #endif
-    USE mo_param_switches,   ONLY: lclmi_progn 
+    USE mo_param_switches,   ONLY: lcdnc_progn 
     USE mo_conv,             ONLY: construct_stream_conv
     USE mo_activ,            ONLY: construct_activ_stream 
 !!    USE mo_localtime,      ONLY: mo_localtime_init
 
     !   specific submodel streams
-    !>>UP new diagnostic stream for CMP tendencies
-    USE mo_cmp_diagn,        ONLY: construct_cmp_diagn_stream
-    !<<UP
     USE mo_co2,              ONLY: init_co2_memory, reference_co2
     USE mo_radiation_parameters, ONLY: co2mmr
     USE mo_transdiag,        ONLY: construct_transdiag_stream
@@ -512,17 +472,13 @@ MODULE mo_submodel_interface
     USE mo_moz_init,         ONLY: init_moz_ic
     USE mo_moz_lightning,    ONLY: init_lightning_stream
     !SF #171 USE mo_hammoz_global_diag, ONLY: init_hammoz_gdiag
+!>>NAJS: high frequency output
+    USE mo_ham_stream_hifreq,ONLY: construct_stream_hifreq
+!<<NAJS 
 #endif
 !!    USE mo_isccpsimulator,   ONLY: construct_stream_isccp
     USE mo_flighttrack,      ONLY: flighttrack_init_output, flighttrack_init_stream_elements
     USE mo_aoa,              ONLY: get_pointer2trac
-    !>>UP adding new ham timers
-    USE mo_hammoz_timer,     ONLY: timer_ham_ifdef, &
-                                   timer_start, &
-                                   timer_stop
-    USE mo_control,          ONLY: ltimer
-    !<<UP
-                                 
 
     IMPLICIT NONE
 
@@ -543,10 +499,6 @@ MODULE mo_submodel_interface
     CALL init_vphysc_stream
 
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
-    ! UP TODO: include initialisations for timming?
     !++mgs #249: acknowledge general lwetdep, ldrydep, and lsedimentation flags! (fix from Sabine)
     IF (lwetdep .AND. ANY(trlist%ti(:)%nwetdep > 0)) CALL init_wetdep_stream
     IF (ldrydep .AND. ANY(trlist%ti(:)%ndrydep > 0)) CALL init_drydep_stream
@@ -556,27 +508,14 @@ MODULE mo_submodel_interface
   ! NB: this is done here and not in alloc_mem, because the initialisation of the dust module
   !     makes use of this stream reference already (called from ham_initialize)
   IF (lemissions) CALL init_emi_stream
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
 
-  IF (lclmi_progn) THEN 
+  IF (lcdnc_progn) THEN 
     CALL construct_activ_stream
     CALL construct_stream_conv
   ENDIF
 
-  !>>UP CMP tendencies
-  IF (lcmptend) THEN
-    CALL construct_cmp_diagn_stream
-  ENDIF
-  !<<UP
-
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
-    ! UP TODO: include initialisations for timming?
     !! allocate memory for HAM aerosol model
     IF (lham) CALL ham_init_memory
 
@@ -585,18 +524,13 @@ MODULE mo_submodel_interface
       CALL init_moz_streams     ! MOZ diagnostic output
       CALL init_moz_ic          ! MOZ initial conditions pre-set
     END IF
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
+   
+    IF (laerocom_diag) CALL init_aerocom_streams
 #endif
 
     IF (ltransdiag) CALL construct_transdiag_stream
 
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
-    ! UP TODO: include initialisations for timming?
     IF (llght)      CALL init_lightning_stream
 
 !!mgs!!!--- initialisation of generic submodel streams
@@ -607,9 +541,10 @@ MODULE mo_submodel_interface
 
     !! initialize global diagnostics for HAMMOZ components
     !SF #171 CALL init_hammoz_gdiag
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
+
+!>>NAJS: high frequency output
+    CALL construct_stream_hifreq
+!<<NAJS 
 #endif
 
   IF (lflighttrack) THEN
@@ -651,37 +586,20 @@ MODULE mo_submodel_interface
 
   SUBROUTINE free_subm_memory
 
-    USE mo_submodel,       ONLY: lflighttrack, lham, llght, &
-                                 lmoz, lccnclim
+    USE mo_submodel,       ONLY: lflighttrack, lham, llght, lmoz
     USE mo_co2,            ONLY: cleanup_co2_memory
 #ifdef HAMMOZ
     USE mo_ham_init,       ONLY: ham_free_memory
 #endif
     USE mo_flighttrack,    ONLY: flighttrack_finalize_output
-    !>>UP adding new ham timers
-    USE mo_hammoz_timer,   ONLY: timer_ham_ifdef, &
-                                 timer_start, &
-                                 timer_stop
-    USE mo_control,        ONLY: ltimer
-    !<<UP
-    USE mo_ccnclim,        ONLY: ccnclim_free_memory
-                                 
     IMPLICIT NONE
     IF (lflighttrack) CALL flighttrack_finalize_output
     CALL cleanup_co2_memory
 
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
     IF (lham)   CALL ham_free_memory
 !    IF (lmoz)   CALL moz_free_memory
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
-
-    IF (lccnclim) CALL ccnclim_free_memory
 
     !!mgs!!IF (llght) CALL lightning_free_memory
     !!mgs!!!--- deallocate memory of generic submodel components
@@ -720,9 +638,6 @@ MODULE mo_submodel_interface
 
   USE mo_time_conversion,     ONLY: time_days
   USE mo_time_control,        ONLY: get_date_components, lstart, lresume
-  !>>UP need ltimer for new ham timers
-  USE mo_control,             ONLY: ltimer
-  !<<UP
 !>>SW: added lmoz for feature #415 in HAMMOZ readmine
   USE mo_submodel,            ONLY: lco2, lham, lccnclim, lmoz
 !<<SW
@@ -737,15 +652,8 @@ MODULE mo_submodel_interface
 !<<SW
 #endif
   USE mo_co2,                 ONLY: read_co2_emission
+  USE mo_ccnclim,             ONLY: read_ccnclim    !++mgs ### could this use a boundary condition?
 
-  
-  USE mo_hammoz_timer,     ONLY: & !>>UP adding new ham timers
-                                 timer_ham_totsum, &
-                                 timer_ham_ifdef, &
-                                 timer_start, &
-                                 timer_stop
-                                 !<<UP
-                                 
   IMPLICIT NONE
 
   TYPE(time_days)     :: current_date
@@ -764,10 +672,6 @@ MODULE mo_submodel_interface
   CALL get_date_components (current_date, year=iyear, month=imonth, day=iday)
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   !--- calculate daylength for HAM
   IF (lham) CALL calc_daylength
 !>>SW see feature #415 and feature #469 in HAMMOZ readmine
@@ -780,46 +684,24 @@ MODULE mo_submodel_interface
      lnewyear=iyear/=inextyear
      lnewday=iday/=inextday
 
-     IF (lresume .OR. lstart) THEN
-        IF (lnewyear) THEN
-           CALL read_dailyetf(inextyear)
-        ELSE
-           CALL read_dailyetf(iyear)
-        END IF
-     ELSE IF (lnewyear) THEN
-        CALL read_dailyetf(inextyear)
-     END IF
+     IF (lnewyear .OR. lresume .OR. lstart) CALL read_dailyetf(iyear)
      IF (lnewday .OR. lresume .OR. lstart) CALL set_dailyetf
 
    ENDIF
 !<<SW
-  !>>UP ham timers
-   IF (ltimer) THEN
-     CALL timer_stop(timer_ham_totsum)
-     CALL timer_stop(timer_ham_ifdef)
-   END IF
-  !<<UP
 #endif
 
   !--- read monthly fields (### should be replaced by BC scheme)
   IF (imonth /= imonthm1) THEN
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) THEN
-       CALL timer_start(timer_ham_totsum)
-       CALL timer_start(timer_ham_ifdef)
-    END IF
-    !<<UP
     !-- BGC dust emissions
 !sschr: bgc_dust_read_monthly must be called in order to get fpar_field
 !       (even if dust is processed via bc scheme)
     IF (lham .AND. idsec_dust > 0) CALL bgc_dust_read_monthly(imonth, ndurough)
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_totsum)
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 
 #endif
+
+    IF (lccnclim) CALL read_ccnclim(iyear,imonth)
 
     !-- JSBACH CO2 emissions
 !!mgs!!    IF (lco2) CALL read_co2_emission  
@@ -910,15 +792,9 @@ MODULE mo_submodel_interface
   USE mo_submodel,      ONLY : lco2
   USE mo_co2,           ONLY : co2_mbalance
 #ifdef HAMMOZ
-  USE mo_ham,           ONLY : nsoa, laeroclim
+  USE mo_ham,           ONLY : nsoa
   USE mo_ham_soa_processes, ONLY : soa_equi0
-  USE mo_ham_aeroclim,  ONLY: prescribe_tracer
 #endif
-
-  !>>UP adding new ham timers
-  USE mo_hammoz_timer,     ONLY: timer_ham_totsum, &
-                                 timer_ham_ifdef
-  !<<UP
 
   IMPLICIT NONE
 
@@ -962,17 +838,6 @@ MODULE mo_submodel_interface
                      klevp1,          krow,            paphm1)
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) THEN
-     CALL timer_start(timer_ham_totsum)
-     CALL timer_start(timer_ham_ifdef)
-  END IF
-
-  !-- Set the prescribed tracers (field and tendency) if relevant
-  IF (laeroclim) THEN
-      CALL prescribe_tracer(kproma, kbdim, klev, krow, ktrac, pxtm1, pxtte)
-  ENDIF
-  !<<UP
   ! set diagnostic tracers for SOA and calculate gas/aerosol equilibrium
   IF (nsoa == 1) THEN 
      CALL soa_equi0(kproma, kbdim, klev, &
@@ -981,12 +846,6 @@ MODULE mo_submodel_interface
                     zt,     zq,          &
                     pxtm1,  pxtte     )
   END IF
-  !>>UP ham timers
-  IF (ltimer) THEN
-     CALL timer_stop(timer_ham_totsum)
-     CALL timer_stop(timer_ham_ifdef)
-  END IF
-  !<<UP
 #endif
   IF (ltimer) CALL timer_stop(timer_physc_subm_1)
 
@@ -1094,10 +953,9 @@ MODULE mo_submodel_interface
                                   timer_physc_subm_2
   USE mo_physical_constants,ONLY: vtmpc1
   USE mo_param_switches,    ONLY: ncd_activ
-  USE mo_submodel,          ONLY: lmoz, llght, lemissions, lccnclim
+  USE mo_submodel,          ONLY: lmoz, llght, lemissions
   USE mo_sub_echam,         ONLY: radionucl_sink
   USE mo_vphysc,            ONLY: set_vphysc_var
-  USE mo_ccnclim,           ONLY: set_ccn_3d
 #ifdef HAMMOZ
   USE mo_ham,               ONLY: nsoa
 ! USE mo_moz,               ONLY: ichem
@@ -1107,11 +965,6 @@ MODULE mo_submodel_interface
   ! >> thk: volatility basis set (VBS)
   USE mo_ham_vbs_partition, ONLY:  vbs_gas_phase_chem
   ! << thk
-
-  !>>UP adding new ham timers
-  USE mo_hammoz_timer,     ONLY: timer_ham_totsum, &
-                                 timer_ham_ifdef
-  !<<UP
 
 #endif
 
@@ -1187,15 +1040,10 @@ MODULE mo_submodel_interface
                        krow,                     paphm1=zaph,         &
                        papm1=zap,                ptvm1=ztv,           &
                        ppbl=ppbl,                ktrpwmo=itrpwmo,     &
+                       pqm1=pqm1,                                     &
                        ktrpwmop1=itrpwmop1)
 
 #ifdef HAMMOZ 
-  !>>UP ham timers
-  IF (ltimer) THEN
-     CALL timer_start(timer_ham_totsum)
-     CALL timer_start(timer_ham_ifdef)
-  END IF
-  !<<UP
   !--- secondary organic aerosol processes
   SELECT CASE (nsoa)
      CASE (1) !D. O'Donnell's SOA implementation
@@ -1213,12 +1061,6 @@ MODULE mo_submodel_interface
                                )
          !<<thk #512
   END SELECT
-  !>>UP ham timers
-  IF (ltimer) THEN
-     CALL timer_stop(timer_ham_totsum)
-     CALL timer_stop(timer_ham_ifdef)
-  END IF
-  !<<UP
 #endif
 
   IF (ktrac > 0) THEN
@@ -1228,9 +1070,6 @@ MODULE mo_submodel_interface
     CALL radionucl_sink (kproma, kbdim, klev, pxtm1, pxtte)
     
   ENDIF
-
-  !--- for CCN climatology:
-  IF (lccnclim) CALL set_ccn_3d(kproma, kbdim, klev, krow, papm1)
 
   IF (ltimer) call timer_stop(timer_physc_subm_2)
   
@@ -1310,11 +1149,7 @@ MODULE mo_submodel_interface
                                    timer_vdiff_subm 
 #ifdef HAMMOZ
   USE mo_hammoz_timer,       ONLY: timer_hammoz_emissions,   &
-                                   timer_hammoz_drydep, &
-                                   !>>UP adding new ham timers
-                                   timer_ham_totsum, &
-                                   timer_ham_ifdef
-                                   !<<UP
+                                   timer_hammoz_drydep
 #endif
   USE mo_physical_constants, ONLY: vtmpc1, rd
   USE mo_submodel,           ONLY: lham,       &
@@ -1323,7 +1158,8 @@ MODULE mo_submodel_interface
                                    lco2,       &
                                    ltransdiag, &
                                    lemissions, &
-                                   ldrydep
+                                   ldrydep,    &
+                                   lccnclim        !++mgs ### ?? why here??
   USE mo_tracdef,            ONLY: trlist
   USE mo_mpi,                ONLY: p_parallel_io
   USE mo_time_control,       ONLY: lstart
@@ -1334,6 +1170,7 @@ MODULE mo_submodel_interface
   USE mo_hammoz_drydep,      ONLY: drydep_interface
   USE mo_hammoz_emissions,   ONLY: emi_interface
 #endif
+  USE mo_ccnclim,            ONLY: ccn_3d     !++mgs ### ?? why here??
   USE mo_tracdef,            ONLY: ntrac
 
 !+++sschr: for use of updated tracers (luse_p1_vars)
@@ -1467,9 +1304,6 @@ MODULE mo_submodel_interface
 
   IF (lemissions) THEN
 #ifdef HAMMOZ    
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
     IF (ltimer) CALL timer_start(timer_hammoz_emissions)
     !--- general emissions controlled by emi_matrix
     CALL emi_interface(kproma, kbdim, ktrac, klev, klevp1, krow, paphp1, pgeom1, loland,  &
@@ -1477,9 +1311,6 @@ MODULE mo_submodel_interface
                        ptm1, ihpbl, pxtems, pxtte)
 
     IF (ltimer) CALL timer_stop(timer_hammoz_emissions)
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 
   END IF  !   lemissions
@@ -1492,10 +1323,6 @@ MODULE mo_submodel_interface
   !-------------------------------------
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   IF (ldrydep .AND. trlist%anydrydep>0) THEN
 
     IF (ltimer) CALL timer_start(timer_hammoz_drydep)
@@ -1517,11 +1344,9 @@ MODULE mo_submodel_interface
     IF (ltimer) CALL timer_stop(timer_hammoz_drydep)
 
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
+
+  IF (lccnclim) CALL ccn_3d(kproma, kbdim, klev, krow, papm1)
 
   IF (ltransdiag) CALL transdiag(kproma,   kbdim,   klev,   klevp1,   krow,  &
                                  pum1,     pvm1,    ptm1,   pqm1,            &
@@ -1566,10 +1391,6 @@ MODULE mo_submodel_interface
              kproma,     kbdim,      klev,       krow, ktdia,            &
              ptkem1,   pwcape, pvervel, prho,                            &
              prho_rcp, pxtm1, pxtte, ptm1, papm1, pqm1, pesw,            &
-             !>>UP
-             pcdnc_min,                                                  &
-             ll_actccn, ll_actccn_wobase, ll_bas, pdpg,                  &
-             !<<UP
              pcdncact,                                                   &
              prwetki, prwetai, prwetci,                                  &
              pfracdusol, pfracduai, pfracduci, pfracbcsol, pfracbcinsol, &
@@ -1579,13 +1400,9 @@ MODULE mo_submodel_interface
    USE mo_exception,      ONLY: em_error
    USE mo_submodel,       ONLY: lham, lccnclim
    USE mo_tracdef,        ONLY: ntrac
-   USE mo_param_switches, ONLY: ncd_activ,                             &
-                                lccnclimdiags
-   USE mo_activ,          ONLY: activ_updraft, activ_lin_leaitch, nfrzmod, nw, &
-                                !>>UP
-                                ham_activ_diag_lin_leaitch_2
-                                !<<UP
-   USE mo_ccnclim,        ONLY: ccn_3d, ccnclim_avail_activ_lin_leaitch, ccnclim_IN_setup
+   USE mo_param_switches, ONLY: ncd_activ
+   USE mo_activ,          ONLY: activ_updraft, activ_lin_leaitch, nfrzmod, nw
+   USE mo_ccnclim,        ONLY: ccnclim_avail_activ_lin_leaitch, ccnclim_IN_setup
 #ifdef HAMMOZ
    USE mo_conv,           ONLY: cdncact_cv
    USE mo_ham,            ONLY: nclass, nccndiag, sizeclass !>>dod<<
@@ -1596,7 +1413,7 @@ MODULE mo_submodel_interface
                                 ham_activ_diag_abdulrazzak_ghan_strat, &
                                 ham_activ_diag_abdulrazzak_ghan_conv
    USE mo_ham_freezing,   ONLY: ham_IN_setup
-   USE mo_ham_streams,    ONLY: a, b, sc, rdry, rwet
+   USE mo_ham_streams,    ONLY: a, b, sc, rdry
    ! --> thk: A-R&G for SALSA
    USE mo_ham_salsa_cloud, ONLY: salsa_abdul_razzak_ghan
    USE mo_ham,             ONLY: nham_subm, HAM_M7, HAM_SALSA
@@ -1605,16 +1422,14 @@ MODULE mo_submodel_interface
    !>>dod activation timer
    USE mo_control,        ONLY: ltimer
    USE mo_timer,          ONLY: timer_start, timer_stop
-   USE mo_hammoz_timer,   ONLY: timer_ham_activation, &
-                                !>>UP adding new ham timers
-                                timer_ham_totsum, &
-                                timer_ham_ifdef
-   USE mo_cmp_timer,      ONLY: timer_ccn_activation
-                                !<<UP 
-  !<<dod
-   !>>UP
-   USE mo_ham_m7ctl,    ONLY: iaits
-   !<<UP
+   USE mo_hammoz_timer,   ONLY: timer_ham_activation
+   !<<dod
+   !>>DN
+   USE mo_hammoz_aerocom_diags, ONLY: lHEaci, lHEaci_activ, lMMPPE
+   USE mo_hammoz_aerocom_HEaci, ONLY: ccn_inst, ccn1_inst, ccn3_inst
+   USE mo_activ,                ONLY: swat
+   USE mo_param_switches,       ONLY: ac_scale_activation
+   !<<DN
 
    INTEGER, INTENT(IN)  :: kproma, kbdim, klev, krow, ktdia
    REAL(wp), INTENT(IN) :: ptkem1(kbdim,klev)
@@ -1628,21 +1443,10 @@ MODULE mo_submodel_interface
    REAL(wp), INTENT(IN) :: papm1(kbdim,klev)
    REAL(wp), INTENT(IN) :: pqm1(kbdim,klev)
    REAL(wp), INTENT(IN) :: pesw(kbdim,klev)
-   !>>UP
-   REAL(wp), INTENT(IN) :: pcdnc_min(kbdim,klev)
-   LOGICAL, INTENT(IN)  :: ll_actccn(kbdim,klev) ! logical for whether these CCN will be potentially
-   ! used for CD activation 
-   LOGICAL, INTENT(IN)  :: ll_actccn_wobase(kbdim,klev) ! logical for whether
-   ! these CCN will be potentially used for CD activation, not including the cloud base check
-   INTEGER, INTENT(IN)  :: ll_bas(kbdim,klev) ! logical for cloud base
-   REAL(wp), INTENT(IN) :: pdpg(kbdim,klev)        !< delta p over g [kg/m2]
-   !<<UP
 
    !-- activation:
    REAL(wp), INTENT(OUT) :: pcdncact(kbdim,klev)
    !-- mixed-phase freezing (despite their names, these quantities ARE NOT dependent on HAM):
-   !UP comment: meaning they don't need to be dependent on HAM, e.g. when they
-   !are supplied by the climatology
    REAL(wp), INTENT(out) :: prwetki(kbdim,klev)  ! wet radius, aitken insoluble mode
    REAL(wp), INTENT(out) :: prwetai(kbdim,klev)  ! wet radius, accumulation insoluble mode
    REAL(wp), INTENT(out) :: prwetci(kbdim,klev)  ! wet radius, coarse insoluble mode
@@ -1671,14 +1475,10 @@ MODULE mo_submodel_interface
    REAL(wp), ALLOCATABLE :: zrc(:,:,:,:), & ! critical radius of activation per mode and w bin [m]
                             zsmax(:,:,:)    ! maximum supersaturation per w bin [% 0-1]
    INTEGER :: jclass
+   !>>DN
+   REAL(wp) :: swattemp(kbdim,klev)
+   !<<DN
 #endif
-   LOGICAL  :: lstrat
-   REAL(wp) :: zw_strat(kbdim,klev)
-   REAL(wp) :: zw_conv(kbdim,klev)
-
-     !>>UP ham timers
-     IF (ltimer) CALL timer_start(timer_ccn_activation)
-     !<<UP
 
    !--- Cloud droplets (activation)
 
@@ -1690,10 +1490,6 @@ MODULE mo_submodel_interface
                         zw, zwpdf                        )
 
 #ifdef HAMMOZ
-     !>>UP ham timers
-     IF (ltimer) CALL timer_start(timer_ham_ifdef)
-     IF (ltimer) CALL timer_start(timer_ham_totsum)
-     !<<UP
      !--- Koehler coefficients: used for Abdul-Razzak & Ghan activation
      IF (nham_subm == HAM_M7 .AND. (ncd_activ == 2 .OR. nccndiag > 0)) THEN
          CALL ham_activ_koehler_ab(kproma, kbdim, klev, krow, ktdia, &
@@ -1708,38 +1504,18 @@ MODULE mo_submodel_interface
            END IF
          END DO
      END IF
-     !>>UP ham timers
-     IF (ltimer) CALL timer_stop(timer_ham_totsum)
-     IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-     !<<UP
 #endif
 
      !--- Activation:
-!!++mgs: double-check logic for lclmi_progn and ncd_activ !! ncd_activ=0 ??  ###
+!!++mgs: double-check logic for lcdnc_progn and ncd_activ !! ncd_activ=0 ??  ###
      IF (ncd_activ == 1) THEN ! Lin & Leaitch scheme
 
        !--- Computes the available number of particules for activation:
        IF (lccnclim) THEN ! CCN climatology
-         ! strat case:
-         lstrat = .TRUE.
-         CALL ccnclim_avail_activ_lin_leaitch(kproma, kbdim, klev, krow, lstrat, zw_strat)
-         ! conv case: (note: this is kept here for conversative purposes, but should be moved to cuasc
-         !                   when conv updraft will be computed from cuasc too)
-         lstrat = .FALSE.
-         CALL ccnclim_avail_activ_lin_leaitch(kproma, kbdim, klev, krow, lstrat, zw_conv)
+         CALL ccnclim_avail_activ_lin_leaitch(kproma, kbdim, klev, krow)
 #ifdef HAMMOZ
        ELSEIF (lham) THEN ! HAM aerosols
-         !>>UP ham timers
-         IF (ltimer) CALL timer_start(timer_ham_ifdef)
-         IF (ltimer) CALL timer_start(timer_ham_totsum)
-         !<<UP
          CALL ham_avail_activ_lin_leaitch(kproma, kbdim, klev, krow, prho, pxtm1)
-         !>>UP ham timers
-         IF (ltimer) CALL timer_stop(timer_ham_totsum)
-         !<<UP
-         !>>UP ham timers
-         IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-         !<<UP
 #endif
        ENDIF
 
@@ -1750,33 +1526,14 @@ MODULE mo_submodel_interface
                               zw(:,:,1), pcdncact)
 
 #ifdef HAMMOZ
-       !>>UP ham timers
-       IF (ltimer) CALL timer_start(timer_ham_ifdef)
-       IF (ltimer) CALL timer_start(timer_ham_totsum)
-       !<<UP
        !--- Do some HAM-specific diagnostics
-       IF (lham) CALL ham_activ_diag_lin_leaitch(kproma, kbdim, klev, krow, prho, &
-                                                 pxtm1, pcdncact, pcdnc_min, &
-                                                 ll_actccn, ll_actccn_wobase, ll_bas, rwet(iaits)%ptr)
-       !>>UP
-       IF (lccnclimdiags .AND. (lham .OR. lccnclim)) CALL ham_activ_diag_lin_leaitch_2(&
-                                                          kproma, kbdim, klev, krow, pcdncact, &
-                                                          zw(:,:,1), ll_actccn, ll_bas, pdpg)
-       !<<UP
-       !>>UP ham timers
-       IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-       IF (ltimer) CALL timer_stop(timer_ham_totsum)
-       !<<UP
+       IF (lham) CALL ham_activ_diag_lin_leaitch(kproma, kbdim, klev, krow, prho, pxtm1, pcdncact)
 #endif
 
      ELSE IF (ncd_activ == 2) THEN !  Abdul-Razzak and Ghan scheme
                                    ! (only possible with active aerosols, security check done in setphys)
 
 #ifdef HAMMOZ
-        !>>UP ham timers
-        IF (ltimer) CALL timer_start(timer_ham_ifdef)
-        IF (ltimer) CALL timer_start(timer_ham_totsum)
-        !<<UP
         IF (ltimer) CALL timer_start(timer_ham_activation)
          ALLOCATE(zrc(kbdim,klev,nclass,nw))
          ALLOCATE(zsmax(kbdim,klev,nw))
@@ -1788,21 +1545,40 @@ MODULE mo_submodel_interface
                DO jclass=1, nclass
                   zrdry(1:kproma,:,jclass)=rdry(jclass)%ptr(1:kproma,:,krow)
                END DO
-   
+
+               !>>DN
+               IF(lHEaci.AND.lHEaci_activ)THEN
+                  swattemp(1:kproma,:)  = swat(1:kproma,:,krow)
+                  swat(1:kproma,:,krow) = 0.001_wp
+                  CALL ham_activ_abdulrazzak_ghan(kproma, kbdim, klev, krow, ktdia, &
+                                               ccn1_inst(:,:,krow), pesw, prho,             &
+                                               pxtm1, ptm1, papm1, pqm1,         &
+                                               zw, zwpdf, za, zb, zrdry,         &
+                                               znact, zfracn, zsc, zrc, zsmax)
+                  swat(1:kproma,:,krow) = 0.003_wp
+                  CALL ham_activ_abdulrazzak_ghan(kproma, kbdim, klev, krow, ktdia, &
+                                               ccn3_inst(:,:,krow), pesw, prho,             &
+                                               pxtm1, ptm1, papm1, pqm1,         &
+                                               zw, zwpdf, za, zb, zrdry,         &
+                                               znact, zfracn, zsc, zrc, zsmax)
+                  swat(1:kproma,:,krow)  = swattemp(1:kproma,:)
+                  lHEaci_activ = .FALSE.
+               END IF
+               !<<DN
+               
                CALL ham_activ_abdulrazzak_ghan(kproma, kbdim, klev, krow, ktdia, &
                                                pcdncact, pesw, prho,             &
                                                pxtm1, ptm1, papm1, pqm1,         &
                                                zw, zwpdf, za, zb, zrdry,         &
                                                znact, zfracn, zsc, zrc, zsmax)
+               !>>DN
+               IF(lMMPPE) pcdncact(1:kproma,:) = pcdncact(1:kproma,:) * ac_scale_activation
+               IF(lHEaci) ccn_inst(1:kproma,:,krow) = pcdncact(1:kproma,:)             
+               !<<DN
    
-               !UP comment: I guess here I should diagnose zsmax
-
                CALL ham_activ_diag_abdulrazzak_ghan_strat(kproma, kbdim, klev,   &
                                                           krow, znact, zfracn,   &
                                                           zrc, zsmax)
-               !UP comment: and here the znact
-               !            so that when we're using the climatology, the
-               !            routine can be skipped.
    
                ! Convective activation uses the stratiform values. This is not
                ! really correct, but keeps the results identical to those before
@@ -1811,12 +1587,6 @@ MODULE mo_submodel_interface
    
                CALL ham_activ_diag_abdulrazzak_ghan_conv(kproma, kbdim, klev,   &
                                                          krow, znact, zrc, zsmax)
-
-               !>>UP
-               IF (lccnclimdiags .AND. (lham .OR. lccnclim)) CALL ham_activ_diag_lin_leaitch_2(kproma, kbdim, klev, &
-                                                                  krow, pcdncact, zw(:,:,1), ll_actccn, ll_bas, pdpg)
-               !<<UP
-
    
             CASE(HAM_SALSA)
                !>> thk #511: AR&G scheme for SALSA
@@ -1851,19 +1621,11 @@ MODULE mo_submodel_interface
          DEALLOCATE(zsmax)
          DEALLOCATE(zrc)
 
-        IF (ltimer) CALL timer_stop(timer_ham_activation)
-        !>>UP ham timers
-        IF (ltimer) CALL timer_stop(timer_ham_totsum)
-        IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-        !<<UP
+         IF (ltimer) CALL timer_stop(timer_ham_activation)
          
 #endif
 
      ENDIF
-
-     !>>UP
-     IF (ltimer) CALL timer_stop(timer_ccn_activation)
-     !<<UP
 
      DEALLOCATE(zwpdf)
      DEALLOCATE(zw)
@@ -1880,19 +1642,11 @@ MODULE mo_submodel_interface
 
      ELSE IF (lham) THEN ! HAM aerosols
 #ifdef HAMMOZ
-       !>>UP ham timers
-       IF (ltimer) CALL timer_start(timer_ham_ifdef)
-       IF (ltimer) CALL timer_start(timer_ham_totsum)
-       !<<UP
        CALL ham_IN_setup(kproma, kbdim, klev, krow,                                  &
                          prho, pxtm1, pxtte, pcdncact,                               &
                          prwetki, prwetai, prwetci,                                  &
                          pfracdusol, pfracduai, pfracduci, pfracbcsol, pfracbcinsol, &
                          pascs, papnx, paprx, papsigx, ld_het                        )
-       !>>UP ham timers
-       IF (ltimer) CALL timer_stop(timer_ham_totsum)
-       IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-       !<<UP
 #endif
      ENDIF
 
@@ -1947,12 +1701,7 @@ MODULE mo_submodel_interface
                                   timer_cloud_subm 
   !>>dod split mo_timer (redmine #51) 
   USE mo_hammoz_timer,      ONLY: timer_ham_wetchem,    &
-                                  timer_hammoz_wetdep,  &
-                                  !>>UP adding new ham timers
-                                  timer_ham_totsum,     &
-                                  timer_ham_ifdef
-  USE mo_cmp_timer,         ONLY: timer_wetdep_strat
-                                  !<<UP
+                                  timer_hammoz_wetdep
   !<<dod
   USE mo_time_control,      ONLY: time_step_len
   USE mo_submodel,          ONLY: lchemistry,           &
@@ -2043,10 +1792,6 @@ MODULE mo_submodel_interface
   END DO
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   !-- heterogeneous (wet) chemistry calculation
   IF ( lham .AND. lchemistry ) THEN  !SF aero wet chemistry
 
@@ -2068,9 +1813,6 @@ MODULE mo_submodel_interface
   IF ( lwetdep .AND. ANY(trlist%ti(:)%nwetdep > 0) ) THEN
 
       IF (ltimer) CALL timer_start(timer_hammoz_wetdep)
-      !>>UP
-      IF (ltimer) CALL timer_start(timer_wetdep_strat)
-      !<<UP
       CALL wetdep_interface(kproma, kbdim,    klev, ktop, krow,      lstrat, &
                             zdpg,   pmratepr, pmrateps,   pmsnowacl,         &
                             pmlwc,  pmiwc,                                   &
@@ -2078,16 +1820,9 @@ MODULE mo_submodel_interface
                             pfrain, pfsnow, pfevapr, pfsubls,                &
                             zdum2d, zdum3d,                                  &
                             paclc,  pclcpre, prhop1, zdummy)
-      !>>UP
-      IF (ltimer) CALL timer_stop(timer_wetdep_strat)
-      !<<UP
       IF (ltimer) CALL timer_stop(timer_hammoz_wetdep)
 
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
 
   IF (ltimer) CALL timer_stop(timer_cloud_subm)
@@ -2095,7 +1830,134 @@ MODULE mo_submodel_interface
   END SUBROUTINE cloud_subm_2
 
   
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! interface between cloud physics and (so far) AerChemMIP
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! <ol>
+!! <li> S. Ferrachat, ETH Zurich. Replacement of old xt_chemistry call by new ham_wet_chemistry
+!!                                and wetdep_interface calls (2009.08; 2009.12)
+!! </ol>
+!!
+!! @par This subroutine is called by
+!! cloud
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!! The wet deposition interface is also called from cuflx_subm.
+!! 
+!!
+!! @par Responsible coder
+!! sylvaine.ferrachat@env.ethz.ch
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   
+
+  SUBROUTINE cloud_subm_3(                                 &
+             kproma,     kbdim,      klev,       krow,     &
+             kcld_top, ld_liqcld,                          &
+             pclcov, pcdnc, prho, paclc, prleff, prsfl, pssfl,&
+             paut, pacc, pdpg, pqccol, pfrain, pfevapr, paclci)             
+
+    USE mo_kind, ONLY: wp
+#ifdef HAMMOZ
+    !>>SF 
+    USE mo_submodel,               ONLY: laerocom_diag
+    USE mo_hammoz_aerocom_diags,   ONLY: lHEaci,lMMPPE
+    USE mo_hammoz_aerocom_HEaci,   ONLY: nstr_cld_top, nstr_cld_liq_top, cdnc3d,&
+         f3d, clt_inst, cdr3d, sprecip_inst, accret3d, auto3d, dpg, riming3d, &
+         qcsedten3d, qcevap3d
+    USE mo_hammoz_aerocom_mmppe,   ONLY: srain_inst
+    USE mo_cloud_utils,    ONLY: clc_min
+    !<<SF
+#endif
+
+    INTEGER, INTENT(in) :: kproma     !< geographic block number of locations
+    INTEGER, INTENT(in) :: kbdim      !< maximum number of locations in block
+    INTEGER, INTENT(in) :: klev       !< number of levels
+    INTEGER, INTENT(in) :: krow       !< geographic block number
+    INTEGER, INTENT(in) :: kcld_top(kbdim,klev)   !< level index of stratiform cloud tops
+    LOGICAL, INTENT(in) :: ld_liqcld(kbdim,klev)  !< flag for presence of droplets in cloud
+    REAL(wp), INTENT(in) :: pclcov(kbdim) !< total cloud cover [fraction]
+    REAL(wp), INTENT(in) :: pcdnc(kbdim,klev) !< grid-mean CDNC [m-3]
+    REAL(wp), INTENT(in) :: prho(kbdim,klev) !< Air density [kg/m3]
+    REAL(wp), INTENT(in) :: paclc(kbdim,klev) !< cloud cover  (now diagnosed in cover)
+    REAL(wp), INTENT(in) :: prleff(kbdim,klev) !< liquid effective radius [um]
+    REAL(wp), INTENT(in) :: prsfl(kbdim) !< surface rain flux (kg/m2/s)
+    REAL(wp), INTENT(in) :: pssfl(kbdim) !< surface snow flux (kg/m2/s)
+    REAL(wp), INTENT(in) :: paut(kbdim,klev) !< Rain formation rate for mass (autoconversion) (kg/kg/s)
+    REAL(wp), INTENT(in) :: pacc(kbdim,klev) !< Rain formation rate for mass (accretion) (kg/kg/s)
+    REAL(wp), INTENT(in) :: pdpg(kbdim,klev)     !< delta p over g [kg/m2]
+    REAL(wp), INTENT(in) :: pqccol(kbdim,klev) !< accretion (riming) of droplets by snow - mass
+    REAL(wp), INTENT(in) :: pfrain   (kbdim,klev)       !< rain flux before evaporation [kg/m2/s]
+    REAL(wp), INTENT(in) :: pfevapr  (kbdim,klev)       !< evaporation of rain [kg/m2/s]
+    REAL(wp), INTENT(in) :: paclci(kbdim,klev)      !< cloud cover used for ice clouds [0,1]
+
+    INTEGER :: icld_liq_top(kbdim, klev)
+  
+#ifdef HAMMOZ
+    !>>SF
+    IF (laerocom_diag) THEN
+       IF (lHEaci) THEN
+          !-- Set level of highest stratiform cloud top
+          nstr_cld_top(1:kproma,krow) = &
+               MINLOC(kcld_top(1:kproma,:),2, &
+               (kcld_top(1:kproma,:) > 0 ))
+
+          !-- Set lev index of all liq cloud tops
+          icld_liq_top(1:kproma,:) = MERGE( &
+               kcld_top(1:kproma,:), 0, &
+               ld_liqcld(1:kproma,:)) 
+          
+          !-- Set level of highest stratiform liq cloud top
+          nstr_cld_liq_top(1:kproma,krow) = MINLOC( &
+               icld_liq_top(1:kproma,:),2, &
+               (icld_liq_top(1:kproma,:) > 0))
+
+          !-- Set cdnc
+           cdnc3d(1:kproma,:,krow) = pcdnc(1:kproma,:)*prho(1:kproma,:)
+          
+          !-- Set cloud cover
+          clt_inst(1:kproma,krow) = pclcov(1:kproma)
+          f3d(1:kproma,:,krow) = paclc(1:kproma,:)
+          cdr3d(1:kproma,:,krow) = MERGE(prleff(1:kproma,:)*0.000001_wp,0._wp,&
+               (paclc(1:kproma,:)>clc_min.AND.ld_liqcld(1:kproma,:)))
+
+          !-- Set sprecip
+          sprecip_inst(1:kproma,krow) = prsfl(1:kproma)+pssfl(1:kproma)
+
+          !-- Set accr, auto, riming
+          accret3d(1:kproma,:,krow) = pacc(1:kproma,:)
+          auto3d(1:kproma,:,krow  ) = paut(1:kproma,:)
+          riming3d(1:kproma,:,krow) = pqccol(1:kproma,:)
+
+          !-- Set dpg
+          dpg(1:kproma,:,krow) = pdpg(1:kproma,:)
+
+          !-- Set qcsedten, qcevap
+          qcsedten3d(1:kproma,:,krow) = pfrain(1:kproma,:)*paclci(1:kproma,:)/pdpg(1:kproma,:)
+          qcevap3d(1:kproma,:,krow)   = pfevapr(1:kproma,:)*paclci(1:kproma,:)/pdpg(1:kproma,:)
+          
+       ENDIF
+       IF (lMMPPE) THEN
+          !-- Set srain
+          srain_inst(1:kproma,krow) = prsfl(1:kproma)
+       END IF
+    ENDIF
+    !<<SF 
+#endif
+  END SUBROUTINE cloud_subm_3
+
+    
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !>
 !! This subroutine is the "portal" to the chemistry submodules. 
@@ -2159,11 +2021,7 @@ MODULE mo_submodel_interface
                                 timer_hammoz_sedimentation,  &
                                 timer_ham_gaschem,    &
                                 timer_moz_chem,       &
-                                timer_hammoz_burden,  &
-                                !>>UP
-                                timer_ham_totsum,     &
-                                timer_ham_ifdef
-                                !<<UP
+                                timer_hammoz_burden
   USE mo_tracdef,         ONLY: ntrac, trlist
   USE mo_submodel,        ONLY: lmethox,              &
                                 lham,                 &
@@ -2281,10 +2139,6 @@ MODULE mo_submodel_interface
 #ifdef HAMMOZ
   !--- Chemistry solvers  !gf: now done before the aerosol microphysics
 
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   ! ... interface to HAM gas-phase chemistry
   IF (lchemistry .AND. lham .AND. .NOT. lhmzoxi ) THEN
 
@@ -2297,9 +2151,6 @@ MODULE mo_submodel_interface
     IF (ltimer) CALL timer_stop(timer_ham_gaschem)
 
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  !<<UP
 
 !!mgs!!     ! ... interface to MOZART chemistry including independent submodules
 !!mgs!!     IF (lemissions .AND. llght .and. ichem >= 10) THEN
@@ -2336,9 +2187,6 @@ MODULE mo_submodel_interface
 
   !--- aerosol microphysics
 
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   IF (lham .AND. laero_micro) THEN
 
     zgrvolm1(:,:) = vphysc%grvolm1(:,:,krow)
@@ -2417,10 +2265,6 @@ MODULE mo_submodel_interface
      CALL ham_ccn(kproma, kbdim, klev,  klevp1, krow, ktrac, &
                   pxtm1,  ztvm1, papm1, paphm1               )
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
 
   ! -- calculate tracer burdens
@@ -2524,10 +2368,6 @@ MODULE mo_submodel_interface
   USE mo_control,        ONLY: ltimer
   USE mo_timer,          ONLY: timer_start, timer_stop, &
                                timer_radiation_subm_1
-  !>>UP ham timers
-  USE mo_hammoz_timer,   ONLY: timer_ham_totsum, &
-                               timer_ham_ifdef
-  !<<UP
   USE mo_submodel,       ONLY: lham
 #ifdef HAMMOZ
   USE mo_ham_rad,       ONLY: ham_rad_cache,          &
@@ -2559,10 +2399,6 @@ MODULE mo_submodel_interface
   IF (ltimer) CALL timer_start(timer_radiation_subm_1)
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   ! a) initialize HAM radiation submodule:
   IF (kaero==1) THEN !explicit HAM aerosol-radiation calculation
     ! for HAM-M7
@@ -2573,10 +2409,6 @@ MODULE mo_submodel_interface
                     aer_tau_sw_vr, aer_piz_sw_vr, aer_cg_sw_vr, aer_tau_lw_vr )
     END IF
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
 
   IF (ltimer) CALL timer_stop(timer_radiation_subm_1)
@@ -2616,16 +2448,15 @@ MODULE mo_submodel_interface
 
   SUBROUTINE radiation_subm_2(kproma, kbdim, krow, klev, &
                               ktrac, kaero,              &
-                              pxtm1                      )
+                              pxtm1,                     &
+!>>NAJS: lidar backscatter
+                              ppd_hl,pp_fl,tk_fl,xm_vap)
+!<<NAJS
 
   USE mo_kind,           ONLY: wp
   USE mo_control,        ONLY: ltimer
   USE mo_timer,          ONLY: timer_start, timer_stop, &
                                timer_radiation_subm_2
-  !>>UP ham timers
-  USE mo_hammoz_timer,   ONLY: timer_ham_totsum,        &
-                               timer_ham_ifdef
-  !<<UP
   USE mo_submodel,       ONLY: lham
 #ifdef HAMMOZ
   USE mo_ham_rad,       ONLY: ham_rad_diag, ham_rad_cache_cleanup
@@ -2640,29 +2471,31 @@ MODULE mo_submodel_interface
   INTEGER,  INTENT(in) :: krow                     ! geographic block number
   INTEGER,  INTENT(in) :: kaero                    ! geographic block number
   REAL(wp), INTENT(in) :: pxtm1 (kbdim,klev,ktrac) ! tracer mass/number mixing ratio (t-dt)   [kg/kg]/[#/k
+!>>NAJS: lidar backscatter
+  REAL(wp), INTENT(IN) :: ppd_hl(kbdim,klev)       ! level pressure thickness in Pa
+  REAL(wp), INTENT(IN) :: pp_fl(kbdim,klev)        ! full level pressure in Pa
+  REAL(wp), INTENT(IN) :: tk_fl(kbdim,klev)        ! full level temperature in K
+  REAL(wp), INTENT(IN) :: xm_vap(kbdim,klev)       ! full level specific humidity in g/g
+!<<NAJS
 
 
   IF (ltimer) CALL timer_start(timer_radiation_subm_2)
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum)
-  !<<UP
   !--- 1) HAM radiation submodule:
   IF (kaero==1) THEN
     !--- Diagnostics:
     IF (lham) THEN
       CALL ham_rad_diag(kproma, kbdim, klev, krow, &
-                         pxtm1                      )
+                        pxtm1,                     & 
+!>>NAJS: lidar backscatter
+                        ppd_hl,pp_fl,tk_fl,xm_vap)
+!<<NAJS
+
       ! free memory for HAM aerosol optical properties:
       CALL ham_rad_cache_cleanup
     END IF
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
 
   IF (ltimer) CALL timer_stop(timer_radiation_subm_2)
@@ -2773,12 +2606,7 @@ MODULE mo_submodel_interface
                                    timer_stop,             &
                                    timer_cuflx_subm 
   !>>dod split mo_timer (redmine #51)
-  USE mo_hammoz_timer,       ONLY: timer_hammoz_wetdep,    &
-  !>>UP ham timers
-                                   timer_ham_totsum,       &
-                                   timer_ham_ifdef
-  USE mo_cmp_timer,          ONLY: timer_wetdep_conv
-  !<<UP
+  USE mo_hammoz_timer,       ONLY: timer_hammoz_wetdep
   !<<dod
   USE mo_tracdef,            ONLY: ntrac, trlist
   USE mo_submodel,           ONLY: lwetdep, llght, lchemistry, lham     !>>>mgs<<<
@@ -2856,12 +2684,6 @@ INTEGER, INTENT(in)       :: ktype(kbdim),              & ! convective cloud typ
   zlfrac_so2(1:kproma,:) = 0._wp
 
 #ifdef HAMMOZ
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  IF (ltimer) CALL timer_start(timer_ham_totsum) ! Not sure how much of this is HAM vs MOZ?
-  ! But since I never run with MOZ, this won't affect my timings.
-  IF (ltimer) CALL timer_start(timer_wetdep_conv)
-  !<<UP
   IF (lham .AND. lchemistry) THEN
     IF (ltimer) CALL timer_start(timer_hammoz_wetdep)
     CALL ham_conv_lfraq_so2(kproma, kbdim, klev, &
@@ -2870,7 +2692,6 @@ INTEGER, INTENT(in)       :: ktype(kbdim),              & ! convective cloud typ
     IF (ltimer) CALL timer_stop(timer_hammoz_wetdep)
 
   END IF
-
 
   ! 2)-- call wet deposition routine
   IF (lwetdep .AND. ANY(trlist%ti(:)%nwetdep > 0)) THEN
@@ -2888,10 +2709,6 @@ INTEGER, INTENT(in)       :: ktype(kbdim),              & ! convective cloud typ
                           paclc,  zdum2d,   prhou, pxtbound)
     IF (ltimer) CALL timer_stop(timer_hammoz_wetdep)
   END IF
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_wetdep_conv)
-  IF (ltimer) CALL timer_stop(timer_ham_totsum)
-  !<<UP
   IF (llght) THEN
 !!  CALL message('cuflx_subm','Calling moz_lightning from cuflx_subm', level=em_debug)
     CALL moz_lightning(kproma,      kbdim,      klev,        krow,              &
@@ -2900,7 +2717,6 @@ INTEGER, INTENT(in)       :: ktype(kbdim),              & ! convective cloud typ
                        pmfu(:,:),   znoems_3d(:,:)                          )
     IF (idt_NO > 0) pxtte(1:kproma,:,idt_NO) = pxtte(1:kproma,:,idt_NO) + znoems_3d(1:kproma,:)
   END IF
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
 #endif
 
   IF (ltimer) CALL timer_stop(timer_cuflx_subm)

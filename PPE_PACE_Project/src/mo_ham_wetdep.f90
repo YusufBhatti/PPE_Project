@@ -117,11 +117,13 @@ MODULE mo_ham_wetdep
   ! master routine for ham scavenging calculations
 
   USE mo_ham_streams,   ONLY: rwet
-  USE mo_ham_m7ctl,     ONLY: cmedr2mmedr,&
-                              !>>UP #809
-                              icoai, lwopath_274, scale_wetdep_wopath274
-                              !<<UP #809
+  USE mo_ham_m7ctl,     ONLY: cmedr2mmedr
   USE mo_ham,           ONLY: nham_subm, HAM_M7
+  !>>DN
+  USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+  USE mo_hammoz_aerocom_HEaci, ONLY: wet3Dso4_inst
+  USE mo_species, ONLY: speclist
+  !<<DN
 
   !--- arguments
   INTEGER, INTENT(in) :: kproma         ! geographic block number of locations
@@ -322,7 +324,6 @@ MODULE mo_ham_wetdep
 
      !--- 1.1.2/ Put everything together:
 
-
      pxtp1c(1:kproma,:,kt) = zxtwat(1:kproma,:) + zxtice(1:kproma,:)
 
      !--- Local deposition mass-flux [grid-box mean kg m-2 s-1]:
@@ -374,6 +375,13 @@ MODULE mo_ham_wetdep
         pdepintic_impm(1:kproma) = pdepintic_impm(1:kproma) - zdxtevapic_impm(1:kproma,jk)
         pdepintic_impc(1:kproma) = pdepintic_impc(1:kproma) - zdxtevapic_impc(1:kproma,jk)
 
+        !>>DN
+        IF(lHEaci .AND. trlist%ti(kt)%nphase == AEROSOLMASS.AND.trlist%ti(kt)%spid>0)THEN
+           IF (speclist(trlist%ti(kt)%spid)%shortname == 'SO4') &
+                wet3Dso4_inst(1:kproma,jk,krow)=&
+                wet3Dso4_inst(1:kproma,jk,krow)+zdep(1:kproma,jk)-zdxtevapic(1:kproma,jk)
+        END IF
+        !<<DN        
      ENDDO
 
      IF (.NOT. lstrat) THEN ! conv case
@@ -440,30 +448,16 @@ MODULE mo_ham_wetdep
      ztmp1(1:kproma,:) = pxtp10(1:kproma,:,kt)*pclc(1:kproma,:)*zxtfrac_col(1:kproma,:)
      zdxtcol(1:kproma,:) = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
 
+     zxtp10(1:kproma,:) = zxtp10(1:kproma,:) - zdxtcol(1:kproma,:)
+
+     zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:)*pdpg(1:kproma,:)/ztmst
+
      ztmp1(1:kproma,:)    = pxtp10(1:kproma,:,kt)*pclc(1:kproma,:)*zxtfrac_colr(1:kproma,:)*pdpg(1:kproma,:)/ztmst
      zdxtcolr(1:kproma,:) = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
 
      ztmp1(1:kproma,:)    = pxtp10(1:kproma,:,kt)*pclc(1:kproma,:)*zxtfrac_cols(1:kproma,:)*pdpg(1:kproma,:)/ztmst
      zdxtcols(1:kproma,:) = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
      !<<SF #458 (replacing where statements)
-
-     !>>UP #809
-     IF (lwopath_274) THEN
-     ! The scaling is a compensation for the removal of path 274
-        IF (trlist%ti(kt)%mode == icoai) THEN
-           ! Thus it should be applied only to the mode that is missing a sink
-           ! because of the inhibited 274, which is the CI mode
-           zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:) * scale_wetdep_wopath274
-           zdxtcolr(1:kproma,:) = zdxtcolr(1:kproma,:) * scale_wetdep_wopath274
-           zdxtcols(1:kproma,:) = zdxtcols(1:kproma,:) * scale_wetdep_wopath274
-        ENDIF
-     ENDIF
-     !<<UP #809
-
-     !UP #809: below two lines needed to be moved here to incorporate the
-     ! scaling
-     zxtp10(1:kproma,:) = zxtp10(1:kproma,:) - zdxtcol(1:kproma,:)
-     zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:)*pdpg(1:kproma,:)/ztmst
 
      DO jk=ktop,klev
 
@@ -480,6 +474,13 @@ MODULE mo_ham_wetdep
         pdepintbc(1:kproma)  = pdepintbc(1:kproma)  - zdxtevapbc(1:kproma,jk)
         pdepintbcr(1:kproma) = pdepintbcr(1:kproma) - zdxtevapbcr(1:kproma,jk)
         pdepintbcs(1:kproma) = pdepintbcs(1:kproma) - zdxtevapbcs(1:kproma,jk)
+        !>>DN
+        IF(lHEaci .AND. trlist%ti(kt)%nphase == AEROSOLMASS)THEN
+           IF (speclist(trlist%ti(kt)%spid)%shortname == 'SO4') &
+                wet3Dso4_inst(1:kproma,jk,krow)=&
+                wet3Dso4_inst(1:kproma,jk,krow)+zdxtcol(1:kproma,jk)-zdxtevapbc(1:kproma,jk)
+        END IF
+        !<<DN        
      ENDDO !jk
 
   ENDIF !end below-cloud scavenging
@@ -490,15 +491,11 @@ MODULE mo_ham_wetdep
   !--- Total tendency + update updraft flux in conv case:   
   IF (lstrat) THEN !SF stratiform case
 
-     ! Cloud free mixing ratio
      pxtp10(1:kproma,:,kt) = zxtp10(1:kproma,:)                              &
                            + (zdxtevapic(1:kproma,:)+zdxtevapbc(1:kproma,:)) &
                              / pdpg(1:kproma,:) * ztmst
 
-     ! tracer mass mixing ratio at t+dt
      zxtp1(1:kproma,:) = pxtm1(1:kproma,:,kt)+pxtte(1:kproma,:,kt)*ztmst
-
-     ! Tracer tendency = (cloud free mixing ratio + cloudy mixing ratio - tracer mass mixing ratio at next time step  ) / time step
      zxtte(1:kproma,:) = (pxtp10(1:kproma,:,kt)+pxtp1c(1:kproma,:,kt)-zxtp1(1:kproma,:)) / ztmst
 
   ELSE !SF conv case
@@ -521,9 +518,6 @@ MODULE mo_ham_wetdep
 
   ! In-cloud scavenging master routine
 
-    !>>UP #809
-    USE mo_ham_m7ctl,     ONLY: icoai, lwopath_274, scale_wetdep_wopath274
-    !<<UP #809
     INTEGER, INTENT(in)   :: kproma, kbdim, klev, krow, ktop, kt
     INTEGER, INTENT(in)   :: kmod                         ! current tracer mode
     INTEGER, INTENT(in)   :: kwat_phase                   ! kwat_phase=1 --> water; kwat_phase=2 --> ice 
@@ -576,19 +570,6 @@ MODULE mo_ham_wetdep
     ztmp1(1:kproma,:) = pxt(1:kproma,:)*zxtfrac(1:kproma,:)*peff(1:kproma,:)
     pdxt(1:kproma,:)  = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
     !<<SF #458 (replacing where statements)
-
-     !>>UP #809
-     IF (lwopath_274) THEN
-     ! The scaling is a compensation for the removal of path 274
-        IF (trlist%ti(kt)%mode == icoai) THEN
-           ! Thus it should be applied only to the mode that is missing a sink
-           ! because of the inhibited 274, which is the CI mode
-           pdxt(1:kproma,:) = pdxt(1:kproma,:) * scale_wetdep_wopath274
-           pdxt_imp(1:kproma,:) = pdxt_imp(1:kproma,:) * scale_wetdep_wopath274
-           pdxt_nuc(1:kproma,:) = pdxt_nuc(1:kproma,:) * scale_wetdep_wopath274
-        ENDIF
-     ENDIF
-     !<<UP #809
 
     pxt(1:kproma,:) = pxt(1:kproma,:) - pdxt(1:kproma,:)
 
@@ -729,13 +710,6 @@ MODULE mo_ham_wetdep
 !SF: output of this subroutine: sfnuc
 !    sfnuc is defined in the whole module instead of being passed as an intent(out) because
 !    it needs to be kept from one instance to the next
-!
-!>>UP note #832:
-!   In future, one may choose to reconsider which CCN concentration to use
-!   for wet deposition: Betty Croft developed the wet deposition
-!   paramterisation for na from L&L which is a different quantity than na
-!   from AR&G, which is used here. This is inconsistent (see #832)!
-!<<UP note #832
 
     USE mo_ham_m7_trac,          ONLY: idt_nks, idt_nas, idt_ncs
     USE mo_activ,                ONLY: na, idt_cdnc, idt_icnc
@@ -782,7 +756,7 @@ MODULE mo_ham_wetdep
 
     ! Critical radius for scavenged mode.
     ! This calculation is only needed *once per mode* because it is not 
-    ! dependent on whether this is a mass or number calculation
+    ! dependent of whether this is a mass or number calculation
     ! (ie not dependent on ktrac_phase)
 
     IF (rcritrad(1,1,kwat_phase,kmod) == UNDEF) THEN ! rcritrad calculation required

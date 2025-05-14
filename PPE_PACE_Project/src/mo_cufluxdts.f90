@@ -40,11 +40,6 @@ MODULE mo_cufluxdts
   USE mo_memory_g3b,         ONLY : aprc_na
   !++-end-for cfmip diagnostics-------------------------------------------------------
 #endif
-  !>>UP new ham timers
-  USE mo_control,            ONLY: ltimer     
-  USE mo_hammoz_timer,       ONLY: timer_start, timer_stop, &
-                                   timer_ham_ifdef
-  !<<UP 
   !
   IMPLICIT NONE
   PRIVATE
@@ -560,16 +555,13 @@ CONTAINS
     &               ptte_cnv, pqte_cnv, pxtte_cnv,                                   &
 #endif
     &               pxtecl,   pxteci                                                )
-!>>DN: burden
-USE mo_activ,        ONLY: dconvtte
-!<<DN: burden
     !
 
 !>>SF
 #ifdef HAMMOZ
   USE mo_boundary_condition, ONLY: bc_set, bc_find
   USE mo_time_control,       ONLY: lstart, lresume
-  USE mo_param_switches,     ONLY: lclmi_progn
+  USE mo_param_switches,     ONLY: lcdnc_progn
 #endif
 !<<SF
 
@@ -649,17 +641,6 @@ USE mo_activ,        ONLY: dconvtte
     DO jk=ktopm2,klev
       !
       IF(jk.LT.klev) THEN
-!>>DN: burden
-     IF (lham) THEN
-     WHERE((pten(1:kproma,jk)-tmelt).GT.0._wp)
-        dconvtte(1:kproma,krow) = dconvtte(1:kproma,krow)+&
-             alv*plude(1:kproma,jk)*zdiagt
-     ELSEWHERE
-        dconvtte(1:kproma,krow) = dconvtte(1:kproma,krow)+&
-             als*plude(1:kproma,jk)*zdiagt
-     END WHERE
-     END IF
-!<<DN: burden
         DO jl=1,kproma
           IF(ldcum(jl)) THEN
             llo1=(pten(jl,jk)-tmelt).GT.0._wp
@@ -785,20 +766,13 @@ USE mo_activ,        ONLY: dconvtte
     END DO
 
 !>>SF #518: save detrained condensate as a new boundary condition to use in 2-moment stratiform cl-micro
-!UP comment: I don't think this is related to HAM, so I won't include it in the timer_ham_totsum
 #ifdef HAMMOZ
-!>>UP ham timers
-IF (ltimer) CALL timer_start(timer_ham_ifdef)
-!<<UP
-    IF (lclmi_progn) THEN
+    IF (lcdnc_progn) THEN
         IF (lstart .OR. lresume) THEN
            CALL bc_find('Detrained condensate', ibc_detr_cond, ierr=ierr)
         ENDIF
         CALL bc_set(ibc_detr_cond, kbdim, krow, zxtec)
     ENDIF
-!>>UP ham timers
-IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-!<<UP
 #endif
 !<<SF
 

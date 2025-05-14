@@ -45,6 +45,7 @@ NAMELIST /submodelctl/ &
   lburden,          &  ! activate burden (column integral) diagnostics for mass mixing ratio tracers
   emi_basepath,     &  ! path to emission files specified in emi_spec.txt
   emi_scenario,     &  ! RCP (Representative Concentration Pathway) to be modelled
-  laoa                 ! age-of-air tracer submodel
-!     ------------------------------------------------------------------
+  laoa,             &  ! age-of-air tracer submodel
+  laerocom_diag        ! main switch for AeroComdiags
+!!     ------------------------------------------------------------------
 

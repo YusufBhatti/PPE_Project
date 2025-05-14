@@ -186,6 +186,9 @@ MODULE mo_memory_g3b
   REAL(dp), POINTER, PUBLIC :: ev_vdiff(:,:)
   REAL(dp), POINTER, PUBLIC :: ch_concloud(:,:)
   REAL(dp), POINTER, PUBLIC :: cw_concloud(:,:)
+  !>DN AeroCom
+  REAL(dp), POINTER, PUBLIC :: rsuscs_na(:,:)
+  !<DN AeroCom
   !
   !  variables for ocean coupling only
   !
@@ -319,6 +322,10 @@ CONTAINS
     !  CALL add (g3b, 'ext_lw08', ext_lw08, code=34, lpost=.FALSE., leveltype=HYBRID, contnorest=.TRUE.)
     !  CALL add (g3b, 'ext_lw12', ext_lw12, code=35, lpost=.FALSE., leveltype=HYBRID, contnorest=.TRUE.)
     !ENDIF
+    !>>DN AeroCom
+    CALL add (g3b,'rsuscs_na',   rsuscs_na   ,code=52, contnorest=.TRUE.              ,units='W/m**2',  &
+         longname='instantaneous surface upwelling shortwave radiation flux (clear-sky)'    )
+    !<<DN AeroCom
     !
     ! fields for energy budget diagnostic
     !

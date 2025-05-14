@@ -51,12 +51,5 @@ NAMELIST /ham_m7ctl/  nwater,     & !< Aerosol water uptake scheme:
                                     !!         = 1 Activation nucleation, Kulmala et al., ACP 2006
                                     !!         = 2 Kinetic nucleation, Laakso et al., ACP 2004
                                     !!
-                      lnucl_stat, & !< Sample the cloud-free volume as function of T, RH, [H2SO4(g)],
+                      lnucl_stat    !< Sample the cloud-free volume as function of T, RH, [H2SO4(g)],
                                     !! H2SO4 condensation sink, and ionization rate (memory intensive)
-                      lwopath_24, & !! UP #809 remove coagulation from mode 2 to mode 4
-                      lwopath_274, &!! UP #809 remove coagulation from mode 2 to 7 (goes to 4)
-                      scale_wetdep_wopath274, &!!UP #809 scale wetdep for CI mode if lwopath_274
-		      l1ccn, &      !! UP #810 use only one mode as CCN (the mode is given by n1ccn)
-		      n1ccn, &	    !! UP #810 use only this mode as CCN (default 3)
-		      laerosimpl_drydep, & !! UP #809 inhibit drydep of the nucleation mode
-		      laerosimpl_wetdep    !! UP #809 inhibit wetdep of the nucleation mode

@@ -1,1 +1,0 @@
-../paper_default/emi_spec_paper_default.txt

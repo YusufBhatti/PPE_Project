@@ -1315,7 +1315,11 @@ CONTAINS
     
   END SUBROUTINE print_sinfo
 !==============================================================================
-  SUBROUTINE add_stream_reference (stream, name, fromstream, lpost, kprec)
+  SUBROUTINE add_stream_reference (stream, name, fromstream, lpost, kprec, ref_name, &
+          !>>SF allow for more ref metadata changes
+          ref_longname, ref_units &                    
+          !<<SF
+          )
   !
   ! add supplementary fields (eg. geopotential, surface pressure, gridbox area)
   !
@@ -1324,6 +1328,11 @@ CONTAINS
   CHARACTER(len=*) ,INTENT(in)    ,OPTIONAL :: fromstream
   LOGICAL          ,INTENT(in)    ,OPTIONAL :: lpost
   INTEGER          ,INTENT(in)    ,OPTIONAL :: kprec
+  CHARACTER(len=*) ,INTENT(in)    ,OPTIONAL :: ref_name
+  !>>SF allow for more ref metadata changes
+  CHARACTER(len=*) ,INTENT(in)    ,OPTIONAL :: ref_longname
+  CHARACTER(len=*) ,INTENT(in)    ,OPTIONAL :: ref_units
+  !<<SF
 
     TYPE (memory_type)  ,POINTER :: source
     TYPE (list_element) ,POINTER :: new_list_element
@@ -1343,6 +1352,14 @@ CONTAINS
         new_list_element% field% info% lpost = lpost
       IF (PRESENT(kprec)) &
         new_list_element% field% info% gribbits = kprec
+      IF (PRESENT(ref_name)) &
+        new_list_element% field% info% name = ref_name
+      !>>SF allow for more ref metadata changes
+      IF (PRESENT(ref_longname)) &
+        new_list_element% field% info% longname = ref_longname
+      IF (PRESENT(ref_units)) &
+        new_list_element% field% info% units = ref_units
+      !<<SF
     ENDIF
 
   END SUBROUTINE add_stream_reference

@@ -73,6 +73,10 @@ MODULE mo_ham_species
 !gf see #146
                      id_no3,                  & ! Nitrate radical
 !gf
+!>>DN AeroCom
+                     id_co,                   & !Carbon Monoxide
+                     id_rn222,                & !Radon 222
+!<<DN AeroCom
                      id_ocnv                   ! Organic carbon (gas)
 
   !   basic HAM model, aerosol phase compounds
@@ -436,6 +440,30 @@ MODULE mo_ham_species
 
 
      !--------- end of basic model aerosol phase species
+
+     !>>DN AeroCom
+     CALL new_species(nphase      = GAS,                 &
+                      longname    = 'Carbon Monoxide',   &
+                      shortname   = 'CO',                &
+                      units       = 'kg kg-1',           &
+                      mw          = 28.0_dp,             &
+                      tsubmname   = 'HAM',               &
+                      itrtype     = itrprog,             &
+                      ldrydep     = .FALSE.,             &
+                      lwetdep     = .FALSE.,             &
+                      idx         = id_co                )
+
+     CALL new_species(nphase      = GAS,                 &
+                      longname    = 'Radon 222',         &
+                      shortname   = 'RN222',             &
+                      units       = 'kg kg-1',           &
+                      mw          = 222.0_dp,            &
+                      tsubmname   = 'HAM',               &
+                      itrtype     = itrprog,             &
+                      ldrydep     = .FALSE.,             &
+                      lwetdep     = .FALSE.,             &
+                      idx         = id_rn222             )
+     !<<DN AeroCom
   END IF
   END SUBROUTINE ham_species
 

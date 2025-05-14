@@ -226,6 +226,8 @@ MODULE mo_cirrus
     LOGICAL,  INTENT(in)  :: LHET    ! .true. ---> heterogeneous freezing of
                                      !             aerosol particles below 235K
                                      !             is considered
+                                     !             aerosol particles below 235K
+                                     !             is considered
 
     INTEGER,  INTENT(in)  :: KLEV    ! number of levels
     INTEGER,  INTENT(in)  :: KBDIM   ! size of arrays
@@ -285,7 +287,7 @@ MODULE mo_cirrus
 !    ! functions
 !
 !    REAL(dp) :: PISAT  ! vapor pressure over ice [hPa]
-!    REAL(dp) :: SCRHOM ! critical ice saturation ratio for homogeneous freezing
+!    REAL(dp) :: SCRHOM ! critical ice saturation ratio for homogeneous freezinh
 
     IXC=0
 

@@ -919,9 +919,6 @@ MODULE mo_external_field_processor
       efield%ef_file = efile
       changed = .TRUE.
     ENDIF
-    !>>SFdbg To be consolidated --> #848
-    newyear=year
-    !<<SFdbg
   ENDIF
   END SUBROUTINE ef_get_filename
 

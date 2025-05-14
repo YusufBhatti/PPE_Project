@@ -66,8 +66,13 @@ MODULE mo_ham_rad_data
             nr_min, nr_max, ni_min, ni_max,   &
             inc_nr, inc_ni,                   &
             lambda, lambda_sw_opt,            &
-            nradang
-
+            nradang,                          &
+!>>NAJS: lidar backscatter
+            iradbeta, Niwv_sw_beta,           &
+!<<NAJS
+!>>NAJS: optical properties for dry aerosol
+            iraddry,  Niwv_sw_dry
+!<<NAJS
 
   !---public member functions
 
@@ -116,15 +121,21 @@ MODULE mo_ham_rad_data
   !--- Indices and dimensions:
 
   INTEGER, PARAMETER :: Nwv_sw     = 14, &   !-- RRTM-SW GCM wavebands
-                        Nwv_sw_opt = 2,  &   !--Optional SW wavebands (550nm+865nm)
-!                       Nwv_sw_opt = 2,  &   !--Optional SW wavebands (550nm+865nm+440nm)
+!                        Nwv_sw_opt = 2,  &   !--Optional SW wavebands (550nm+865nm)
+                        Nwv_sw_opt = 3,  &   !--Optional SW wavebands (550nm+870nm+440nm)
                         Nwv_sw_tot = Nwv_sw+Nwv_sw_opt, &
                         Nwv_lw     = 16, &   !--RRTM-LW GCM wavebands
                         Nwv_swlw   = Nwv_sw+Nwv_lw, &
-                        Nwv_tot    = Nwv_sw+Nwv_sw_opt+Nwv_lw
+                        Nwv_tot    = Nwv_sw+Nwv_sw_opt+Nwv_lw, &
+!>>NAJS: lidar backscatter
+                        Niwv_sw_beta = 1, &   ! Number of indices to wavelengths for backscatter factor
+!<<NAJS
+!>>NAJS: optical properties for dry aerosol
+                        Niwv_sw_dry  = 3      ! Number of indices to wavelengths for dry optical properties
+!<<NAJS
 
-  REAL(dp), PARAMETER :: lambda_sw_opt(2)=(/ 0.550E-6_dp, 0.865E-6_dp /)
-!  REAL(dp), PARAMETER :: lambda_sw_opt(2)=(/ 0.550E-6_dp, 0.865E-6_dp , 0.440E-6_dp/)
+!  REAL(dp), PARAMETER :: lambda_sw_opt(2)=(/ 0.550E-6_dp, 0.865E-6_dp /)
+  REAL(dp), PARAMETER :: lambda_sw_opt(3)=(/ 0.550E-6_dp, 0.865E-6_dp , 0.440E-6_dp/)
 
   !--- Define mask for output of wavelengths: 
   !
@@ -136,6 +147,13 @@ MODULE mo_ham_rad_data
   INTEGER :: nraddiagwv(Nwv_tot)
 
   INTEGER :: nradang(2)
+
+!>>NAJS: lidar backscatter
+  INTEGER, PARAMETER :: iradbeta(Niwv_sw_beta) = (/ 10 /) ! indices to sw wavelengths (533nm) for backscatter factor
+!<<NAJS
+!>>NAJS: optical properties for dry aerosol
+  INTEGER, PARAMETER :: iraddry(Niwv_sw_dry) = (/ 15, 16, 17 /) ! indices to sw wavelengths (550nm) for dry optical properties
+!<<NAJS
 
   !--- 1) Mid-band wavelengths:
 
@@ -175,8 +193,9 @@ CONTAINS
        nraddiagwv(1:NWv_tot)=0                          !--- Default: no diagnostics
 
        nraddiagwv(Nwv_sw+1:Nwv_sw+Nwv_sw_opt)=1         ! AOD only for all optional wavelengths
-       nraddiagwv(Nwv_sw+1)=2                           ! Additional diagnostics for 550nm
-
+       nraddiagwv(Nwv_sw+1)=3                           ! Additional diagnostics for 550nm
+       nraddiagwv(Nwv_sw+1:Nwv_sw+Nwv_sw_opt)=3      ! Additional diagnostics for 440, 550, 865nm !DN
+ 
        IF (ANY(nrad(:)==2) .OR. ANY(nrad(:)==3)) THEN
           nraddiagwv(Nwv_sw+Nwv_sw_opt+1)=1             ! AOD for first LW band
        END IF
@@ -205,13 +224,13 @@ CONTAINS
            7.900E-06_dp,   1.300E-06_dp,  5.200E-08_dp,  1.000E-09_dp,  1.000E-09_dp,  1.000E-09_dp,  &
            1.000E-09_dp,   2.600E-01_dp                                                               /)
 
-   !--- Optional Wavelengths at 550 and 865nm:
+   !--- Optional Wavelengths at 550, 865nm and 440nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradso4) =                                                          &
-        (/ 1.432_dp,       1.424_dp                                                                   /)
+        (/ 1.432_dp,       1.424_dp,      1.44_dp                                                     /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradso4) =                                                          &
-        (/ 1.000E-09_dp,   7.384E-07_dp                                                               /)
+        (/ 1.000E-09_dp,   7.384E-07_dp,  1.000E-9_dp                                                 /)
 
    !--- Black Carbon (Medium-absorbing values from Bond & Bergstrom, 2006):
    !
@@ -228,13 +247,13 @@ CONTAINS
            7.274E-01_dp,  7.106E-01_dp,  6.939E-01_dp,  7.213E-01_dp,  7.294E-01_dp,  7.584E-01_dp,  &
            7.261E-01_dp,  1.088E+00_dp                                                               /)
 
-   !--- Optional Wavelengths at 550nm and 865nm:
+   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
-        (/ 1.85_dp,       1.85_dp                                                                    /)
+        (/ 1.85_dp,       1.85_dp,       1.843_dp                                                    /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
-        (/ 7.10E-01_dp,   6.99E-01_dp                                                                /)
+        (/ 7.10E-01_dp,   6.99E-01_dp,   7.265E-01_dp                                                /)
 
    !--- Organic Carbon (Medium-absorbing values from Bond & Bergstrom, 2006):
    !
@@ -248,15 +267,15 @@ CONTAINS
    cni(1:Nwv_sw,iradoc) = &
         (/ 2.75E-02_dp,   7.33E-03_dp,   7.33E-03_dp,   4.58E-03_dp,   6.42E-03_dp,   1.43E-02_dp,    &
            1.77E-02_dp,   2.01E-02_dp,   1.50E-02_dp,   7.70E-03_dp,   9.75E-03_dp,   1.63E-02_dp,    &
-           5.27E-03_dp,   7.24E-02_dp                                                                /)
+           5.27E-03_dp,   7.24E-02_dp                                                                 /)
 
-   !--- Optional Wavelengths at 550nm and 865nm:
+   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradoc) =                                                          &
-        (/ 1.53_dp,       1.52_dp                                                                    /)
+        (/ 1.53_dp,       1.52_dp,       1.530_dp                                                    /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradoc) =                                                          &
-        (/ 5.50E-03_dp,   1.10E-02_dp                                                                /)
+        (/ 5.50E-03_dp,   1.10E-02_dp,   9.02E-3_dp                                                  /)
 
    !--- Sea Salt (Nilsson, 1979):
 
@@ -270,13 +289,13 @@ CONTAINS
            3.300E-04_dp,  1.000E-04_dp,  1.000E-07_dp,  1.000E-08_dp,  2.000E-08_dp,  1.000E-06_dp,  &
            1.000E-05_dp,  1.400E-02_dp                                                               /)
 
-   !--- Optional Wavelengths at 550nm and 865nm:
+   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradss) =                                                          &
-        (/ 1.450_dp,      1.470_dp                                                                   /)
+        (/ 1.450_dp,      1.470_dp,      1.496_dp                                                    /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradss) =                                                          &
-        (/ 1.000E-08_dp,  1.000E-8_dp                                                                /)
+        (/ 1.000E-08_dp,  1.000E-8_dp,   1.643E-08_dp                                                /)
 
   !--- Dust (provided by Stefan Kinne, MPI-MET:
   !    mainly based on Sokolik & Toon, JGR, 1999)
@@ -293,13 +312,13 @@ CONTAINS
            6.000E-04_dp,  7.500E-04_dp,  9.500E-04_dp,  1.000E-03_dp,  2.500E-03_dp,  2.000E-02_dp,  &
            2.500E-02_dp,  1.000E-01_dp                                                               /)
 
-   !--- Optional Wavelengths at 550nm and 865nm:
+   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
-        (/ 1.450_dp,      1.450_dp                                                                   /)
+        (/ 1.450_dp,      1.450_dp,      1.450_dp                                                    /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
-        (/ 1.000E-03_dp,  8.400E-4_dp                                                                /)
+        (/ 1.000E-03_dp,  8.400E-04_dp,  1.964E-03_dp                                                /)
 
    !--- Water (provided by Stefan Kinne interpolated with code by Andy Lacis (NASA-GISS):
    !          (Hale and Querry [1973] for 0.2 to 0.7 mm, 
@@ -315,13 +334,13 @@ CONTAINS
            1.200E-05_dp,  2.100E-06_dp,  6.800E-08_dp,  2.800E-09_dp,  3.900E-09_dp,  1.700E-08_dp,  &
            6.400E-08_dp,  4.000E-02_dp                                                               /)
 
-   !--- Optional Wavelengths at 550nm and 865nm:
+   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradwat) =                                                         &
-        (/ 1.335_dp,      1.329_dp                                                                   /)
+        (/ 1.335_dp,      1.329_dp,      1.339_dp                                                    /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradwat) =                                                         &
-        (/ 2.800E-09,     1.186E-06                                                                  /)
+        (/ 2.800E-09_dp,  1.186E-06_dp,  3.507E-09_dp                                                /)
 
 
    !--- 2) LW refractive indices:

@@ -46,8 +46,8 @@
 # Machine-specific (customize your path here):
 #----------------------------------------------
 
-input_basepath="XX/${input_files_version}"      # where all input files except nudging data is to be found
-nudg_basepath="XX"                              # where all nudging data is to be found
+input_basepath=XX/${input_files_version}      # where all input files except nudging data is to be found
+nudg_basepath=XX                              # where all nudging data is to be found
 
 #--------------------------------------------------
 # You shouldn't need to modify the following

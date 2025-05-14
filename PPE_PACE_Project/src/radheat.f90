@@ -98,7 +98,15 @@ USE mo_diag_tendency_new, ONLY: tdiag_vars, set_tendency
 USE mo_cosp_simulator,    ONLY: locosp, cosp_sunlit
 USE mo_memory_g3b,        ONLY: tradsu_na, trad0_na,  traf0_na, sradsu_na, &
                                 srad0u_na, srad0d_na, srads_na, srafs_na,  &
+                                !>>DN AeroCom
+                                rsuscs_na,                                 &
+                                !<<DN AeroCom
                                 sraf0_na,  trads_na,  trafs_na
+USE mo_hammoz_aerocom_diags, ONLY: lAP3D
+!>>DN AeroCom
+USE mo_hammoz_aerocom_AP3D, ONLY: rsuscs, rsnscs
+USE mo_memory_cfdiag,       ONLY: locfdiag, srsucs
+!<<DN AeroCom
 
 #ifdef _PROFILE
 USE mo_profile,           ONLY: trace_start, trace_stop
@@ -273,6 +281,11 @@ INTEGER :: jrow, jk, jl
      srafs_na(1:kproma,krow)=pi0(1:kproma)*ptrsof(1:kproma,2)
      sraf0_na(1:kproma,krow)=pi0(1:kproma)*ptrsof(1:kproma,1)
 
+     !>>DN AeroCom
+     IF (locfdiag) &
+          rsuscs_na(1:kproma,krow)=pi0(1:kproma)*srsucs(1:kproma,klevp1,krow)
+     !<<DN AeroCom
+
      DO 510 jl = 1, kproma
        psrad0(jl) = psrad0(jl) + zdtime*zflxs(jl,1)
        ptrad0(jl) = ptrad0(jl) + zdtime*zflxt(jl,1)
@@ -283,6 +296,12 @@ INTEGER :: jrow, jk, jl
        psrad0d(jl) = psrad0d(jl) + zdtime*pi0(jl)
        psraf0(jl) = psraf0(jl) + zdtime*sraf0_na(jl,krow)
        psrafs(jl) = psrafs(jl) + zdtime*srafs_na(jl,krow)
+       !>>DN AeroCom
+       IF(lAP3D)THEN
+          rsnscs(jl,krow) = rsnscs(jl,krow) + zdtime*srafs_na(jl,krow)
+          rsuscs(jl,krow) = rsuscs(jl,krow) + zdtime*rsuscs_na(jl,krow)
+       END IF
+       !<<DN AeroCom
 510  END DO
 
 !

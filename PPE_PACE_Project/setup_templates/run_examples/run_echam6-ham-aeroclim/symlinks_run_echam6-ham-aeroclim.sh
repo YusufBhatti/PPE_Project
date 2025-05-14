@@ -1,1 +1,0 @@
-../run_defaults_echam6-ham/symlinks_run_defaults_echam6-ham.sh

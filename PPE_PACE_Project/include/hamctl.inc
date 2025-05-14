@@ -50,6 +50,8 @@ NAMELIST /hamctl/ &
   nrad,                   & !< Radiation calculation (for each mode)
   nradmix,                & !< Mixing scheme for refractive indices (for each mode)
   nraddiag,               & !< Extended radiation diagnostics
+  nraddry,                & !< dry aerosol radiation diagnostics
+  nradbeta,               & !< LIDAR diagnostics
   lhetfreeze,             & !< switch to set heterogeneous freezing below 235K (cirrus scheme)
   nsoa,                   & !< Choice for Secondary Organic Aerosols
                             !! 0: no SOA scheme
@@ -76,9 +78,6 @@ NAMELIST /hamctl/ &
                             !! 1 : by tracer
                             !! 2 : per species
                             !! 3 : per mode (default)
-  lccnclim_diag,          & !< switch on diagnostics for later feeding the CCNclim submodel !SF #333       
-  laeroclim,              & !< switch to override selected aero tracers by climatologies
-  lconstwindemi,          & !< switch on to replace wind dependence in SS, DMS and dust emissions with a constant !UP test for sensitivity studies
 !--- boundary conditions (oxidant fields)
   bc_oh,                  & !< tracer boundary condition for OH
   bc_o3,                  & !< tracer boundary condition for O3

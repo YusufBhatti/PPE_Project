@@ -87,11 +87,8 @@ CONTAINS
    USE mo_exception,    ONLY: finish, message, message_text, em_param
    !>>SF
    USE mo_param_switches, ONLY: ncd_activ, & !SF ncd_activ replaces former ncdnc
-                                lclmi_progn !SF
+                                lcdnc_progn !SF
    !<<SF
-!davidn
-   USE mo_param_switches, ONLY: tun47entrpen,tun47cprcon,tun47entrscv,tun47cmfctop
-!davidn   
 
   IMPLICIT NONE
 
@@ -140,7 +137,7 @@ CONTAINS
   cmftau  = MIN(3._wp*3600._wp,7200._wp*63._wp/nn)
 
 !>>SF Modifications for double-moment cloud microphysics scheme
-  IF (lclmi_progn) THEN
+  IF (lcdnc_progn) THEN
      IF (nn == 63) THEN
         IF (nlev == 31) THEN
            SELECT CASE (ncd_activ)
@@ -172,12 +169,6 @@ CONTAINS
                  cmfctop = 0.2_wp
                  cprcon  = 9.E-04_wp
            END SELECT
-!davidn tuning        
-           entrpen = tun47entrpen
-           cprcon  = tun47cprcon
-           entrscv = tun47entrscv
-           cmfctop = tun47cmfctop
-!davidn tuning               
         ENDIF 
      ENDIF
   ENDIF

@@ -62,13 +62,8 @@
 MODULE mo_orocirrus
 
 #ifdef HAMMOZ
-! UP comment: I think content-wise this belongs to CMP, so I won't include it in timer_ham_totsum.
+
   USE mo_kind,           ONLY: dp
-  !>>UP new ham timers
-  USE mo_control,       ONLY: ltimer     
-  USE mo_hammoz_timer,  ONLY: timer_start, timer_stop, &
-                              timer_ham_ifdef
-  !<<UP
 
   IMPLICIT NONE
 
@@ -186,10 +181,6 @@ MODULE mo_orocirrus
 
 ! Executable statements
 
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  !<<UP
-  
   IF (.NOT. ALLOCATED(pampl_gwd))   ALLOCATE(pampl_gwd(kbdim,klev))
   IF (.NOT. ALLOCATED(pw_gwd_kpr))  ALLOCATE(pw_gwd_kpr(kbdim,klev))
   IF (.NOT. ALLOCATED(pl_z))        ALLOCATE(pl_z(kbdim))
@@ -474,9 +465,6 @@ MODULE mo_orocirrus
       ENDDO ! jl loop
      ENDDO ! jk loop
 
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 
   END  SUBROUTINE orocirrus_w
 
@@ -514,10 +502,6 @@ MODULE mo_orocirrus
 
 ! Executable statements
 
-  !>>UP ham timers
-  IF (ltimer) CALL timer_start(timer_ham_ifdef)
-  !<<UP
-  
   !
   !*         1.    calculate additional cloud cover (occ)
   !                ------------------------
@@ -538,10 +522,6 @@ MODULE mo_orocirrus
         paclc(jl,jk)=MIN(paclc(jl,jk),1._dp)
      ENDDO
   ENDDO
-
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 
   END  SUBROUTINE orocirrus_cc
 #endif

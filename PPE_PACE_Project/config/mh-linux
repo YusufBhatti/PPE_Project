@@ -244,33 +244,15 @@ case $ac_sitename in
                 ;;
             intel|intel_tectest) 
                 CC          = icc
-	            CFLAGS      = -std=gnu99 -O3 -march=native -g -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+	        CFLAGS      = -std=gnu99 -O3 -march=native -g -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
                 ccversion   = $(icc --version 2>&1 | awk 'NR==1') 
 
                 case $ac_hostname in
                      aerosol*) # AMD aerosol cluster
                          FCFLAGS = $FCFLAGS -march=corei7-avx
                      ;;
-                     eu-login*) #euler cluster
-                         #>>SF 202203 for euler 6/7
-                         CFLAGS  = $CFLAGS -march=core-avx2
-                         FCFLAGS = $FCFLAGS -march=core-avx2
-                         FFLAGS  = $FFLAGS -march=core-avx2
-                         #<<SF 202203
-                     ;;
                 esac
                 ;;                      
-            gcc)
-                FCFLAGS = $FCFLAGS -O3
-                FFLAGS  = $FFLAGS  -O3 
-                case $ac_hostname in
-                    eu-login*) #euler cluster
-                        CFLAGS  = $CFLAGS -march=core-avx2
-                        FCFLAGS = $FCFLAGS -march=core-avx2
-                        FFLAGS = $FFLAGS -march=core-avx2
-                        ;;
-                esac
-                ;; 
         esac
 
     ;;

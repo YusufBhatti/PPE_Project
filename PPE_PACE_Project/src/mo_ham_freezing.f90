@@ -59,18 +59,11 @@ MODULE mo_ham_freezing
     USE mo_ham_m7ctl,      ONLY : crdiv,                    &  
                                   iaiti,iacci,icoai,        &     
                                   iaccs, inucs    
-    USE mo_ham,            ONLY : lhetfreeze, sizeclass, nclass, nham_subm, HAM_M7, &
-                                  HAM_SALSA, lccnclim_diag
+    USE mo_ham,            ONLY : lhetfreeze, sizeclass, nclass, nham_subm, HAM_M7, HAM_SALSA
     USE mo_activ,          ONLY: nfrzmod
-    USE mo_ham_streams,    ONLY: rwet, ndusol_strat, nbcsol_strat, &
+    USE mo_ham_streams,    ONLY: rwet, ndusol_strat, nbcsol_strat,       &
                                  nduinsolai, nduinsolci, nbcinsol, &
-                                 naerinsol, &
-                                 !>>SF #333
-                                 fracdusol_acc, fracduai_acc, fracduci_acc, &
-                                 fracbcsol_acc, rwetai_acc, rwetci_acc, rwetas_acc
-                                 !<<SF #333
-    USE mo_time_control,   ONLY: delta_time !SF #333
-
+                                 naerinsol
     USE mo_ham_salsactl,   ONLY: in2b, in2a, in1a
     INTEGER,  INTENT(in)  :: kproma, kbdim, klev, krow
 
@@ -126,22 +119,6 @@ MODULE mo_ham_freezing
      pfracbcsol(1:kproma,:)   = MIN(nbcsol_strat(1:kproma,:,krow)/(pcdncact(1:kproma,:)      +zeps), 1._dp)
      pfracbcinsol(1:kproma,:) = MIN(nbcinsol(1:kproma,:,krow)    /(naerinsol(1:kproma,:,krow)+zeps), 1._dp)
  
-
-
-!>>SF #333 for ccn diags
-
-     IF (lccnclim_diag) THEN
-        fracdusol_acc(1:kproma,:,krow) = fracdusol_acc(1:kproma,:,krow) + pfracdusol(1:kproma,:)*delta_time
-        fracduai_acc(1:kproma,:,krow)  = fracduai_acc(1:kproma,:,krow)  + pfracduai(1:kproma,:) *delta_time
-        fracduci_acc(1:kproma,:,krow)  = fracduci_acc(1:kproma,:,krow)  + pfracduci(1:kproma,:) *delta_time
-        fracbcsol_acc(1:kproma,:,krow) = fracbcsol_acc(1:kproma,:,krow) + pfracbcsol(1:kproma,:)*delta_time
-   
-        rwetas_acc(1:kproma,:,krow) = rwetas_acc(1:kproma,:,krow) + rwet(iaccs)%ptr(1:kproma,:,krow)*delta_time
-        rwetai_acc(1:kproma,:,krow) = rwetai_acc(1:kproma,:,krow) + rwet(iacci)%ptr(1:kproma,:,krow)*delta_time
-        rwetci_acc(1:kproma,:,krow) = rwetci_acc(1:kproma,:,krow) + rwet(icoai)%ptr(1:kproma,:,krow)*delta_time
-     ENDIF
-!<<SF #333 for ccn diags
-
     !--- Cirrus freezing setup:
 
      !--- Soluble aerosol number concentration:

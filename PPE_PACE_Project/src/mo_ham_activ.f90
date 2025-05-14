@@ -88,7 +88,7 @@ CONTAINS
     ! II)  Calculate the corresponding radius of activation
     !      for each mode
     ! III) Calculate the number of particles that are larger
-    !      than the radius of activation for each mode.
+    !      then the radius of activation for each mode.
     ! 
     ! III) Calculation of the number of activated particles:
     !      See the routine ham_m7_logtail below.
@@ -103,10 +103,7 @@ CONTAINS
     ! Pruppbacher and Klett, Kluewer Ac. Pub., 1997.
 
     !>>dod soa
-    USE mo_ham_m7ctl,   ONLY: sigmaln, &
-    !>>UP #810
-                              l1ccn, n1ccn
-    !<<UP
+    USE mo_ham_m7ctl,   ONLY: sigmaln
     !<<dod
     USE mo_ham_tools,   ONLY: ham_m7_logtail
     USE mo_tracdef,     ONLY: trlist, ntrac, AEROSOLMASS
@@ -121,6 +118,10 @@ CONTAINS
     USE mo_ham_streams,  ONLY: frac
     USE mo_activ,        ONLY: na, nw
     !<<DN #364
+!>>DN
+   USE mo_hammoz_aerocom_diags, ONLY: lHEaci, lHEaci_activ
+   USE mo_activ,         ONLY: swat
+!<<DN
 
     IMPLICIT NONE
 
@@ -328,7 +329,15 @@ CONTAINS
        !<<dod
     END DO
 
-    !--- 3) Calculate activation:
+!>>DN
+    IF (lHEaci.AND.lHEaci_activ) THEN
+       DO jw=1, nw
+          psmax(1:kproma,:,jw)=swat(1:kproma,:,krow)
+       END DO
+    ENDIF
+!<<DN
+
+       !--- 3) Calculate activation:
 
     DO jw=1, nw
        DO jclass=1, nclass
@@ -369,17 +378,7 @@ CONTAINS
 
     DO jclass=1, nclass
        IF (sizeclass(jclass)%lactivation) THEN !>>dod<< #377
-          !>>UP #810
-          IF (l1ccn) THEN
-                  IF (jclass == n1ccn) THEN
-                          pfracn(1:kproma,:,jclass) = zfracn_top(1:kproma,:,jclass)/zfracn_bot(1:kproma,:,jclass)
-                  ELSE
-                          pfracn(1:kproma,:,jclass) = 0.0_dp
-                  END IF
-          ELSE
-                  pfracn(1:kproma,:,jclass) = zfracn_top(1:kproma,:,jclass)/zfracn_bot(1:kproma,:,jclass)
-          END IF
-          !<<UP #810
+          pfracn(1:kproma,:,jclass) = zfracn_top(1:kproma,:,jclass)/zfracn_bot(1:kproma,:,jclass)
           pnact(1:kproma,:,jclass)  = pfracn(1:kproma,:,jclass) * zn(1:kproma,:,jclass)
           pcdncact(1:kproma,:)      = pcdncact(1:kproma,:) + pnact(1:kproma,:,jclass)
        END IF
@@ -491,10 +490,6 @@ CONTAINS
     USE mo_physical_constants,   ONLY: rhoh2o, argas, amw
     USE mo_ham,         ONLY: naerocomp, aerocomp, sizeclass
     USE mo_tracdef,     ONLY: ntrac
-!davidn
-    USE mo_param_switches,     ONLY: lepsfix
-    USE mo_ham_streams,        ONLY: densaer
-!davidn
 
     IMPLICIT NONE
 
@@ -531,12 +526,8 @@ CONTAINS
 
     INTEGER :: jn, jspec
     INTEGER :: nion
-!davidn
-    REAL(dp),            POINTER :: densaer_p(:,:,:)
-!davidn
 
     zmasssum(1:kproma,:,:) = 0._dp
-    zmassfrac(1:kproma,:)  = 0._dp !davidn
     pa(1:kproma,:,:)       = 0._dp
     pb(1:kproma,:,:)       = 0._dp
 
@@ -580,20 +571,7 @@ CONTAINS
        jt = aerocomp(jn)%idt
        jclass = aerocomp(jn)%iclass
        
-!davidn 
-       densaer_p => densaer(jclass)%ptr
-!davidn 
        IF (nion > 0 .AND. sizeclass(jclass)%lactivation) THEN      !>>dod<< #377
-!davidn
-          IF(lepsfix)THEN !#680
-             WHERE(zmasssum(1:kproma,:,jclass)>zeps)           
-                zmassfrac(1:kproma,:)=zmassfrac(1:kproma,:)+pxtm1(1:kproma,:,jt)/zmasssum(1:kproma,:,jclass)
-             
-                zsumtop(1:kproma,:,jclass)=zsumtop(1:kproma,:,jclass)+pxtm1(1:kproma,:,jt)*znion*zosm/zmoleweight
-                zsumbot(1:kproma,:,jclass)=zsumbot(1:kproma,:,jclass)+pxtm1(1:kproma,:,jt)/densaer_p(1:kproma,:,krow)                   
-             END WHERE
-          ELSE
-!davidn
           WHERE(zmasssum(1:kproma,:,jclass)>zeps)
 
              zmassfrac(1:kproma,:)=pxtm1(1:kproma,:,jt)/zmasssum(1:kproma,:,jclass)
@@ -602,9 +580,6 @@ CONTAINS
              zsumbot(1:kproma,:,jclass)=zsumbot(1:kproma,:,jclass)+pxtm1(1:kproma,:,jt)/zrhoaer
                    
           END WHERE
-          !davidn
-          END IF
-          !davidn
 
        END IF! nion>0
 
@@ -613,22 +588,6 @@ CONTAINS
     DO jclass=1,nclass
        !>>dod #377
        IF(sizeclass(jclass)%lactivation) THEN
-!davidn
-         IF(lepsfix)THEN
-          WHERE (zsumbot(1:kproma,:,jclass)>zeps)
-
-             !--- 1.1.1) Hygroscopicity parameter B (Eq. 4) [1]:
-
-             pb(1:kproma,:,jclass)=(zamw*zsumtop(1:kproma,:,jclass))/(rhoh2o*zsumbot(1:kproma,:,jclass))&
-                  *zmassfrac(1:kproma,:)
-
-             !--- 1.1.2) Calculate the curvature parameter A [m]:
-
-             pa(1:kproma,:,jclass)= zafac/ptm1(1:kproma,:)
-
-          END WHERE
-          ELSE
-!davidn
           WHERE (zsumbot(1:kproma,:,jclass)>zeps)
 
              !--- 1.1.1) Hygroscopicity parameter B (Eq. 4) [1]:
@@ -640,9 +599,6 @@ CONTAINS
              pa(1:kproma,:,jclass)= zafac/ptm1(1:kproma,:)
 
           END WHERE
-!davidn
-          END IF
-!davidn
        END IF
        !<<dod
     END DO !jclass=1, nclass
@@ -656,7 +612,7 @@ CONTAINS
   !! 
   !! @remarks Preparatory routine for Lin&Leaitch activation scheme (HAM-specific)
   !! Basically it computes the fractional mass and number of each mode
-  !! larger than the cutoff of the instrument and adds them up
+  !! larger than the cutoff of the instrument and add them up
   !! Derived from the former aero_activ_lin_leaitch subroutine
 
   SUBROUTINE ham_avail_activ_lin_leaitch(kproma, kbdim, klev, krow, &
@@ -787,52 +743,20 @@ CONTAINS
 
   END SUBROUTINE ham_avail_activ_lin_leaitch
 
-  SUBROUTINE ham_activ_diag_lin_leaitch(kproma, kbdim, klev, krow, prho, pxtm1, pcdncact, pcdnc_min, &
-                                        ll_actccn, ll_actccn_wobase, ll_bas, zrwet)
+  SUBROUTINE ham_activ_diag_lin_leaitch(kproma, kbdim, klev, krow, prho, pxtm1, pcdncact)
 
-    USE mo_activ,        ONLY: na, &
-                        !>>UP
-                        ccn_strat_cdncmin, ccn_strat_cdncmin_ctr, &
-                        ccn_strat_actccn, ccn_strat_actccn_ctr, &
-                        ccn_strat_noactccn, ccn_strat_noactccn_ctr, &
-                        ccn_strat_actccnwobase, ccn_strat_actccnwobase_ctr, &
-                        ccn_strat_nosmall40, ccn_strat_nosmall40_ctr, &
-                        ccn_strat_nosmall1, ccn_strat_nosmall1_ctr, &
-                        ccn_strat_so4ks, &
-                        ccn_strat_max, ccn_strat_max_ctr
-    USE mo_ham_m7_trac, ONLY: idt_ms4ks, idt_nks, idt_mocks, idt_mbcks, &
-                              idt_ms4as, idt_nas, idt_mocas, idt_mbcas, &
-                              idt_mduas, idt_mssas
-    USE mo_ham_m7ctl,   ONLY: iaits, iaccs
-    USE mo_activ,       ONLY: rwet_KS_diag, rwet_KS_diag_cloudbase, &
-                              rwet_KS_diag_cloudbase_ctr
-    USE mo_param_switches, ONLY: lccnclimdiags
-    !<<UP
-    USE mo_conv,         ONLY: cdncact_cv, na_cv
-    USE mo_ham_streams,  ONLY: frac, nact_strat, nact_conv, &
-                               ccn_strat, ccn_conv !SF #333
-    USE mo_tracdef,      ONLY: ntrac
-    !>>SF #333
-    USE mo_ham,          ONLY: lccnclim_diag
-    USE mo_time_control, ONLY: delta_time
-    !<<SF #333
+    USE mo_activ,       ONLY: na
+    USE mo_conv,        ONLY: cdncact_cv
+    USE mo_ham_streams, ONLY: frac, nact_strat, nact_conv
+    USE mo_tracdef,     ONLY: ntrac
     USE mo_ham,         ONLY: sizeclass !>>dod<< #377
 
     INTEGER, INTENT(IN)  :: kproma, kbdim, klev, krow
     REAL(dp), INTENT(IN) :: prho(kbdim,klev)        ! air density
     REAL(dp), INTENT(IN) :: pxtm1(kbdim,klev,ntrac) ! tracer mmr
     REAL(dp), INTENT(IN) :: pcdncact(kbdim,klev) ! number of activated particles
-    REAL(dp), INTENT(IN) :: pcdnc_min(kbdim,klev) ! minimal CDNC
-    LOGICAL, INTENT(IN) :: ll_actccn(kbdim,klev) ! whether these CCN are
-    ! potentially used for CD activation
-    LOGICAL, INTENT(IN)  :: ll_actccn_wobase(kbdim,klev) ! logical for whether
-    ! these CCN will be potentially used for CD activation, not including the cloud base check
-    !>>UP
-    INTEGER, INTENT(IN)  :: ll_bas(kbdim,klev) ! logical for cloud base
-    REAL(dp), INTENT(IN) :: zrwet(kbdim,klev,krow) ! wet number mean radius, Aitken soluble
-    !<<UP
 
-    INTEGER  :: jclass, it, jccn, jw
+    INTEGER  :: jclass, it
     LOGICAL  :: ll1(kbdim,klev)
     REAL(dp) :: zeps
     REAL(dp) :: ztmp1(kbdim,klev), ztmp2(kbdim,klev)
@@ -850,18 +774,9 @@ CONTAINS
           ztmp1(1:kproma,:) = MERGE(na(1:kproma,:,krow), 1._dp, ll1(1:kproma,:)) !SF 1._dp is a dummy val.
           ztmp2(1:kproma,:) = pxtm1(1:kproma,:,it) * prho(1:kproma,:) &
                             * frac(jclass)%ptr(1:kproma,:,krow) / ztmp1(1:kproma,:)
-                            !UP note: fraction of particles in that mode (pxtm1) * fraction of activated particles in that mode (frac) / na
-                            !-> activated particles in that mode per total
-                            !activated particles
-                            !UP note: I don't get the units, though, because
-                            !pxtm1 is mass...
 
           nact_strat(jclass)%ptr(1:kproma,:,krow) = MERGE( &
                                                           pcdncact(1:kproma,:) * ztmp2(1:kproma,:), &
-                                                          !UP note: * CDNC
-                                                          !If the two scale the
-                                                          !same, this gives the
-                                                          !CDNC per mode
                                                           nact_strat(jclass)%ptr(1:kproma,:,krow), &
                                                           ll1(1:kproma,:))
 
@@ -873,72 +788,6 @@ CONTAINS
        END IF
        !<<dod
     END DO
-
-    !>>SF #333
-    IF (lccnclim_diag) THEN
-       ccn_strat(1:kproma,:,krow) = ccn_strat(1:kproma,:,krow) + na(1:kproma,:,krow)    * delta_time
-       ccn_conv(1:kproma,:,krow)  = ccn_conv(1:kproma,:,krow)  + na_cv(1:kproma,:,krow) * delta_time
-       !>>UP
-       ccn_strat_cdncmin(1:kproma,:,krow) = ccn_strat_cdncmin(1:kproma,:,krow) + & 
-                                            MERGE(na(1:kproma,:,krow) * delta_time, 0._dp, na(1:kproma,:,krow) > pcdnc_min)
-       ccn_strat_cdncmin_ctr(1:kproma,:,krow) = ccn_strat_cdncmin_ctr(1:kproma,:,krow) + &
-                                            MERGE(1._dp*delta_time, 0._dp, na(1:kproma,:,krow) > pcdnc_min)
-       ccn_strat_actccn(1:kproma,:,krow) = ccn_strat_actccn(1:kproma,:,krow) + & 
-                                            MERGE(na(1:kproma,:,krow) * delta_time, 0._dp, ll_actccn(1:kproma,:))
-       ccn_strat_actccn_ctr(1:kproma,:,krow) = ccn_strat_actccn_ctr(1:kproma,:,krow) + &
-                                            MERGE(1._dp*delta_time, 0._dp, ll_actccn(1:kproma,:))
-       ccn_strat_noactccn(1:kproma,:,krow) = ccn_strat_noactccn(1:kproma,:,krow) + & 
-                                            MERGE(0._dp, na(1:kproma,:,krow) * delta_time, ll_actccn(1:kproma,:))
-       ccn_strat_noactccn_ctr(1:kproma,:,krow) = ccn_strat_noactccn_ctr(1:kproma,:,krow) + &
-                                            MERGE(0._dp, 1._dp*delta_time, ll_actccn(1:kproma,:))
-       ccn_strat_actccnwobase(1:kproma,:,krow) = ccn_strat_actccnwobase(1:kproma,:,krow) + & 
-                                            MERGE(na(1:kproma,:,krow) * delta_time, 0._dp, ll_actccn_wobase(1:kproma,:))
-       ccn_strat_actccnwobase_ctr(1:kproma,:,krow) = ccn_strat_actccnwobase_ctr(1:kproma,:,krow) + &
-                                            MERGE(1._dp*delta_time, 0._dp, ll_actccn_wobase(1:kproma,:))
-       ccn_strat_nosmall40(1:kproma,:,krow) = ccn_strat_nosmall40(1:kproma,:,krow) + &
-                                            MERGE(na(1:kproma,:,krow) * delta_time, 0._dp, na(1:kproma,:,krow) > 40.0E6_dp)
-       ccn_strat_nosmall40_ctr(1:kproma,:,krow) = ccn_strat_nosmall40_ctr(1:kproma,:,krow) + &
-                                            MERGE(1._dp*delta_time, 0._dp, na(1:kproma,:,krow) > 40.0E6_dp)
-       ccn_strat_nosmall1(1:kproma,:,krow) = ccn_strat_nosmall1(1:kproma,:,krow) + &
-                                            MERGE(na(1:kproma,:,krow) * delta_time, 0._dp, na(1:kproma,:,krow) > 1.0E6_dp)
-       ccn_strat_nosmall1_ctr(1:kproma,:,krow) = ccn_strat_nosmall1_ctr(1:kproma,:,krow) + &
-                                            MERGE(1._dp*delta_time, 0._dp, na(1:kproma,:,krow) > 1.0E6_dp)
-       ccn_strat_so4ks(1:kproma,:,krow) = ccn_strat_so4ks(1:kproma,:,krow) + &
-                                          MERGE( &
-                                          ! Mass of SO4 in KS mode 
-                                          pxtm1(1:kproma,:,idt_ms4ks) / &
-                                          ! Mass of the KS mode 
-                                          (pxtm1(1:kproma,:,idt_ms4ks) + pxtm1(1:kproma,:,idt_mbcks) + pxtm1(1:kproma,:,idt_mocks)) &
-                                          ! Number concentration in the KS mode 
-                                          * pxtm1(1:kproma,:,idt_nks) &
-                                          ! CCN fraction of the KS mode 
-                                          * frac(iaits)%ptr(1:kproma,:,krow) &
-                                          ! Conversion and time
-                                          * prho(1:kproma,:) &
-                                          * delta_time, &
-                                          ! MERGE 
-                                          0._dp, &
-                                          ! MERGE 
-                                          (pxtm1(1:kproma,:,idt_ms4ks) + pxtm1(1:kproma,:,idt_mbcks) + &
-                                          pxtm1(1:kproma,:,idt_mocks)) > 0._dp)
-       ccn_strat_max(1:kproma,:,krow) = MAX(na(1:kproma,:,krow), ccn_strat_max(1:kproma,:,krow))
-       ccn_strat_max_ctr(1:kproma,:,krow) = 1._dp
-                                        
-
-       !<<UP
-    ENDIF
-    !<<SF #333
-
-    !>>UP
-    IF (lccnclimdiags) THEN
-    ! Diagnose wet radius at cloud base and outside
-    rwet_KS_diag(1:kproma,:,krow) = rwet_KS_diag(1:kproma,:,krow) + zrwet(1:kproma,:,krow) * delta_time
-    rwet_KS_diag_cloudbase(1:kproma,:,krow) = rwet_KS_diag_cloudbase(1:kproma,:,krow) + &
-                MERGE(zrwet(1:kproma,:,krow) * delta_time, 0._dp, ll_bas(1:kproma,:) > 0._dp)
-    rwet_KS_diag_cloudbase_ctr(1:kproma,:,krow) = rwet_KS_diag_cloudbase_ctr(1:kproma,:,krow) + &
-                MERGE(1._dp * delta_time, 0._dp, ll_bas(1:kproma,:) > 0._dp)
-    ENDIF
-    !<<UP
  
   END SUBROUTINE ham_activ_diag_lin_leaitch
 

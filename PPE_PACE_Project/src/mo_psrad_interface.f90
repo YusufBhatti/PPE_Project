@@ -97,6 +97,13 @@ CONTAINS
        & vis_frc_sfc     ,par_dn_sfc      ,nir_dff_frc     ,vis_dff_frc     ,&
        & par_dff_frc                                                         )
 
+    !>>DN   
+    USE mo_submodel,          ONLY: laerocom_diag
+    USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+    USE mo_hammoz_aerocom_HEaci, ONLY: cod3dswl, cod3dswi, od550aer3d
+    USE mo_hammoz_aerocom_AP3D,  ONLY: ec550aer_int, abs550aer_int
+    !<<DN
+
     INTEGER,INTENT(IN)  ::             &
          iaero,                        & !< aerosol control
          kproma,                       & !< number of longitudes
@@ -191,6 +198,10 @@ CONTAINS
          wx_vr        (kbdim,maxxsec,klev),& !< number of molecules/cm2 of
          cld_tau_lw_vr(kbdim,klev,nbndlw), & !< LW optical thickness of clouds
          cld_tau_sw_vr(kbdim,klev,nb_sw),  & !< extincion
+!>>DN
+         cld_tau_swl_vr(kbdim,klev,nb_sw), & !< extincion
+         cld_tau_swi_vr(kbdim,klev,nb_sw), & !< extincion
+!<<DN
          cld_cg_sw_vr (kbdim,klev,nb_sw),  & !< asymmetry factor
          cld_piz_sw_vr(kbdim,klev,nb_sw),  & !< single scattering albedo
          aer_tau_lw_vr(kbdim,klev,nbndlw), & !< LW optical thickness of aerosols
@@ -396,11 +407,12 @@ CONTAINS
          & laglac        ,laland        ,kproma        ,kbdim          ,& 
          & klev          , ktype        ,nbndlw        ,nbndsw         ,&
          & icldlyr       ,zlwp_vr       ,ziwp_vr       ,zlwc_vr        ,&
-!>>SF
-         & ziwc_vr       ,cdnc_vr       , icnc_vr, cld_tau_lw_vr ,cld_tau_sw_vr  ,&
-!         & ziwc_vr       ,cdnc_vr       ,cld_tau_lw_vr ,cld_tau_sw_vr  ,&
-!<<SF
-         & cld_piz_sw_vr ,cld_cg_sw_vr  ,re_drop       ,re_cryst    )  
+         & ziwc_vr       ,cdnc_vr       ,icnc_vr                       ,&
+!>>DN
+!         & cld_tau_lw_vr ,cld_tau_sw_vr                                ,&
+         & cld_tau_lw_vr ,cld_tau_sw_vr ,cld_tau_swl_vr,cld_tau_swi_vr ,&
+!<<DN
+         & cld_piz_sw_vr ,cld_cg_sw_vr  ,re_drop       ,re_cryst    ) 
 
     IF (locosp) THEN
       DO jk=1,klev
@@ -421,6 +433,14 @@ CONTAINS
           DO jl=1,kproma
             cisccp_cldtau3d(jl,jk,krow) = &
                  cld_tau_sw_vr(jl,jkb,9)  ! band 9 is 625 - 778 nm, needed is 670 nm
+!>>DN
+            IF (laerocom_diag.AND.lHEaci) THEN
+               cod3dswl(jl,jk,krow) = &
+                    cld_tau_swl_vr(jl,jkb,9)
+               cod3dswi(jl,jk,krow) = &
+                    cld_tau_swi_vr(jl,jkb,9)
+            ENDIF
+!<<DN
           END DO
         END DO
         DO jk=1,klev
@@ -492,7 +512,29 @@ CONTAINS
     !
     ! 6.0 Interface for submodel diagnosics after radiation calculation:
     ! ------------------------------------------------------------------
-    IF (lanysubmodel)  CALL radiation_subm_2(kproma, kbdim, krow, klev, ktrac, iaero, pxtm1)
+    IF (lanysubmodel)                                                       &
+      CALL radiation_subm_2(kproma, kbdim, krow, klev, ktrac, iaero, pxtm1, &
+!>>NAJS: lidar backscatter
+                            ppd_hl,pp_fl,tk_fl,xm_vap)
+!<<NAJS
+
+    !>>DN
+    IF (laerocom_diag.AND.lHEaci) THEN
+       IF (iaero == 0) THEN !aerosol-free call
+       ELSE
+          DO jk=1,klev
+             jkb = klev+1-jk
+             DO jl=1,kproma
+                od550aer3d(jl,jk,krow) = aer_tau_sw_vr(jl,jkb,9)
+                IF(jk == klev) THEN
+                   ec550aer_int(jl,krow)  = aer_tau_sw_vr(jl,jkb,9)
+                   abs550aer_int(jl,krow) = (1._wp - aer_piz_sw_vr(jl,jkb,9)) * aer_tau_sw_vr(jl,jkb,9)
+                END IF
+             END DO
+          END DO
+       ENDIF
+    ENDIF
+    !<<DN
 
   END SUBROUTINE psrad_interface
 end module mo_psrad_interface

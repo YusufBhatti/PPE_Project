@@ -579,15 +579,15 @@ CONTAINS
           WRITE (message_text,*) 'dt_stop:', dt_stop
           CALL message('jsbach_config', message_text)
 
-!SF#IF !(__INTEL_COMPILER_BUILD_DATE == 20150815)
+!#IF !(__INTEL_COMPILER_BUILD_DATE == 20150815)
           WRITE (message_text,*) 'restart periode:', putrerun
           CALL message('jsbach_config', message_text)
-!SF#ENDIF
+!#ENDIF
 
-!SF#IF !(__INTEL_COMPILER_BUILD_DATE == 20150815)
+!#IF !(__INTEL_COMPILER_BUILD_DATE == 20150815)
           WRITE (message_text,*) 'output periode:', putdata
           CALL message('jsbach_config', message_text)
-!SF#ENDIF
+!#ENDIF
           IF (.NOT. veg_at_1200) veg_putdata = putdata
 
           IF (no_days /= -1) THEN

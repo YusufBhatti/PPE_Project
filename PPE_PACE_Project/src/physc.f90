@@ -73,8 +73,7 @@ USE mo_activ,             ONLY: icnc_instantan
   USE mo_vphysc,            ONLY: vphysc, set_vphysc_var !++s.stadtler
   USE mo_hyb,               ONLY: delb, nlevm1
   USE mo_param_switches,    ONLY: lcond, lconv, lgwdrag, lrad, &
-                                  lclmi_progn, nic_cirrus, &
-                                  lnewdiags !UP #783
+                                  lcdnc_progn, nic_cirrus
   USE mo_math_constants,    ONLY: pi
   USE mo_physical_constants,ONLY: grav, rd, vtmpc1, tmelt, cpd, vtmpc2
   USE mo_radiation_parameters,  ONLY: iaero, flx_ratio_cur, solc
@@ -138,13 +137,14 @@ USE mo_activ,             ONLY: icnc_instantan
 !>>SF
   USE mo_cloud_micro_2m, ONLY: cloud_micro_interface
 !<<SF
-
-!>>UP
-  USE mo_cmp_timer,        ONLY: timer_start,    timer_stop,    &
-                               timer_cmp_bulk
-  USE mo_cmp_diagn,        ONLY: diags_cc_bytemp !#783
-!<<UP
-
+  
+#ifdef HAMMOZ
+!>>DN AeroCom diagnostics
+  USE mo_submodel,     ONLY: laerocom_diag
+  USE mo_hammoz_aerocom_diags, ONLY: update_aerocom_diags
+!<<SF
+#endif
+  
   IMPLICIT NONE
   !
 #ifdef _EUROHACK_2015
@@ -308,6 +308,9 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
 
   !
   CALL presf(apm1,nbdim,aphm1,nproma)
+  IF (lanysubmodel) THEN
+     vphysc%apm1(1:nproma,:,krow) = apm1(1:nproma,:)
+  END IF
   !
   !*        3.4   COMPUTE REAL WINDS AND WIND TENDENCIES.
   !
@@ -501,16 +504,10 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
         zprat=(MIN(8._dp,80000._dp/apm1(jl,jk)))**nexp
         IF (loland(jl).AND.(.NOT.loglac(jl)).OR.lolake(jl)) THEN
           zn1= 20._dp
-          !zn2=180._dp !UP: original line
-          !UP: changing the prescribed CDNC at the surface over land for
-          !IssueID #771
-          zn2=120._dp
+          zn2=180._dp
         ELSE 
           zn1= 20._dp
-          ! zn2= 80._dp
-          !UP: changing the prescribed CDNC at the surface over ocean for
-          !IssueID #771
-          zn2= 50._dp
+          zn2= 80._dp
         ENDIF
         IF (apm1(jl,jk).LT.80000._dp) THEN
           zcdnc=1.e6_dp*(zn1+(zn2-zn1)*(EXP(1._dp-zprat)))
@@ -1075,7 +1072,7 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
       END IF
     END IF
 
-    IF (.NOT. lclmi_progn) THEN
+    IF (.NOT. lcdnc_progn) THEN
 
        CALL cloud( nproma, nbdim, ktdia, nlev, nlevp1                       & ! in
             , delta_time,        time_step_len                              & ! in, time steps
@@ -1101,12 +1098,6 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
 
     ELSE 
 
-       !>>UP timers
-       IF (ltimer) THEN
-          CALL timer_start(timer_cmp_bulk)
-       END IF
-       !<<UP
-
        CALL cloud_micro_interface(nproma, nbdim, nlev, nlevp1, ntrac, ktdia, krow,       & ! in
                                   invb,                                                  & ! in
                                   aphm1,           apm1,              app1,              & ! in
@@ -1123,12 +1114,6 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
                                   zicnc(:,:),        relhum(:,:,krow),                   & ! out
                                   ssfl(:), rsfl(:))                                        ! out
         
-       !>>UP timers
-       IF (ltimer) THEN
-          CALL timer_stop(timer_cmp_bulk)
-       END IF
-       !<<UP
-
        IF (nic_cirrus > 0) THEN
           icnc_instantan(1:nproma,1:nlev,krow)=zicnc(1:nproma,1:nlev)
        END IF
@@ -1190,6 +1175,9 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
   DO jl=1,nproma
     zprecip(jl)=rsfl(jl)+ssfl(jl)+rsfc(jl)+ssfc(jl)
   END DO
+  !>>DN
+  CALL set_vphysc_var(nproma, -1, krow, pprecip_na = zprecip(1:nproma))
+  !<<DN
   !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!! following is a submodel interface !!!!!!!!!!!!!!!!!!!!!!!!
@@ -1409,6 +1397,14 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
          ,tslm1(:,krow),seaicem(:,krow),loland)
   END IF
 
+  !>>DN AeroCom diagnostics
+#ifdef HAMMOZ
+  IF (laerocom_diag) THEN
+      CALL update_aerocom_diags(nproma, nbdim, nlev, krow, zi0)
+  ENDIF
+#endif
+  !<<DN
+
   !
   ! Save large-scale/convective rain/snow rate for next time step
   !
@@ -1437,12 +1433,6 @@ REAL(dp):: zicnc(ldc%nproma,nlev)
   !*       10.    RELEASE SPACE.
   !               ------- ------
   !
-
-!>>UP: new cc diags, #783
-  IF (lnewdiags) THEN
-     CALL diags_cc_bytemp(nproma,nbdim,nlev,krow,aclc(:,:,krow),tm1(:,:,krow),tte(:,:,krow))
-  ENDIF
-!<<UP 
   !     ------------------------------------------------------------
   !
 #ifdef _EUROHACK_2015
