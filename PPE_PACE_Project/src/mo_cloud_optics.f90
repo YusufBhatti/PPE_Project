@@ -35,12 +35,9 @@ MODULE mo_cloud_optics
   USE mo_control,   ONLY: nn
 !>>SF
   USE mo_echam_cloud_params, ONLY: crhoi, cthomi
-  USE mo_param_switches,     ONLY: nic_cirrus, lclmi_progn
+  USE mo_param_switches,     ONLY: nic_cirrus, lcdnc_progn
   USE mo_control,            ONLY: nlev
 !<<SF
-!davidn
-  USE mo_param_switches,     ONLY: tun47zinhomi,tun47zinhoml1,tun47zinhoml2,tun47zinhoml3,tun47zinpar 
-!davidn
 
   IMPLICIT NONE
   PRIVATE
@@ -140,7 +137,7 @@ CONTAINS
     ENDIF
 
     !>>SF Modifications for 2-moments cloud microphysics scheme
-    IF (lclmi_progn) THEN
+    IF (lcdnc_progn) THEN
        IF (nn == 63) THEN
           IF (nlev == 31) THEN
              SELECT CASE(ncd_activ)
@@ -166,21 +163,12 @@ CONTAINS
                    zinhoml2 = 0.4_wp
                    zinhoml3 = 0.8_wp
              END SELECT
-!davidn tuning          
-             zinhomi = tun47zinhomi
-             zinhoml1= tun47zinhoml1
-             zinhoml2= tun47zinhoml2
-             zinhoml3= tun47zinhoml3
-!davidn
           ENDIF
        ENDIF
     ENDIF
     !<<SF
 
     zinpar  = 0.10_wp
-!davidn tuning          
-    zinpar = tun47zinpar
-!davidn
 
     IF (p_parallel_io) THEN
       CALL io_open ('ECHAM6_CldOptProps.nc', optical_tbl, io_read)
@@ -259,10 +247,11 @@ CONTAINS
           & laglac       ,laland          ,kproma         ,kbdim         ,&
           & klev         ,ktype           ,nb_lw          ,nb_sw         ,&
           & icldlyr      ,zlwp            ,ziwp           ,zlwc          ,&
-!>>SF
-          & ziwc         ,zcdnc  , zicnc         ,tau_lw         ,tau_sw        ,&
-!          & ziwc         ,zcdnc           ,tau_lw         ,tau_sw        ,&
-!<<SF
+          & ziwc         ,zcdnc           ,zicnc                         ,&
+!>>DN
+!          & tau_lw       ,tau_sw                                         ,&
+          & tau_lw       ,tau_sw          ,tau_swl        ,tau_swi       ,&
+!<<DN
           & omg          ,asy             ,re_droplets2d  ,re_crystals2d  )
 
 !>>SF
@@ -293,6 +282,10 @@ CONTAINS
     REAL (wp), INTENT (OUT) ::       &
          tau_lw(kbdim,klev,nb_lw),   & !< LW optical depth
          tau_sw(kbdim,klev,nb_sw),   & !< SW optical depth
+!>>DN
+         tau_swl(kbdim,klev,nb_sw),   & !< SW optical depth
+         tau_swi(kbdim,klev,nb_sw),   & !< SW optical depth
+!<<DN
          omg   (kbdim,klev,nb_sw),   & !< cloud single scattering albedo
          asy   (kbdim,klev,nb_sw),   & !< cloud asymmetry factor
          re_droplets2d(kbdim,klev),  & !< effective radius of liquid distribution
@@ -311,6 +304,10 @@ CONTAINS
          re_crystals,        & !< effective radius of ice distribution
          zscratch,           & !< effective radius of ice distribution
          ztau(kbdim,klev,n_mdl_bnds), & !< SW optical depth
+!>>DN
+         ztaul(kbdim,klev,n_mdl_bnds), & !< SW optical depth
+         ztaui(kbdim,klev,n_mdl_bnds), & !< SW optical depth
+!<<DN
          zomg(kbdim,klev,n_mdl_bnds), & !< cloud single scattering albedo
          zasy(kbdim,klev,n_mdl_bnds), & !< cloud asymmetry factor
 !>>SF
@@ -408,6 +405,10 @@ CONTAINS
 
             zscratch = (ztol*zol+ztoi*zoi)
             ztau(jl,jk,iband) = ztol*zinhoml(jl) + ztoi*zinhomi
+!>>DN
+            ztaul(jl,jk,iband)= ztol*zinhoml(jl)
+            ztaui(jl,jk,iband)= ztoi*zinhomi
+!<<DN
             zomg(jl,jk,iband) = zscratch/(ztol+ztoi)
             zasy(jl,jk,iband) = (ztol*zol*zgl+ztoi*zoi*zgi)/zscratch
           END DO
@@ -422,9 +423,17 @@ CONTAINS
             zmsaid=(rebcuh(ii)+rebcug(ii)/re_crystals)
             ztau(jl,jk,iband)  = zmsald*zlwp(jl,jk)*zinhoml(jl)          &
                  &             + zmsaid*ziwp(jl,jk)*zinhomi
+!>>DN
+            ztaul(jl,jk,iband) = zmsald*zlwp(jl,jk)*zinhoml(jl)
+            ztaui(jl,jk,iband) = zmsaid*ziwp(jl,jk)*zinhomi
+!<<DN
           END DO
         ELSE
           ztau(jl,jk,:)  = 0.0_wp
+!>>DN
+          ztaul(jl,jk,:) = 0.0_wp
+          ztaui(jl,jk,:) = 0.0_wp
+!<<DN
           zomg(jl,jk,:)  = 1.0_wp
           zasy(jl,jk,:)  = 0.0_wp
           re_crystals2d(jl,jk) = 0.0_wp
@@ -433,6 +442,10 @@ CONTAINS
         tau_lw(jl,jk,1:nb_lw-1) = ztau(jl,jk,1:15)
         tau_lw(jl,jk,nb_lw)     = ztau(jl,jk,30)
         tau_sw(jl,jk,1:nb_sw)   = ztau(jl,jk,16:29)
+!>>DN
+        tau_swl(jl,jk,1:nb_sw) = ztaul(jl,jk,16:29)
+        tau_swi(jl,jk,1:nb_sw) = ztaui(jl,jk,16:29)
+!<<DN
         omg   (jl,jk,1:nb_sw)   = zomg(jl,jk,16:29)
         asy   (jl,jk,1:nb_sw)   = zasy(jl,jk,16:29)
       END DO

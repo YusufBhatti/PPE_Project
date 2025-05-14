@@ -24,8 +24,10 @@
 !!   -# K. Zhang (MPI-Met) - submodel interface (2009-07)
 !!   -# M.G. Schultz (FZ Juelich) - cleanup (XXXX)
 !!   -# P. Stier (Uni Oxford) - adaptation to RRTM-SW (2010)
+!!   -# P. Stier (Uni Oxford) - additional aerosol index diagnostics
 !!   -# T. Bergman (FMI) - nmod->nclass to facilitate new aerosol models (2013-02-05)
 !!   -#  H. Kokkola (FMI) - modified to include SALSA (2013-06)
+!!   -# P Stier (Uni Oxford) - addition of dry radiative properties (2017)
 !!
 !! \limitations
 !! None
@@ -61,13 +63,19 @@ MODULE mo_ham_rad
                               nr_min, nr_max, ni_min, ni_max,   &
                               inc_nr, inc_ni,                   &
                               lambda, lambda_sw_opt,            &
-                              ham_rad_data_initialize
+                              ham_rad_data_initialize,          &
+!>>NAJS: optical properties of dry aerosol
+                              Niwv_sw_dry, iraddry
+!<<NAJS
   USE mo_ham,           ONLY: naerocomp,           &
                               aerocomp,          &
                               aerowater,         &
                               nraddiag, nrad,    &
-                              sizeclass,            &
-                              nclass
+                              sizeclass,         &
+                              nclass,            &
+!>>NAJS: optical properties of dry aerosol
+                              nraddry
+!<<NAJS
   USE mo_ham,           ONLY: subm_aerospec 
   USE mo_kind,          ONLY: dp
   USE mo_species,       ONLY: speclist, naerospec, nmaxspec
@@ -94,6 +102,12 @@ MODULE mo_ham_rad
   REAL(dp), PUBLIC, ALLOCATABLE :: asym(:,:,:,:)
   REAL(dp), PUBLIC, ALLOCATABLE :: nr(:,:,:,:)
   REAL(dp), PUBLIC, ALLOCATABLE :: ni(:,:,:,:)
+  REAL(dp), PUBLIC, ALLOCATABLE :: pp180(:,:,:,:)
+
+!>>PS: optical properties for dry aerosol
+  REAL(dp), PUBLIC, ALLOCATABLE :: sigma_dry(:,:,:,:)
+  REAL(dp), PUBLIC, ALLOCATABLE :: omega_dry(:,:,:,:)
+!<<PS
 
   !$OMP THREADPRIVATE (sigma, omega, asym, nr, ni)
 
@@ -112,14 +126,18 @@ MODULE mo_ham_rad
   REAL(dp), DIMENSION(:,:,:), ALLOCATABLE :: znum ! aerosol number per mode per unit area for each layer [m-2]
   !$OMP THREADPRIVATE (znum)
 
-  !@@@ Currently lut_pp180 are always allocated and read - need for switch?
+  !>>NAJS: In this branch pp180 is vital as it is needed for lidar backscatter.
+  !But the idea of switching off this lidar simulator is a good idea
+  !<<NAJS
 
 CONTAINS
 
 !----------------------------------------------------------------------------------------------------------------
 
-  SUBROUTINE ham_rad_refrac(kproma, kbdim, klev, krow, ktrac, kmod, kwv, &
-                             pxtm1, pnr,  pni )
+  SUBROUTINE ham_rad_refrac(kproma, kbdim, klev, krow, &
+                            ldry,                      &
+                            ktrac,  kmod, kwv, &
+                            pxtm1,  pnr,  pni )
 
     ! *ham_rad_refrac* calculates average refractive indices
     !                   for the internally mixed aerosol  
@@ -136,6 +154,9 @@ CONTAINS
     !
     ! Declan O'Donnell, MPI-Met, Hamburg, 2007 - openMP bugfix (removed need for
     !                                            allocatable arrays in subordinate routines)
+    !
+    ! Philip Stier, Oxford, 04/2017: dry refractive indices
+    !
     ! Method:
     ! -------
     ! The real and imaginary parts of the refractive index 
@@ -148,6 +169,7 @@ CONTAINS
 
     USE mo_kind,         ONLY: dp
     USE mo_ham,          ONLY: nradmix
+    USE mo_ham_rad_data, ONLY: Nwv_tot
 
     IMPLICIT NONE
 
@@ -158,6 +180,7 @@ CONTAINS
     INTEGER,  INTENT(in)  :: kwv                            ! current wavelength
     REAL(dp), INTENT(in)  :: pxtm1(kbdim,klev,ktrac)        ! tracer concentrations
     REAL(dp), INTENT(out) :: pnr(kbdim,klev), pni(kbdim,klev)
+    LOGICAL,  INTENT(in)  :: ldry                           ! dry refractive indices - ignore water
 
 
     !--- 1) Calculate effective refractive index with mixing rules:
@@ -167,7 +190,8 @@ CONTAINS
     CASE (1)
 
        CALL  ham_rad_refrac_volume(kproma, kbdim, klev, krow, ktrac, kmod, kwv, &
-                                    pxtm1, pnr,  pni )
+                                   ldry,                                        &
+                                   pxtm1,  pnr,   pni )
 
     CASE (2)
        CALL  ham_rad_refrac_maxgar(kproma, kbdim, klev, krow, ktrac, kmod, kwv, &
@@ -186,7 +210,8 @@ CONTAINS
 !----------------------------------------------------------------------------------------------------------------
   !>>dod omp bugfix
   SUBROUTINE ham_rad_refrac_volume(kproma, kbdim, klev, krow, ktrac, kmod, kwv, &
-                                    pxtm1, pnr,  pni )
+                                   ldry,                                        &
+                                   pxtm1,  pnr,   pni )
   !<<dod  
     ! *ham_rad_refrac_volume* calculates volume averaged 
     !                          refractive indices for the
@@ -200,6 +225,7 @@ CONTAINS
     ! Modified
     ! --------
     ! Declan O'Donnell MPI-M 2008, SOA and OpenMP bugfix...major changes
+    ! Philip Stier, Oxford, 04/2017: dry refractive indices
     !
     ! Method:
     ! -------
@@ -213,6 +239,7 @@ CONTAINS
 
     !---inherited types, data and functions
     USE mo_kind,         ONLY: dp
+    USE mo_ham_rad_data, ONLY: Nwv_tot
 
     IMPLICIT NONE
 
@@ -223,6 +250,7 @@ CONTAINS
     INTEGER,  INTENT(in)  :: kwv                            ! current wavelength
     REAL(dp), INTENT(in)  :: pxtm1(kbdim,klev,ktrac)        ! tracer concentrations
     REAL(dp), INTENT(out) :: pnr(kbdim,klev), pni(kbdim,klev)
+    LOGICAL,  INTENT(in)  :: ldry                           ! dry refractive indices - ignore water
 
     !--- Local variables:
 
@@ -275,7 +303,7 @@ CONTAINS
     END DO
 
     ! Add aerosol water
-    IF (sizeclass(kmod)%lsoluble .AND. nrad(kmod) > 0) THEN
+    IF (.NOT. ldry .AND. sizeclass(kmod)%lsoluble .AND. nrad(kmod) > 0) THEN
        jt = aerowater(kmod)%idt
        zdensity = aerowater(kmod)%species%density
        ikey = aerowater(kmod)%species%iaerorad
@@ -889,6 +917,8 @@ CONTAINS
     ! restuctured to loop around the wavelengths and removed allocatable 
     ! arrays to enable running under OpenMP. 
     !
+    ! Philip Stier, Oxford, 2017: introduced dry AOD calculation
+    !
     ! Method:
     ! -------
     ! To be done!
@@ -906,7 +936,10 @@ CONTAINS
     USE mo_kind,          ONLY: dp
     USE mo_exception,     ONLY: finish
     USE mo_tracdef,       ONLY: ntrac
-    USE mo_ham_streams,   ONLY: rwet 
+    USE mo_ham_streams,   ONLY: rwet, &
+!>>PS: optical properties ffor dry aerosol
+                                rdry
+!<<PS
     USE mo_control,       ONLY: ltimer
     !>>dod split of mo_timer (#51)
     USE mo_hammoz_timer,  ONLY: timer_start, timer_stop, &
@@ -914,7 +947,13 @@ CONTAINS
                                 timer_ham_rad_refrac
     !<<dod
     USE mo_ham_rad_data, ONLY: nraddiagwv
-    USE mo_ham_streams,  ONLY: tau_mode
+    USE mo_ham_streams,  ONLY: tau_mode,             &
+!>>PS: optical properties of dry aerosol
+                               tau_dry, ext_dry, abs_dry, &
+!>>DN: AeroCom
+                               abs_lev_dry
+!<<DN
+!<<PS
 
 
     IMPLICIT NONE
@@ -939,6 +978,9 @@ CONTAINS
     REAL(dp) :: zeps
 
     REAL(dp) :: zxx(kbdim,klev),                           & ! size parameter
+!>>PS: optical properties for dry aerosol
+                zxx_dry(kbdim,klev),                       & ! dry aerosol size parameter
+!<<PS
                 zdpg(kbdim,klev)                             ! auxiliary parameter dp/grav
 
     REAL(dp) :: zaer_tau_sw_vr(kbdim,klev,Nwv_sw_tot,nclass),& ! SW optical depth for each band and mode
@@ -947,16 +989,21 @@ CONTAINS
 !>>gf: needed to avoid architecture-dependent problems (Cray XT5)
     REAL(dp) :: znr2d(kbdim,klev),                         & ! 2D subset of 4D array nr
                 zni2d(kbdim,klev),                         & ! 2D subset of 4D array ni
-                zsigma2d(kbdim,klev),                      & ! 2D subste of 4D array sigma
-                zomega2d(kbdim,klev),                      & ! 2D subste of 4D array omega
-                zasym2d(kbdim,klev)                          ! 2D subste of 4D array asym
+                zsigma2d(kbdim,klev),                      & ! 2D subset of 4D array sigma
+                zomega2d(kbdim,klev),                      & ! 2D subset of 4D array omega
+                zasym2d(kbdim,klev),                       & ! 2D subset of 4D array asym
+                zpp1802d(kbdim,klev)                         ! 2D subset of 4D array pp180
+
 !<<gf
 
     INTEGER :: jlwv                                          ! RRTM-LW band number
     
     !--- Stream:
 
-    REAL(dp), POINTER     :: rwet_p(:,:,:)
+    REAL(dp), POINTER     :: rwet_p(:,:,:),  &
+!>>PS: optical properties for dry aerosol
+                             rdry_p(:,:,:)
+!<<PS
 
     !---executable procedure
 
@@ -967,6 +1014,13 @@ CONTAINS
     sigma(1:kproma,:,:,:)=0._dp
     omega(1:kproma,:,:,:)=0._dp
     asym(1:kproma,:,:,:) =0._dp
+    pp180(1:kproma,:,:,:) =0._dp
+!>>PS: optical properties for dry aerosol
+    IF (nraddry.GT.0) THEN
+      sigma_dry(1:kproma,:,:,:)=0._dp
+      omega_dry(1:kproma,:,:,:)=0._dp
+    END IF
+!<<PS
 
     zdpg(1:kproma,:)=ppd_hl(1:kproma,:)/grav
 
@@ -994,28 +1048,36 @@ CONTAINS
                 !    directly in the call to ham_rad_refrac is causing architecture-dependent problems (Cray XT5)
                 !    Therefore intermediate variables znr2d and zni2d are introduced
 
-                znr2d(1:kproma,:) = nr(1:kproma,:,jwv,jclass)
-                zni2d(1:kproma,:) = ni(1:kproma,:,jwv,jclass)
+!NAJS: redundant                znr2d(1:kproma,:) = nr(1:kproma,:,jwv,jclass)
+!NAJS: redundant                zni2d(1:kproma,:) = ni(1:kproma,:,jwv,jclass)
+                znr2d(1:kproma,:) = 0.0_dp
+                zni2d(1:kproma,:) = 0.0_dp
 
                 CALL ham_rad_refrac(kproma, kbdim, klev, krow, &
-                                     ntrac,  jclass,  jwv,     &
-                                     pxtm1,  znr2d, zni2d )
+                                    .FALSE.,                   &
+                                    ntrac,  jclass,  jwv,      &
+                                    pxtm1,  znr2d, zni2d       )
 
                 IF (ltimer) CALL timer_stop(timer_ham_rad_refrac)
 
                 !--- 1.1) Calculate size parameter:
           
-                zxx(1:kproma,:) = 2._dp*pi*rwet_p(1:kproma,:,krow)/lambda(jwv)
+                zxx(1:kproma,:)     = 2._dp*pi*rwet_p(1:kproma,:,krow)/lambda(jwv)
 
                 !--- 1.2) Table-lookup for optical properties:
 
                 IF (ltimer) CALL timer_start(timer_ham_rad_fitplus)
 
                 !gf: same as in the call to ham_rad_refrac, for the call to ham_rad_fitplus
-
-                zsigma2d(1:kproma,:) = sigma(1:kproma,:,jwv,jclass)
-                zomega2d(1:kproma,:) = omega(1:kproma,:,jwv,jclass)
-                zasym2d(1:kproma,:)  = asym(1:kproma,:,jwv,jclass)
+!ham_ps:bug - why is this here? you basically store old values in arrays - they need to be initialised with 0 not old values? 
+!!$                zsigma2d(1:kproma,:) = sigma(1:kproma,:,jwv,jclass)
+!!$                zomega2d(1:kproma,:) = omega(1:kproma,:,jwv,jclass)
+!!$                zasym2d(1:kproma,:)  = asym(1:kproma,:,jwv,jclass)
+!!$                zpp180(1:kproma,:)  = pp180(1:kproma,:,jwv,jclass)
+                zsigma2d(1:kproma,:) = 0.0_dp
+                zomega2d(1:kproma,:) = 0.0_dp
+                zasym2d(1:kproma,:)  = 0.0_dp
+                zpp1802d(1:kproma,:)   = 0.0_dp
 
                 SELECT CASE(nham_subm)
 
@@ -1045,7 +1107,8 @@ CONTAINS
                                          zxx,   znr2d,     zni2d,                &
                                          itable, lut1_sigma, zsigma2d,           & 
                                                  lut1_omega, zomega2d,           &
-                                                 lut1_g,     zasym2d             )
+                                                 lut1_g,     zasym2d,            &
+                                                 lut1_pp180, zpp1802d            )
 
                 ELSE 
 
@@ -1053,7 +1116,8 @@ CONTAINS
                                          zxx,   znr2d,     zni2d,                &
                                          itable, lut2_sigma, zsigma2d,           &
                                                  lut2_omega, zomega2d,           &
-                                                 lut2_g,     zasym2d             )
+                                                 lut2_g,     zasym2d,            &
+                                                 lut2_pp180, zpp1802d            )
 
                 END IF
 
@@ -1065,17 +1129,99 @@ CONTAINS
                 asym(1:kproma,:,jwv,jclass)  = zasym2d(1:kproma,:)
                 nr(1:kproma,:,jwv,jclass)    = znr2d(1:kproma,:)
                 ni(1:kproma,:,jwv,jclass)    = zni2d(1:kproma,:)
+                pp180(1:kproma,:,jwv,jclass) = zpp1802d(1:kproma,:)
                 !<<gf
 
                 sigma(1:kproma,:,jwv,jclass) = sigma(1:kproma,:,jwv,jclass)*lambda(jwv)*lambda(jwv)
-         
+
              END DO ! jwv
+
+!>>NAJS: optical properties of dry aerosol
+             IF (nraddry.GT.0) THEN
+
+               rdry_p => rdry(jclass)%ptr
+               DO jwv=1,Niwv_sw_dry
+
+                 !--- 1.1) Calculate volume averaged refractive index nr and ni:
+
+                 IF (ltimer) CALL timer_start(timer_ham_rad_refrac)
+
+                 CALL ham_rad_refrac(kproma, kbdim, klev, krow,   &
+                                     .TRUE.,                      &   ! exclude water from aerosol
+                                     ntrac,  jclass,  iraddry(jwv),        &
+                                     pxtm1,  znr2d    , zni2d     )
+               
+                 IF (ltimer) CALL timer_stop(timer_ham_rad_refrac)
+
+                 !--- 1.1) Calculate size parameter:
+          
+                 zxx_dry(1:kproma,:) = 2._dp*pi*rdry_p(1:kproma,:,krow)/lambda(iraddry(jwv))
+
+                 !--- 1.2) Table-lookup for optical properties:
+
+                 IF (ltimer) CALL timer_start(timer_ham_rad_fitplus)
+
+                 zsigma2d(1:kproma,:) = 0.0_dp
+                 zomega2d(1:kproma,:) = 0.0_dp
+                 zasym2d(1:kproma,:)  = 0.0_dp
+                 zpp1802d(1:kproma,:) = 0.0_dp
+
+                 SELECT CASE(nham_subm)
+ 
+                     CASE(HAM_M7)
+ 
+                        IF (ABS(modesigma(jclass)-sigma_fine)<zeps) THEN
+                           itable=1
+                        ELSE IF  ((ABS(modesigma(jclass)-sigma_coarse)<zeps)) THEN
+                           itable=2
+                        ELSE 
+                           CALL finish('ham_rad','incompatible standard deviation in modal setup')
+                        END IF
+ 
+                     CASE(HAM_SALSA)
+ 
+                        IF(jclass < 6 .OR. (jclass > fn2a .AND. jclass < fn2b-(nbin3-1))) THEN
+                           itable=1                      
+                        ELSE                     
+                           itable=2                      
+                        END IF
+ 
+                 END SELECT
+
+                 IF (itable == 1) THEN
+ 
+                   CALL ham_rad_fitplus(kproma,  kbdim     , klev    ,       &
+                                        zxx_dry, znr2d     , zni2d   ,       &
+                                        itable,  lut1_sigma, zsigma2d,       & 
+                                                 lut1_omega, zomega2d,       &
+                                                 lut1_g    , zasym2d ,       &
+                                                 lut1_pp180, zpp1802d        )
+ 
+                 ELSE 
+ 
+                   CALL ham_rad_fitplus(kproma,  kbdim     , klev,           & 
+                                        zxx_dry, znr2d     , zni2d   ,       &
+                                        itable, lut2_sigma , zsigma2d,       &
+                                                 lut2_omega, zomega2d,       &
+                                                 lut2_g    , zasym2d ,       &
+                                                 lut2_pp180, zpp1802d        )
+ 
+                 END IF
+ 
+                 IF (ltimer) CALL timer_stop(timer_ham_rad_fitplus)
+ 
+                 sigma_dry(1:kproma,:,jwv,jclass) = zsigma2d(1:kproma,:)*lambda(iraddry(jwv))*lambda(iraddry(jwv))
+                 omega_dry(1:kproma,:,jwv,jclass) = zomega2d(1:kproma,:)
+
+               ENDDO ! jwv
+             ENDIF
+!<<NAJS
 
           END IF ! nrad
        END DO ! jclass
 
-       !--- Summation over modes, conversion into total extinction and calculation 
-       !    of weighted single scattering albedo and assymetry factor. 
+       !--- Summation over modes, conversion into total extinction, backscatter 
+       !    and calculation of weighted single scattering albedo and assymetry factor. 
 
        zaer_tau_sw_vr(1:kproma,:,:,:)=0.0_dp
  
@@ -1150,11 +1296,14 @@ CONTAINS
                 !gf: the former usage of nr(1:kproma,:,jwv,jclass) and ni(1:kproma,:,jwv,jclass)
                 !    directly in the call to ham_rad_refrac is causing architecture-dependent problems (Cray XT5)
                 !    Therefore intermediate variables znr2d and zni2d are introduced
-
-                znr2d(1:kproma,:) = nr(1:kproma,:,jlwv,jclass)
-                zni2d(1:kproma,:) = ni(1:kproma,:,jlwv,jclass)
+!ham_ps:bug - this should be initialised with 0.0 (should not matter but conceptually more correct)
+!!$                znr2d(1:kproma,:) = nr(1:kproma,:,jlwv,jclass)
+!!$                zni2d(1:kproma,:) = ni(1:kproma,:,jlwv,jclass)
+                znr2d(1:kproma,:) = 0.0_dp
+                zni2d(1:kproma,:) = 0.0_dp
 
                 CALL ham_rad_refrac(kproma, kbdim, klev, krow,                                &
+                                    .FALSE.,                                                  &
                                     ntrac, jclass,  jlwv,                                       &
                                     pxtm1, znr2d, zni2d )
 
@@ -1169,8 +1318,9 @@ CONTAINS
                 IF (ltimer) CALL timer_start(timer_ham_rad_fitplus)
 
                 !gf: same as in the call to ham_rad_refrac, for the call to ham_rad_fitplus
-
-                zsigma2d(1:kproma,:) = sigma(1:kproma,:,jlwv,jclass)
+!ham_ps:bug - this should not be initialised with old value but 0.0? 
+!               zsigma2d(1:kproma,:) = sigma(1:kproma,:,jlwv,jclass)
+                zsigma2d(1:kproma,:) = 0.0_dp
 
                 SELECT CASE(nham_subm)
 
@@ -1265,7 +1415,8 @@ CONTAINS
                               pxx,    pnr,   pni,     &
                               ktable, plut1,  pfit1,  &
                                       plut2,  pfit2,  &
-                                      plut3,  pfit3   )
+                                      plut3,  pfit3,  &
+                                      plut4,  pfit4   )
   !<<dod
   
     ! *ham_rad_fitplus* returns linear interpolated fit of the 
@@ -1280,6 +1431,8 @@ CONTAINS
     !    (adaption to ECHAM5/HAM, reduced memory expense)
     ! Luis Kornblueh, MPI-Met, Hamburg                         2006-07-07
     !    (bugfix for uninitialized variables by adding kproma)
+    ! Philip Stier, University of Oxford                       2014-04-14
+    !    (extension for aerosol backscatter)
     ! 
     ! Interface:
     ! ----------
@@ -1298,12 +1451,14 @@ CONTAINS
     REAL(dp), INTENT(out) :: pfit1(kbdim,klev)
     REAL(dp), INTENT(out), OPTIONAL :: pfit2(kbdim,klev)
     REAL(dp), INTENT(out), OPTIONAL :: pfit3(kbdim,klev)
+    REAL(dp), INTENT(out), OPTIONAL :: pfit4(kbdim,klev)
 
     REAL(dp), INTENT(in)  :: pnr(kbdim,klev),  pni(kbdim,klev), pxx(kbdim,klev)
 
     REAL(dp), INTENT(in)  :: plut1(0:Nnrmax(ktable), 0:Nnimax(ktable), 0:Ndismax(ktable))
     REAL(dp), INTENT(in), OPTIONAL  :: plut2(0:Nnrmax(ktable), 0:Nnimax(ktable), 0:Ndismax(ktable))
     REAL(dp), INTENT(in), OPTIONAL  :: plut3(0:Nnrmax(ktable), 0:Nnimax(ktable), 0:Ndismax(ktable))
+    REAL(dp), INTENT(in), OPTIONAL  :: plut4(0:Nnrmax(ktable), 0:Nnimax(ktable), 0:Ndismax(ktable))
 
     !--- Local variables:
 
@@ -1402,12 +1557,14 @@ CONTAINS
                 
                 IF (PRESENT(plut2)) pfit2(jl,jk) = plut2(Nnr, Nni,Ndis)
                 IF (PRESENT(plut3)) pfit3(jl,jk) = plut3(Nnr, Nni,Ndis)
+                IF (PRESENT(plut4)) pfit4(jl,jk) = plut4(Nnr, Nni,Ndis)
 
              ELSE
                 
                 pfit1(jl,jk)=0._dp
                 IF (PRESENT(plut2)) pfit2(jl,jk) = 0._dp
                 IF (PRESENT(plut3)) pfit3(jl,jk) = 0._dp
+                IF (PRESENT(plut4)) pfit4(jl,jk) = 0._dp
 
              END IF
           END DO
@@ -1642,7 +1799,10 @@ CONTAINS
 
 !----------------------------------------------------------------------------------------------------------------
 
-  SUBROUTINE ham_rad_diag(kproma, kbdim, klev, krow, pxtm1)
+  SUBROUTINE ham_rad_diag(kproma, kbdim, klev, krow, pxtm1, &
+!>>NAJS: lidar backscatter
+                          ppd_hl,pp_fl,tk_fl,xm_vap)
+!<<NAJS
 
     ! *ham_rad_diag* calculated type specific diagnostics
     !                 of aerosol optical properties
@@ -1660,21 +1820,54 @@ CONTAINS
 
 
     USE mo_kind,         ONLY: dp
+!>>NAJS: lidar backscatter
+    USE mo_math_constants,     ONLY: pi
+    USE mo_physical_constants, ONLY: rd, vtmpc1, grav, argas, avo
+!<<NAJS
     USE mo_tracdef,      ONLY: ntrac 
-    USE mo_ham,          ONLY: nrad 
-    USE mo_ham_rad_data, ONLY: nraddiagwv, nradang
+    USE mo_ham,          ONLY: nrad,                                                     & 
+!>>NAJS: lidar backscatter
+                               nradbeta
+!<<NAJS
+    USE mo_ham_rad_data, ONLY: nraddiagwv, nradang,                                      &
+!>>NAJS: lidar backscatter
+                               iradbeta,Niwv_sw_beta
+!<<NAJS
     USE mo_ham_streams,  ONLY: tau_mode, abs_mode, omega_mode, sigma_mode, asym_mode,    &
-                               tau_comp, abs_comp, tau_2d,     abs_2d,     ang,          &
-                               nr_mode,    ni_mode,                  &
+                               tau_comp, abs_comp, tau_2d,     abs_2d,     ang,      ai, &
+!>>PS: optical properties for dry aerosol
+                               tau_dry,  ext_dry,  abs_dry,                              &
+!<<PS
+!>>DN: AeroCom
+                               abs_lev_dry,                                              &
+!<<DN
+                               nr_mode,  ni_mode,                                        &
                                omega_2d_mode, sigma_2d_mode, asym_2d_mode,               &
-                               nr_2d_mode,    ni_2d_mode
+                               nr_2d_mode,    ni_2d_mode,                                &
+!>>NAJS: lidar backscatter
+                               attbeta_tot_space, attbeta_tot_earth, beta_tot,           &
+                               alfa_aer, alfa_gas, lidar_ratio_aer
+!<<NAJS
     USE mo_species,      ONLY: aero_idx, speclist
+!>>DN 
+    USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+    USE mo_hammoz_aerocom_HEaci, ONLY: aerindex_inst
+!<<DN 
+!>>DN ambient AOD per species
+    USE mo_param_switches, ONLY: lnoh2oaod
+!<<DN
 
     IMPLICIT NONE
 
     INTEGER   :: kproma, kbdim, klev, krow
 
     REAL(dp)  :: pxtm1(kbdim,klev,ntrac)
+!>>NAJS: lidar backscatter
+    REAL(dp), INTENT(IN) :: ppd_hl(kbdim,klev)       ! level pressure thickness in Pa
+    REAL(dp), INTENT(IN) :: pp_fl(kbdim,klev)        ! full level pressure in Pa
+    REAL(dp), INTENT(IN) :: tk_fl(kbdim,klev)        ! full level temperature in K
+    REAL(dp), INTENT(IN) :: xm_vap(kbdim,klev)       ! full level specific humidity in g/g
+!<<NAJS
 
     INTEGER   :: jl, jk, jclass, ikey, jt
 
@@ -1690,6 +1883,15 @@ CONTAINS
 
     REAL(dp)  :: zvcomp(kbdim,klev,naerospec,nclass)
 
+!>>NAJS: lidar backscatter
+    REAL(dp)  :: alfa(1:kbdim),      & ! total extinction at one level [per layer]
+                 intalfa(1:kbdim),   & ! total extinction integrated over previous levels
+                 attbeta(1:kbdim),   & ! attenuated total backscatter [per layer]
+                 zairdens,           & ! air density [kg m-3]
+                 zlayerdz(kbdim,klev)  ! layer thickness [m]
+    LOGICAL   :: test(1:kbdim,klev)    ! check if aerosol extinction is zero
+!<<NAJS
+
     REAL(dp), POINTER :: tau_2d_p(:,:)
     REAL(dp), POINTER :: tau_p(:,:,:),    abs_p(:,:,:)
     
@@ -1703,7 +1905,22 @@ CONTAINS
     
     zeps=EPSILON(1.0_dp)
 
-    !--- Optical thickness for optional wavelengths:
+    ! Calculate layer thickness [m]
+
+    DO jk=1,klev
+      DO jl=1,kproma
+
+        ! air density (neglects volume occupied by liquid and ice water)
+        zairdens = pp_fl(jl,jk)/(tk_fl(jl,jk)*rd*(1.0_dp+vtmpc1*xm_vap(jl,jk)))
+
+        ! layer thickness [m]
+        zlayerdz(jl,jk) = ppd_hl(jl,jk)/grav/zairdens
+
+      ENDDO ! jl
+    ENDDO ! jk
+
+
+    !--- 1) Optical thickness for optional wavelengths:
 
     DO jwv=1, Nwv_tot
 
@@ -1736,7 +1953,7 @@ CONTAINS
 
        END IF ! nraddiagwv(jwv)>0
 
-       !--- 2) 2D extended diatnostics of mode radiative parameters:
+       !--- 2) 2D extended diagnostics of mode radiative parameters:
 
        IF (nraddiagwv(jwv)>1) THEN
 
@@ -1799,7 +2016,7 @@ CONTAINS
 
           END IF ! nraddiag
 
-          !--- 3) 3D extended diatnostics of mode radiative parameters:
+          !--- 3) 3D extended diagnostics of mode radiative parameters:
 
           IF (nraddiag==2) THEN
              DO jclass=1, nclass
@@ -1888,6 +2105,9 @@ CONTAINS
           END DO
 
           ! add aerosol water
+!>>DN ambient AOD per species
+          IF (.NOT.lnoh2oaod) THEN
+!<<DN
 
           DO jclass=1,nclass
              IF (nrad(jclass) > 0 .AND. sizeclass(jclass)%lsoluble) THEN
@@ -1906,6 +2126,9 @@ CONTAINS
                 END DO
              END IF
           END DO
+!>>DN ambient AOD per species
+          END IF
+!<<DN
 
           DO jspec=1,naerospec
 
@@ -1916,6 +2139,71 @@ CONTAINS
              ikey=speclist(aero_idx(jspec))%iaerorad
 
              !--- Weighted averaging and vertical integration:
+
+             DO jclass=1, nclass
+                IF (nrad(jclass) > 0) THEN
+
+!>>DN ambient AOD per species
+                   IF (.NOT.lnoh2oaod .OR. &
+                        (lnoh2oaod.AND.(speclist(aero_idx(jspec))%iaerocomp(jclass)>0))) THEN
+!<<DN
+                   tau_p     => tau_mode(jclass,jwv)%ptr
+                   abs_p     => abs_mode(jclass,jwv)%ptr
+
+                   DO jk=1, klev
+                      DO jl=1, kproma
+                         IF (zvsum(jl,jk,jclass)>zeps) THEN
+                            ztaucomp(jl)=ztaucomp(jl) + &
+                                         tau_p(jl,jk,krow)*zvcomp(jl,jk,jspec,jclass)/zvsum(jl,jk,jclass)
+                            zabscomp(jl)=zabscomp(jl) + &
+                                         abs_p(jl,jk,krow)*zvcomp(jl,jk,jspec,jclass)*cni(jwv,ikey) / &
+                                         znivsum(jl,jk,jclass)
+                         END IF
+                      END DO
+                   END DO
+!>>DN ambient AOD per species
+                END IF
+!<<DN
+
+                END IF
+             END DO     !jclass
+
+             !--- Store in output streams:
+
+             tau_comp(jspec,jwv)%ptr(1:kproma,krow)=ztaucomp(1:kproma)
+             abs_comp(jspec,jwv)%ptr(1:kproma,krow)=zabscomp(1:kproma)
+
+          END DO     !jspec   
+!>>DN ambient AOD per species
+          IF (lnoh2oaod) THEN
+          DO jclass=1,nclass
+             IF (nrad(jclass) > 0 .AND. sizeclass(jclass)%lsoluble) THEN
+                jt = aerowater(jclass)%idt
+                ikey = speclist(id_wat)%iaerorad
+                zdensity = speclist(id_wat)%density
+
+                DO jk=1, klev
+                   DO jl=1, kproma
+                      zv=pxtm1(jl,jk,jt)/zdensity
+                   
+                      zvcomp(jl,jk,aero_ridx(id_wat),jclass)=zvcomp(jl,jk,aero_ridx(id_wat),jclass) + zv
+                      zvsum(jl,jk,jclass)       =zvsum(jl,jk,jclass)        + zv
+                      znivsum(jl,jk,jclass)     =znivsum(jl,jk,jclass)      + zv * cni(jwv,ikey)
+                   END DO
+                END DO
+             END IF
+          END DO
+          DO jspec=1,naerospec
+
+             ztaucomp(1:kproma)    =0._dp
+             zabscomp(1:kproma)    =0._dp
+!ham_ps:why m7 specific?
+             !ikey = speclist(subm_aerospec(jspec))%iaerorad
+             ikey=speclist(aero_idx(jspec))%iaerorad
+
+             !--- Weighted averaging and vertical integration:
+ 
+             IF (aero_idx(jspec)==id_wat) THEN
 
              DO jclass=1, nclass
                 IF (nrad(jclass) > 0) THEN
@@ -1937,19 +2225,62 @@ CONTAINS
 
                 END IF
              END DO     !jclass
-
              !--- Store in output streams:
 
              tau_comp(jspec,jwv)%ptr(1:kproma,krow)=ztaucomp(1:kproma)
              abs_comp(jspec,jwv)%ptr(1:kproma,krow)=zabscomp(1:kproma)
-
+          END IF
           END DO     !jspec   
+
+          END IF
+!<<DN
 
        END IF !nraddiagwv(jwv)>1
 
     END DO !jwv
 
-    !--- 5) Calculate Angstroem parameter between two wavelengths:
+
+    !--- Diagnose dry aerosol radiative properties for requested wavelengths (nraddiagwv):
+!>>PS: optical properties fo dry aerosol
+    IF (nraddry.GT.0) THEN
+      DO jwv=1, Niwv_sw_dry
+        tau_dry(jwv)%ptr(1:kproma,krow)=0.0_dp
+        IF (nraddry.GT.1) abs_dry(jwv)%ptr(1:kproma,krow)=0.0_dp
+        IF (nraddry.GT.2) ext_dry(jwv)%ptr(1:kproma,:,krow)=0.0_dp
+!>>DN: AeroCom
+        IF (nraddry.GT.2) abs_lev_dry(jwv)%ptr(1:kproma,:,krow)=0.0_dp
+!<<DN
+        DO jclass=1, nclass
+          IF (nrad(jclass)>0) THEN
+            DO jk=1, klev
+              tau_dry(jwv)%ptr(1:kproma,krow)   =tau_dry(jwv)%ptr(1:kproma,krow) + & 
+                                                 znum(1:kproma,jk,jclass)*sigma_dry(1:kproma,jk,jwv,jclass)
+            END DO
+            IF (nraddry.GT.1) THEN
+              DO jk=1, klev
+                abs_dry(jwv)%ptr(1:kproma,krow) = abs_dry(jwv)%ptr(1:kproma,krow) + & 
+                                                  znum(1:kproma,jk,jclass)*sigma_dry(1:kproma,jk,jwv,jclass) * &
+                                                  (1.0_dp - omega_dry(1:kproma,jk,jwv,jclass))
+              END DO
+            END IF
+            IF (nraddry.GT.2) THEN
+              DO jk=1, klev
+                ext_dry(jwv)%ptr(1:kproma,jk,krow) = ext_dry(jwv)%ptr(1:kproma,jk,krow) + &
+                     znum(1:kproma,jk,jclass) * sigma_dry(1:kproma,jk,jwv,jclass)/zlayerdz(1:kproma,jk)
+!>>DN: AeroCom
+                abs_lev_dry(jwv)%ptr(1:kproma,jk,krow) = abs_lev_dry(jwv)%ptr(1:kproma,jk,krow) + &
+                     znum(1:kproma,jk,jclass) * sigma_dry(1:kproma,jk,jwv,jclass)/zlayerdz(1:kproma,jk) * &
+                     (1.0_dp - omega_dry(1:kproma,jk,jwv,jclass))                
+!<<DN
+              END DO
+            END IF
+          END IF ! nrad(jclass)>0
+        END DO ! jclass
+    END DO ! jwv
+    ENDIF
+!<<PS
+
+    !--- 5) Calculate Angstroem parameter and Aerosol Index between two wavelengths:
 
     IF (nradang(1)/=0 .AND. nradang(2)/=0) THEN 
 
@@ -1960,14 +2291,272 @@ CONTAINS
        ztmp1(1:kproma) = MERGE(tau_2d(nradang(1))%ptr(1:kproma,krow), 1._dp, ll1(1:kproma)) !SF 1. is dummy
        ztmp2(1:kproma) = MERGE(tau_2d(nradang(2))%ptr(1:kproma,krow), 1._dp, ll1(1:kproma)) !SF 1. is dummy
 
+      !--- Angstroem parameter:
+
        ang(1:kproma,krow) = MERGE( &
            LOG(ztmp2(1:kproma)/ztmp1(1:kproma)) / LOG(lambda(nradang(1))/lambda(nradang(2))), &
            ang(1:kproma,krow), &                           
            ll1(1:kproma))
        
        !<<SF #458 (replacing WHERE statements)
+       
+!>>DN
+       IF (lHEaci) THEN
+          aerindex_inst(1:kproma,krow)=tau_2d(nradang(1))%ptr(1:kproma,krow)*ang(1:kproma,krow)
+       ENDIF
+!<<DN
+
+       !--- 5) Calculate Aerosol Index (AOD)
+
+       ai(1:kproma,krow)=MERGE(ztmp1(1:kproma)*ang(1:kproma,krow), ai(1:kproma,krow), ll1(1:kproma))
 
     END IF
+
+!>>NAJS: lidar backscatter
+    !-- 6) Calculate lidar backscatter
+! This uses the same method as COSP to solve the LIDAR equation, however it
+! does not depend on COSP so aerosol backscatter may be calculated without COSP calls
+
+    IF (nradbeta.GT.0) THEN
+
+      ! Calculate extinction and attenuated backscatter
+      DO jwv=1,Niwv_sw_beta
+        IF (iradbeta(jwv)/=0) THEN
+  
+          alfa_aer(jwv)%ptr(1:kproma,:,krow)          = 0._dp ! aerosol extinction
+          IF (nradbeta.GT.1) THEN
+            alfa_gas(jwv)%ptr(1:kproma,:,krow)          = 0._dp ! Rayleigh extinction
+            beta_tot(jwv)%ptr(1:kproma,:,krow)          = 0._dp ! total backscatter
+            lidar_ratio_aer(jwv)%ptr(1:kproma,:,krow)   = 0._dp ! aerosol LIDAR ratio
+          ENDIF
+          IF (nradbeta.GT.2) THEN
+            attbeta_tot_space(jwv)%ptr(1:kproma,:,krow) = 0._dp ! total attenuated backscatter from space
+            attbeta_tot_earth(jwv)%ptr(1:kproma,:,krow) = 0._dp ! total attenuated backscatter from Earth
+          ENDIF
+   
+          ! Calculate aerosol extinction and backscatter per layer
+          DO jclass=1, nclass
+  
+            IF ( nrad(jclass) > 0 ) THEN
+    
+              ! aerosol extinction per mode at each model layer
+              alfa_aer(jwv)%ptr(1:kproma,:,krow) = alfa_aer(jwv)%ptr(1:kproma,:,krow)     &
+                  + znum(1:kproma,:,jclass) * sigma(1:kproma,:,iradbeta(jwv),jclass)           
+ 
+              IF (nradbeta.GT.1) THEN  
+                ! aerosol contribution to backscatter per mode at each model layer
+                beta_tot(jwv)%ptr(1:kproma,:,krow) = beta_tot(jwv)%ptr(1:kproma,:,krow)   &
+                    + znum(1:kproma,:,jclass)                                             &
+                    * sigma(1:kproma,:,iradbeta(jwv),jclass)                              &
+                    * omega(1:kproma,:,iradbeta(jwv),jclass)                              &
+                    * pp180(1:kproma,:,iradbeta(jwv),jclass)/(4.0_dp*pi)
+              ENDIF ! nradbeta.GT.1
+  
+             ENDIF
+          ENDDO ! jclass
+ 
+          IF (nradbeta.GT.1) THEN 
+            ! Aerosol LIDAR ratio (check if extinction is not too small)
+            test(1:kproma,:) = (beta_tot(jwv)%ptr(1:kproma,:,krow) > zeps)
+            lidar_ratio_aer(jwv)%ptr(1:kproma,:,krow) = MERGE(                              &
+                alfa_aer(jwv)%ptr(1:kproma,:,krow) / beta_tot(jwv)%ptr(1:kproma,:,krow),    &
+                lidar_ratio_aer(jwv)%ptr(1:kproma,:,krow),                                  &
+                test(1:kproma,:))
+    
+            ! gas extinction per model layer
+            alfa_gas(jwv)%ptr(1:kproma,:,krow) =                                            &
+                gasextinction(kproma,kbdim,klev,lambda(iradbeta(jwv)))                      &
+                *  pp_fl(1:kproma,:) / argas / tk_fl(1:kproma,:) * avo * zlayerdz(1:kproma,:) 
+    
+            ! Rayleigh contribution to backscatter at each model layer
+            beta_tot(jwv)%ptr(1:kproma,:,krow) = beta_tot(jwv)%ptr(1:kproma,:,krow)         &
+                + 3.0_dp / 8.0_dp / pi * alfa_gas(jwv)%ptr(1:kproma,:,krow)
+          ENDIF ! nradbeta.GT.1  
+  
+          IF (nradbeta.GT.2) THEN 
+            ! Calculate attenuated total backscatter from space, per layer
+            attbeta_tot_space(jwv)%ptr(1:kbdim,:,krow) =                                    &
+                IntegrateLidarEq(kproma,kbdim,klev,1,klev,                                  &
+                    alfa_aer(jwv)%ptr(1:kbdim,:,krow) + alfa_gas(jwv)%ptr(1:kbdim,:,krow),  &
+                    beta_tot(jwv)%ptr(1:kbdim,:,krow) )
+    
+            ! Calculate attenuated total backscatter from Earth, per layer
+            attbeta_tot_earth(jwv)%ptr(1:kbdim,:,krow) =                                    &
+                IntegrateLidarEq(kproma,kbdim,klev,klev,1,                                  &
+                    alfa_aer(jwv)%ptr(1:kbdim,:,krow) + alfa_gas(jwv)%ptr(1:kbdim,:,krow),  &
+                    beta_tot(jwv)%ptr(1:kbdim,:,krow) )
+          ENDIF ! nradbeta.GT.2
+  
+          ! Calculate extinction
+          DO jk=1,klev
+            DO jl=1,kproma
+  
+              alfa_aer(jwv)%ptr(jl,jk,krow)          = alfa_aer(jwv)%ptr(jl,jk,krow)          / zlayerdz(jl,jk)
+  
+            ENDDO ! jl
+          ENDDO ! jk
+
+          ! Calculate backscatter
+          IF (nradbeta.GT.1) THEN
+            DO jk=1,klev
+              DO jl=1,kproma
+    
+              beta_tot(jwv)%ptr(jl,jk,krow)          = beta_tot(jwv)%ptr(jl,jk,krow)          / zlayerdz(jl,jk)
+              alfa_gas(jwv)%ptr(jl,jk,krow)          = alfa_gas(jwv)%ptr(jl,jk,krow)          / zlayerdz(jl,jk)
+    
+              ENDDO ! jl
+            ENDDO ! jk
+          ENDIF ! nradbeta.GT.1
+
+          ! Calculate attenuated backscatter
+          IF (nradbeta.GT.2) THEN
+            DO jk=1,klev
+              DO jl=1,kproma
+    
+                attbeta_tot_space(jwv)%ptr(jl,jk,krow) = attbeta_tot_space(jwv)%ptr(jl,jk,krow) / zlayerdz(jl,jk)
+                attbeta_tot_earth(jwv)%ptr(jl,jk,krow) = attbeta_tot_earth(jwv)%ptr(jl,jk,krow) / zlayerdz(jl,jk)
+    
+              ENDDO ! jl
+            ENDDO ! jk
+          ENDIF ! nradbeta.GT.2
+  
+        ENDIF
+      ENDDO ! jwv
+
+    ENDIF ! nradbeta.GT.0
+
+
+  CONTAINS
+
+    FUNCTION IntegrateLidarEq(kproma,kbdim,klev,klbeg,klend,alfa,beta)
+      !
+      ! ! Description
+      ! Calculates attenuated backscatter from either space or Earth
+      !
+      ! ! Author
+      ! NAJ Schutgens, University of Oxford, 2016/11/17
+      !
+      ! ! Method
+      ! Direct solution of the LIDAR equation, with all properties defined and
+      ! calculated over model layers. This is very similar to COSP. 
+      !
+      ! ! Revision history
+      !
+
+      IMPLICIT NONE
+
+      ! ! Input parameters
+      INTEGER,  INTENT(IN) :: kproma, kbdim, klev, klbeg, klend
+      REAL(dp), INTENT(IN) :: alfa(1:kbdim,1:klev), &  ! total extinction per layer
+                              beta(1:kbdim,1:klev)     ! total backscatter per layer
+
+      ! ! Return value
+      REAL(dp)             :: IntegrateLidarEq(1:kbdim,1:klev)
+
+      ! ! Local variables
+      INTEGER              :: jl,jk,klstep
+      REAL(dp)             :: intalfa(1:kbdim), tmpalfa(1:kbdim), attbeta(1:kbdim)
+      LOGICAL              :: test(1:kbdim)
+
+      ! Do we integrate from space downward or from Earth upward?
+      IF (klbeg.LE.klend) THEN 
+        klstep = 1  ! Downward from space
+      ELSE 
+        klstep = -1 ! Upward from Earth
+      ENDIF
+
+      ! Calcuate attenuated total backscatter from either space or ground
+      intalfa(1:kproma) = 0.0_dp ! integrated extinction from previous layers
+      attbeta(1:kproma) = 0.0_dp ! attenuated backscatter
+      DO jk=klbeg, klend, klstep
+
+        ! total extinction at level
+        tmpalfa(1:kproma) = alfa(1:kproma,jk)
+
+        test(1:kproma)    = (tmpalfa(1:kproma) > zeps)
+        attbeta(1:kproma) = beta(1:kproma,jk) * EXP(-2.0_dp*intalfa) * (1.0_dp-EXP(-2.0_dp*tmpalfa))/2.0_dp
+        attbeta(1:kproma) = MERGE(attbeta(1:kproma)/tmpalfa(1:kproma),0.0_dp,test(1:kproma))
+
+        IntegrateLidarEq(1:kproma,jk) = attbeta(1:kproma)
+
+        ! total extinction up to and including this level
+        intalfa(1:kproma) = intalfa(1:kproma) + tmpalfa(1:kproma)
+        
+      ENDDO ! jk
+
+      RETURN
+    END FUNCTION
+
+
+    FUNCTION gasextinction(kproma,kbdim,klev,wvl)
+      !
+      ! ! Description
+      ! Calculates Rayleigh extinction cross-section for simulation of LIDAR measurements
+      !
+      ! ! Author
+      ! NAJ Schutgens, University of Oxford, 2016/11/17
+      !
+      ! ! Method
+      ! Following Bodhaine et al JAOT 16, 1999, extinction is calculated under the 
+      ! assumption of constant depolarisation ratio and no impact from humidity
+      ! In the visual, these assumptions should hold with less that 1% error
+      !
+      ! ! Revision history
+      !
+
+      ! Note: at present this function calculates what is essentially a constant
+      ! (for a given wavelength). Thus it makes more sense to make this part of
+      ! ham_rad_initialize but the function is kept in rad_diag if in future,
+      ! the impact of specific humidity should be accounted for as in Froehlich
+      ! & Shaw Applied Optics 19, 1980
+
+
+      USE mo_math_constants,     ONLY: pi
+      USE mo_physical_constants, ONLY: argas, avo
+
+      IMPLICIT NONE
+
+      ! ! Defined parameters
+      REAL(dp),PARAMETER    :: delta   = 0.0284307,   &   ! depolarisation ratio at 530nm, see Bates in Bodhaine et al.
+                               hpa_std = 101325.0_dp, &   ! [pa] at 1 atmos
+                               TK_std  = 288.0_dp,    &   ! [K], 15 degree C
+                               Ns_cm3  = hpa_std/argas/TK_std*avo * 1.d-6 ! molecular number density
+
+      ! ! Input parameters
+      INTEGER, INTENT(IN)   :: kproma,kbdim,klev
+      REAL(dp),INTENT(IN)   :: wvl                        ! wavelength [m]
+  
+      ! ! Return value
+      REAL(dp)              :: gasextinction(kproma,klev) ! gas extinction [m2]
+
+      ! ! Local variables
+      REAL(dp)              :: ns,                      & ! refractive index of dry air
+                               wvl_mum,                 & ! wavelength [mum]
+                               wvl_cm                     ! wavelength [cm]
+      INTEGER               :: jl,jk
+     
+      ! Conversions 
+      wvl_mum = wvl * 1.d6 ! [m] -> [mum]
+      wvl_cm  = wvl * 1.d2 ! [m] -> [cm]
+
+      ! Refractive index of air, Eq. (4) in Bodhaine et al, from Eq. (3) from Peck & Reeder
+      ns = 1.0_dp+(8060.51_dp+2480990._dp/(132.274_dp-wvl_mum**(-2))+17455.7_dp/(39.32957_dp-wvl_mum**(-2)))*1.d-8
+
+      DO jk=1,klev
+        DO jl=1,kproma
+
+          ! Rayleigh extinction, Eq. (2) in Bodhaine et al 
+          gasextinction(jl,jk) = 24.0_dp * pi**3 * (ns**2-1.0_dp)**2 / (ns**2+2.0_dp)**2 &
+                                       / wvl_cm**4 / Ns_cm3**2                            &
+                                       * (6.0_dp+3.0_dp*delta) / (6.0_dp-7.0_dp*delta)    &  ! [cm2]
+                                       *  1.d-4                                              ! [m2]
+
+        ENDDO ! jl
+      ENDDO ! jk
+
+      RETURN
+    END FUNCTION
+!<<NAJS
 
   END SUBROUTINE ham_rad_diag
 !----------------------------------------------------------------------------------------------------------------
@@ -2046,6 +2635,10 @@ CONTAINS
     ALLOCATE(asym (kbdim,klev,Nwv_sw_tot,nclass))
     ALLOCATE(nr(kbdim,klev,Nwv_tot,nclass))
     ALLOCATE(ni(kbdim,klev,Nwv_tot,nclass))
+    IF (nraddry.GT.0) ALLOCATE(sigma_dry(kbdim,klev,Niwv_sw_dry,nclass))
+    IF (nraddry.GT.1) ALLOCATE(omega_dry(kbdim,klev,Niwv_sw_dry,nclass))
+
+    ALLOCATE(pp180(kbdim,klev,Nwv_sw_tot,nclass))
 
     ALLOCATE(znum(kbdim,klev,nclass))
 
@@ -2068,7 +2661,10 @@ CONTAINS
     
     IMPLICIT NONE
 
-    DEALLOCATE(sigma,omega,asym, nr, ni, znum)
+    DEALLOCATE(sigma,omega,asym, nr, ni, znum, pp180)
+    IF (nraddry.GT.0) DEALLOCATE(sigma_dry)
+    IF (nraddry.GT.1) DEALLOCATE(omega_dry)
+
 
   END SUBROUTINE ham_rad_cache_cleanup
 

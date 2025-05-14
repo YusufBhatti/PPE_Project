@@ -64,15 +64,16 @@ MODULE mo_ham
   PUBLIC :: nclass ! number of classes in current model
   PUBLIC :: nsol ! number of soluble classes in current model
   PUBLIC :: naerocomp, naerorad, nraddiag, nrad, nradmix, nseasalt, nmaxclass
+!>>NAJS: optical properties of dry aerosol
+  PUBLIC :: nraddry
+!<<NAJS
+!>>NAJS: lidar backscatter
+  PUBLIC :: nradbeta
+!<<NAJS
   PUBLIC :: HAM_BULK, HAM_M7, HAM_SALSA
   PUBLIC :: npist, laerocom_diag, ndrydep, nwetdep, lomassfix
   PUBLIC :: ndust !SF #479
   PUBLIC :: burden_keytype
-  PUBLIC :: lccnclim_diag
-  PUBLIC :: laeroclim
-  !>>UP test
-  PUBLIC :: lconstwindemi 
-  !<<UP test
   PUBLIC :: mw_s, mw_so2, mw_so4, mw_dms, mw_oc
   PUBLIC :: lhetfreeze
   PUBLIC :: nlai_drydep_ef_type !gf #244
@@ -255,6 +256,18 @@ MODULE mo_ham
                                        !             = 1 2D diagnostics
                                        !             = 2 2D+3D diagnostics
                                        !
+!>>NAJS: optical properties of dry aerosol
+  INTEGER :: nraddry     = 0           ! 0: no dry diagnostics
+                                       ! 1: only dry AOT
+                                       ! 2: dry AOT and AAOT
+                                       ! 3: dry AOt, AAOT and extinction
+!<<NAJS
+!>>NAJS: lidar backscatter
+  INTEGER :: nradbeta    = 0           ! 0: no LIDAR diagnostics
+                                       ! 1: basic LIDAR diagnostics: alfa_aer (aerosol extinction)
+                                       ! 2: (1) + aerosol & gas backscatter & lidar ratio
+                                       ! 3: (2) + attenuated backscatter from space & Earth
+!<<NAJS
   LOGICAL :: lomassfix   = .TRUE.      ! Mass fixer in convective scheme
 
   INTEGER, PUBLIC :: nsoa = 0          ! Choice for the secondary organics scheme 
@@ -288,11 +301,6 @@ MODULE mo_ham
   INTEGER         :: burden_keytype          ! options: OFF, BYTRACER, BYSPECIES
   
   !>>dod deleted iwritetrac <<dod
-
-  LOGICAL         :: lccnclim_diag = .FALSE. !SF #333
-  LOGICAL         :: lconstwindemi = .FALSE. !UP test
-
-  LOGICAL         :: laeroclim = .FALSE. !SF
 
   !--- 1.2) boundary conditions 
   INTEGER, PUBLIC :: ibc_oh, ibc_o3, & ! boundary condition indices for tracer fields
@@ -495,16 +503,17 @@ CONTAINS
        CALL p_bcast (nrad,          p_io)
        CALL p_bcast (nradmix,       p_io)
        CALL p_bcast (nraddiag,      p_io)
+!>>NAJS: optical properties of dry aerosol
+       CALL p_bcast (nraddry,       p_io)
+!<<NAJS
+!>>NAJS: lidar backscatter
+       CALL p_bcast (nradbeta,      p_io)
+!<<NAJS
        CALL p_bcast (lomassfix,     p_io)
        CALL p_bcast (nsoa,          p_io)                     
        CALL p_bcast (nsoalumping,   p_io) 
        CALL p_bcast (lhetfreeze,    p_io)
        CALL p_bcast (burden_keytype,p_io)
-       CALL p_bcast (lccnclim_diag, p_io)
-       CALL p_bcast (laeroclim,     p_io)
-       !>>UP test
-       CALL p_bcast (lconstwindemi, p_io)
-       !<<UP
        CALL p_bcast_bc (bc_oh,      p_io)
        CALL p_bcast_bc (bc_o3,      p_io)
        CALL p_bcast_bc (bc_h2o2,    p_io)
@@ -552,14 +561,6 @@ CONTAINS
          END IF
 
       ENDIF
-
-!>>SF #333: diagnostics for CCNclim currently only implemented for M7
-      IF (lccnclim_diag .AND. nham_subm /= HAM_M7) THEN
-         WRITE(message_text,'(a)') 'CCNclim diagnostics are only implemented for M7!', &
-                                   'Please switch off lccnclim_diag or set nham_subm = ',HAM_M7
-         CALL finish ('setham',message_text)
-      ENDIF
-!<<SF #333
 
 !>>SF #299
       !--- Check authorized values for burden_keytype
@@ -759,6 +760,37 @@ CONTAINS
           CALL message ('setham', message_text, level=em_error)
       END SELECT
 
+!>>NAJS: optical properties of dry aerosol
+      SELECT CASE(nraddry)
+        CASE (0)
+          CALL message ('','No dry radiation diagnostics (nraddry=0).',level=em_param)
+        CASE (1)
+          CALL message ('','Dry radiation diagnostics: AOT  (nraddry=1).',level=em_param)
+        CASE (2)
+          CALL message ('','Dry radiation diagnostics: AOT & AAOT (nraddry=2).',level=em_param)
+        CASE (3)
+          CALL message ('','Dry radiation diagnostics: AOT, AAOT & extinction (nraddry=3).',level=em_param)
+        CASE DEFAULT
+          WRITE (message_text,'(a,i0)') 'Invalid value for nraddry: ', nraddry
+          CALL message ('setham', message_text, level=em_error)
+      END SELECT
+!<<NAJS
+!>>NAJS: lidar backscatter
+      SELECT CASE(nradbeta)
+        CASE (0)
+          CALL message ('','No LIDAR diagnostics (nradbeta=0).',level=em_param)
+        CASE (1)
+          CALL message ('','LIDAR diagnostics: alfa_aer  (nradbeta=1).',level=em_param)
+        CASE (2)
+          CALL message ('','LIDAR diagnostics: alfa_aer, alfa_gas, beta_tot & lidar_ratio (nradbeta=2).',level=em_param)
+        CASE (3)
+          CALL message ('','Full LIDAR diagnostics: incl. att. backscatter from Earth and space (nradbeta=3).',level=em_param)
+        CASE DEFAULT
+          WRITE (message_text,'(a,i0)') 'Invalid value for nradbeta: ', nradbeta
+          CALL message ('setham', message_text, level=em_error)
+      END SELECT
+!<<NAJS
+
     ELSE       ! naerorad==0
       CALL message('setham','Aerosol radiation interactions deactivated!', level=em_warn)
     END IF
@@ -804,7 +836,6 @@ CONTAINS
         WRITE (message_text,*) 'nccndiag = ',nccndiag,' not supported.'
         CALL message('setham',message_text, level=em_error)
     END SELECT
-    CALL print_value('Aerosol climatology (laeroclim)', laeroclim)
 
   END SUBROUTINE setham
 

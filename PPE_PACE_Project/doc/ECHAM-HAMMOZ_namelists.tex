@@ -84,8 +84,7 @@ lmfpen & True to switch on penetrative convection & .true. & .true. \\
 lgwdrag & True for gravity wave drag scheme & .true. & .true. \\ 
 lice & True for sea-ice temperature calculation & .true. & .true. \\ 
 lconvmassfix & True for switching on aerosol mass fixer in conv & .true. & .true. \\ 
-lclmi\_progn & True for prognostic cloud activation scheme & .false. & .false. \\ 
-nclmi\_progn & \begin{minipage}[t]{7.5cm} \raggedright Allows to fine-tune the 2-moment cloud microphysics calculations in mo\_cloud\_micro\_2m.f90 \\ 0: both CDNC and ICNC are diagnostic variables \\ 1: CDNC is a prognostic var, ICNC is a diagnostic var \\  2: CDNC is a diagnotic var,  ICNC is a prognostic var \\ 3: CDNC and ICNC are prognostic vars \\ ~\\[0.2cm] \end{minipage} & 3 & 3 \\
+lcdnc\_progn & True for prognostic cloud activation scheme & .false. & .false. \\ 
 ncd\_activ & \begin{minipage}[t]{7.5cm} \raggedright Select cloud droplet activation scheme:\\ 0: off (lcdnc\_progn=false) \\ 1: Lohmann et al. (1999) + Lin and Leaitch (1997) \\ 2: Lohmann et al. (1999) + Abdul-Razzak and Ghan (2000) \\ ~\\[0.2cm] \end{minipage} & 2 & 2 \\ 
 nactivpdf & \begin{minipage}[t]{7.5cm} \raggedright Sub-grid scale pdf of updraft velocities in activation scheme:\\ 0: Mean updraft from TKE scheme without pdf \\ 1: Coupling of updraft pdf with 20 bins to TKE scheme (West et al., 2013)\\ $>$1: as 1, but use the specified number of bins\\ $<$0: as positive value, but output per-bin supersaturation diagnostics etc. \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 
 nic\_cirrus & \begin{minipage}[t]{7.5cm} \raggedright Select ice crystal cirrus scheme:\\ 0: off (lcdnc\_progn=false) \\ 1: Lohmann JAS 2002 \\ 2: Kaercher \ Lohmann JGR 2002 \\ ~\\[0.2cm] \end{minipage} & 0 & 0 \\ 

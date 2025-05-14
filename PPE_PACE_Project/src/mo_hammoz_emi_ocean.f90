@@ -194,9 +194,6 @@ MODULE mo_hammoz_emi_ocean
   USE mo_memory_g3b,         ONLY: slm
   USE mo_vphysc,             ONLY: vphysc
   USE mo_physical_constants, ONLY: tmelt
-  !>>UP test
-  USE mo_ham,                ONLY: lconstwindemi
-  !<<UP test
 
   IMPLICIT NONE
 
@@ -245,11 +242,6 @@ MODULE mo_hammoz_emi_ocean
 
     IF (loocean(jl)) THEN   ! ocean
       zzspeed=vphysc%velo10m(jl,krow)
-      !>>UP test
-      IF (lconstwindemi) THEN
-        zzspeed=6.2_dp
-      ENDIF
-      !<<UP
 
       IF (npist == 1) THEN ! Calculate piston velocity (Liss&Merlivat, 1986)
         IF (zzspeed.GT.3.6_dp.AND.zzspeed.LE.13._dp) THEN

@@ -20,7 +20,6 @@
 !!   -# M.G. Schultz and S. Schroeder (FZ Juelich) - original code (2010-02-11)
 !!   -# D. O'Donnell (ETH-Zurich) - added AEROCOM emissions (2010-04-21)
 !!   -# A.Laakso (FMI) - modified module for SALSA (2013-06)
-!!   -# T. Kuehn (UEF) - bugfixes and code cleanup
 !!
 !! \limitations
 !! None
@@ -621,7 +620,7 @@ SUBROUTINE ham_salsa_emissions(kproma, kbdim, klev, krow, ktrac, ksec, kspec,   
            pfactor(idx_moc(ii)) = deltadp/                                        &
                 (dpmid(ii)*sqrt(2._dp*pi)*log(sigmag(1)))*                   &
                 exp(-log(dpmid(ii)/dpg_m(1))**2/                             &
-                (2._dp*log(sigmag(1))**2)) ! thk: bugfix #596
+                (2._dp*log(sigmag(1))**2))*(zbg_wsoc_perc)
         END DO
         !insoluble
         DO ii  = in2b, fn2b
@@ -631,7 +630,7 @@ SUBROUTINE ham_salsa_emissions(kproma, kbdim, klev, krow, ktrac, ksec, kspec,   
            pfactor(idx_moc(ii)) = deltadp/                                        &
                 (dpmid(ii)*sqrt(2._dp*pi)*log(sigmag(1)))*                   &
                 exp(-log(dpmid(ii)/dpg_m(1))**2/                             &
-                (2._dp*log(sigmag(1))**2)) ! thk: bugfix #596
+                (2._dp*log(sigmag(1))**2))*(1._dp-zbg_wsoc_perc)
         END DO
         !pfactor(idx_moc(:))=zom2oc*pfactor(idx_moc(:))*1._dp/sum(pfactor(idx_moc(:)))
         pfactor(idx_moc(in1a:fn2a))=zom2oc*pfactor(idx_moc(in1a:fn2a))*1._dp/sum(pfactor(idx_moc(in1a:fn2a)))*(zbg_wsoc_perc)
@@ -640,9 +639,9 @@ SUBROUTINE ham_salsa_emissions(kproma, kbdim, klev, krow, ktrac, ksec, kspec,   
      END IF
 
      !--- biogenic
-     !--- if SOA scheme from D. O'Donnell or T. Kuehn is active, the biogenic sector does not emit aerosols
+     !--- if SOA scheme from D. O'Donnell is active, the biogenic sector does not emit aerosols
      !    (only precursors)
-     IF (ksec == idsec_biogenic .AND. nsoa == 0) THEN        !>>dod soa; bugfix thk #595
+     IF (ksec == idsec_biogenic .AND. nsoa /= 1) THEN        !>>dod soa
 
         !pfactor(idx_mocki) = (1._dp-zbg_wsoc_perc)               ! insoluble fraction
         !pfactor(idx_mocks) = 0.5*zbg_wsoc_perc                   ! soluble fraction (aitken)

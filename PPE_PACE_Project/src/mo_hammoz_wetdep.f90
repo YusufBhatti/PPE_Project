@@ -577,7 +577,7 @@ MODULE mo_hammoz_wetdep
   !! ---------------------------------------------------------------------------------------
   !! gas_wetdep: routine to handle gas wet deposition
 
-  SUBROUTINE gas_wetdep(kproma, kbdim,    klev, ktop, &
+  SUBROUTINE gas_wetdep(kproma, kbdim, klev, krow, ktop, &
                         kt,                           &
                         kscavICtype, kscavBCtype,     &
                         kscavICphase, kscavBCphase,   &
@@ -606,10 +606,17 @@ MODULE mo_hammoz_wetdep
 
   USE mo_time_control,  ONLY: time_step_len
   USE mo_tracdef,       ONLY: ntrac
+ !>>DN
+  USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+  USE mo_hammoz_aerocom_HEaci, ONLY: wet3Dso2_inst, wet3Dso4_inst
+  USE mo_species,              ONLY: speclist
+  USE mo_tracdef,              ONLY: trlist
+  !<<DN
 
   INTEGER, INTENT(in) :: kproma        ! geographic block number of locations
   INTEGER, INTENT(in) :: kbdim         ! geographic block maximum number of locations
   INTEGER, INTENT(in) :: klev          ! numer of levels
+  INTEGER, INTENT(in) :: krow           ! geographic block number
   INTEGER, INTENT(in) :: ktop          ! top layer index
   INTEGER, INTENT(in) :: kt            ! tracer index
   INTEGER, INTENT(in) :: kscavICtype   ! indicates in-cloud scavenging scheme
@@ -758,6 +765,16 @@ MODULE mo_hammoz_wetdep
 
        !--- Reduce integrated deposition mass flux by re-evap
        pdepintic(1:kproma) = pdepintic(1:kproma) - zdxtevapic(1:kproma,jk)
+        !>>DN
+        IF(lHEaci.AND.trlist%ti(kt)%spid>0)THEN
+           IF (speclist(trlist%ti(kt)%spid)%shortname == 'SO2') &
+                wet3Dso2_inst(1:kproma,jk,krow)=&
+                wet3Dso2_inst(1:kproma,jk,krow)+zdep(1:kproma,jk)-zdxtevapic(1:kproma,jk)
+           IF (speclist(trlist%ti(kt)%spid)%shortname == 'H2SO4') &
+                wet3Dso4_inst(1:kproma,jk,krow)=&
+                wet3Dso4_inst(1:kproma,jk,krow)+zdep(1:kproma,jk)-zdxtevapic(1:kproma,jk)
+        END IF
+        !<<DN        
     ENDDO
 
      IF (.NOT. lstrat) THEN !conv case
@@ -848,6 +865,16 @@ MODULE mo_hammoz_wetdep
            pdepintbcr(1:kproma) = pdepintbcr(1:kproma) + zdxtcolr(1:kproma,jk)*pdpg(1:kproma,jk)/ztmst
            pdepintbcs(1:kproma) = pdepintbcs(1:kproma) + zdxtcols(1:kproma,jk)*pdpg(1:kproma,jk)/ztmst
 
+        !>>DN
+        IF(lHEaci)THEN
+           IF (speclist(trlist%ti(kt)%spid)%shortname == 'SO2') &
+                wet3Dso2_inst(1:kproma,jk,krow)=&
+                wet3Dso2_inst(1:kproma,jk,krow)+zdxtcol(1:kproma,jk)*pdpg(1:kproma,jk)/ztmst
+           IF (speclist(trlist%ti(kt)%spid)%shortname == 'H2SO4') &
+                wet3Dso4_inst(1:kproma,jk,krow)=&
+                wet3Dso4_inst(1:kproma,jk,krow)+zdxtcol(1:kproma,jk)*pdpg(1:kproma,jk)/ztmst
+        END IF
+        !<<DN        
 !temporary, don't take re-evaporation into account
 !SF note: inherited from former code. Is it still relevant to dismiss re-evaporation ?
 
@@ -907,6 +934,10 @@ MODULE mo_hammoz_wetdep
   USE mo_species,       ONLY: speclist
   USE mo_ham_wetdep,    ONLY: ham_wetdep, ham_setscav, prep_ham_mode_init
   USE mo_submodel_diag, ONLY: get_diag_pointer
+  !>>DN
+  USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+  USE mo_hammoz_aerocom_HEaci, ONLY: wet3Dso2_inst, wet3Dso4_inst
+  !<<DN
 
   INTEGER,  INTENT(in)    :: kproma                      ! geographic block number of locations
   INTEGER,  INTENT(in)    :: kbdim                       ! geographic block maximum number of locations
@@ -990,6 +1021,12 @@ MODULE mo_hammoz_wetdep
   ENDDO
 !SFNote the above to refactor. probably should use zaclc also....
 
+  !>>DN
+  IF(lHEaci)THEN
+     wet3Dso2_inst(1:kproma,:,krow) = 0._dp
+     wet3Dso4_inst(1:kproma,:,krow) = 0._dp
+  END IF
+  !<<DN       
   !--- tracer loop
   DO jt=1, ntrac
 
@@ -1005,7 +1042,7 @@ MODULE mo_hammoz_wetdep
     zdepintic_impw(1:kproma) = 0._dp
     zdepintic_impm(1:kproma) = 0._dp
     zdepintic_impc(1:kproma) = 0._dp
-
+ 
     IF(lstrat) THEN
        zclc(1:kproma,:) = pclc(1:kproma,:)
     ELSE
@@ -1084,7 +1121,7 @@ MODULE mo_hammoz_wetdep
         ENDIF
 
         !--- process scavenging:
-        CALL gas_wetdep(kproma, kbdim, klev, ktop,                  &
+        CALL gas_wetdep(kproma, kbdim, klev, krow, ktop,            &
                         jt,                                         &
                         jscavICtype, jscavBCtype,                   &
                         jscavICphase, jscavBCphase,                 &

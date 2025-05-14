@@ -2468,10 +2468,7 @@ SUBROUTINE m7_dnum(kproma, kbdim,  klev,   krow,  &
   !  accordingly before changes in the code below.
   
   USE mo_kind,       ONLY: dp
-  USE mo_ham_m7ctl,  ONLY: ncoag, &
-                           !>>UP #809
-                           lwopath_24, lwopath_274
-                           !<<UP
+  USE mo_ham_m7ctl,  ONLY: ncoag
   USE mo_ham,        ONLY: naerocomp, nclass, lscoag
   !>>dod timers
   USE mo_control,    ONLY: ltimer
@@ -2640,17 +2637,6 @@ SUBROUTINE m7_dnum(kproma, kbdim,  klev,   krow,  &
            zbfract2(jl,jk,5)=zcom(jl,jk,12)*paernl(jl,jk,6)
            zbfract2(jl,jk,6)=zcom(jl,jk,13)*paernl(jl,jk,7)
            !<<dod
-           !>>UP #809
-           ! set the respective coagulation coefficient products to 0 so that
-           ! all coagulation from 2 to 4 is inhibited (mass, number, gain and
-           ! loss from the respective classes)
-           IF (lwopath_24) THEN
-                   zbfract2(jl,jk,3)=0.0_dp
-           ENDIF
-           IF (lwopath_274) THEN
-                   zbfract2(jl,jk,6)=0.0_dp
-           ENDIF
-           !<<UP #809
 
            !--- Sum of all particles that are moved from mode 2:
         
@@ -4478,13 +4464,10 @@ END SUBROUTINE m7_concoag
                     pa4delt(jl,jk,iso4as)=pa4delt(jl,jk,iso4as)+pbfract1(jl,jk,5)*zanli(jl,jk,1)*za4av 
 
                     ! Mass from 1 to 4: 
-                    !UP #809 TODO: target 14; probably targeting pbfract1 is
-                    !smarter, see for lwopath24
  
                     pa4delt(jl,jk,iso4cs)=pbfract1(jl,jk,3)*zanli(jl,jk,1)*za4av 
 
                     ! Mass from 1 to 4 due to coag. with 7:
-                    !UP #809 TODO: target
  
                     pa4delt(jl,jk,iso4cs)=pa4delt(jl,jk,iso4cs)+pbfract1(jl,jk,6)*zanli(jl,jk,1)*za4av 
 
@@ -4543,7 +4526,7 @@ END SUBROUTINE m7_concoag
                                          pbfract2(jl,jk,5)*zocmass
 
                     ! Mass from 2 to 4: 
-
+ 
                     pa4delt(jl,jk,iso4cs)=pa4delt(jl,jk,iso4cs)+pbfract2(jl,jk,3)*zanli(jl,jk,2)*za4av 
                     pa4delt(jl,jk,ibccs)=pa4delt(jl,jk,ibccs)+                                & 
                                          pbfract2(jl,jk,3)*zbcmass
@@ -4557,6 +4540,7 @@ END SUBROUTINE m7_concoag
                                          pbfract2(jl,jk,6)*zbcmass
                     pa4delt(jl,jk,ioccs)=pa4delt(jl,jk,ioccs)+                                & 
                                          pbfract2(jl,jk,6)*zocmass
+
  
                     IF (nsoa == 1) THEN
                        DO jm=1,nsoaspec

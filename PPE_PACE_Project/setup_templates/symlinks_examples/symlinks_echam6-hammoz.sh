@@ -26,7 +26,6 @@
 #    flag_CMIP5_ozon="[usage of CMIP5 ozon: 'false' (obsolete climatologic input) or 'true' (CMIP5)]"
 #    flag_time_dep_sol_irr="[time-dependence of solar irradiance: 'false' (climatologic) or 'true' (time-dep)]"
 #    flag_kinne_aerosols="[flag to use Kinne aerosols (radiative prop + CCN (time-dep)): 'false' (no Kinne aerosols) or 'true']"
-#    flag_aeroclim="[flag to use the aeroclim prescribed tracers: 'false' (no aeroclim) or 'true']"
 #    flag_stenchikov_aerosols="[flag to use Stenchikov volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
 #    flag_crowley_aerosols="[flag to use crowley volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
 #    flag_submclim_aerosols="[flag to use submodel climatology volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
@@ -47,8 +46,8 @@
 # Machine-specific (customize your path here):
 #----------------------------------------------
 
-input_basepath="XX/${input_files_version}"      # where all input files except nudging data is to be found
-nudg_basepath="XX"                              # where all nudging data is to be found
+input_basepath=XX/${input_files_version}      # where all input files except nudging data is to be found
+nudg_basepath=XX                              # where all nudging data is to be found
 
 #--------------------------------------------------
 # You shouldn't need to modify the following
@@ -204,24 +203,6 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
          flag_check $case_insensitive flag_submclim_aerosols "${possible_values[@]}"
       else
          echo "Error! flag_submclim_aerosols is not defined! Please review your symlinks script!" | tee -a $log_file
-         echo "Exiting"
-         exit 1
-      fi
-
-  #-- flag_aeroclim
-
-      # flag_aeroclim is automatically set prior to executing this script, based on iaero:
-      # if laeroclim=.true. --> flag_aeroclim=true
-      # flag_aeroclim=false otherwise  
-      # uncomment the following line to override the automatic setting:
-      # flag_aeroclim=XXX
-
-      possible_values=( true false )
-      case_insensitive=true
-      if [ ! -z $flag_aeroclim ] ; then
-         flag_check $case_insensitive flag_aeroclim "${possible_values[@]}"
-      else
-         echo "Error! flag_aeroclim is not defined! Please review your symlinks script!" | tee -a $log_file
          echo "Exiting"
          exit 1
       fi
@@ -431,7 +412,6 @@ echo "flag_kinne_aerosols: $flag_kinne_aerosols"      | tee -a $log_file
 echo "flag_stenchikov_aerosols: $flag_stenchikov_aerosols" | tee -a $log_file
 echo "flag_crowley_aerosols: $flag_crowley_aerosols"       | tee -a $log_file
 echo "flag_submclim_aerosols: $flag_submclim_aerosols"     | tee -a $log_file
-echo "flag_aeroclim: $flag_aeroclim"                  | tee -a $log_file
 echo "scenario: $scenario"                            | tee -a $log_file
 echo "flag_nudg: $flag_nudg"                          | tee -a $log_file
 echo "flag_nudg_netcdf: $flag_nudg_netcdf"            | tee -a $log_file
@@ -600,30 +580,6 @@ if $flag_kinne_aerosols ; then
        #<< SFtemp
    done
 
-fi
-
-#---------------------------------------
-#  Aerosol climatology (--> laeroclim) 
-#---------------------------------------
-if $flag_aeroclim ; then
-    cyyyymm="${start_yyyymm_m1}"
-    cmm=`date --utc "+%m" --date "${cyyyymm}01"`
-    
-    while [[ $cyyyymm -le ${stop_yyyymm_p1} ]] ; do
-
-        if [ -z "$presc_trc_fixed_yyyy" ] ; then
-            #-- Use current yyyymm for the presc tracer files
-            presc_trc_yyyymm="$cyyyymm"
-        else
-            #-- Use a permanent, fixed year for the presc tracer files
-            presc_trc_yyyymm="${presc_trc_fixed_yyyy}${cmm}"
-        fi
-
-        ln -sf ${presc_trc_dir}/${presc_trc_expn}_${presc_trc_yyyymm}.01${presc_trc_suff} presc_tracer_${cyyyymm}.nc
-
-        cyyyymm=`date --utc "+%Y%m" --date "${cyyyymm}01 + 1 month"`
-        cmm=`date --utc "+%m" --date "${cyyyymm}01"`
-    done
 fi
 
 #---------------------------------------

@@ -86,21 +86,9 @@ MODULE mo_hammoz_timer
   INTEGER, PUBLIC :: timer_ham_m7_concoag
   INTEGER, PUBLIC :: timer_ham_m7_redistr
 
-  !>>UP adding new ham timers
-  INTEGER, PUBLIC :: timer_ham_totsum
-  INTEGER, PUBLIC :: timer_ham_ifdef
-  !<<UP
-
 CONTAINS
   
   SUBROUTINE init_hammoz_timers
-
-    !>>UP adding new ham timers
-    ! timer for all of ham
-    timer_ham_totsum       = new_timer('ham_totalsum')
-    ! timer for all ifdef HAMMOZ
-    timer_ham_ifdef        = new_timer('ham_ifdef-hammoz')
-    !<<UP
 
     ! submodel timers (process level)
     timer_ham_bulk          = new_timer('ham_bulk')

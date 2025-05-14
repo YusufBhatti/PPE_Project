@@ -440,9 +440,7 @@ SUBROUTINE scan1
       CALL mass_fixer(qfcst,alpha,psm1cor,pscor,ztodt)
 #endif
     CASE (tpcore)
-      IF (ltimer) CALL timer_start(timer_tpcore)
-      CALL tpcore_tendencies (psm1cor, pscor) !UL: added this part to the timer 
-      IF (ltimer) CALL timer_stop(timer_tpcore) !UL: added this part to the time, because it seems to belong to a tpcore timing.
+      CALL tpcore_tendencies (psm1cor, pscor) 
     END SELECT
   ENDIF
 

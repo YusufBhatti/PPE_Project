@@ -18,20 +18,9 @@
 !     *LICE*    LOGICAL   *TRUE* FOR SEA-ICE TEMPERATURE CALCULATION    
 !                                                                       
 !  !!mgs: new switches for cloud activation
-!     lclmi_progn logical  true for prognostic cloud activation scheme (former ncdnc and nicnc)
-!     nclmi_progn integer allows to fine-tune the 2-moment cloud microphysics calculations in
-!                         mo_cloud_micro_2m.f90
-!                         WARNING: this is meant for special sensitivity studies!!
-!                                  Do not modify if you don't know about it
-!                         0: both CDNC and ICNC are diagnostic variables
-!                            WARNING!! this is *not* equivalent to lclmi_progn = .false. because
-!                            this still uses cloud_cdnc_icnc.f90 (with a different autoconversion
-!                            scheme as compared to using cloud.f90).
-!                         1: CDNC is a prognostic var, ICNC is a diagnostic var
-!                         2: CDNC is a diagnotic var,  ICNC is a prognostic var
-!                         3: CDNC and ICNC are prognostic vars [DEFAULT, normal case]         
+!     lcdnc_progn logical  true for prognostic cloud activation scheme (former ncdnc and nicnc)
 !     ncd_activ   integer  select cloud droplet activation scheme:
-!                         0: off (lclmi_progn=false)
+!                         0: off (lcdnc_progn=false)
 !                         1: Lohmann et al. (1999) + Lin and Leaitch (1997)
 !                         2: Lohmann et al. (1999) + Abdul-Razzak and Ghan (2000)
 !>>ZK
@@ -43,7 +32,7 @@
 !<<ZK
 !>>SF changed the former lice_supersat logical into an integer (nic_cirrus)
 !     nic_cirrus  integer select ice crystal cirrus scheme:
-!                         0: off (lclmi_progn=false)
+!                         0: off (lcdnc_progn=false)
 !                         1: Lohmann, JAS 2002
 !                         2: Kaercher & Lohmann, JGR 2002
 !<<SF
@@ -59,41 +48,7 @@
 
 NAMELIST /PHYSCTL/ LPHYS,  LRAD,  LVDIFF, LCOND,   LSURF,               &
                    LCONV, LMFPEN, LGWDRAG, LICE, LCONVMASSFIX,          &
-                   lclmi_progn, nclmi_progn, ncd_activ, nic_cirrus, nauto, &
-                   lsecprod, lorocirrus, ldyn_cdnc_min, nactivpdf, cdnc_min_fixed, &!davidn
-		   tun47zinhomi,tun47zinhoml1,tun47zinhoml2,tun47zinhoml3,&
-		   tun47zinpar,tun47ccraut,tun47ccsaut,tun47cdncmin,&
-		   tun47entrpen,tun47cprcon,tun47entrscv,tun47cmfctop,&!davidn
-	 	   lemuphase_nic_cirrus, eta_emu_nic_cirrus,& !UP
-		   lemuphase_riming, eta_emu_riming,& !UP
-		   lemuphase_wbf, eta_emu_wbf,& !UP #765
-		   lemuphase_icaggr, eta_emu_icaggr,& !UP #757
-		   lemuphase_icaccr, eta_emu_icaccr,& !UP #775
-		   lemuphase_cdaccr, eta_emu_cdaccr,& !UP #805
-		   lemuphase_cdautc, eta_emu_cdautc,& !UP #805
-		   lemuphase_sci, eta_emu_sci,& !UP
-		   lemuphase_dep, eta_emu_dep,& !UP #801
-		   lemuphase_icnucl, eta_emu_icnucl,& !UP #801
-		   lemuphase_sub_evp_falling, eta_emu_subfis,& !UP #802
-		   eta_emu_evpr, & !UP #802
-		   lemuphase_cdnuc, eta_emu_cdnuc,& !UP #805
-		   lemuphase_sip, eta_emu_sip,& !UP #805
-		   lemuphase_mlt, eta_emu_mlt,& !UP #802
-		   lcmpsimpl_prescr, & !UP #821
-	           ncmpsimpl_prescr_rime, & !UP #821
-	           ncmpsimpl_prescr_icnucl, & !UP #821
-	           ncmpsimpl_prescr_subfis, & !UP #821
-	           ncmpsimpl_prescr_sci, & !UP #821
-	           ncmpsimpl_prescr_icaccr, & !UP #821
-	           ncmpsimpl_prescr_mlt, & !UP #821
-		   ldetr_liquid, & !UP #782.1
-                   ldetr_convicfactor, convicfactor,& !UP #782.2
-                   lnewdiags,lepsfix, &
-		   lccnclimdiags, &
-                   lpr_corr, & !UP #783.3
-                   rcd_vol_max, & !UP
-		   lsedfix, & !UP #797
-		   lslf, & !UP FOR-ICE #839
-		   lemuphase_hetfrz, eta_emu_hetfrz, & !MA #790
-		   lemuphase_fvic, eta_emu_fvic, & !MA #795
-		   lctrl_WBF !MA WBF switch
+                   lcdnc_progn, ncd_activ, nic_cirrus, nauto, lsecprod, &
+                   lorocirrus, ldyn_cdnc_min, nactivpdf, cdnc_min_fixed,&
+		   ac_scale_activation, ac_scale_autoconversion, lnoh2oaod,&
+		   ac_scale_accretion, ac_scale_KK_LWP_exponent

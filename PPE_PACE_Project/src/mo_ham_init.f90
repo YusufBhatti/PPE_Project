@@ -92,8 +92,7 @@ MODULE mo_ham_init
                                    HAM_BULK,        &
                                    HAM_M7,          &
                                    HAM_SALSA,       &
-                                   subm_naerospec,  &
-                                   laeroclim
+                                   subm_naerospec
     USE mo_ham_dust,        ONLY : setdust
     USE mo_ham_m7ctl,       ONLY : sethamM7, m7_initialize
     USE mo_ham_salsactl,    ONLY : setham_salsa  
@@ -104,7 +103,6 @@ MODULE mo_ham_init
     ! >> thk: volatility basis set (VBS)
     USE mo_ham_vbsctl, ONLY : setham_vbs, laqsoa
     USE mo_ham_vbs,    ONLY : vbs_species
-    USE mo_ham_aeroclim, ONLY: init_aeroclim_submodel
     ! << thk
   
     !-- local variables
@@ -184,11 +182,6 @@ MODULE mo_ham_init
 
        CALL ham_define_bins(nclass, naerosol(nham_subm), subm_naerospec)
     END SELECT
-
-    ! Start aeroclim submodule
-    IF (laeroclim) THEN
-        CALL init_aeroclim_submodel
-    ENDIF
   
   
   END SUBROUTINE start_ham
@@ -246,9 +239,6 @@ MODULE mo_ham_init
     USE mo_ham,               ONLY: nsol
     USE mo_ham_m7_trac,       ONLY: idt_cdnc_ham, idt_icnc_ham
     USE mo_ham_soa,           ONLY: soaprop, set_soa_tracer_attr
-    !>>UP 809
-    USE mo_ham_m7ctl,         ONLY: laerosimpl_drydep, laerosimpl_wetdep, iso4ns ! no wet and dry dep for the nucleation mode
-    !<<UP #809
     
     IMPLICIT NONE
 
@@ -420,27 +410,9 @@ MODULE mo_ham_init
       trac_fullname = TRIM(trac_sname) // '_' // TRIM(sizeclass(jclass)%shortname)
 
       idrydep = OFF
-      !>>UP #809
-      IF (laerosimpl_drydep) THEN
-              IF (jn /= iso4ns) THEN
-                      IF (aerocomp(jn)%species%ldrydep) idrydep = ndrydep   ! set drydep scheme to hamctl default
-              ENDIF
-      ELSE
-              ! original line
-              IF (aerocomp(jn)%species%ldrydep) idrydep = ndrydep   ! set drydep scheme to hamctl default
-      ENDIF
-      !<<UP #809
+      IF (aerocomp(jn)%species%ldrydep) idrydep = ndrydep   ! set drydep scheme to hamctl default
       iwetdep = OFF
-      !>>UP #809
-      IF (laerosimpl_wetdep) THEN
-              IF (jn /= iso4ns) THEN
-                      IF (aerocomp(jn)%species%lwetdep) iwetdep = nwetdep   ! set wetdep scheme to hamctl default      
-              ENDIF
-      ELSE
-              ! original line
-              IF (aerocomp(jn)%species%lwetdep) iwetdep = nwetdep   ! set wetdep scheme to hamctl default      
-      ENDIF
-      !<<UP #809
+      IF (aerocomp(jn)%species%lwetdep) iwetdep = nwetdep   ! set wetdep scheme to hamctl default      
 
       !>>dod SOA has unusual tracer handling, let the SOA module set the tracer attributes
       !>>dod bugfix (redmine #59 and #60)
@@ -1071,7 +1043,7 @@ MODULE mo_ham_init
     !<<dod
 
 !>>SF #390 (for security)
-    USE mo_param_switches, ONLY: lclmi_progn
+    USE mo_param_switches, ONLY: lcdnc_progn
     USE mo_ham, ONLY: nwetdep
 !<<SF #390
 
@@ -1106,8 +1078,8 @@ MODULE mo_ham_init
 !<<SF security
 
 !>>SF #390
-   IF (.NOT. lclmi_progn .AND. nwetdep == 3) THEN
-      call message('ham_initialize','nwetdep = 3 is not possible when lclmi_progn is false!',level=em_error)
+   IF (.NOT. lcdnc_progn .AND. nwetdep == 3) THEN
+      call message('ham_initialize','nwetdep = 3 is not possible when lcdnc_progn is false!',level=em_error)
    ENDIF
 !<<SF #390
 

@@ -108,7 +108,7 @@ SUBROUTINE ham_vdaer( kproma,   kbdim,   klev,    krow,     loland,  pvgrat, &
   !     the mass size distribution for a log normal aerosol distribution
   !     defined by the radius and the log sigma. The model calculates the
   !     Vd over land and over sea considering the diffusion,impaction and
-  !     sedimentation. Over sea the effect of particle growth due to the
+  !     sedimentation. Over sea the effect op particle growth due to the
   !     large relative humidity is accounted for and the effect of
   !     bubble bursting is also considered. The bubble bursting enhances
   !     the dry deposition since it causes the breakdown of the laminar
@@ -116,7 +116,7 @@ SUBROUTINE ham_vdaer( kproma,   kbdim,   klev,    krow,     loland,  pvgrat, &
   !     This model version does not contain yet a parameterization which
   !     specifically considers the deposition to vegetated surfaces. For
   !     these surfaces, a surface resistance as a function of canopy
-  !     structure should be incorporated. This might possibly be implemented
+  !     structure should be incorporated. This might possible be implemented
   !     in the future (Laurens Ganzeveld, 29-01-2002)
   !
   !     The model requires as input parameters:

@@ -62,13 +62,6 @@ MODULE mo_jsbach_interface
                               omp_get_num_threads
 #endif
 
-  !<<UP new ham timers
-  USE mo_control,         ONLY: ltimer     
-  USE mo_hammoz_timer,    ONLY: timer_start, &
-                                timer_stop, &
-                                timer_ham_totsum, & 
-                                timer_ham_ifdef
-  !<<UP
   IMPLICIT NONE
 
   PRIVATE
@@ -389,9 +382,6 @@ USE mo_boundary_condition, ONLY: bc_set, bc_find
 
 ! +++ TS #244
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
 !++mgs 2013/05/16
     IF (lstart .OR. lresume) THEN
         CALL bc_find('leaf area index', ibc_lai, ierr=ierr)
@@ -443,9 +433,6 @@ USE mo_boundary_condition, ONLY: bc_set, bc_find
       CALL bc_set(ibc_sw,kdim,kblock,sw_mean(:))
   END IF
   
-  !>>UP ham timers
-  IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-  !<<UP
 #endif
 
     IF (kland == 0) THEN
@@ -458,14 +445,8 @@ USE mo_boundary_condition, ONLY: bc_set, bc_find
        IF (PRESENT(CO2_flux_herbivory)) CO2_flux_herbivory         = 0.0_dp
        IF (PRESENT(CO2_flux_dynveg)) CO2_flux_dynveg               = 0.0_dp
 #ifdef HAMMOZ /* SF */
-       !>>UP ham timers
-       IF (ltimer) CALL timer_start(timer_ham_ifdef)
-       !<<UP
        IF (PRESENT(borealtr)) borealtr                    = 0.0_dp
        IF (PRESENT(borealsh)) borealsh                    = 0.0_dp
-       !>>UP ham timers
-       IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-       !<<UP
 #endif
        IF (PRESENT(CO2_emission_lcc)) CO2_emission_lcc             = 0.0_dp
        IF (PRESENT(CO2_emission_harvest)) CO2_emission_harvest     = 0.0_dp
@@ -1043,10 +1024,6 @@ USE mo_boundary_condition, ONLY: bc_set, bc_find
 ! get lai for use in HAMMOZ
 #ifdef HAMMOZ
 !++mgs 2013/05/16
-       !>>UP ham timers
-       IF (ltimer) CALL timer_start(timer_ham_ifdef)
-       IF (ltimer) CALL timer_start(timer_ham_totsum)
-       !<<UP
        IF (ibc_lai > 0 ) THEN
           CALL average_tiles(theLand%Vegetation%lai(kidx0:kidx1,1:ntiles) * &
              theLand%Vegetation%veg_fract_correction(kidx0:kidx1,1:ntiles), &
@@ -1096,10 +1073,6 @@ USE mo_boundary_condition, ONLY: bc_set, bc_find
           sw_mean = UNPACK(zsw_mean,mask,0.0_dp)
          CALL bc_set(ibc_sw, kdim,kblock, sw_mean(:))
        END IF
-       !>>UP ham timers
-       IF (ltimer) CALL timer_stop(timer_ham_totsum)
-       IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-       !<<UP
 #endif
 
    ! Unpack output fields
@@ -1112,14 +1085,8 @@ USE mo_boundary_condition, ONLY: bc_set, bc_find
    IF (PRESENT(CO2_flux_herbivory)) CO2_flux_herbivory         = UNPACK(zCO2_flux_herbivory, mask, 0.0_dp)
    IF (PRESENT(CO2_flux_dynveg)) CO2_flux_dynveg               = UNPACK(zCO2_flux_dynveg, mask, 0.0_dp)
 #ifdef HAMMOZ /* SF */
-   !>>UP ham timers
-   IF (ltimer) CALL timer_start(timer_ham_ifdef)
-   !<<UP
    IF (PRESENT(borealtr)) borealtr                     = UNPACK(zborealtr, mask, 0.0_dp)
    IF (PRESENT(borealsh)) borealsh                     = UNPACK(zborealsh, mask, 0.0_dp)
-   !>>UP ham timers
-   IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-   !<<UP
 #endif
    IF (PRESENT(CO2_emission_lcc)) CO2_emission_lcc             = UNPACK(zCO2_emission_landcover_change, mask, 0.0_dp)
    IF (PRESENT(CO2_emission_harvest)) CO2_emission_harvest     = UNPACK(zCO2_emission_harvest, mask, 0.0_dp)

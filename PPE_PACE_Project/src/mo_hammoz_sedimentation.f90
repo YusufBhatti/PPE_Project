@@ -209,6 +209,12 @@ MODULE mo_hammoz_sedimentation
   USE mo_time_control,         ONLY: time_step_len, delta_time
   USE mo_submodel_diag,        ONLY: get_diag_pointer
   USE mo_ham_sedimentation,    ONLY: ham_prep_sedi, ham_sedimentation
+  !>>DN
+  USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+  USE mo_hammoz_aerocom_HEaci, ONLY: dry3Dso2_inst, dry3Dso4_inst
+  USE mo_species,              ONLY: speclist
+  USE mo_tracdef,              ONLY: trlist
+  !<<DN
 
   !--- parameters
   INTEGER,  INTENT(in)    :: kbdim, kproma, klev, krow
@@ -265,6 +271,14 @@ MODULE mo_hammoz_sedimentation
     IF (ierr == 0) fld2d(1:kproma,krow) = zvsedi(1:kproma,klev)
 
     pxtte(1:kproma,:,jt)=zxtte(1:kproma,:)  !csld write tendency out
+    
+    !>>DN
+    IF(lHEaci.AND.trlist%ti(jt)%spid>0)THEN
+       IF (speclist(trlist%ti(jt)%spid)%shortname == 'SO4') &
+            dry3Dso4_inst(1:kproma,:,krow)=&
+            dry3Dso4_inst(1:kproma,:,krow)+zsediflux(1:kproma,:)
+    END IF
+    !<<DN        
 
   END DO
 

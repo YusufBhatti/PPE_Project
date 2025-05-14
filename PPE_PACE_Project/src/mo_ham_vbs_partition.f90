@@ -435,32 +435,31 @@ CONTAINS
          pi_6
 
     USE mo_physical_constants, ONLY: &
-         avo,               &    ! Avogadro constant [#/mol]
-         ak                      ! Boltzmann constant [J/K] !bugfix thk #594
+         avo
 
     USE mo_species, ONLY: &
-         speclist                ! list of chemical species in ham
+         speclist              ! list of chemical species in ham
 
     USE mo_ham_species, ONLY: &
          id_wat
 
     USE mo_ham_vbsctl, ONLY: &
-         t_vbs_group,          & ! the VBS data structure
-         vbs_ngroup,           & ! number of VBS bins
-         vbs_set,              & ! VBS
-         nclass_vbs              ! number of modes/bins that include VBS soa
+         t_vbs_group,        & ! the VBS data structure
+         vbs_ngroup,         & ! number of VBS bins
+         vbs_set,            & ! VBS
+         nclass_vbs            ! number of modes/bins that include VBS soa
 
     USE mo_ham_salsactl, ONLY: &
-         surfw0                  ! surface tension of water [J/m2]
+         surfw0                ! surface tension of water [J/m2]
          
     USE mo_ham, ONLY : &
-         sizeclass,            & ! aerosol bin properties
-         subm_aerospec,        & ! aerosol species list
-         subm_ngasspec,        & ! number of gas species in HAM
-         subm_naerospec,       & ! aerosol species list
-         subm_naerospec_nowat, &
-         subm_aerospec_nowat,  &
-         nclass                  ! number of bins
+         sizeclass,          & ! aerosol bin properties
+         subm_aerospec,      & ! aerosol species list
+         subm_ngasspec,      & ! number of gas species in HAM
+         subm_naerospec,     & ! aerosol species list
+         subm_naerospec_nowat,     &
+         subm_aerospec_nowat,     &
+         nclass                ! number of bins
 
     ! -----------------------------------------------------------------------
 
@@ -475,7 +474,7 @@ CONTAINS
     REAL(dp), INTENT(INOUT) :: &
          pc_gas(subm_ngasspec),                & ! Gas phase tracer concentrations [molec/m3]
          pnaero(nclass),                       & ! aerosol number concentrations [#/m3]
-         pvols(nclass,subm_naerospec_nowat)      ! aerosol volume concentrations per species [m3/m3]
+         pvols(nclass,subm_naerospec_nowat)                ! aerosol volume concentrations per species [m3/m3]
 
 
     ! -----------------------------------------------------------------------
@@ -484,7 +483,7 @@ CONTAINS
 
     ! indexing VBS groups
     TYPE(t_vbs_group), POINTER :: &
-         zgroup                                    ! local copy for easier reading
+         zgroup                                  ! local copy for easier reading
 
     ! intermediates for calculation
     REAL(dp) :: &
@@ -492,7 +491,7 @@ CONTAINS
          zlarge = 1e30_dp,                       & ! big number
          ztemp_sum,                              & ! temporary storage
          zv_tot,                                 & ! total dry aerosol volume concentraion
-         zc_part_all(nclass_vbs, subm_naerospec),& ! particle phase concentrations per species
+         zc_part_all(nclass_vbs, subm_naerospec),  & ! particle phase concentrations per species
                                                    ! for the vbs relevant bins + water [m3/m3]
                                                    ! note the different dimensions!
          zk_mass(nclass_vbs),                    & ! mass transfer coefficient
@@ -571,7 +570,7 @@ CONTAINS
              zgroup => vbs_set(jg)
 
              ! Kelvin effect only
-             zs_prime(jg,jvc) = exp(4.0_dp*surfw0*zgroup%mv/(ak*ptemp*pd_wet(jc)))
+             zs_prime(jg,jvc) = exp(4.0_dp*surfw0*zgroup%mv/(avo*ptemp*pd_wet(jc)))
           END DO
 
        END IF ! lsoainclass

@@ -62,15 +62,6 @@ MODULE mo_ham_m7ctl
   ! -- variables
   PUBLIC :: nwater, nsnucl, nonucl
   PUBLIC :: lnucl_stat
-  !>>UP #809
-  PUBLIC :: lwopath_24, lwopath_274
-  PUBLIC :: scale_wetdep_wopath274
-  PUBLIC :: laerosimpl_drydep
-  PUBLIC :: laerosimpl_wetdep
-  !<<UP #809
-  !>>UP #810
-  PUBLIC :: l1ccn, n1ccn
-  !<<UP #810
   PUBLIC :: inucs, iaits, iaccs, icoas, iaiti, iacci, icoai
 
   PUBLIC :: critn, cmin_aernl, cmin_aerml, cminvol, cminrad, cminrho, cdconv
@@ -110,22 +101,6 @@ MODULE mo_ham_m7ctl
   LOGICAL :: lnucl_stat = .FALSE.   ! Sample the cloud-free volume as function of T, RH, [H2SO4(g)],
                                     ! H2SO4 condensation sink, and ionization rate (memory intensive)
 
-  !>>UP #809
-  LOGICAL :: lwopath_24 = .FALSE.   ! Whether to remove the coagulation path
-                                    ! from mode 2 to 4
-  LOGICAL :: lwopath_274 = .FALSE.  ! Whether to remove the coagulation path
-                                    ! from mode 2 via 7 to 4
-  REAL(dp):: scale_wetdep_wopath274 = 1.0 ! If path274 is removed (see
-                                    ! lwopath_274 above), wetdep for the CI mode
-                                    ! is scaled up by multiplying by this number
-  LOGICAL :: laerosimpl_drydep = .FALSE. ! Whether to inhibit dry deposition of the nucleation mode
-  LOGICAL :: laerosimpl_wetdep = .FALSE. ! Whether to inhibit wet deposition of the nucleation mode
-  !>>UP #810
-  LOGICAL :: l1ccn = .FALSE.        ! Whether to use only one mode (given by
-                                    ! nccn below) as CCN
-  INTEGER :: n1ccn = 3              ! If l1ccn, then this mode is the only one
-                                    ! effectively acting as CCN
-  !<<UP
   !--- Mass index (in array aerml and ttn): 
   !
   !         Attention:
@@ -602,17 +577,6 @@ CONTAINS
     CALL p_bcast (nsnucl,     p_io)
     CALL p_bcast (nonucl,     p_io)
     CALL p_bcast (lnucl_stat, p_io)
-    !>>UP #809
-    CALL p_bcast (lwopath_24, p_io)
-    CALL p_bcast (lwopath_274, p_io)
-    CALL p_bcast (scale_wetdep_wopath274, p_io)
-    CALL p_bcast (laerosimpl_drydep, p_io)
-    CALL p_bcast (laerosimpl_wetdep, p_io)
-    !<<UP
-    !>>UP #810
-    CALL p_bcast (l1ccn, p_io)
-    CALL p_bcast (n1ccn, p_io)
-    !<<UP
 
     !--- error checking
     IF (nsnucl > 1 .AND. .NOT. lgcr) THEN
@@ -622,19 +586,11 @@ CONTAINS
     END IF
     
     !--- write the values of the switches:
-    !>>UP #809 & #810
-    CALL sethamM7_log(nwater,nsnucl,nonucl,lnucl_stat, &
-                      lwopath_24,lwopath_274,scale_wetdep_wopath274, &
-                      l1ccn,n1ccn,laerosimpl_drydep, laerosimpl_wetdep)
-    !<<UP
+    CALL sethamM7_log(nwater,nsnucl,nonucl,lnucl_stat)
         
   END SUBROUTINE sethamM7
   
-  !>>UP #809 & #810
-  SUBROUTINE sethamM7_log(nwater,nsnucl,nonucl,lnucl_stat, &
-                          lwopath_24,lwopath_274,scale_wetdep_wopath274, &
-                          l1ccn,n1ccn,laerosimpl_drydep, laerosimpl_wetdep)
-  !<<UP
+  SUBROUTINE sethamM7_log(nwater,nsnucl,nonucl,lnucl_stat)
     
     ! *sethamM7_log* writes the values of the given switches in a given output
     ! unit and conducts selceted consistency checks.
@@ -656,15 +612,6 @@ CONTAINS
     !
     
     LOGICAL :: lnucl_stat
-    !>>UP #809
-    LOGICAL :: lwopath_24
-    LOGICAL :: lwopath_274
-    REAL(dp):: scale_wetdep_wopath274
-    LOGICAL :: l1ccn  !#810
-    INTEGER :: n1ccn  !#810
-    LOGICAL :: laerosimpl_drydep
-    LOGICAL :: laerosimpl_wetdep
-    !<<UP
     INTEGER :: nwater, nsnucl, nonucl
   
     CALL message('','',level=em_param) 
@@ -727,16 +674,6 @@ CONTAINS
     
     CALL message('', separator) 
     
-    !>>UP #809
-    CALL print_value('M7 wopath switch, lwopath_24:',lwopath_24)
-    CALL print_value('M7 wopath switch, lwopath_274:',lwopath_274)
-    CALL print_value('If lwopath_274, scale CI mode wet deposition by this number, scale_wetdep_wopath_274:', &
-                   lwopath_274)
-    CALL print_value('Use only one mode as CCN switch, l1ccn:',l1ccn) !#810
-    CALL print_value('Use only this mode as CCN switch, n1ccn:',n1ccn) !#810
-    CALL print_value('M7 no dry dep for the nucleation mode switch, laerosimpl_drydep:',laerosimpl_drydep)
-    CALL print_value('M7 no wet dep for the nucleation mode switch, laerosimpl_wetdep:',laerosimpl_wetdep)
-    !<<UP
   END SUBROUTINE sethamM7_log
 
 END MODULE mo_ham_m7ctl

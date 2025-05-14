@@ -50,7 +50,7 @@ MODULE mo_mvstream
   TYPE(t_stream) :: dummy_stream  ! Dummy for reading defaults and sizes
   TYPE(memory_info) :: dummy_info ! Dummy for reading defaults and sizes
 
-  INTEGER, PARAMETER        :: nam_max=545
+  INTEGER, PARAMETER        :: nam_max=500
 
   TYPE(io_time_event), PARAMETER :: &
        default_interval = io_time_event(1, TIME_INC_MONTHS, TRIG_FIRST, 0)

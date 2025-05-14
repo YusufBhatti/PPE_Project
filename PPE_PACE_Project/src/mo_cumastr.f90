@@ -74,17 +74,13 @@ MODULE mo_cumastr
 #ifdef HAMMOZ
   USE mo_boundary_condition, ONLY: bc_set, bc_find
   USE mo_time_control,       ONLY: lstart, lresume
-  USE mo_param_switches,     ONLY: lclmi_progn
+  USE mo_param_switches,     ONLY: lcdnc_progn
   !>>csld #332
   USE mo_submodel,           ONLY: lmoz
   USE mo_tracdef,            ONLY: trlist, GAS
   !<<#332     
 #endif
 !<<SF
-!>>UP ham timers
-  USE mo_control,            ONLY: ltimer     
-  USE mo_hammoz_timer,       ONLY: timer_start, timer_stop, &
-                                   timer_ham_ifdef
 
   IMPLICIT NONE
   PRIVATE
@@ -204,14 +200,8 @@ CONTAINS
     zxtp1(1:kproma,:,:) = pxtm1(1:kproma,:,:)+pxtte(1:kproma,:,:)*ztmst
 
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
     zqtmst=1._wp/ztmst
     zxtte(1:kproma,:,:) = pxtte(1:kproma,:,:)
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 
     DO jk=1,klev
@@ -251,18 +241,12 @@ CONTAINS
 
 !>>SF #368: save temperature as a new boundary condition to use in 2-moment stratiform cl-micro 
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
-    IF (lclmi_progn) THEN
+    IF (lcdnc_progn) THEN
         IF (lstart .OR. lresume) THEN
            CALL bc_find('Temperature in convective scheme', ibc_tconv, ierr=ierr)
         ENDIF
         CALL bc_set(ibc_tconv, kbdim, krow, ztp1)
     ENDIF
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 
 !<<SF
@@ -342,11 +326,7 @@ CONTAINS
     END DO
 
 !>>csld #332 : this line introduced in #332 is not conserving aerosol mass -> used only for moz
-! UP comment: I won't use it in timer_ham_totsum then
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
     IF (lmoz) THEN
        DO jt=1,ktrac
           IF (trlist%ti(jt)%nphase==GAS) THEN
@@ -356,9 +336,6 @@ CONTAINS
           END IF
        END DO
     END IF
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 !<<csld #332
     !
@@ -490,13 +467,7 @@ CONTAINS
     
 !>>SF
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
     zxtbound(1:kproma,1:ktrac) = 0._wp !SF initializes the boundary cond for xt_conv_massfix
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 !<<SF
 
@@ -901,11 +872,7 @@ CONTAINS
     !  ENDDO
 !>>SF
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
-! UP comment: to me it seems like this does not contribute to HAM directly, so I don't include it in timer_ham_totsum.
-    IF (lclmi_progn) THEN
+    IF (lcdnc_progn) THEN
         DO jl=1,kproma
            zcvcbot(jl)=0._wp
            zwcape(jl)=0._wp
@@ -925,9 +892,6 @@ CONTAINS
         CALL bc_set(ibc_cvcbot, kbdim, krow, zcvcbot)
         CALL bc_set(ibc_wcape,  kbdim, krow, zwcape)
     ENDIF
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 !<<SF
 

@@ -41,7 +41,7 @@ MODULE mo_cloud_utils
  !>>SF #475
  REAL(dp), PARAMETER :: cdnc_min_upper = 40.e6_dp       !upper value for min CDNC (used when ldyn_cdnc_min is TRUE)
  REAL(dp), PARAMETER :: cdnc_min_lower =  1.e6_dp       !lower value for min CDNC (used when ldyn_cdnc_min is TRUE)
- !REAL(dp), PARAMETER :: rcd_vol_max = 19.e-6_dp         !maximum droplet volume radius [m] !UP: make this tunable in settings file
+ REAL(dp), PARAMETER :: rcd_vol_max = 19.e-6_dp         !maximum droplet volume radius [m] 
  !SF The above has been updated on 2016.04.04 (David Neubauer, pure atm run, HAM-M7, AR&G activation) 
  !<<SF #475
  REAL(dp), PARAMETER :: icemin  = 10._dp
@@ -61,8 +61,12 @@ MODULE mo_cloud_utils
  REAL(dp), PARAMETER :: rhoice  = 925._dp
  REAL(dp), PARAMETER :: conv_effr2mvr = 0.9_dp  ! conversion ice crystal effective radius to mean volume radius
  REAL(dp), PARAMETER :: clc_min = 0.01_dp      ! minimum cloud cover below which cloud cover should be considered 0.
- REAL(dp), PARAMETER :: exm1_1    = 2.47_dp-1.0_dp
- REAL(dp), PARAMETER :: exp_1     = -1._dp / exm1_1
+!>>DN AeroCom Cloud MMPPE experiment
+! REAL(dp), PARAMETER :: exm1_1    = 2.47_dp-1.0_dp
+! REAL(dp), PARAMETER :: exp_1     = -1._dp / exm1_1
+ REAL(dp) :: exm1_1
+ REAL(dp) :: exp_1
+!<<DN
  REAL(dp), PARAMETER :: exm1_2    = 4.7_dp-1.0_dp
  REAL(dp), PARAMETER :: exp_2     = -1._dp / exm1_2
  REAL(dp), PARAMETER :: pirho     = pi*rhoh2o
@@ -227,10 +231,6 @@ MODULE mo_cloud_utils
 
    USE mo_boundary_condition,       ONLY: bc_nml, bc_define
    USE mo_external_field_processor, ONLY: EF_MODULE
-   !>>UP #821
-   USE mo_param_switches,           ONLY: lcmpsimpl_prescr
-   USE mo_cmp_simpl,                ONLY: init_cmp_simpl
-   !<<UP #821
 
    INTEGER :: ibc_cvcbot, ibc_wcape, ibc_tconv, ibc_detr_cond
 
@@ -257,12 +257,6 @@ MODULE mo_cloud_utils
                                 bc_detr_cond, 3, .TRUE.)
       !<<SF #518
    ENDIF !csld #455 
-
-   !>>UP #821
-   IF (lcmpsimpl_prescr) THEN
-       CALL init_cmp_simpl
-   ENDIF
-   !<<UP #821
 
  END SUBROUTINE init_cloud_micro_2m
   

@@ -32,11 +32,6 @@ MODULE mo_tracer_processes
 
   USE mo_kind,             ONLY: wp 
   USE mo_filename,         ONLY: trac_filetype, find_next_free_unit
-  !>>UP new ham timers
-  USE mo_control,       ONLY: ltimer     
-  USE mo_hammoz_timer,  ONLY: timer_start, timer_stop, &
-                              timer_ham_ifdef
-  !<<UP
   IMPLICIT NONE
 
   
@@ -952,13 +947,7 @@ IF (lfirst) CALL message('xt_burden','burdentype 32 not properly implemented yet
 
 !>>SF
 #ifdef HAMMOZ
-          !>>UP ham timers
-          IF (ltimer) CALL timer_start(timer_ham_ifdef)
-          !<<UP
           zdxtdt(1:kproma)=zdxtdt(1:kproma)+pxtbound(1:kproma,jt) !SF restore boundary cond. calc.
-          !>>UP ham timers
-          IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-          !<<UP
 #endif
 !<<SF
 

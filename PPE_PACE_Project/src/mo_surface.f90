@@ -21,11 +21,6 @@ MODULE mo_surface
 ! for station diagnostic
   USE mo_memory_g3b,           ONLY: evap_na, ahfl_na, ahfs_na, wind10_na, &
                                      ustr_na, vstr_na, tsurf_na
-  !>>UP new ham timers
-  USE mo_control,              ONLY: ltimer     
-  USE mo_hammoz_timer,         ONLY: timer_start, timer_stop, &
-                                     timer_ham_ifdef
-  !<<UP
   
   !---------------------------------------------------------------------
   IMPLICIT NONE 
@@ -1749,18 +1744,12 @@ CONTAINS
 ! TS    zril(1:nproma)   = land%ZRIL(1:nproma,jrow)
 !>>SF gf #78
 #ifdef HAMMOZ
-    !>>UP ham timers
-    IF (ltimer) CALL timer_start(timer_ham_ifdef)
-    !<<UP
     zril(1:nproma)   = land%ZRIL(1:nproma,jrow)
     zriw(1:nproma)   = ocean%ZRIW(1:nproma,jrow)
     zrii(1:nproma)   = ice%ZRII(1:nproma,jrow)
     zcfml(1:nproma)  = land%zcfml(1:nproma,jrow)
     zcfmw(1:nproma)  = ocean%zcfmw(1:nproma,jrow)
     zcfmi(1:nproma)  = ice%zcfmi(1:nproma,jrow)     
-    !>>UP ham timers
-    IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-    !<<UP
 #endif
 !<<SF gf #78
     zcfnc(1:nproma)  = box%ZCFNC(1:nproma,jrow)

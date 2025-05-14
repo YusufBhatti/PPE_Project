@@ -123,7 +123,6 @@ SUBROUTINE ham_subm_interface(kproma, kbdim, klev, krow, ktrac, &
   USE mo_ham_salsa,          ONLY: salsa
   USE mo_ham_m7,             ONLY: m7
   !<<dod
-  USE mo_ham,                ONLY: laeroclim
 
   IMPLICIT NONE 
    
@@ -226,10 +225,9 @@ SUBROUTINE ham_subm_interface(kproma, kbdim, klev, krow, ktrac, &
 
   !--- Mass conserving correction of negative tracer values:
   
-  IF (.NOT. laeroclim) &
-      CALL xt_borrow(kproma, kbdim,  klev, ilevp1, ktrac, &
-                     pap,    paph,                        &
-                     pxtm1,  pxtte                        )
+  CALL xt_borrow(kproma, kbdim,  klev, ilevp1, ktrac, &
+                 pap,    paph,                        &
+                 pxtm1,  pxtte                        )
   
   !--- 1) Calculate necessary parameters: --------------------------------------
   
@@ -387,7 +385,7 @@ SUBROUTINE ham_subm_interface(kproma, kbdim, klev, krow, ktrac, &
 
   END DO
   
-  !--- 3.2) Particle mass:
+  !--- 3.2 Particle mass:
   
   DO jn=1, naerocomp
      jt    = aerocomp(jn)%idt       ! get tracer id
@@ -500,86 +498,83 @@ SUBROUTINE ham_subm_interface(kproma, kbdim, klev, krow, ktrac, &
   !--- 5) Reconvert masses and numbers into mixing ratios, other ---------------
   !       quantities to SI units and calculate the tendencies (xtte):
   !
-  IF (.NOT. laeroclim) THEN
-      !>>dod soa
-      !---5.1) Gases
-    !++mgs: changes to replace gasspec and m7unitconv (see above)
-      DO jn = 1,subm_ngasspec
-        jt=speclist(subm_gasspec(jn))%idt
-    
-        SELECT CASE(subm_gasunitconv(jn))    
-        CASE(immr2ug)                            
-          DO jk=1,klev
-            DO jl=1,kproma
-              zqunitfac = zqfac/zrhoa(jl,jk)
-              pxtte(jl,jk,jt) = (zgas(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
-            END DO
-          END DO
-               
-        CASE(immr2molec)
-          DO jk=1,klev
-            DO jl=1,kproma
-               ! >> thk #513
-               zqunitfac = 1e3*speclist(subm_gasspec(jn))%moleweight/(avo*zrhoa(jl,jk))
-               ! << thk
-               pxtte(jl,jk,jt) = (zgas(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
-            END DO
-          END DO
-        END SELECT
-    
-    !>>csld #538
-    ! csld : A more elegant way to resolve this bug could be to define an extra case
-    ! for h2so4 (subm_gasunitconv(jn)). Another alternative would be to do the back unit conversion 
-    ! inside the HAM_M7 case. 
-    ! I let this cosmetic issue for the moment.
-        IF ((nham_subm == HAM_M7) .AND. (jn == isubm_so4g)) THEN
-            DO jk=1,klev
-              DO jl=1,kproma
-                 zqunitfac = zqfacm/zrhoa(jl,jk)
-                 pxtte(jl,jk,jt) = (zgas(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
-              END DO
-          END DO
-        END IF
-    !<<csld 538
-    
-      END DO
-    
-      !--- 5.2) Particle mass:
-      DO jn = 1,naerocomp
-         jt    = aerocomp(jn)%idt       ! get tracer id
-         jspec = aerocomp(jn)%spid      ! get secies id
-         jl    = subm_aero_idx(jspec)     ! get index to subm_aerospec list
-    
-    !!mgs-old code!!     SELECT CASE(aerocomp(jn)%species%m7unitconv)    
-    
-         SELECT CASE(subm_aerounitconv(jl))
-         CASE(immr2ug)                            
-            zqunitfac = zqfac
-         CASE(immr2molec)
-            zqunitfac = zqfacm
-         END SELECT
-    
-         DO jk=1,klev
-            DO jl=1,kproma
-               pxtte(jl,jk,jt) = (zaerml(jl,jk,jn)*zqunitfac/zrhoa(jl,jk)-pxtm1(jl,jk,jt))*zqtmst
-            END DO
-         END DO
-      END DO
-    
-      !--- 5.3 Particle numbers:
-    
-      DO jn=1,nclass
-         jt = sizeclass(jn)%idt_no     
-         DO jk=1,klev
-            DO jl=1,kproma
-               zqunitfac = zqfacn/zrhoa(jl,jk)
-               pxtte(jl,jk,jt) = (zaernl(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
-            END DO
-         END DO
-      END DO
-      !<<dod soa
+  !>>dod soa
+  !---5.1) Gases
+!++mgs: changes to replace gasspec and m7unitconv (see above)
+  DO jn = 1,subm_ngasspec
+    jt=speclist(subm_gasspec(jn))%idt
 
-  ENDIF !SF no aeroclim case
+    SELECT CASE(subm_gasunitconv(jn))    
+    CASE(immr2ug)                            
+      DO jk=1,klev
+        DO jl=1,kproma
+          zqunitfac = zqfac/zrhoa(jl,jk)
+          pxtte(jl,jk,jt) = (zgas(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
+        END DO
+      END DO
+           
+    CASE(immr2molec)
+      DO jk=1,klev
+        DO jl=1,kproma
+           ! >> thk #513
+           zqunitfac = 1e3*speclist(subm_gasspec(jn))%moleweight/(avo*zrhoa(jl,jk))
+           ! << thk
+           pxtte(jl,jk,jt) = (zgas(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
+        END DO
+      END DO
+    END SELECT
+
+!>>csld #538
+! csld : A more elegant way to resolve this bug could be to define an extra case
+! for h2so4 (subm_gasunitconv(jn)). Another alternative would be to do the back unit conversion 
+! inside the HAM_M7 case. 
+! I let this cosmetic issue for the moment.
+    IF ((nham_subm == HAM_M7) .AND. (jn == isubm_so4g)) THEN
+        DO jk=1,klev
+          DO jl=1,kproma
+             zqunitfac = zqfacm/zrhoa(jl,jk)
+             pxtte(jl,jk,jt) = (zgas(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
+          END DO
+      END DO
+    END IF
+!<<csld 538
+
+  END DO
+
+  !--- 5.2) Particle mass:
+  DO jn = 1,naerocomp
+     jt    = aerocomp(jn)%idt       ! get tracer id
+     jspec = aerocomp(jn)%spid      ! get secies id
+     jl    = subm_aero_idx(jspec)     ! get index to subm_aerospec list
+
+!!mgs-old code!!     SELECT CASE(aerocomp(jn)%species%m7unitconv)    
+
+     SELECT CASE(subm_aerounitconv(jl))
+     CASE(immr2ug)                            
+        zqunitfac = zqfac
+     CASE(immr2molec)
+        zqunitfac = zqfacm
+     END SELECT
+
+     DO jk=1,klev
+        DO jl=1,kproma
+           pxtte(jl,jk,jt) = (zaerml(jl,jk,jn)*zqunitfac/zrhoa(jl,jk)-pxtm1(jl,jk,jt))*zqtmst
+        END DO
+     END DO
+  END DO
+
+  !--- 5.3 Particle numbers:
+
+  DO jn=1,nclass
+     jt = sizeclass(jn)%idt_no     
+     DO jk=1,klev
+        DO jl=1,kproma
+           zqunitfac = zqfacn/zrhoa(jl,jk)
+           pxtte(jl,jk,jt) = (zaernl(jl,jk,jn)*zqunitfac-pxtm1(jl,jk,jt))*zqtmst
+        END DO
+     END DO
+  END DO
+  !<<dod soa
 
   !--- 6) Convert microphysical model output quantities to SI units and store in streams: --------------
   
@@ -608,21 +603,18 @@ SUBROUTINE ham_subm_interface(kproma, kbdim, klev, krow, ktrac, &
   END DO
   
   !--- Store diagnostic aerosol properties in pseudo-tracers:
-  IF (.NOT. laeroclim) THEN
-      !>>dod soa
-      DO jn=1,nsol
-         pxtm1(1:kproma,:,aerowater(jn)%idt)=zww(1:kproma,:,jn)/zrhoa(1:kproma,:)
-      END DO
-      !<<dod
-  ENDIF
+  !>>dod soa
+  DO jn=1,nsol
+     pxtm1(1:kproma,:,aerowater(jn)%idt)=zww(1:kproma,:,jn)/zrhoa(1:kproma,:)
+  END DO
+  !<<dod
 
 !gf
   !--- Mass conserving correction of negative tracer values:
 
-  IF (.NOT. laeroclim) &
-      CALL xt_borrow(kproma, kbdim,  klev, ilevp1, ktrac, &
-                     pap,    paph,                        &
-                     pxtm1,  pxtte                        )
+  CALL xt_borrow(kproma, kbdim,  klev, ilevp1, ktrac, &
+                 pap,    paph,                        &
+                 pxtm1,  pxtte                        )
 !gf
 
   !--- 7) Perform mass conservation check: -------------------------------------

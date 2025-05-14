@@ -58,8 +58,7 @@ MODULE mo_time_control
   !-
   USE mo_kind,            ONLY: dp
   USE mo_machine,         ONLY: prec
-  USE mo_control,         ONLY: lcouple, lhd, nn, lnwp, nlev, ldiagamip, &
-                                ltimer ! UP: new ham timers
+  USE mo_control,         ONLY: lcouple, lhd, nn, lnwp, nlev, ldiagamip
   USE mo_exception,       ONLY: finish, message
   USE mo_mpi,             ONLY: p_bcast, p_all_comm
   USE mo_math_constants,  ONLY: pi
@@ -96,10 +95,6 @@ MODULE mo_time_control
                                 ly360_date,  Set_LY360Day,  Get_Ly360YearDay,  &
                                 sec2frac
 
-  !>>UP new ham timers
-  USE mo_hammoz_timer,    ONLY: timer_start, timer_stop, &
-                                timer_ham_ifdef
-  !<<UP
 
   IMPLICIT NONE
 
@@ -1882,14 +1877,7 @@ CONTAINS
       IF      (truncation == 31) THEN; set_delta_time = 1800.0_dp
 !>>SF
 #ifdef HAMMOZ
-      ELSE IF (truncation == 63) THEN
-              !>>UP ham timers
-              IF (ltimer) CALL timer_start(timer_ham_ifdef)
-              !<<UP
-              set_delta_time =  450.0_dp
-              !>>UP ham timers
-              IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-              !<<UP
+      ELSE IF (truncation == 63) THEN; set_delta_time =  450.0_dp
 #endif
 !<<SF
       ELSE

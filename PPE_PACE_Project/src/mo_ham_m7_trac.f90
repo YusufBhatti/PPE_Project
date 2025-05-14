@@ -63,6 +63,9 @@ MODULE mo_ham_m7_trac
   USE mo_species,       ONLY: speclist
   USE mo_physical_constants, ONLY: rhoh2o 
   USE mo_ham_species,   ONLY: id_dms, id_so2, id_so4g, id_oh, id_h2o2, id_o3, &
+       !>>DN AeroCom
+                              id_co, id_rn222,                                &
+       !<<DN AeroCom
                               id_no2, id_so4, id_bc, id_oc, id_ss, id_du, id_wat 
   
   IMPLICIT NONE
@@ -78,6 +81,9 @@ MODULE mo_ham_m7_trac
             idt_nns,   idt_nki,   idt_nks,   idt_nai,      &
             idt_nas,   idt_nci,   idt_ncs,                 &
             idt_cdnc_ham,  idt_icnc_ham,                   &
+            !>>DN AeroCom
+            idt_co, idt_rn222,                             &
+            !<<DN AerCom
             idt_mwans, idt_mwaks, idt_mwaas, idt_mwacs
  
   PUBLIC:: ham_m7_set_idt
@@ -98,6 +104,10 @@ MODULE mo_ham_m7_trac
   INTEGER :: idt_so2    ! mass mixing ratio so2
   INTEGER :: idt_so4    ! mass mixing ratio so4
   INTEGER :: idt_ocnv   ! mass mixing ratio nonvolatile organic
+  !>>DN AeroCom
+  INTEGER :: idt_co     ! mass mixing ratio CO
+  INTEGER :: idt_rn222  ! mass mixing ration Radon 222
+  !<<DN AeroCom
 
   INTEGER :: idt_ms4ns  ! mass mixing ratio sulfate        nuclea. soluble
   INTEGER :: idt_ms4ks  ! mass mixing ratio sulfate        aitken  soluble
@@ -183,6 +193,10 @@ MODULE mo_ham_m7_trac
        idt_dms  = speclist(id_dms)%idt
        idt_so2  = speclist(id_so2)%idt
        idt_so4  = speclist(id_so4g)%idt
+       !>>DN AeroCom
+       idt_co     = speclist(id_co)%idt
+       idt_rn222  = speclist(id_rn222)%idt
+       !<<DN AeroCom
   
        idt_ms4ns = aerocomp(iso4ns)%idt
        idt_ms4ks = aerocomp(iso4ks)%idt

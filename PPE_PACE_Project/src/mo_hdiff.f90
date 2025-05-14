@@ -24,11 +24,7 @@ MODULE mo_hdiff
   USE mo_time_control,  ONLY: time_step_len, delta_time, lfirst_day,  &
                               get_time_step
   USE mo_filename,      ONLY: find_next_free_unit
-  !>>UP new ham timers
-  USE mo_control,       ONLY: ltimer     
-  USE mo_hammoz_timer,  ONLY: timer_start, timer_stop, &
-                              timer_ham_ifdef
-  !<<UP
+
   IMPLICIT NONE
 
   INTEGER,  ALLOCATABLE ::  ncdif(:)
@@ -166,9 +162,6 @@ CONTAINS
         ENDIF
 !>>SF
 #ifdef HAMMOZ
-      !>>UP ham timers
-      IF (ltimer) CALL timer_start(timer_ham_ifdef)
-      !<<UP
       ELSE IF (nn == 63) THEN
         IF (nlev == 31) THEN
            ihq63(1:3)  = 1
@@ -176,9 +169,6 @@ CONTAINS
            ihq63(5)    = 3
            ihq63(6:)   = 4
         ENDIF
-      !>>UP ham timers
-      IF (ltimer) CALL timer_stop(timer_ham_ifdef)
-      !<<UP
 #endif
 !<<SF
       ELSE

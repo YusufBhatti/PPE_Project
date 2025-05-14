@@ -1130,7 +1130,6 @@ IMPLICIT NONE
                               pu10,   pv10,                          &
                               paz0,   paz0l,  paz0w,  paz0i,         & 
 #ifdef HAMMOZ /* SF */
-! UP comment: I am timing timer_ham_totsum inside this routine, so I think it's okay.
 !SF gf #78
                               zcfml,  zcfmw,  zcfmi,                 &
                               zcfncl, zcfncw, zcfnci, zepdu2, zkap,  &

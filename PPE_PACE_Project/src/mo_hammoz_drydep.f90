@@ -283,6 +283,12 @@ MODULE mo_hammoz_drydep
   USE mo_hammoz_drydep_lg, ONLY: drydep_lg_calcra, drydep_lg_vdbl
   USE mo_ham_drydep,       ONLY: ham_vdaer, ham_vd_presc
 !! USE mo_moz_diag,          ONLY: moz_drydep_diag   ### to be written
+  !>>DN
+  USE mo_hammoz_aerocom_diags, ONLY: lHEaci
+  USE mo_hammoz_aerocom_HEaci, ONLY: dry3Dso2_inst, dry3Dso4_inst
+  USE mo_species,              ONLY: speclist
+  USE mo_tracdef,              ONLY: trlist
+  !<<DN
 
   IMPLICIT NONE
   
@@ -376,6 +382,13 @@ MODULE mo_hammoz_drydep
   zws   (1:kproma)      = ws   (1:kproma,krow) !soil wetness
   zwsmx (1:kproma)      = wsmx (1:kproma,krow) !field capacity of soil
 
+  !>>DN
+  IF(lHEaci)THEN
+     dry3Dso2_inst(1:kproma,:,krow) = 0._dp
+     dry3Dso4_inst(1:kproma,:,krow) = 0._dp
+  END IF
+  !<<DN
+  
   !--- 1) Calculate relative humidity and other parameters needed below
   zrh(1:kproma)=MIN(1._dp,MAX(zephum,pqsfc(1:kproma)/pqsssfc(1:kproma)))
 
@@ -484,7 +497,21 @@ MODULE mo_hammoz_drydep
     ! get diagnostics pointer
     CALL get_diag_pointer(ddep, fld2d, jt, ierr=ierr)
     IF (ierr == 0) fld2d(1:kproma,krow)=fld2d(1:kproma,krow)+zdrydepflux(1:kproma)*delta_time
-!### add stomatal deposition flux ... ###
+    !### add stomatal deposition flux ... ###
+    
+    !>>DN
+    IF(lHEaci .AND. (trlist%ti(jt)%spid > 0))THEN
+       IF (speclist(trlist%ti(jt)%spid)%shortname == 'SO2') &
+            dry3Dso2_inst(1:kproma,klev,krow)=&
+            dry3Dso2_inst(1:kproma,klev,krow)+zdrydepflux(1:kproma)
+       IF (speclist(trlist%ti(jt)%spid)%shortname == 'H2SO4') &
+            dry3Dso4_inst(1:kproma,klev,krow)=&
+            dry3Dso4_inst(1:kproma,klev,krow)+zdrydepflux(1:kproma)
+       IF (speclist(trlist%ti(jt)%spid)%shortname == 'SO4') &
+            dry3Dso4_inst(1:kproma,klev,krow)=&
+            dry3Dso4_inst(1:kproma,klev,krow)+zdrydepflux(1:kproma)
+    END IF
+    !<<DN        
 
     ! special diagnostics for MOZ
     !! CALL moz_drydep_diag()  ....    ### to be done in mo_moz_diag

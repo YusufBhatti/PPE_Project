@@ -894,16 +894,13 @@ CONTAINS
 !--------------------------------------------------------------------------------------------
 
 
-    USE mo_kind,           ONLY: dp
+    USE mo_kind,         ONLY: dp
     USE mo_math_constants, ONLY: pi
-    USE mo_species,        ONLY: speclist
-    USE mo_ham_species,    ONLY: id_ss
-    USE mo_memory_g3b,     ONLY: slf, alake, seaice
-    USE mo_vphysc,         ONLY: vphysc
-    USE mo_exception,      ONLY: message, message_text, finish
-    !>>UP test
-    USE mo_ham,            ONLY: lconstwindemi
-    !<<UP test
+    USE mo_species,      ONLY: speclist
+    USE mo_ham_species,  ONLY: id_ss
+    USE mo_memory_g3b,   ONLY: slf, alake, seaice
+    USE mo_vphysc,       ONLY: vphysc
+    USE mo_exception,     ONLY: message, message_text, finish
 
     IMPLICIT NONE
 
@@ -986,30 +983,13 @@ CONTAINS
 
        IF (dmt(m).GT.dmta .and. dmt(m).le.dmtb_long) THEN
          
-         !>>UP test
-         IF (lconstwindemi) THEN
-                 p1=p11*(Log10(2*rm(m)))**3+p12*(Log10(2*rm(m)))**2+p13*(Log10(2*rm(m)))+p14 
-                 fi(1:kproma,m) = 10.**p1*(p0*6.2_dp**ppww_long)*logdp
-         ELSE
-                ! original formulation
-                 p1=p11*(Log10(2*rm(m)))**3+p12*(Log10(2*rm(m)))**2+p13*(Log10(2*rm(m)))+p14 
-                 fi(1:kproma,m) = 10.**p1*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long)*logdp
-         ENDIF
-         !<<UP test
+         p1=p11*(Log10(2*rm(m)))**3+p12*(Log10(2*rm(m)))**2+p13*(Log10(2*rm(m)))+p14 
+         fi(1:kproma,m) = 10.**p1*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long)*logdp
 
        ELSEIF (dmt(m).GT.dmtb_long .and. dmt(m).le.dmtd) THEN
            
-         !>>UP test
-         IF (lconstwindemi) THEN
-                 p2=p21*(Log10(2*rm(m)))**3+p22*(Log10(2*rm(m)))**2+p23*(Log10(2*rm(m)))+p24 
-                 fi(1:kproma,m) = 10.**p2*(p0*6.2_dp**ppww_long)*logdp
-         ELSE
-                ! original formulation
-                 p2=p21*(Log10(2*rm(m)))**3+p22*(Log10(2*rm(m)))**2+p23*(Log10(2*rm(m)))+p24 
-                 fi(1:kproma,m) = 10.**p2*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long)*logdp
-         ENDIF
-         !<<UP test
-
+         p2=p21*(Log10(2*rm(m)))**3+p22*(Log10(2*rm(m)))**2+p23*(Log10(2*rm(m)))+p24 
+         fi(1:kproma,m) = 10.**p2*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long)*logdp
 
        END IF
 

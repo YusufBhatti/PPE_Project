@@ -1,1 +1,0 @@
-../run_defaults_echam6-ham/emi_spec_run_defaults_echam6-ham.txt

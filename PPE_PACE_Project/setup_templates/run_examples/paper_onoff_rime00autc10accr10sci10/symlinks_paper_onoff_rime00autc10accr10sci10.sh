@@ -1,1 +1,0 @@
-../paper_default/symlinks_paper_default.sh

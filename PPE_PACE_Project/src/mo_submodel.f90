@@ -105,10 +105,6 @@
   PUBLIC :: lccnclim                       ! switch for CCN climatology (as submodel)
   PUBLIC :: lflighttrack                   ! switch for flight-track simulator
   
-  !>>UP
-  PUBLIC :: lcmptend                       ! switch for cloud microphysical tendencies
-  !<<UP
-
   PUBLIC :: lhmzphoto                      ! HAMMOZ coupling switches
   PUBLIC :: lhmzoxi                        !
   PUBLIC :: lhmzhet                        ! 
@@ -122,6 +118,7 @@
   PUBLIC :: linteram                       !
   PUBLIC :: lintercp                       !
   PUBLIC :: laoa                           ! age-of-air submodel switch
+  PUBLIC :: laerocom_diag                  ! main switch for AeroCom diags
 
   PUBLIC :: emi_basepath
   PUBLIC :: emi_scenario !sschr See #411 (HAMMOZ)
@@ -138,7 +135,8 @@
   PUBLIC :: id_ccnclim
   PUBLIC :: id_flighttrack
   PUBLIC :: id_aoa
-  
+  PUBLIC :: id_aerocomdiag
+
   !
   ! interfaces
   !                                
@@ -200,10 +198,6 @@
   LOGICAL :: lccnclim       = .FALSE. ! .true. for CCN climatology
   LOGICAL :: lflighttrack   = .FALSE. ! .true. for flight-track simulator
 
-  !>>UP
-  ! Diagnostics switch for cloud microphysical tendencies
-  LOGICAL :: lcmptend       = .TRUE. ! .true. for cloud microphysical tendencies
-  !<<UP
   
 ! HAMMOZ coupling switches (default: true -- they are automatically turned off if one module is inactive)
 ! see also Liao et al, JGR, 2005, table 1.
@@ -223,7 +217,8 @@
   LOGICAL :: linteram   = .FALSE. ! switch calculation of air mass from chemistry (HAMMONIA only)
   LOGICAL :: lintercp   = .FALSE. ! switch calculation of cp from chemistry (HAMMONIA only)
   LOGICAL :: laoa       = .FALSE. ! .true. for enabling age-of-air submodel
-  
+  LOGICAL :: laerocom_diag = .FALSE. ! .true. for enabling aerocom submodel
+
   CHARACTER(LEN=256) :: emi_basepath = ''
   CHARACTER(LEN=8)   :: emi_scenario = ''
 
@@ -244,6 +239,7 @@
   INTEGER :: id_flighttrack
   
   INTEGER :: id_aoa
+  INTEGER :: id_aerocomdiag
   
   CONTAINS
 
@@ -448,10 +444,6 @@
      CALL p_bcast (lccnclim, p_io)
      CALL p_bcast (lflighttrack, p_io)
 
-     !>>UP
-     CALL p_bcast (lcmptend, p_io)
-     !<<UP
-
      ! generic process switches
      CALL p_bcast (lchemistry, p_io)
      CALL p_bcast (ldrydep, p_io)
@@ -478,6 +470,9 @@
      ! age-of-air tracer switch
      CALL p_bcast (laoa, p_io)
      
+     ! main AeroCom diags switch
+     CALL p_bcast (laerocom_diag, p_io)
+  
   END IF
 
 !sschr: this is the right place for the following commands!
@@ -630,6 +625,7 @@
   IF (lccnclim)         CALL new_submodel('CCNCLIM',          id_ccnclim  )
   IF (lflighttrack)     CALL new_submodel('FLIGHTTRACK',    id_flighttrack)
   IF (laoa)             CALL new_submodel('AOA',              id_aoa      )
+  IF (laerocom_diag)    CALL new_submodel('AEROCOM_DIAG',   id_aerocomdiag)
 
   ! report submodel status
   
@@ -673,10 +669,6 @@
      CALL print_status('CCN climatology', lccnclim)
      CALL print_status('Flight-track simulator', lflighttrack)
      
-     !>>UP
-     CALL print_status('CMP tendencies', lcmptend)
-     !<<UP
-
      SELECT CASE ( iadvec )
         CASE (no_advection) 
            CALL message('', 'Run without tracer advection!', level=em_warn)
@@ -702,6 +694,8 @@
      END IF
             
      CALL print_status('Age-of-air submodel', laoa)
+     
+     CALL print_status('AeroCom diags submodel', laerocom_diag)
 
      CALL message('', separator)
      

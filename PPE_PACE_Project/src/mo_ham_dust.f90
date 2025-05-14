@@ -1470,9 +1470,6 @@ MODULE mo_ham_dust
     USE mo_decomposition, ONLY: lc => local_decomposition
     USE mo_vphysc,        ONLY: vphysc
     USE mo_time_control,  ONLY: lstart,lresume !csld #433
-    !>>UP test
-    USE mo_ham,           ONLY: lconstwindemi
-    !<<UP test
 
     IMPLICIT NONE
 
@@ -1562,11 +1559,6 @@ MODULE mo_ham_dust
     IF (.NOT. ALLOCATED(flux_6h)) ALLOCATE (flux_6h(lc%nproma, ntrace, lc%ngpblks))
 
     du_wind(:) = vphysc%velo10m(1:kproma,krow)
-    !>>UP test
-    IF (lconstwindemi) THEN
-      du_wind(:)=6.2_dp
-    ENDIF
-    !<<UP
 
     !>>SF #458 (replacing where statements)
     du_wind(:) = MERGE( &
