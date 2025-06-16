@@ -119,6 +119,10 @@ MODULE mo_ham_wetdep
   USE mo_ham_streams,   ONLY: rwet
   USE mo_ham_m7ctl,     ONLY: cmedr2mmedr
   USE mo_ham,           ONLY: nham_subm, HAM_M7
+  ! YAB <
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+                                     scale_wetdep_bc
+  !> YAB 
   !>>DN
   USE mo_hammoz_aerocom_diags, ONLY: lHEaci
   USE mo_hammoz_aerocom_HEaci, ONLY: wet3Dso4_inst
@@ -448,16 +452,32 @@ MODULE mo_ham_wetdep
      ztmp1(1:kproma,:) = pxtp10(1:kproma,:,kt)*pclc(1:kproma,:)*zxtfrac_col(1:kproma,:)
      zdxtcol(1:kproma,:) = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
 
-     zxtp10(1:kproma,:) = zxtp10(1:kproma,:) - zdxtcol(1:kproma,:)
-
-     zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:)*pdpg(1:kproma,:)/ztmst
-
      ztmp1(1:kproma,:)    = pxtp10(1:kproma,:,kt)*pclc(1:kproma,:)*zxtfrac_colr(1:kproma,:)*pdpg(1:kproma,:)/ztmst
      zdxtcolr(1:kproma,:) = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
 
      ztmp1(1:kproma,:)    = pxtp10(1:kproma,:,kt)*pclc(1:kproma,:)*zxtfrac_cols(1:kproma,:)*pdpg(1:kproma,:)/ztmst
      zdxtcols(1:kproma,:) = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
      !<<SF #458 (replacing where statements)
+
+     
+     !>>YAB Adding perturbed physics scaling for below-cloud scavenging:
+     IF (lo_hammoz_perturbations) THEN 
+        ! Scale the BC separately
+!        IF (trlist%ti(kt)%basename == "BC") THEN
+!           zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:) * scale_wetdep_bc_bc_only
+!           zdxtcolr(1:kproma,:) = zdxtcolr(1:kproma,:) * scale_wetdep_bc_bc_only
+!           zdxtcols(1:kproma,:) = zdxtcols(1:kproma,:) * scale_wetdep_bc_bc_only
+!        ENDIF
+
+        ! Scale everything BC
+        zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:) * scale_wetdep_bc
+        zdxtcolr(1:kproma,:) = zdxtcolr(1:kproma,:) * scale_wetdep_bc
+        zdxtcols(1:kproma,:) = zdxtcols(1:kproma,:) * scale_wetdep_bc
+     ENDIF
+     !<<YAB
+
+     zxtp10(1:kproma,:) = zxtp10(1:kproma,:) - zdxtcol(1:kproma,:)
+     zdxtcol(1:kproma,:) = zdxtcol(1:kproma,:)*pdpg(1:kproma,:)/ztmst
 
      DO jk=ktop,klev
 
@@ -518,6 +538,11 @@ MODULE mo_ham_wetdep
 
   ! In-cloud scavenging master routine
 
+    !>>YAB  Added perturbed physics setup:
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+                                     scale_wetdep_ic 
+    !<< YAB
+
     INTEGER, INTENT(in)   :: kproma, kbdim, klev, krow, ktop, kt
     INTEGER, INTENT(in)   :: kmod                         ! current tracer mode
     INTEGER, INTENT(in)   :: kwat_phase                   ! kwat_phase=1 --> water; kwat_phase=2 --> ice 
@@ -570,6 +595,18 @@ MODULE mo_ham_wetdep
     ztmp1(1:kproma,:) = pxt(1:kproma,:)*zxtfrac(1:kproma,:)*peff(1:kproma,:)
     pdxt(1:kproma,:)  = MERGE(ztmp1(1:kproma,:), 0._dp, ll1(1:kproma,:))
     !<<SF #458 (replacing where statements)
+
+    !>>YAB Adding perturbed physics scaling for in-cloud scavenging:
+    IF (lo_hammoz_perturbations) THEN 
+       ! Scale the tendency rather than the fraction
+
+
+       ! Scale everything (including BC)
+       pdxt(1:kproma,:) = pdxt(1:kproma,:) * scale_wetdep_ic
+       pdxt_imp(1:kproma,:) = pdxt_imp(1:kproma,:) * scale_wetdep_ic
+       pdxt_nuc(1:kproma,:) = pdxt_nuc(1:kproma,:) * scale_wetdep_ic
+    ENDIF
+    !<<YAB
 
     pxt(1:kproma,:) = pxt(1:kproma,:) - pdxt(1:kproma,:)
 

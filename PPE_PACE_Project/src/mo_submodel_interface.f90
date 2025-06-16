@@ -251,6 +251,13 @@ MODULE mo_submodel_interface
 
 !!mgs!!   USE mo_xt,               ONLY: idm_xt, setxt, xt_define_tracers, xt_init    ! to be completed
 
+
+!>>ps 
+  USE mo_hammoz_perturbations, ONLY: init_hammoz_perturbations, init_hammoz_emi_perturbations
+!<<ps
+
+  INTEGER:: ierr
+
   ! 0) --- Preparations: initialize species list
 
   CALL init_splist
@@ -266,6 +273,11 @@ MODULE mo_submodel_interface
      lforcererun = .FALSE.
   ENDIF
 
+  !>>ps
+  !--- Initialise hammoz perturbed physics setup - before emissions and before ham:
+  IF (lham) CALL init_hammoz_perturbations
+  !<<ps
+ 
   ! -- initialize aerosol module and its species
   IF (lham) CALL start_ham              !ham aerosol module
 
@@ -410,6 +422,13 @@ MODULE mo_submodel_interface
      CALL flighttrack_initialize
   ENDIF
  
+  !>>ps
+  !--- Initialise hammoz perturbed physics setup - after emissions:
+#ifdef HAMMOZ
+  if (lham) CALL init_hammoz_emi_perturbations
+#endif
+  !<<ps
+
   END SUBROUTINE init_subm
 
 
