@@ -194,7 +194,10 @@ MODULE mo_hammoz_emi_ocean
   USE mo_memory_g3b,         ONLY: slm
   USE mo_vphysc,             ONLY: vphysc
   USE mo_physical_constants, ONLY: tmelt
-
+  
+  ! << YAB 
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_dms_sc
+  ! >> YAB
   IMPLICIT NONE
 
   INTEGER,  INTENT(in) :: kproma               ! geographic block number of locations
@@ -205,7 +208,7 @@ MODULE mo_hammoz_emi_ocean
   !--- Local Variables:
   INTEGER                :: jl
   REAL(dp)               :: zsst, zzspeed
-  REAL(dp)               :: zschmidt_dms, zschmidt_co2, zschmidt_nh3
+  REAL(dp)               :: zschmidt_dms, zschmidt_co2, zschmidt_nh3, ratio, ratio1
   REAL(dp)               :: zkw
   REAL(dp)               :: zvp_dms(kbdim), zvp_nh3(kbdim)
   LOGICAL                :: loocean(kbdim)
@@ -243,33 +246,45 @@ MODULE mo_hammoz_emi_ocean
     IF (loocean(jl)) THEN   ! ocean
       zzspeed=vphysc%velo10m(jl,krow)
 
+      ratio = zschmidt_dms/600._dp
+      ratio1 = zschmidt_dms/600._dp
       IF (npist == 1) THEN ! Calculate piston velocity (Liss&Merlivat, 1986)
         IF (zzspeed.GT.3.6_dp.AND.zzspeed.LE.13._dp) THEN
           zkw=2.85_dp*zzspeed-9.65_dp
-          zvp_dms(jl)=zkw*(zschmidt_dms/600._dp)**(-0.5_dp)
+          IF (lo_hammoz_perturbations) THEN
+            zvp_dms(jl)=zkw*(ratio * scale_dms_sc)**(-0.5_dp)
+          ENDIF
 !         zvp_co2(jl)=zkw*(zschmidt_co2/600.)**(-0.5)
           zvp_nh3(jl)=zkw*(zschmidt_nh3/600.)**(-0.5)
         ELSE IF(zzspeed.LE.3.6_dp) THEN
           zkw=0.17_dp*zzspeed
-          zvp_dms(jl)=zkw*(zschmidt_dms/600._dp)**(-2._dp/3._dp)
+          IF (lo_hammoz_perturbations) THEN
+            zvp_dms(jl)=zkw*(ratio * scale_dms_sc)**(-2._dp/3._dp)
+          ENDIF
 !         zvp_co2(jl)=zkw*(zschmidt_co2/600.)**(-2./3.)
           zvp_nh3(jl)=zkw*(zschmidt_nh3/600.)**(-2./3.)
         ELSE
           zkw=5.9_dp*zzspeed-49.3_dp
-          zvp_dms(jl)=zkw*(zschmidt_dms/600._dp)**(-0.5_dp)
+          IF (lo_hammoz_perturbations) THEN
+            zvp_dms(jl)=zkw*(ratio * scale_dms_sc)**(-0.5_dp)
+          ENDIF
 !         zvp_co2(jl)=zkw*(zschmidt_co2/600.)**(-0.5)
           zvp_nh3(jl)=zkw*(zschmidt_nh3/600.)**(-0.5)
         END IF
 
       ELSE IF (npist == 2) THEN ! Calculate piston velocity (Wanninkhof, 1992)
         zkw=0.31_dp*zzspeed*zzspeed
-        zvp_dms(jl)=zkw*(zschmidt_dms/660._dp)**(-0.5_dp)
+        IF (lo_hammoz_perturbations) THEN
+          zvp_dms(jl)=zkw*(ratio1 * scale_dms_sc)**(-0.5_dp)
+        ENDIF
 !       zvp_co2(jl)=zkw*(zschmidt_co2/660.)**(-0.5)
         zvp_nh3(jl)=zkw*(zschmidt_nh3/660.)**(-0.5)
 
       ELSE IF (npist == 3) THEN  ! Calculate piston velocity (Nightingale, 2000)
         zkw=(0.222_dp*zzspeed*zzspeed+0.333_dp*zzspeed)
-        zvp_dms(jl)=zkw*(zschmidt_dms/660._dp)**(-0.5_dp)
+        IF (lo_hammoz_perturbations) THEN
+          zvp_dms(jl)=zkw*(ratio1 * scale_dms_sc)**(-0.5_dp)
+        ENDIF
 !       zvp_co2(jl)=zkw*(zschmidt_co2/660.)**(-0.5)
         zvp_nh3(jl)=zkw*(zschmidt_nh3/660.)**(-0.5)
       END IF

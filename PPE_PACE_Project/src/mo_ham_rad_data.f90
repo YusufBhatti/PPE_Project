@@ -173,10 +173,10 @@ CONTAINS
     !   -
 
     USE mo_ham,  ONLY: naerorad, nrad, nham_subm, HAM_M7, HAM_SALSA
-    !>>dwp Added perturbed physics setup:
+    !>>YAB Added perturbed physics setup:
     USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                       bc_rad_ni, du_rad_ni
-    !<<dwp ! YAB added oc and du
+                                       bc_rad_ni, du_rad_ni, oc_rad_ni
+    !<< ! YAB added oc and du
 
 
     IMPLICIT NONE
@@ -188,7 +188,7 @@ CONTAINS
     INTEGER :: itable
 
     REAL(dp) :: scale_bc_rad_ni
-!    REAL(dp) :: scale_oc_rad_ni ! YAB added
+    REAL(dp) :: scale_oc_rad_ni ! YAB added
     REAL(dp) :: scale_du_rad_ni ! YAB added
 
     !--- Initialize wavelength settings
@@ -300,10 +300,10 @@ CONTAINS
 
    !>>YAB Adding perturbed physics scaling for OC imaginary refractive index (SW
    !only):
-!   IF (lo_hammoz_perturbations) THEN
-!       scale_oc_rad_ni = oc_rad_ni / cni(Nwv_sw+1,iradoc)
-!       cni(1:Nwv_sw_tot,iradoc) = cni(1:Nwv_sw_tot,iradoc) * scale_oc_rad_ni
-!   ENDIF
+   IF (lo_hammoz_perturbations) THEN
+       scale_oc_rad_ni = oc_rad_ni / cni(Nwv_sw+1,iradoc)
+       cni(1:Nwv_sw_tot,iradoc) = cni(1:Nwv_sw_tot,iradoc) * scale_oc_rad_ni
+   ENDIF
 
    !--- Sea Salt (Nilsson, 1979):
 
