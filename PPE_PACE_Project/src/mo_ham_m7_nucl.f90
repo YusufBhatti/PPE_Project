@@ -42,6 +42,7 @@ MODULE mo_ham_m7_nucl
   
   USE mo_kind, ONLY: dp
   USE mo_netcdf
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_nuc_ft
   
   IMPLICIT NONE
   

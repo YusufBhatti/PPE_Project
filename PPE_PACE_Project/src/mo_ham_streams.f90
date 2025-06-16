@@ -457,7 +457,7 @@ MODULE mo_ham_streams
         WRITE(csat,'(F7.3)') zsat(jsat)*100.0
 
         SELECT CASE (nccndiag)
-           CASE (1,3,5)
+           CASE (1,3,5,7)
              CALL add_stream_element (stream_ham, 'CCN_'//TRIM(ADJUSTL(csat)),              &
                                       ccn_2d(jsat)%ptr, units='m-3',                        &
                                       longname='Cloud Condensation Nuclei at S='//csat//'%' )
@@ -490,7 +490,7 @@ MODULE mo_ham_streams
                                         ccn_burden(jsat)%ptr, units='m-2',                  &
                                         longname='Cloud Condensation Nuclei burden at S='//csat//'%' )
             ENDDO
-   
+   	  CASE (7)
             CALL add_stream_element (stream_ham, 'CN_BURDEN', cn_burden, units='m-2', &
                                      longname='Condensation Nuclei Burden'            )
       END SELECT

@@ -142,7 +142,9 @@ MODULE mo_ham_species
 !gf
   USE mo_ham,             ONLY: mw_so2, mw_so4, mw_dms
 !gf
-
+! YAB
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_kappa_ss, scale_kappa_oc
+! YAB
   IMPLICIT NONE
 
   !--- executable procedure ----
@@ -373,7 +375,7 @@ MODULE mo_ham_species
                          density      = 2000._dp,            &
                          iaerorad     = iradoc,              &
                          lwatsol      = .TRUE.,              &  
-                         kappa        = 0.06_dp,             &
+NEED TO MODIFY                         kappa        = 0.06_dp * scale_kappa_oc,             &
                          ldrydep      = .TRUE.,              &
                          lwetdep      = .TRUE.,              &   
                          idx          = id_oc                   )
@@ -389,14 +391,14 @@ MODULE mo_ham_species
                       units        = 'kg kg-1',           &
                       mw           = 58.443_dp,           &
                       tsubmname    = 'HAM',               &
-                      itrtype      = itrprog,             &
+i                      itrtype      = itrprog,             &
                       density      = 2165._dp,            &
                       iaerorad     = iradss,              &
                       lwatsol      = .TRUE.,              & 
                       lelectrolyte = .TRUE.,              &
                       nion         = 2,                   &
                       osm          = 1._dp,               & 
-                      kappa        = 1._dp,               &    !>>dod<<
+                      kappa        = 1._dp * scale_kappa_ss,               &! # should be 1    !>>dod<<
                       ldrydep      = .TRUE.,              &
                       lwetdep      = .TRUE.,              &   
                       idx          = id_ss                   )

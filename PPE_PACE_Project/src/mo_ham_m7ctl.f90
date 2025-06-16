@@ -324,6 +324,10 @@ CONTAINS
     USE mo_ham,              ONLY: sizeclass, nclass
     USE mo_ham_wetdep_data,  ONLY: csr_strat_wat, csr_strat_mix, csr_strat_ice, csr_conv, &
                                    cbcr, cbcs
+    !>>dwp Added perturbed physics setup:
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+                                     scale_so4_coating
+    !<<dwp
 
     IMPLICIT NONE
 
@@ -332,6 +336,10 @@ CONTAINS
     LOGICAL :: lsedi(naeroclass(HAM_M7)) = (/.FALSE., .FALSE., .TRUE., .TRUE.,  & ! soluble modes
                                         .FALSE., .TRUE., .TRUE. /)  ! insoluble modes
  
+    !>>dwp Added perturbed physics setup:
+    IF (lo_hammoz_perturbations) THEN
+        so4_coating_threshold = so4_coating_threshold * scale_so4_coating
+    ENDIF
 
     !>>dod soa 
     !---executable procedure

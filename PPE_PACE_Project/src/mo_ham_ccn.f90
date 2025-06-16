@@ -129,7 +129,7 @@ CONTAINS
 
     !--- 0) Initializations:
 
-    zrmin(1:kproma,:,:)=3.0E-9_dp             ! 3nm cut-off radius for CN calculation
+    zrmin(1:kproma,:,:)=1.0E-7_dp             ! 3nm cut-off radius for CN calculation
 
     zeps=EPSILON(1._dp)
 
@@ -139,7 +139,7 @@ CONTAINS
     ELSE
        itoplev=1
 
-       IF (nccndiag==5 .OR. nccndiag==6) THEN
+       IF (nccndiag==5 .OR. nccndiag==6 .OR. nccndiag==7) THEN
           !--- Calculate zdpg:
           zdpg(1:kproma,1)=2._dp*(paphm1(1:kproma,2)-papm1(1:kproma,1))/grav
           zdpg(1:kproma,2:klev)=(paphm1(1:kproma,3:klev+1)-paphm1(1:kproma,2:klev))/grav
@@ -203,7 +203,7 @@ CONTAINS
 
        !--- Store diagnostics in aero stream:
 
-       IF (nccndiag==1 .OR. nccndiag==3 .OR. nccndiag==5) THEN
+       IF (nccndiag==1 .OR. nccndiag==3 .OR. nccndiag==5 .OR. nccndiag==7) THEN
 
           ccn_2d(jsat)%ptr(1:kproma,krow)=zccn(1:kproma,klev)
 
@@ -255,7 +255,7 @@ CONTAINS
 
        !--- 4) Sum up the CN over levels to burdens:
 
-       IF (nccndiag==5 .OR. nccndiag==6) THEN
+       IF (nccndiag==5 .OR. nccndiag==6 .OR. nccndiag==7) THEN
 
           DO jk=itoplev, klev
              cn_burden(1:kproma,krow)=cn_burden(1:kproma,krow) + &
