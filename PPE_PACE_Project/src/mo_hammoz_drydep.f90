@@ -277,12 +277,16 @@ MODULE mo_hammoz_drydep
   USE mo_time_control,     ONLY: delta_time, time_step_len
   USE mo_physical_constants, ONLY: grav
   USE mo_memory_g3b,       ONLY: wsmx, ws
-  USE mo_tracdef,          ONLY: trlist, ntrac
+  USE mo_tracdef,          ONLY: trlist, ntrac, AEROSOLMASS, AEROSOLNUMBER
   USE mo_submodel,         ONLY: lham
   USE mo_submodel_diag,    ONLY: get_diag_pointer
   USE mo_hammoz_drydep_lg, ONLY: drydep_lg_calcra, drydep_lg_vdbl
   USE mo_ham_drydep,       ONLY: ham_vdaer, ham_vd_presc
 !! USE mo_moz_diag,          ONLY: moz_drydep_diag   ### to be written
+!>>YAB Added perturbed physics setup:
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+                                     scale_drydep_acc
+!<<YAB
   !>>DN
   USE mo_hammoz_aerocom_diags, ONLY: lHEaci
   USE mo_hammoz_aerocom_HEaci, ONLY: dry3Dso2_inst, dry3Dso4_inst
@@ -355,6 +359,10 @@ MODULE mo_hammoz_drydep
   !--- Local variables
 
   INTEGER :: jl, jt, ierr
+
+!>>YAB Added perturbed physics setup:
+  INTEGER :: imode
+!<<YAB
 
   REAL(dp), PARAMETER  :: zephum=5.e-2_dp
 
@@ -474,6 +482,26 @@ MODULE mo_hammoz_drydep
       zdz=(paphp1(jl,klev+1)-paphp1(jl,klev))/(pdensair(jl)*grav)
       zvd(jl,jt) = MIN(zvd(jl,jt) , 2._dp*(zdz/time_step_len))
     END DO
+
+!>>YAB Added perturbed physics scaling:
+
+    IF (lo_hammoz_perturbations) THEN 
+      IF (trlist%ti(jt)%nphase == AEROSOLMASS .OR. trlist%ti(jt)%nphase == AEROSOLNUMBER) THEN
+
+        imode=trlist%ti(jt)%mode
+
+        SELECT CASE (imode)
+!        CASE(2,5) 
+!          zvd(1:kproma,jt)=zvd(1:kproma,jt)*scale_drydep_ait
+        CASE(3,6)
+          zvd(1:kproma,jt)=zvd(1:kproma,jt)*scale_drydep_acc
+!        CASE(4,7)
+!          zvd(1:kproma,jt)=zvd(1:kproma,jt)*scale_drydep_coa
+        END SELECT
+
+      ENDIF
+    ENDIF
+!<< YAB
 
     CALL get_diag_pointer(vddep, fld2d, jt, ierr=ierr)
 

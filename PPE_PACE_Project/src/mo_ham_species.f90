@@ -143,7 +143,7 @@ MODULE mo_ham_species
   USE mo_ham,             ONLY: mw_so2, mw_so4, mw_dms
 !gf
 ! YAB
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_kappa_ss, scale_kappa_oc
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, kappa_ss, kappa_oc
 ! YAB
   IMPLICIT NONE
 
@@ -297,6 +297,13 @@ MODULE mo_ham_species
      !  density here is that of H2SO4 
 
 !>>DT
+     !>>hjia Added for PPE
+     kappa_tmp = 0.60_dp ! default value
+     IF (lhamperturb) THEN
+        kappa_tmp = kappa_so4  
+     END IF
+     !hjia
+
      CALL new_species(nphase      = AEROSOL,             &
                       longname    = 'Sulphate',          &
                       shortname   = 'SO4',               &
@@ -312,7 +319,8 @@ MODULE mo_ham_species
                       lelectrolyte = .TRUE.,             &
                       nion         = 2,                  &
                       osm          = 1._dp,              &
-                      kappa        = 0.60_dp,            &
+!                      kappa        = 0.60_dp,            & 
+                      kappa        = kappa_tmp,           &  !hjia
                       lburden      = .TRUE.,             &
                       idx          = id_so4              )
 !<<DT
@@ -364,7 +372,14 @@ MODULE mo_ham_species
 
         !--------- 10b. Organic Carbon (Primary organic aerosol)
         !
-        
+       
+        !>>hjia Added for PPE
+        kappa_tmp=0.06_dp ! default value
+        IF (lhamperturb) THEN
+           kappa_tmp = kappa_oc
+        END IF
+        !hjia
+
         CALL new_species(nphase       = AEROSOL,             &
                          longname     = 'Organic carbon',    &
                          shortname    = 'OC',                &
@@ -375,7 +390,8 @@ MODULE mo_ham_species
                          density      = 2000._dp,            &
                          iaerorad     = iradoc,              &
                          lwatsol      = .TRUE.,              &  
-NEED TO MODIFY                         kappa        = 0.06_dp * scale_kappa_oc,             &
+!                         kappa        = 0.06_dp,             &
+                         kappa        = kappa_tmp,           &  !hjia
                          ldrydep      = .TRUE.,              &
                          lwetdep      = .TRUE.,              &   
                          idx          = id_oc                   )
@@ -385,20 +401,29 @@ NEED TO MODIFY                         kappa        = 0.06_dp * scale_kappa_oc, 
      !--------- 11. Sea salt
      !
 
+
+     !>>hjia Added for PPE
+     kappa_tmp=1._dp ! default value
+     IF (lhamperturb) THEN
+        kappa_tmp = kappa_ss
+     END IF
+     !hjia
+
      CALL new_species(nphase       = AEROSOL,             &
                       longname     = 'Sea salt',          &
                       shortname    = 'SS',                &
                       units        = 'kg kg-1',           &
                       mw           = 58.443_dp,           &
                       tsubmname    = 'HAM',               &
-i                      itrtype      = itrprog,             &
+                      itrtype      = itrprog,             &
                       density      = 2165._dp,            &
                       iaerorad     = iradss,              &
                       lwatsol      = .TRUE.,              & 
                       lelectrolyte = .TRUE.,              &
                       nion         = 2,                   &
                       osm          = 1._dp,               & 
-                      kappa        = 1._dp * scale_kappa_ss,               &! # should be 1    !>>dod<<
+!                      kappa        = 1._dp,               &    !>>dod<<
+                      kappa        = kappa_tmp,           &  !hjia
                       ldrydep      = .TRUE.,              &
                       lwetdep      = .TRUE.,              &   
                       idx          = id_ss                   )
