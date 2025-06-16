@@ -255,9 +255,10 @@ ml_flux.o: mo_decomposition.o mo_interpo.o mo_kind.o mo_memory_g3b.o mo_sst.o
 ml_ocean.o: mo_control.o mo_kind.o mo_physc2.o mo_physical_constants.o \
 	mo_time_control.o
 mo_activ.o: mo_cloud_utils.o mo_control.o mo_conv.o mo_echam_cloud_params.o \
-	mo_exception.o mo_filename.o mo_kind.o mo_linked_list.o \
-	mo_math_constants.o mo_memory_base.o mo_param_switches.o \
-	mo_physical_constants.o mo_submodel.o mo_submodel_diag.o mo_tracer.o
+	mo_exception.o mo_filename.o mo_hammoz_perturbations.o mo_kind.o \
+	mo_linked_list.o mo_math_constants.o mo_memory_base.o \
+	mo_param_switches.o mo_physical_constants.o mo_submodel.o \
+	mo_submodel_diag.o mo_tracer.o
 mo_aero_kinne.o: mo_decomposition.o mo_exception.o mo_interpo.o mo_kind.o \
 	mo_memory_g3b.o mo_mpi.o mo_physical_constants.o mo_read_netcdf77.o \
 	mo_rrtm_params.o mo_time_control.o mo_time_conversion.o \
@@ -1251,8 +1252,8 @@ pio_uncouple.o: mo_couple_wrap.o mo_io_units.o mo_mpi.o
 pres.o: mo_control.o mo_hyb.o mo_kind.o
 presf.o: mo_control.o mo_kind.o
 radheat.o: mo_control.o mo_cosp_simulator.o mo_diag_tendency_new.o \
-	mo_hammoz_aerocom_AP3D.o mo_heatingrates.o mo_kind.o \
-	mo_memory_cfdiag.o mo_memory_g3b.o mo_physical_constants.o \
+	mo_hammoz_aerocom_AP3D.o mo_hammoz_aerocom_diags.o mo_heatingrates.o \
+	mo_kind.o mo_memory_cfdiag.o mo_memory_g3b.o mo_physical_constants.o \
 	mo_profile.o mo_radiation_forcing.o mo_radiation_parameters.o \
 	mo_submodel.o mo_submodel_interface.o mo_time_control.o mo_vphysc.o
 scan1.o: mo_advection.o mo_call_trans.o mo_co2.o mo_column.o mo_control.o \

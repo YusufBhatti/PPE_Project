@@ -137,7 +137,10 @@ MODULE mo_ham_m7_emissions
   USE mo_ham_dust,               ONLY: bgc_dust_initialize
   USE mo_boundary_condition,       ONLY: bc_query
   USE mo_external_field_processor, ONLY: EF_MODULE
-
+!>>ps Added for perturbed physics setup:
+  USE mo_hammoz_perturbations,   ONLY: lo_hammoz_perturbations, scale_emi_cmr_ff, &
+                                       scale_emi_cmr_bb
+!<<ps
   INTEGER, INTENT(in)      :: nsectors    ! number of sectors defined in emi matrix
 
   INTEGER           :: i, nvars, jt, ieftype
@@ -180,6 +183,15 @@ MODULE mo_ham_m7_emissions
                         mmr_dust_ai = 0.35E-6_dp,       &! source mass median radii [m]
                         mmr_dust_ci = 1.75E-6_dp
   REAL(dp) :: densdust
+
+!>>ps Added for perturbed physics setup:
+  IF (lo_hammoz_perturbations) THEN 
+    cmr_ff=cmr_ff*scale_emi_cmr_ff
+    cmr_bb=cmr_bb*scale_emi_cmr_bb
+!    cmr_bg=cmr_bg*scale_emi_cmr_bf
+!    zfacso2=(1.0_dp-emi_prim_so4_frac)
+  ENDIF
+!<<ps
 
   !-- initialize
   idsec_dust      = -1
@@ -254,6 +266,13 @@ MODULE mo_ham_m7_emissions
   zm2n_s4as_bb=3._dp/((4._dp*pi*speclist(id_so4)%density*(cmr_sa*cmr2ram(iaccs))**3))
   zm2n_s4cs_bb=3._dp/((4._dp*pi*speclist(id_so4)%density*(cmr_sc*cmr2ram(icoas))**3))
 !<<gf
+!>>ps Added for perturbed physics setup:
+!  IF (lo_hammoz_perturbations) THEN 
+!    zm2n_s4ks=3._dp/((4._dp*pi*speclist(id_so4)%density*(emi_prim_so4_cmr*cmr2ram(iaits))**3))
+!    zm2n_s4as=3._dp/((4._dp*pi*speclist(id_so4)%density*(emi_prim_so4_cmr*cmr2ram(iaccs))**3))
+!    zm2n_s4cs=3._dp/((4._dp*pi*speclist(id_so4)%density*(emi_prim_so4_cmr*cmr2ram(icoas))**3))
+!  ENDIF
+!<<ps
 
   IF (idsec_dust > 0) THEN
     densdust=speclist(id_du)%density
@@ -457,7 +476,10 @@ MODULE mo_ham_m7_emissions
   !<<dod
   USE mo_boundary_condition,       ONLY: bc_set, bc_query
   USE mo_external_field_processor, ONLY: EF_MODULE
-
+!>>ps Added for perturbed physics setup:
+  USE mo_hammoz_perturbations,   ONLY: lo_hammoz_perturbations, scale_emi_cmr_ff, &
+                                       scale_emi_cmr_bb
+!<<ps
   USE mo_ham,   ONLY: ibc_dust, ibc_seasalt !alaak +
 
   ! arguments
@@ -641,7 +663,27 @@ MODULE mo_ham_m7_emissions
       pfactor(idx_ns4ks) = 0.5_dp * zso2tso4 * (1._dp-zfacso2) * zm2n_s4ks_bb
       pfactor(idx_ns4as) = 0.5_dp * zso2tso4 * (1._dp-zfacso2) * zm2n_s4as_bb
     END IF
-  END IF
+ 
+!!>>ps Added for perturbed physics setup:
+!    ! Disregard old 50%/50% split and emit in mode containing assumed emission crm:
+!  IF (lo_hammoz_perturbations) THEN 
+!    pfactor(:) = 0._dp                  ! reset weighting factors
+!    IF ((0.005E-3_dp < emi_prim_so4_cmr) .AND. (emi_prim_so4_cmr <= 0.05E-3_dp)) THEN
+!      pfactor(idx_ms4ks)=zso2tso4 * (1._dp-zfacso2)
+!      pfactor(idx_ns4ks)=zso2tso4 * (1._dp-zfacso2) * zm2n_s4ks
+!    ELSE IF ((0.05E-3_dp < emi_prim_so4_cmr) .AND. (emi_prim_so4_cmr <= 0.5E-3_dp)) THEN
+!      pfactor(idx_ms4as)=zso2tso4 * (1._dp-zfacso2)
+!      pfactor(idx_ns4ks)=zso2tso4 * (1._dp-zfacso2) * zm2n_s4as
+!    ELSE IF (0.5E-3_dp < emi_prim_so4_cmr) THEN
+!      pfactor(idx_ms4cs)=zso2tso4 * (1._dp-zfacso2)
+!      pfactor(idx_ns4ks)=zso2tso4 * (1._dp-zfacso2) * zm2n_s4cs
+!    ELSE
+!      CALL finish('hammoz_perturbations','Inconsistent emissions size for primary SO4 in ham_m7_emissions')
+!    ENDIF
+!  ENDIF
+!!<<ps
+
+ END IF
  
   END SUBROUTINE ham_m7_emissions
 

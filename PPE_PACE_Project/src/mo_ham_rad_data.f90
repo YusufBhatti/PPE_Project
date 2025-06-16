@@ -173,6 +173,11 @@ CONTAINS
     !   -
 
     USE mo_ham,  ONLY: naerorad, nrad, nham_subm, HAM_M7, HAM_SALSA
+    !>>dwp Added perturbed physics setup:
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
+                                       bc_rad_ni, du_rad_ni
+    !<<dwp ! YAB added oc and du
+
 
     IMPLICIT NONE
 
@@ -181,6 +186,10 @@ CONTAINS
 
     !---local variables
     INTEGER :: itable
+
+    REAL(dp) :: scale_bc_rad_ni
+!    REAL(dp) :: scale_oc_rad_ni ! YAB added
+    REAL(dp) :: scale_du_rad_ni ! YAB added
 
     !--- Initialize wavelength settings
 
@@ -255,6 +264,18 @@ CONTAINS
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
         (/ 7.10E-01_dp,   6.99E-01_dp,   7.265E-01_dp                                                /)
 
+   !>>dwp Adding perturbed physics scaling for BC imaginary refractive index (SW
+   !only):
+   IF (lo_hammoz_perturbations) THEN 
+       scale_bc_rad_ni = bc_rad_ni / cni(Nwv_sw+1,iradbc)
+       cni(1:Nwv_sw_tot,iradbc) = cni(1:Nwv_sw_tot,iradbc) * scale_bc_rad_ni
+   ENDIF
+
+!   !<< luciad Adding perturbed physics scaling for BC real refractive index (SW only):
+!   IF (lo_hammoz_perturbations) THEN
+!       cnr(1:Nwv_sw_tot,iradbc) = 1.25 * cni(1:Nwv_sw_tot,iradbc) + 0.96
+!   ENDIF
+
    !--- Organic Carbon (Medium-absorbing values from Bond & Bergstrom, 2006):
    !
    !    - wavelength dependency scaled from OPAC (Hess et al., 1998)
@@ -276,6 +297,13 @@ CONTAINS
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradoc) =                                                          &
         (/ 5.50E-03_dp,   1.10E-02_dp,   9.02E-3_dp                                                  /)
+
+   !>>YAB Adding perturbed physics scaling for OC imaginary refractive index (SW
+   !only):
+!   IF (lo_hammoz_perturbations) THEN
+!       scale_oc_rad_ni = oc_rad_ni / cni(Nwv_sw+1,iradoc)
+!       cni(1:Nwv_sw_tot,iradoc) = cni(1:Nwv_sw_tot,iradoc) * scale_oc_rad_ni
+!   ENDIF
 
    !--- Sea Salt (Nilsson, 1979):
 
@@ -319,6 +347,12 @@ CONTAINS
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
         (/ 1.000E-03_dp,  8.400E-04_dp,  1.964E-03_dp                                                /)
+
+!  YAB added for aerosol ppe
+   IF (lo_hammoz_perturbations) THEN
+       scale_du_rad_ni = du_rad_ni / cni(Nwv_sw+1,iraddu)
+       cni(1:Nwv_sw_tot,iraddu) = cni(1:Nwv_sw_tot,iraddu) * scale_du_rad_ni
+   ENDIF
 
    !--- Water (provided by Stefan Kinne interpolated with code by Andy Lacis (NASA-GISS):
    !          (Hale and Querry [1973] for 0.2 to 0.7 mm, 

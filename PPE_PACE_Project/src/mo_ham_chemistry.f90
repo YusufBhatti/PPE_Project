@@ -99,6 +99,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
                                    d_prod_ms4cs
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactionst
   
   IMPLICIT NONE
 
@@ -318,8 +319,12 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
            zp_h2o2=zh_h2o2*zpfac
            zf_h2o2=zp_h2o2/(1._dp+zp_h2o2)
            !
-           zrkh2o2(jl,jk)=zrke*zf_so2*zf_h2o2
-        ELSE
+           zrkh2o2(jl,jk)=zrke*zf_so2*zf_h2o2 ! YAB
+           IF (lo_hammoz_perturbations) THEN
+               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_reactions !scale_so2_reactions_AQ ! YAB
+	   ENDIF
+
+           ELSE
            zrkh2o2(jl,jk)=0._dp
         END IF
      END DO
@@ -606,6 +611,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
                                     d_prod_so4_so2_oh,  & 
                                     d_prod_h2so4
   USE mo_exception,          ONLY: finish
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
 
   IMPLICIT NONE
 
@@ -827,6 +833,10 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
            pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)-zdso2        ! update tendencies for SO2
            !>>dod bugfix(#49)
            zso4so2oh = zdso2*zconv_so2_so4
+	  ! YAB SO4 production from SO2 PERTURBATIONS 
+           IF (lo_hammoz_perturbations) THEN
+               zso4so2oh = zso4so2oh  *  scale_so2_reactions !scale_so2_reactions
+           ENDIF
            pxtte(jl,jk,idt_so4)=pxtte(jl,jk,idt_so4)+zso4so2oh    ! update tendencies for SO4
            !<<dod
 
@@ -882,6 +892,12 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               zdms=MIN(zdms,zdms0(jl,jk)*zqtmst)
               pxtte(jl,jk,idt_dms)=pxtte(jl,jk,idt_dms)-zdms
               zdms2so2no3=zdms*zconv_dms_so2                                    !>>dod bugfix(#49) <<dod
+              IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB
+
+                    zdms2so2no3 = zdms2so2no3 * scale_so2_reactions                                    !>>dod bugfix(#49) <<dod
+
+              ENDIF
+
               pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2no3  
 
    !--- Store producion of sulfate and SO2 for diagnostics:

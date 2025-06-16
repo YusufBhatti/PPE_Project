@@ -2285,6 +2285,9 @@ SUBROUTINE m7_nuck(kproma,  kbdim,  klev,   krow,          &
   USE mo_ham_m7_nucl,  ONLY: nucl_vehkamaeki, nucl_kazil_lovejoy, &
                              nucl_activation, nucl_kinetic
   USE mo_memory_g3b,   ONLY: forest
+!>>ps Added for perturbed physics setup:
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_nuc_ft
+!<<ps
   
   IMPLICIT NONE
   
@@ -2376,6 +2379,20 @@ SUBROUTINE m7_nuck(kproma,  kbdim,  klev,   krow,          &
     zonrate(1:kproma,:) = 0.0_dp
   END IF
   
+!>>YAB Added for perturbed physics setup:
+
+  IF (lo_hammoz_perturbations) THEN
+
+    zsns(1:kproma,:)=zsns(1:kproma,:)*scale_nuc_ft
+    zsnrate(1:kproma,:)=zsnrate(1:kproma,:)*scale_nuc_ft
+
+!    zons(1:kproma,:)=zons(1:kproma,:)*scale_nuc_bl
+!    zonrate(1:kproma,:)=zonrate(1:kproma,:)*scale_nuc_bl
+
+  ENDIF
+
+!<<YAB
+
   DO jk = 1, klev
     DO jl = 1, kproma
       
