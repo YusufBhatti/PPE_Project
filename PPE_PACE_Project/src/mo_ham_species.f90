@@ -147,6 +147,7 @@ MODULE mo_ham_species
 ! YAB
   IMPLICIT NONE
 
+  REAL(dp)    :: kappa_tmp! = 0.6_dp
   !--- executable procedure ----
 
   !--------- 0. Initialisations    
@@ -298,7 +299,6 @@ MODULE mo_ham_species
 
 !>>DT
      !>>hjia Added for PPE
-     REAL(dp)    :: kappa_tmp! = 0.6_dp
 !     kappa_tmp = 0.60_dp ! default value
      IF (lo_hammoz_perturbations) THEN
         kappa_tmp = kappa_so4  
@@ -375,8 +375,7 @@ MODULE mo_ham_species
         !
        
         !>>hjia Added for PPE
-        REAL(dp)    ::  kappa_tmp
-+     ! kappa_oc=0.06._dp ! default value
+!+     ! kappa_oc=0.06._dp ! default value
         IF (lo_hammoz_perturbations) THEN
            kappa_tmp = kappa_oc
         END IF
@@ -405,8 +404,7 @@ MODULE mo_ham_species
 
 
      !>>hjia Added for PPE
-     REAL(dp)    :: kappa_tmp
-     !kappa_ss=1._dp ! default value
+!     !kappa_ss=1._dp ! default value
      IF (lo_hammoz_perturbations) THEN
         kappa_tmp = kappa_ss
      END IF
