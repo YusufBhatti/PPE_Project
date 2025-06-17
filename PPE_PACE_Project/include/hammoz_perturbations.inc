@@ -90,6 +90,6 @@ NAMELIST /hammoz_perturbations/ &
 !  pH_pert,     & ! Scale the cloud-water pH
   kappa_ss, &
   kappa_so4, &
-  kappa_oc, &
-  scale_dms_sc, &          & ! Scale the imaginary part of the refractive index (for DUST)
-  scale_seasalt_expo
+  kappa_oc
+  !scale_dms_sc, &           ! Scale the imaginary part of the refractive index (for DUST)
+  !scale_seasalt_expo

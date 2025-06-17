@@ -49,22 +49,23 @@ MODULE mo_hammoz_perturbations
   PUBLIC :: init_hammoz_perturbations, lo_hammoz_perturbations, &
             init_hammoz_emi_perturbations, &
             scale_nuc_ft, &
-            scale_emi_cmr_ff, scale_emi_cmr_bb, &
+            scale_emi_cmr_ff, scale_emi_cmr_bb, scale_emi_bc,  &
 	    scale_drydep_acc,  &
             scale_wetdep_ic, scale_wetdep_bc, & 
             bc_rad_ni, du_rad_ni, oc_rad_ni, &
             scale_so4_coating, &
 	    scale_so2_reactions, &
             kappa_so4, kappa_oc, kappa_ss, &
-	    scale_vertical_velocity, scale_dms_sc, &
-	    scale_seasalt_expo, scale_emi_bc
+	    scale_vertical_velocity, scale_emi_dms
+!	    scale_dms_sc,  scale_seasalt_expo 
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
 
   !--- Parameter list to perturb with short description:
 
-  REAL(dp)    :: ft_nuc, & ! scalable - done
+  REAL(dp)    :: bl_nuc, & ! scalable - done
+                 ft_nuc, & ! scalable - done
                  ageing, & ! scalable - done
                  act_diam, & ! tricky as not in HAM
                  drydep_aer_acc, & ! scalable - done
@@ -91,14 +92,14 @@ MODULE mo_hammoz_perturbations
                  scale_emi_ff = 1.0_dp,     & ! Scale factor for fossil fule emissions
                  scale_emi_bb = 1.0_dp,     & ! Scale factor for wildfire emissions
                  scale_emi_bf = 1.0_dp,     & ! Scale factor for biofuel emissions
-                 scale_emi_bc = 1.0_dp,     & ! Scale factor for biofuel emissions
+                 scale_emi_bc = 1.0_dp,    & ! Scale factor for BC emissions (all sectors)
                  scale_emi_dms = 1.0_dp,    &   ! Scale factor for dms emissions (terrestrial + oceanic)
                  scale_emi_ssa = 1.0_dp,     &! Scale factor for SSA emissions
                  scale_emi_du = 1.0_dp,    &! Scale factor for dust emissions
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
-                 scale_so2_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
-                 scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
-                 scale_seasalt_expo = 1.0_dp    ! Scale factor schmidt number ratio of DMS
+                 scale_so2_reactions = 1.0_dp ! Scale factor for all SO2 reactions
+!                 scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
+!                 scale_seasalt_expo = 1.0_dp    ! Scale factor schmidt number ratio of DMS
 
   REAL(dp)    :: scale_drydep_acc = 1.0_dp ! Scale factor for dry deposition of accumulation modes
 
@@ -248,8 +249,8 @@ CONTAINS
        CALL p_bcast (kappa_oc, p_io)
        ! SO2 chemistry
        CALL p_bcast (scale_so2_reactions,        p_io)
-       CALL p_bcast (scale_dms_sc,        p_io)
-       CALL p_bcast (scale_seasalt_expo,        p_io)
+     !  CALL p_bcast (scale_dms_sc,        p_io)
+     !  CALL p_bcast (scale_seasalt_expo,        p_io)
 
 
     END IF
@@ -547,17 +548,17 @@ CONTAINS
 
    !    --- DMS:
 
-!    nsec=SIZE(sectors_dms)
-!    DO isec=1, nsec
-!      ind=em_get_sectorindex(TRIM(sectors_dms(isec)))
-!      nvars=ematrix%em_sectors(ind)%es_nvars
-!      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_dms
-!      CALL message('hammoz_perturbations','DMS Emissions scale factor for sector:')
-!      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
-!      DO i=1, nvars
-!        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
-!      ENDDO
-!    ENDDO
+    nsec=SIZE(sectors_dms)
+    DO isec=1, nsec
+      ind=em_get_sectorindex(TRIM(sectors_dms(isec)))
+      nvars=ematrix%em_sectors(ind)%es_nvars
+      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_dms
+      CALL message('hammoz_perturbations','DMS Emissions scale factor for sector:')
+      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+      DO i=1, nvars
+        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
+      ENDDO
+    ENDDO
     CALL message('',separator)
 
   END SUBROUTINE init_hammoz_emi_perturbations
