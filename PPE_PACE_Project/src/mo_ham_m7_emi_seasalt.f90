@@ -91,11 +91,11 @@ MODULE mo_ham_m7_emi_seasalt
   REAL(dp), PRIVATE  :: ss1_mon                   ! sea salt flux factor 1, Monahan (nseasalt=1) scheme    
   REAL(dp), PRIVATE  :: ss2_mon                   ! sea salt flux factor 2, Monahan (nseasalt=1) scheme    
   ! < YAB scaling the exponent of wind 
-  IF (lo_hammoz_perturbations) THEN
-    ppww_scaled = ppww * scale_seasalt_expo
-  ELSE
-    ppww_scaled = ppww
-  ENDIF
+!  IF (lo_hammoz_perturbations) THEN
+!    ppww_scaled = ppww * scale_seasalt_expo
+!  ELSE
+!    ppww_scaled = ppww
+!  ENDIF
   ! > YAB
 CONTAINS
 
@@ -536,7 +536,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2)) 
  
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
 
        END IF
 
@@ -683,7 +683,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2)) 
 
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
 
        ELSEIF (dmt(m).GT.dmtb_guelle .and. dmt(m).le.dmtd) THEN 
 
@@ -836,7 +836,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**3.45_dp
          p3 = 10**(1.607_dp*EXP(-bmn(m)**2)) 
  
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
 
        ELSEIF (dmt(m).GT.dmtb_gong .and. dmt(m).le.dmtd) THEN 
 
@@ -844,7 +844,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2))  
 
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
 
        END IF
 
@@ -1217,7 +1217,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**3.45_dp
          p3 = 10**(1.607_dp*EXP(-bmn(m)**2)) 
  
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
 
        ELSEIF (dmt(m).GT.dmtb_gong .and. dmt(m).le.dmtd) THEN 
 
@@ -1225,7 +1225,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2))  
 
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
 
        END IF
 
