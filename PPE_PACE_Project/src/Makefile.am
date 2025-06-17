@@ -714,10 +714,11 @@ mo_hammoz_emissions.o: mo_boundary_condition.o mo_decomposition.o \
 	mo_ham_salsa_emissions.o mo_ham_salsactl.o mo_ham_species.o \
 	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_diags.o \
 	mo_hammoz_emi_biogenic.o mo_hammoz_emi_fire.o mo_hammoz_emi_ocean.o \
-	mo_hammoz_emi_volcano.o mo_kind.o mo_memory_base.o mo_mpi.o \
-	mo_physical_constants.o mo_species.o mo_string_utls.o mo_submodel.o \
-	mo_submodel_diag.o mo_submodel_streams.o mo_time_control.o \
-	mo_tracdef.o mo_tracer.o mo_util_string.o mo_vphysc.o
+	mo_hammoz_emi_volcano.o mo_hammoz_perturbations.o mo_kind.o \
+	mo_memory_base.o mo_mpi.o mo_physical_constants.o mo_species.o \
+	mo_string_utls.o mo_submodel.o mo_submodel_diag.o \
+	mo_submodel_streams.o mo_time_control.o mo_tracdef.o mo_tracer.o \
+	mo_util_string.o mo_vphysc.o
 mo_hammoz_global_diag.o: mo_control.o mo_exception.o mo_filename.o \
 	mo_geoloc.o mo_global_op.o mo_kind.o mo_moz_diag.o mo_moz_lightning.o \
 	mo_mpi.o mo_netcdf.o mo_submodel_diag.o mo_time_control.o

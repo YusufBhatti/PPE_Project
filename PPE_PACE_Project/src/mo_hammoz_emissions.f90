@@ -72,7 +72,7 @@ MODULE mo_hammoz_emissions
   INTEGER               :: nsectors
   INTEGER               :: emimod(maxsectors,nmaxspec)     ! mode of application
   INTEGER               :: ibc_emis(maxsectors,nmaxspec)   ! index to boundary condition
-  REAL(dp)              :: emfactor(maxsectors,nmaxspec)   ! scaling factor
+  REAL(dp), PUBLIC      :: emfactor(maxsectors,nmaxspec)   ! scaling factor
   REAL(dp), ALLOCATABLE :: dgeo(:,:)                       ! delta(geopotential height)
   REAL(dp), ALLOCATABLE :: height(:,:)                     ! grid box height
   REAL(dp), ALLOCATABLE :: dens(:,:)                       ! air density
@@ -107,6 +107,7 @@ MODULE mo_hammoz_emissions
   !--alaak
   USE mo_ham_salsactl,             ONLY:  in2b, fn2b, in2a,fn2a,fn1a
   USE mo_decomposition,            ONLY: ldc=>local_decomposition
+  USE mo_hammoz_perturbations,     ONLY: scale_emi_bc, lo_hammoz_perturbations, init_hammoz_emi_perturbations
 
   TYPE(bc_nml)       :: bc_struc
   INTEGER            :: i, j, jspec, itrtype, nvars, idims, emtype, idum, jtrac, ii
@@ -131,7 +132,7 @@ MODULE mo_hammoz_emissions
 
   ! -- read emission matrix from emi_spec.dat file
   CALL em_read(nsectors)
-
+  CALL init_hammoz_emi_perturbations
   lemissions = .FALSE.
   DO i = 1, nsectors
     CALL em_get_sector_info(i, secname, nvars)
@@ -292,6 +293,11 @@ MODULE mo_hammoz_emissions
              CALL ham_salsa_init_emissions(nsectors)
      END SELECT
      !--alaak
+
+     IF (lo_hammoz_perturbations) THEN
+       emfactor(:, id_bc) = emfactor(:, id_bc) * scale_emi_bc 
+     ENDIF 
+
   ENDIF
   
   IF (.NOT. lemissions) &

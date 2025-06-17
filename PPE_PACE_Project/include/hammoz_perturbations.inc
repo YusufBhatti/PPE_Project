@@ -15,7 +15,7 @@
 !!   -# Philip Stier (Oxford) - original code (2013)
 !!   -# Duncan Watson-Parris (Oxford) - Added wet depostion, fire height, BC ni and
 !!                                      convection perturbations
-!!
+!!   -# Yusuf Bhatti (SRON) - modified for Aerosol PPE
 !! \limitations
 !! None
 !!
@@ -46,7 +46,7 @@ NAMELIST /hammoz_perturbations/ &
   scale_emi_ff,             & ! Scale factor for fossil fule emissions
   scale_emi_bb,             & ! Scale factor for wildfire emissions
   scale_emi_bf,             & ! Scale factor for biofuel emissions
-!  scale_emi_bc,             & ! Scale factor for BC emissions (all sectors)
+  scale_emi_bc,             & ! Scale factor for BC emissions (all sectors)
   scale_emi_dms,            & ! Scale factor for dms emissions (terrestrial)
   scale_emi_ssa,            & ! Scale factor for SSA emissions (all sectors) 
   scale_emi_du,             & ! Scale factor for DUST emissions (all sectors)
@@ -88,7 +88,8 @@ NAMELIST /hammoz_perturbations/ &
 !  scale_water, &
 !  scale_RH,    &
 !  pH_pert,     & ! Scale the cloud-water pH
-!  scale_kappa_ss, &
-  scale_kappa_so4, &
+  kappa_ss, &
+  kappa_so4, &
+  kappa_oc, &
   scale_dms_sc, &          & ! Scale the imaginary part of the refractive index (for DUST)
   scale_seasalt_expo

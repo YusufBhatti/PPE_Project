@@ -55,9 +55,9 @@ MODULE mo_hammoz_perturbations
             bc_rad_ni, du_rad_ni, oc_rad_ni, &
             scale_so4_coating, &
 	    scale_so2_reactions, &
-            scale_kappa_so4, scale_kappa_oc, &
+            kappa_so4, kappa_oc, kappa_ss, &
 	    scale_vertical_velocity, scale_dms_sc, &
-	    scale_seasalt_expo
+	    scale_seasalt_expo, scale_emi_bc
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -91,6 +91,7 @@ MODULE mo_hammoz_perturbations
                  scale_emi_ff = 1.0_dp,     & ! Scale factor for fossil fule emissions
                  scale_emi_bb = 1.0_dp,     & ! Scale factor for wildfire emissions
                  scale_emi_bf = 1.0_dp,     & ! Scale factor for biofuel emissions
+                 scale_emi_bc = 1.0_dp,     & ! Scale factor for biofuel emissions
                  scale_emi_dms = 1.0_dp,    &   ! Scale factor for dms emissions (terrestrial + oceanic)
                  scale_emi_ssa = 1.0_dp,     &! Scale factor for SSA emissions
                  scale_emi_du = 1.0_dp,    &! Scale factor for dust emissions
@@ -117,7 +118,6 @@ MODULE mo_hammoz_perturbations
 
   REAL(dp)    :: scale_so4_coating = 1.0_dp  ! Scale the coating thickness of SO4 required to 'age' particles (move them
                                              !  from insoluble to soluble modes)
-  REAL(dp)    :: scale_kappa_so4 = 0.6_dp
 
 
 CONTAINS
@@ -204,15 +204,15 @@ CONTAINS
 
     !--- 2) Broadcast over processors:
     IF (p_parallel) THEN
-       CALL p_bcast (scale_nuc_bl,         p_io)
+!!       CALL p_bcast (scale_nuc_bl,         p_io)
        CALL p_bcast (scale_nuc_ft,         p_io)
        CALL p_bcast (scale_emi_cmr_ff,     p_io)
        CALL p_bcast (scale_emi_cmr_bb,     p_io)
-       CALL p_bcast (scale_emi_cmr_bf,     p_io)
+     !  CALL p_bcast (scale_emi_cmr_bf,     p_io)
        CALL p_bcast (scale_emi_ff,         p_io)
        CALL p_bcast (scale_emi_bb,         p_io)
        CALL p_bcast (scale_emi_bf,         p_io)
-    !   CALL p_bcast (scale_emi_bc,        p_io)
+       CALL p_bcast (scale_emi_bc,        p_io)
        CALL p_bcast (scale_emi_dms,        p_io)
        CALL p_bcast (scale_emi_ssa,        p_io)
        CALL p_bcast (scale_emi_du,        p_io)
@@ -243,8 +243,9 @@ CONTAINS
    !    CALL p_bcast (scale_accretion, p_io)
    !    CALL p_bcast (scale_water, p_io)
  !      CALL p_bcast (scale_RH, p_io)
-       CALL p_bcast (scale_kappa_ss, p_io)
-       CALL p_bcast (scale_kappa_so4, p_io)
+       CALL p_bcast (kappa_ss, p_io)
+       CALL p_bcast (kappa_so4, p_io)
+       CALL p_bcast (kappa_oc, p_io)
        ! SO2 chemistry
        CALL p_bcast (scale_so2_reactions,        p_io)
        CALL p_bcast (scale_dms_sc,        p_io)
@@ -273,17 +274,17 @@ CONTAINS
                  level=em_info)
 
     CALL message('','---')
-    CALL print_value('Nucleation scaling factor (scale_nuc_bl)', scale_nuc_bl)
+    !    CALL print_value('Nucleation scaling factor (scale_nuc_bl)', scale_nuc_bl)
     CALL print_value('Nucleation scaling factor (scale_nuc_ft)', scale_nuc_ft)
 
     CALL message('','---')
     CALL print_value('Emission radius scaling factor (scale_emi_cmr_ff)', scale_emi_cmr_ff)
     CALL print_value('Emission radius scaling factor (scale_emi_cmr_bb)', scale_emi_cmr_bb)
-    CALL print_value('Emission radius scaling factor (scale_emi_cmr_bf)', scale_emi_cmr_bf)
+!    CALL print_value('Emission radius scaling factor (scale_emi_cmr_bf)', scale_emi_cmr_bf)
 
     CALL message('','---')
-    CALL print_value('Emission of primary SO4 - fraction of SO2 emitted as SO4', emi_prim_so4_frac)
-    CALL print_value('Emission of primary SO4 - radius of emitted SO4         ', emi_prim_so4_cmr)
+!    CALL print_value('Emission of primary SO4 - fraction of SO2 emitted as SO4', emi_prim_so4_frac)
+    !    CALL print_value('Emission of primary SO4 - radius of emitted SO4         ', emi_prim_so4_cmr)
 
     CALL message('','---')
     CALL print_value('Emission scaling factor (scale_emi_ff)', scale_emi_ff)
@@ -340,7 +341,7 @@ CONTAINS
  !   CALL print_value('The aerosol water uptake', scale_RH)
 
     CALL message('', '---')
-    CALL print_value('The scaling of the (AMIP) solar constant', scale_solar_const)
+    !    CALL print_value('The scaling of the (AMIP) solar constant', scale_solar_const)
     ! Actually do the scaling here
 !    ssi_amip = ssi_amip * scale_solar_const
 
