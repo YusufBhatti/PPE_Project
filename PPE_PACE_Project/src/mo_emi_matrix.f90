@@ -41,7 +41,7 @@ MODULE mo_emi_matrix
   PUBLIC :: em_get_SectorIndex
   PUBLIC :: maxsectors
   PUBLIC :: maxvars
-!!   PUBLIC :: ematrix
+  PUBLIC :: ematrix
 
   PUBLIC :: EM_NONE, EM_SURFACE, EM_VOLUME, EM_LEVEL50M, EM_FIRE
 
@@ -957,7 +957,7 @@ MODULE mo_emi_matrix
   found = .false.
   DO WHILE ((.NOT. found) .AND. (i <= ematrix%em_nsectors))
     i = i + 1
-    IF (ematrix%em_sectors(i)%es_sectorname == name) found = .true.
+    IF (TRIM(ematrix%em_sectors(i)%es_sectorname) == TRIM(name)) found = .true.
   ENDDO
   IF (i .gt. ematrix%em_nsectors) CALL message('em_get_bc_from_matrix', 'no sector '//trim(name)//' defined!',level=em_error)
   index = i

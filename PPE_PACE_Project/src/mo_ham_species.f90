@@ -143,7 +143,7 @@ MODULE mo_ham_species
   USE mo_ham,             ONLY: mw_so2, mw_so4, mw_dms
 !gf
 ! YAB
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, kappa_ss, kappa_oc
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, kappa_ss, kappa_oc, kappa_so4
 ! YAB
   IMPLICIT NONE
 
@@ -299,7 +299,7 @@ MODULE mo_ham_species
 !>>DT
      !>>hjia Added for PPE
      kappa_tmp = 0.60_dp ! default value
-     IF (lhamperturb) THEN
+     IF (lo_hammoz_perturbations) THEN
         kappa_tmp = kappa_so4  
      END IF
      !hjia
@@ -375,7 +375,7 @@ MODULE mo_ham_species
        
         !>>hjia Added for PPE
         kappa_tmp=0.06_dp ! default value
-        IF (lhamperturb) THEN
+        IF (lo_hammoz_perturbations) THEN
            kappa_tmp = kappa_oc
         END IF
         !hjia
@@ -404,7 +404,7 @@ MODULE mo_ham_species
 
      !>>hjia Added for PPE
      kappa_tmp=1._dp ! default value
-     IF (lhamperturb) THEN
+     IF (lo_hammoz_perturbations) THEN
         kappa_tmp = kappa_ss
      END IF
      !hjia
