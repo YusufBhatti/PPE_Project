@@ -94,7 +94,7 @@ MODULE mo_hammoz_emissions
   USE mo_hammoz_emi_ocean,         ONLY: init_emi_ocean
   USE mo_hammoz_emi_biogenic,      ONLY: init_emi_biogenic, lbioemi_dyn, start_biogenic_emissions
   USE mo_ham_m7_emissions,         ONLY: ham_m7_init_emissions
-  USE mo_ham_species,              ONLY: id_so2, id_so4
+  USE mo_ham_species,              ONLY: id_so2, id_so4, id_bc
   USE mo_ham,                      ONLY: ibc_dust, ibc_seasalt, &
                                          nham_subm,             &
                                          HAM_BULK,              &
