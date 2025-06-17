@@ -1,0 +1,10 @@
+#! @SHELL@
+set -e
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 1 @abs_builddir@/test_mpi_smartdedup
+#
+# Local Variables:
+# mode: sh
+# End:
+#

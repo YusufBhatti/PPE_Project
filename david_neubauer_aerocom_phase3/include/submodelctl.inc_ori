@@ -1,0 +1,43 @@
+! submodelctl.inc
+!
+! This namelist defines general submodel switches which are needed in the interface
+! layer (*mo_submodel_interface* or other parts of the standard ECHAM code). Also
+! included are switches which define the coupling between various submodels (for
+! example in HAMMOZ, which coupled aerosol and gas-phase chemical processes). Other
+! submodel-specific switches should be defined and maintained in extra namelists
+! which carry the name of the submodel itself (e.g. mozctl or hamctl).
+!
+!     ------------------------------------------------------------------
+NAMELIST /submodelctl/ &
+  lxt,            &  ! switch generic test tracer submodule on/off
+  lmethox,        &  ! switch for upper atmospheric H2O production from methane
+  ltransdiag,     &  ! switch to turn on atmospheric energy transport diagnostics
+  lco2,           &  ! switch for CO2 submodel (JSBACH related)
+  lham,           &  ! switch HAM aerosol module on/off
+  lsalsa,         &  ! switch SALSA module on/off
+  lmoz,           &  ! switch MOZART on/off
+  lhammoz,        &  ! switch HAM and MOZ on/off together with the coupling between the two
+                     ! note: lhammoz overrides lham and lmoz
+  lhammonia,      &  ! switch HAMMONIA on/off
+  llght,          &  ! switch lightning emissions on/off
+  laircraft,      &  ! switch aircraft emissions on/off
+  lmegan,         &  ! switch biogenic emissions model (MEGAN) on/off
+  losat,          &  ! satellite simulator on/off
+  loisccp,        &  ! isccp diagnostics on/off
+  lhmzphoto,      &  ! hammoz photolysis frequency coupling on/off
+  lhmzoxi,        &  ! hammoz coupling of oxidant fields on/off
+  lhmzhet,        &  ! hammoz heterogeneous chemistry coupling on/off
+  linterchem,     &  ! chemistry interacts with radiation on/off
+  lchemheat,      &  ! chemical heating on/off
+  linteram,       &  ! hammonia air mass from chemistry on/off
+  lintercp,       &  ! hammonia specific heat from chemistry on/off
+  lemissions,     &  ! switch emissions on/off
+  lchemistry,     &  ! switch chemistry calculations on/off
+  ldrydep,        &  ! switch dry deposition on/off
+  lwetdep,        &  ! switch wet deposition on/off
+  lsedimentation, &  ! switch sedimantation on/off
+  lmicrophysics,  &  ! switch microphysical processes on/off
+  lburden,        &  ! activate burden (column integral) diagnostics for mass mixing ratio tracers
+  laoa               ! age-of-air tracer submodel
+!     ------------------------------------------------------------------
+

@@ -1,0 +1,1340 @@
+\subsection[Systematic technical testing of \echambw]{Systematic technical testing of \echam}
+In many cases, scientists wish to modify the \echam{} code for their
+special applications. Before any ``production'' simulation can be
+started, the modified \echam{} version has to be tested thoroughly. 
+The purpose of this collection of korn shell scripts is to provide a
+systematic and easy to use test bed of the \echam{} code on a technical
+level. These test scripts perform very short simulations in the T31L47
+resolution over 12~time
+steps in different model configurations in order to trap errors in
+the code that cause technical malfunctions. However, this kind of tests can
+not detect any 
+scientific failure or evaluate the scientific quality of the
+results. The tests rely on a
+comparison of the output of 12~time steps using the
+{\tt cdo diff} tool. We apply the term that the results of two
+simulations are ``bit
+identical'' if the {\tt cdo diff} command does not find differences
+between all netcdf or GRIB output files of these two simulations. This means
+that the output on the standard output device of these two simulations
+is allowed to be different, e.g.~by new messages for a newly built in
+submodel facility. Futhermore, it is only checked whether the netcdf
+representation of the output of the two simulations is bit--identical
+but not whether all variables during the run of the \echam{} program have
+bit identical values in both simulations. 
+In addition to tests on one model version that will be called the
+test version, such a test version of the model can be compared to a
+reference version in the so--called update test.
+ 
+The package of scripts performing these tests can be used on various
+computers without queueing system and can be modified in such a
+way that individual namelists and input data can be provided to the
+test and reference model.
+
+The following tests and combinations of them can be performed by the
+test tool (including checkout and compilation of the model which is
+always performed): 
+
+\begin{description}
+\item[compile:] This is not a real test. The respective test version is
+  checked out from the svn version control system if necessary and
+  compiled, but no run is performed. 
+\item[single test:] In this test, the test version is (checked out,
+  compiled, and) run for 12 time
+  steps. The test is successful if the program does not crash.
+\item[debug test:] This runs the \emph{single test}, but on a single processor
+  only to allow for debugging.
+\item[parallel test:] For this test, a simulation of the test \echam{}
+  version over
+  12~time steps is performed on 1~and 2~processors, respectively, and
+  the result is compared by the {\tt cdo diff}
+  tool for every time step. The test simulation on a single processor
+  is also performed using the 
+  parallel mode of the program. It is therefore not a test for the
+  version of \echam{} without message passing interface (mpi). With this
+  kind of test, possible parallelization errors can be detected like
+  the usage of variables or fields which were not sent to all
+  processors. The result of these two simulations should be bit
+  identical. On massive parallel machines, using a lot of processors
+  distributed over several nodes further problems may occur
+  even if this test is passed. Such problems are often either subtle
+  errors in the usage of mpi or compiler problems. Supplemental tests
+  have to be performed on a later stage when the program is ported to
+  such a platform.
+\item[nproma test:] The section of the globe that is present on a
+  processor after distribution of the data onto the processors, is
+  vectorized by blocks of maximum length {\tt nproma}. This means that ---
+  even if only one processor is used --- surface fields of the earth do not
+  simply have two dimensions of the size of longitudes $n_{\rm lon}$
+  and latitudes $n_{\rm lat}$
+  but are reshaped to {\tt ngpblks} blocks of maximum length {\tt
+    nproma}. Since {\tt nproma} may not be a divisor of $n_{\rm
+    lon}\times n_{\rm lat}$, there may be a last block that contains fewer than
+  {\tt nproma} elements. This may lead to problems in the code, if
+  such non--initialized elements of the last block are
+  used accidentally. The nproma test traps such errors by using two different
+  nproma lengths of 17 and 23 which are both not divisors of $n_{\rm
+    lon}$ in the T31
+  resolution in the test simulations and comparing the results of
+  12~time steps. The results should be bit--identical.
+\item[rerun test:] \echam{} has the possibility to split up a long term
+  simulation into several runs of a shorter time period and to restart
+  the model at a certain date. The results after restart are bit
+  identical with those of a simulation without restart. There is a
+  large variety of errors associated with a failure of the restart
+  facility which can not all be trapped by this test like wrong
+  scripting of the use of transient boundary conditions, but to pass this
+  test is a minimum requirement. The base simulation starts at
+  1999-12-31, 22:00:00h, writes a
+  restart file at 23:45:00h. It stops after a total of 12~time
+  steps. The rerun files are used to restart the program and 
+  to complete the 12~times steps. The five time steps after restart
+  are then compared with the simulation that was not interrupted. The
+  results should be bit--identical.  
+\item[update test:] This test compares the results of two simulations
+  with different model versions (test version versus reference
+  version). Under certain circumstances, 
+  bit--identical results may be required in this test.
+\item[submodel off test:] The above standard tests are all run in a
+  model configuration that comprises submodels (configuration similar
+  to the CMIP--5 simulations). In some cases, one may be interested in
+  a configuration without any submodel. This test tries to run \echam{}
+  without any submodel. If two revisions are compared, the
+  results of this model configuration are also compared for the test
+  and reference 
+  revision.
+\end{description}
+
+\subsubsection{System requirements}
+
+The \echam{} test scripts can be adapted to UNIX~computers without queuing
+system. The automatic configure procedure for the model compilation
+has to work and the environment has to provide the possibility to run
+programs using message passing interface (mpi). The initial and
+boundary condition data of \echam{} have to be 
+directly accessible in some directory. If there is no direct access to
+the version control system of echam (svn), individual model versions
+on the computer may be used in the 
+tests, but the path name of the location of these model versions has to
+follow the below described conventions.
+
+\subsubsection{Description of the scripts}\label{sususecdescr}
+
+In figure~\ref{figflow}, we present the flow chart of the scripts
+performing the test simulations of \echam{} and the comparison of the
+results. The scripts need some additional variables that are written
+to files by the master script {\tt test\_echam6.sh} and read from these
+files by the dependent scripts. The variables can be set in the master
+script as described in Tab.~\ref{tabvar1}. The corresponding
+files must not be modified by hand. The file {\tt
+  c.dat} contains the module name of the C compiler, the file {\tt
+  fortran.dat} contains the module name of the fortran compiler, the
+file {\tt mpirun.dat} contains the absolute path and name of the
+command to start programs using message passing interface (mpi), the
+file {\tt outfiletype.dat} contains a number associated with the type
+of the output files (1~for GRIB format and 2~for netcdf format).
+
+\begin{figure}[h]
+\tikzstyle{blockred} = [rectangle, draw, fill=red!20,
+    text width=12em, text centered, minimum height=2em]
+\tikzstyle{blockgreen} = [rectangle, draw, fill=green!20,
+    text width=12em, text centered, minimum height=2em]
+\tikzstyle{blockblue} = [rectangle, draw, fill=blue!20,
+    text width=12em, text centered, minimum height=2em]
+\tikzstyle{block} = [rectangle, draw,
+    text width=13em, text centered, minimum height=2em]
+\tikzstyle{joint} = [draw, ]
+\tikzstyle{line} = [draw, -]
+\begin{tikzpicture}[node distance = 2cm, auto]
+\node [blockred] (init) {\tt test\_echam6.sh};
+\node [joint, below of=init] (j0) {};
+\node [block, right of=j0, node distance=3.3cm] (dir) {\tt test\_checkdirectories.sh};
+\node [joint, below of=j0] (j1) {};
+\node [block, right of=j1, node distance=3.3cm] (comp) {\tt compile\_echam6.sh};
+\node [joint, below of=j1] (j2) {};
+\node [blockblue, right of=j2, node distance=3cm] (mode) {\tt test\_{\it mode}.sh};
+\node [joint, below of=mode] (j21) {} ;
+\node [block, right of=j21, node distance=3.3cm] (run) {\tt
+  test\_echam6\_run.sh};
+\node [joint, below of=run] (j31) {};
+\node [blockgreen, right of=j31, node distance=5cm, text width=20em] (links) {\tt
+  test\_echam6\_$\left\{\stackrel{\displaystyle\rm
+      reference}{\displaystyle\rm test}\right\}$\_links.sh};
+\node [block, below of=links] (link) {\tt link.sh};
+\node [joint, below of=j31, node distance=4cm] (j32) {};
+\node [blockgreen, right of=j32, node distance=5cm, text width=20em] (namelists) {\tt
+  test\_echam6\_$\left\{\stackrel{\displaystyle\rm 
+      reference}{\displaystyle\rm test}\right\}$\_namelists.sh};
+\node [joint, below of=j32] (j33) {};
+\node [blockgreen, right of=j33, node distance=5cm] (mpi) {\tt mpirun.dat};
+\node [joint, below of=j21, node distance=10cm] (j22) {};
+\node [block, right of=j22, node distance=3.3cm] (diff) {\tt test\_diff.sh};
+\path [line] (init)--(j0);
+\path [line] (j0)--(dir);
+\path [line] (j0)--(j1);
+\path [line] (j1)--(comp);
+\path [line] (j1)--(j2);
+\path [line] (j2)--(mode);
+\path [line] (mode)--(j21);
+\path [line] (j21)--(j22);
+\path [line] (j21)--(run);
+\path [line] (run)--(j31);
+\path [line] (j31)--(links);
+\path [line] (links)--(link);
+\path [line] (j31)--(j32);
+\path [line] (j32)--(namelists);
+\path [line] (j32)--(j33);
+\path [line] (j33)--(mpi);
+\path [line] (j22)--(diff);
+\end{tikzpicture}
+\caption{Flow chart of test scripts. 
+  The main script in the red box has to be modified by the user.
+  The scripts in the green boxes can be modified in order to use
+  different model settings than the standard ones for test or
+  reference model, respectively.
+  The script in the blue box
+  depends on the test mode and is one of {\tt\it mode}$=${\tt single},
+  {\tt
+    parallel}, {\tt nproma}, {\tt rerun}, {\tt submodeloff}, {\tt
+    parallelnproma}, {\tt 
+    parallelnpromarerun}, {\tt parallelnpromarerunsubmodelloff}, 
+    {\tt update}, {\tt
+    all}.}\label{figflow}   
+\end{figure}
+
+\begin{description}
+\item[test\_echam6.sh:] This script contains a definition part
+  where all the path names and the model version for the test and
+  reference model must be set. It is also the place at which the key
+  word for the kind of test is defined. It calls the scripts for
+  downloading the respective model versions from svn if they are not
+  yet present on your computer and calls the compile and test run scripts.
+\item[test\_directories.sh:] Checks the existance of the directories
+  and the svn URL of the test and reference model. You may enter your
+  special settings on the command 
+  line if one of the items is not found. If it is found, it is used
+  without further notice. Only the relevant items are checked. 
+\item[compile\_echam6.sh:] This script downloads the respective
+  model version from the revision administration system svn if it is
+  not yet present on your computer and compiles the model. Compilation
+  can be forced. Note that the compiler options depend
+  on the settings in the input scripts of the configure procedure
+  and may be different from revision to revision. Different compiler
+  options may lead to numerically different results although the
+  algorithms in the code are identical!
+\item[test\_{\textsl{mode}}.sh:] This family of scripts performs the various
+  simulations and the comparison of the results. The {\tt\it mode} is
+  one of {\tt single}, {\tt parallel}, {\tt nproma}, {\tt rerun}, {\tt update},
+  {\tt submodeloff},
+  {\tt parallelnproma}, {\tt 
+    parallelnpromarerun}, {\tt parallelnpromarerunsubmodeloff}, {\tt all}.
+\item[test\_echam6\_run.sh:] General run script for echam. 
+\item[test\_echam6\_\{test,reference\}\_links.sh:] Script that
+  provides the links to all input and boundary condition files needed
+  for simulations with \echam. In the standard version, the two scripts
+  are identical but allow the user to apply different files for the
+  reference and test model, respectively.
+\item[test\_echam6\_\{test,reference\}\_namelists.sh:] These scripts
+  generate the namelists for the reference and test model
+  separately. In the standard version, these two scripts are
+  identical. They are useful if the introduction of a new submodel
+  requires a namelist for the test model that is different from the
+  namelist used for the reference model.
+\item[test\_diff.sh:] This script performs a comparison of all
+  output files that are common to two test simulations. It also gives
+  a list of outputfiles that are not common to the two test
+  simulations. If there are no results written into an output file
+  during the 12~time steps of the test simulations, the comparison of
+  the files with the {\tt cdo diff} command leads to an error message
+  that the respective file structure is unsupported. 
+\end{description}
+
+\subsubsection{Usage}
+
+The scripts should be copied into a directory
+that is different form the original \echam{} directory so that
+you can savely change them without overwriting the original.
+The files {\tt $\ast$.dat} must not be changed but contain values of
+``global'' variables to all scripts. They are described in
+section~\ref{sususecdescr}. 
+The variables
+that have to be modified in {\tt test\_echam6.sh} are listed in
+table~\ref{tabvar1}. 
+Note that the revision specific
+  path of the \echam{} 
+  model will be automatically composed as {\tt
+    \$\{REF\_DIR\}/\$\{REF\_BRANCH\}\_rev\$\{REF\_REVISION\}} for the reference
+  model and as {\tt \$\{TEST\_DIR\}/\$\{TEST\_BRANCH\}\_rev\$\{TEST\_REVISION\}}
+  for the test model, respectively. Inside these directories, the
+  echam model sources are expected to be in a revision independent
+  directory {\tt \$\{REF\_BRANCH\}} and {\tt \$\{TEST\_BRANCH\}},
+  respectively.
+The simulation results will be in directories {\tt
+  \$\{REF\_ODIR\}/0000nrev\$\{REF\_REVISION\}} and {\tt
+  \$\{TEST\_ODIR\}/0000nrev\$\{TEST\_REVISION\}} for the reference and
+test model, respectively. The number {\tt n} is the number of the
+experiment. If in such a directory, an outputfile $\ast${\tt .err}
+exists, the test tool assumes that the simulation already exists and
+does not perform a new simulation. The results are not removed
+once a test is performed in order to avoid the repetition of the same
+test simulation over and over again (e.g.~for the reference model). If
+experiments have to be repeated, the corresponding directory or at
+least the $\ast${\tt .err} file inside this directory has to be
+removed by hand.
+
+The test is then started by typing {\tt ./test\_echam6.sh} in the directory
+of the test scripts. 
+
+The test script {\tt test\_echam6.sh} can be started by adding three
+arguments {\tt MODE} {\tt TEST\_REVISION} {\tt REF\_REVISION} giving
+the key word for the test mode, the revision number of the test model
+and the revision number of the reference model, respectively. It is
+possible to omit {\tt REF\_REVISION} or both {\tt TEST\_REVISION} and
+{\tt REF\_REVISION}.
+
+The links to input and boundary condition data and the input namelists
+for the model revisions can be modified for the reference and the test
+model individually by editing the scripts {\tt
+  test\_echam6\_\{reference,test\}\_links.sh} and {\tt
+  test\_echam6\_\{reference,test\}\_namelists.sh}, respectively. This
+makes this collection of test scripts rather flexible: It may be used
+even for models containing extensions of \echam{} like \echam-HAM or
+\echam-HAMMOZ. 
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}p{10cm}}
+\hline\hline
+\caption[Variables of {\tt test\_echam6.sh}]{Variables of {\tt
+    test\_echam6.sh} that have to be modified 
+  by the user of the test scripts. The variables are listed in the
+  order of their appearance in {\tt test\_echam6.sh}. Note that the
+  revision specific 
+  path of the \echam{} 
+  model will be automatically composed as {\tt
+    \$\{REF\_DIR\}/\$\{REF\_BRANCH\}\_\$\{REF\_REVISION\}} for the reference
+  model and as {\tt \$\{TEST\_DIR\}/\$\{TEST\_BRANCH\}\_\$\{TEST\_REVISION\}}
+  for the test model, respectively.}\\\hline\label{tabvar1}
+\endfirsthead
+\caption[]{{\tt test\_echam6.sh} --- continued}\\\hline
+\endhead
+\hline\multicolumn{2}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{2}{r}{end of table}
+\endlastfoot
+Variable & Explanation \\\hline
+{\tt SCR\_DIR} & Absolute path to diretory where test scripts are
+located. \\
+{\tt OUTFILETYPE} & File type of output files. Set to 1 for GRIB
+format output files and to 2 for netcdf output files. It is
+recommended to test \echam{} with both output formats.\\
+{\tt FORTRANCOMPILER} & If a module has to be loaded in order to use
+the correct fortran compiler version, give the fortran
+compiler module here. \\
+{\tt CCOMPILER} & If a module has to be loaded in order to use the
+correct C compiler version, give the C compiler module here.\\
+{\tt MPI\_MODULE} & If a module has to be loaded in order to use the
+Message Passing Interface (MPI) runtime environment, specify the module here.\\
+{\tt MPIRUN} & command specification to run a program using MPI.
+When running, the script will replace \verb|%n| and \verb|%x| by the number of
+processes and the name of the executable, respectively.\\
+{\tt TEST\_DIR}, {\tt REF\_DIR} & Absolute base path to directory containing
+model versions of test and reference model, respectively. Even if
+the model source code is loaded from svn, this directory has to exist.\\
+{\tt TEST\_BRANCH}, {\tt REF\_BRANCH} & name of branch of test and reference
+model in the revision
+control system svn a revision of which has to be tested, respectively. \\
+{\tt TEST\_REVISION}, {\tt REF\_REVISION} & revision number of
+test and reference model revision, respectively. \\
+{\tt TEST\_SVN}, {\tt REF\_SVN} & URL address of test and reference model
+branch in svn system, respectively. Can be omitted if model source
+code is on local disk. \\
+{\tt TEST\_ODIR}, {\tt REF\_ODIR} & Absolute path where test scripts
+can open directories for simulation results of test and reference
+model, respectively. This directory has to exist.\\
+{\tt LCOMP} & {\tt LCOMP=.true.} forces compilation, with {\tt
+  LCOMP=.false.} compilation is done only if executable is not
+existing.\\
+{\tt MODE} & One of {\tt compile}, {\tt single}, {\tt debug}, {\tt parallel},
+{\tt nproma}, {\tt rerun}, {\tt update}, {\tt submodeloff}, {\tt
+  parallelnproma}, {\tt parallelnpromarerun}, {\tt
+  parallelnpromarerunsubmodeloff}, {\tt all} in order to perform the
+corresponding tests. \\
+\end{longtable}
+
+If some step or test was not successful, more information about the
+possible error is given in
+the protocol files that are written for each step.
+If the model was checked out from the svn system, there is a protocol
+file {\tt checkout.log} of the checkout procedure in {\tt
+    \$\{REF\_DIR\}/\$\{REF\_BRANCH\}\_\$\{REF\_REVISION\}} for the reference
+  model and {\tt
+    \$\{TEST\_DIR\}/\$\{TEST\_BRANCH\}\_\$\{TEST\_REVISION\}} for the
+  test model, respectively. 
+The configure procedure and compilation is protocolled inside the {\tt
+  \$\{BRANCH\}} directory of the aforementioned paths in the files
+{\tt config.log} and {\tt compile.log}, respectively.
+Information about each simulation can be found inside the directories
+{\tt \$\{REF\_ODIR\}/0000nrev\$\{REF\_REVISION\}} and {\tt
+  \$\{TEST\_ODIR\/0000nrev\$\{TEST\_REVISION\}}  
+with {\tt n} being the number of the test case indicated during the test
+run procedure on the screen, respectively. In these
+directories, the standard and standard error output of the \echam{}
+program can be found in the {\tt 0000nrev\$\{REF\_REVISION\}.\{log,err\}}
+and the {\tt 0000nrev\$\{TEST\_REVISION\}.\{log,err\}} files,
+respectively. The detailed result of the cdo comparison for each
+output file is also in these output directories in respective files
+{\tt diff$\ast$.dat}. On the screen, only the most important steps and
+results are displayed. A certain test is successfully passed if the
+comparison for each file
+results in the message ``0 of $r$ records differ'' where $r$ is the
+number of records.
+
+
+\subsection[Automatic generation of run scripts for \echambw]{Automatic generation of run scripts for \echam}
+\label{runscripts:generation}
+
+The \emph{mkexp} tool allows to automatically generate run scripts for \echam{}
+experiments. It uses a set of experiment templates to generate these scripts.
+
+To set up an experiment, you have to write a simple configuration file
+containing experiment specific information like an experiment type to choose
+the appropriate templates, and possibly model settings that override the
+default set of options. All information needed to run \echam{} is then written
+to the run scripts and may be adjusted as needed for more specialized
+experiments.
+
+By default, templates and examples for AMIP and CMIP5's SSTClim style
+experiments are provided, for two spatial resolutions, LR and MR.
+
+\begin{quote}
+  \colorbox{dgray}{\parbox{\linewidth}{Some part of the input below is variable
+      and marked by \code{\tvar{angle\_brackets}}. Remember to replace these
+      markers by actual experiment name, project name, version tag, etc.\ before
+      trying any of the examples.}}
+\end{quote}
+
+\subsubsection{Re-create a reference experiment on \blizzard}
+\label{runscripts:generation:reference_run}
+
+After compiling \echam{} on \blizzard{} you may check the model output
+against the reference data provided for the release. To allow direct comparison
+of data, it is essential to load the exact compiler version given in section
+\ref{seccompiling} before compiling.
+
+\begin{enumerate}
+
+\item 
+
+From the \verb|echam-<version_tag>| directory (see section \ref{seccompiling}),
+change into the \code{run} directory, load the Python environment and set up
+the reference experiment:
+%
+\begin{quote}
+\begin{verbatim}
+cd run
+module add PYTHON
+../util/mkexp/mkexp examples/amiptest.config
+\end{verbatim}
+\end{quote}
+
+This creates directories for run scripts and output data, and prints their
+names. It also prints the 'data directory' needed in step 4.
+
+\item
+
+Change to the script directory created by step 1, and submit your experiment
+\texttt{amiptest} to the execution queue:
+%
+\begin{quote}
+\begin{verbatim}
+cd ../experiments/amiptest/scripts
+llsubmit amiptest.run_start
+\end{verbatim}
+\end{quote}
+
+\item
+
+To check if your experiment is running, you may use:
+%
+\begin{quote}
+\begin{verbatim}
+llqdetail
+\end{verbatim}
+\end{quote}
+
+The Status column shows e.g. \verb|I| for waiting (Idle), \verb|R| for Running,
+or \verb|NQ| for Not Queued. The latter may happen if a user submits too many
+jobs (current limit is 10). If a run stops due to errors, you will get a
+notification by email.
+
+\item 
+
+When the experiment has finished, it will disappear from the \verb|llqdetail|
+list. Now go to the data directory as printed in step 1:
+%
+\begin{quote}
+\begin{verbatim}
+cd <data_directory>
+\end{verbatim}
+\end{quote}
+
+Check your output files against the reference data listed in
+\url{https://code.zmaw.de/projects/echam/wiki/ECHAM6_reference_experiments}
+using \verb|cdo diff|.
+
+\end{enumerate}
+
+\subsubsection{Getting started: create experiment setups}
+
+This section gives instructions for three different computer systems that are
+used at the \mpimet: \blizzard, \thunder, and \emph{CIS desktops}.
+
+For any system, start from the directory where you have placed
+the \echam{} source code - as described in section \ref{seccompiling} - and
+change into the \code{run} directory:
+\begin{quote}
+\begin{verbatim}
+cd run
+\end{verbatim}
+\end{quote}
+
+By convention, experiments are named using a three-letter acronym plus a unique
+4-digit experiment number (e.g. \verb|jus0001|). For \mpimet{} users, acronyms
+are defined in
+\url{https://code.zmaw.de/projects/mpi-intern/wiki/List_of_Experimenter_IDs}.
+
+\paragraph*{Roadmap for \blizzard}
+\label{runscripts:generation:blizzard}
+
+\begin{enumerate}
+
+\item
+
+Make sure that the Python environment is loaded:
+\begin{quote}
+\begin{verbatim}
+module add PYTHON
+\end{verbatim}
+\end{quote}
+
+\item
+
+Create a copy of the \texttt{amiptest.config} example:
+%
+\begin{quote}
+\begin{verbatim}
+cp examples/amiptest.config <experiment_name>.config
+\end{verbatim}
+\end{quote}
+
+\item
+
+Edit this file and complete the configuration as described in
+\ref{runscripts:generation:example_configuration}.
+
+\item
+
+Create scripts and experiment directories:
+\begin{quote}
+\begin{verbatim}
+../util/mkexp/mkexp <experiment_name>.config
+\end{verbatim}
+\end{quote}
+This prints the 'script directory' and 'data directory' needed in later steps.
+
+\item
+
+Change to the script directory written by the previous step:
+\begin{quote}
+\begin{verbatim}
+cd <script_directory>
+\end{verbatim}
+\end{quote}
+
+\item
+
+Submit the first experiment job (see
+\ref{runscripts:generation:generated_scripts} for the different options):
+%
+\begin{quote}
+\begin{verbatim}
+llsubmit <experiment_name>.run_start ### or <experiment_name>.run_init
+\end{verbatim}
+\end{quote}
+
+\item 
+
+To check the status of your jobs, use one of
+%
+\begin{quote}
+\begin{verbatim}
+llqdetail
+llq -u $USER
+\end{verbatim}
+\end{quote}
+
+\end{enumerate}
+
+\paragraph*{Roadmap for \thunder}
+\label{runscripts:generation:thunder}
+
+\begin{enumerate}
+
+\item
+
+Make sure that the Python and MPI environments are loaded:
+\begin{quote}
+\begin{verbatim}
+module add python mvapich2/1.9b-static-intel12
+\end{verbatim}
+\end{quote}
+
+\item
+
+Create a copy of the \texttt{amiptest.config} example:
+%
+\begin{quote}
+\begin{verbatim}
+cp examples/amiptest.config <experiment_name>.config
+\end{verbatim}
+\end{quote}
+
+\item
+
+Edit this file and complete the configuration as described in
+\ref{runscripts:generation:example_configuration}.
+
+\item
+
+Create scripts and experiment directories:
+\begin{quote}
+\begin{verbatim}
+../util/mkexp/mkexp <experiment_name>.config
+\end{verbatim}
+\end{quote}
+This prints the 'script directory' and 'data directory' needed in later steps.
+
+\item
+
+Change to the script directory written by the previous step:
+\begin{quote}
+\begin{verbatim}
+cd <script_directory>
+\end{verbatim}
+\end{quote}
+
+\item
+
+Submit the first experiment job (see
+\ref{runscripts:generation:generated_scripts} for the different options):
+%
+\begin{quote}
+\begin{verbatim}
+sbatch <experiment_name>.run_start ### or <experiment_name>.run_init
+\end{verbatim}
+\end{quote}
+
+\item 
+
+To check the status of your jobs, use:
+%
+\begin{quote}
+\begin{verbatim}
+squeue -u $USER ### Add -l for more details
+\end{verbatim}
+\end{quote}
+
+\end{enumerate}
+
+
+\paragraph*{Roadmap for \emph{CIS desktops}}
+\label{runscripts:generation:desktops}
+
+\begin{enumerate}
+
+\item
+
+Make sure that the Python and MPI environments are loaded:
+\begin{quote}
+\begin{verbatim}
+module add python mpich2
+\end{verbatim}
+\end{quote}
+
+\item
+
+Create a copy of the \texttt{amiptest.config} example:
+%
+\begin{quote}
+\begin{verbatim}
+cp examples/amiptest.config <experiment_name>.config
+\end{verbatim}
+\end{quote}
+
+\item
+
+Edit this file and complete the configuration as described in
+\ref{runscripts:generation:example_configuration}.
+
+\item
+
+Create scripts and experiment directories:
+\begin{quote}
+\begin{verbatim}
+../util/mkexp/mkexp <experiment_name>.config
+\end{verbatim}
+\end{quote}
+This prints the 'script directory' and 'data directory' needed in later steps.
+
+\item
+
+Change to the script directory written by the previous step:
+\begin{quote}
+\begin{verbatim}
+cd <script_directory>
+\end{verbatim}
+\end{quote}
+
+\item
+
+Run the first experiment job in background (see
+\ref{runscripts:generation:generated_scripts} for the different options):
+%
+\begin{quote}
+\begin{verbatim}
+( ./<experiment_name>.run_start & ) ### or <experiment_name>.run_init
+\end{verbatim}
+\end{quote}
+
+\item 
+
+To check the status of your jobs, use:
+%
+\begin{quote}
+\begin{verbatim}
+ps -fu $USER
+\end{verbatim}
+\end{quote}
+
+\end{enumerate}
+
+\subsubsection{Description of generated scripts}
+\label{runscripts:generation:generated_scripts}
+
+After running \code{mkexp}, the script directory contains these files:
+%
+\begin{description}
+\item[{\texttt{README}}]\leavevmode\\
+contains the experiment description you entered as comment for the config file
+
+\item[\code{\tvar{experiment\_name}.run\_start}
+      (submit to start from another experiment)]\leavevmode\\
+Restart script. Provides restart files from a previous experiment, and calls
+\code{\tvar{experiment\_name}.run} for the first model year.
+
+\item[\code{\tvar{experiment\_name}.run\_init}
+      (submit to run from initial conditions)]\leavevmode\\
+Initialization script. Performs an initial run for the first model year. Calls
+\code{\tvar{experiment\_name}.job*} for post-processing, and
+\code{\tvar{experiment\_name}.run} for subsequent model years.
+
+\item[\code{\tvar{experiment\_name}.run}]\leavevmode\\ 
+Run script, called by \code{\tvar{experiment\_name}.run\_start} or
+\code{\tvar{experiment\_name}.run\_init}. Calls
+\code{\tvar{experiment\_name}.job*} for post-processing, and itself for
+subsequent model years.
+
+\item[\code{\tvar{experiment\_name}.job1}]\leavevmode\\ 
+Packs model restart files into an archive file. Called by
+\code{\tvar{experiment\_name}.run} and
+\code{\tvar{experiment\_name}.run\_init}.
+
+\item[\code{\tvar{experiment\_name}.job2}]\leavevmode\\ 
+Post-processing of model output files. This creates the so-called ATM, BOT, and
+LOG files used for \echam{} standard visualization. Called by
+\code{\tvar{experiment\_name}.run} and
+\code{\tvar{experiment\_name}.run\_init}.
+
+\item[\code{\tvar{experiment\_name}.job3}]\leavevmode\\
+Concatenates model output files by year. Files are moved to the data
+directory if this is different from the model working directory. Called by
+\code{\tvar{experiment\_name}.job2}.
+
+\item[\code{\tvar{experiment\_name}.plot, \tvar{experiment\_name}.plot\_diff}]
+\leavevmode\\
+Create plots and tables for evaluation of results. See section
+\ref{postprocessing:quickplots} for details. These files are not run
+automatically.
+
+\end{description}
+
+
+\subsubsection{Model output and log files}
+
+All jobs redirect their standard output and error to log files, \verb|<experiment_name>_run*_<process_number>.log|, in the script directory.
+
+Output data files are written to the data directory as printed in step 4 above.
+
+\begin{quote}\colorbox{dgray}{\parbox{\linewidth}{ 
+  Due to incompatible handling of return codes, \thunder{} complains even
+  if the run job completes successfully. The message:
+
+  \begin{quote}{\ttfamily \raggedright \noindent
+==========================================================\\
+=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES\\
+=   EXIT CODE: 127\\
+=   CLEANING UP REMAINING PROCESSES\\
+=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES\\
+==========================================================
+  }\end{quote}
+
+  may safely be ignored.
+}}\end{quote}
+
+\subsubsection{Example configuration details}
+\label{runscripts:generation:example_configuration}
+
+The \texttt{examples} sub-directory currently contains only one experiment
+configuration, \code{amiptest.config}.
+It performs an AMIP type simulation with the LR model for one year, used for
+checking the model against reference data (see
+\ref{runscripts:generation:reference_run} above). Since \echam{} 6.2, by default
+only monthly mean output is created, without the formerly used 6-hourly data.
+The selection of variables reflects the standard selection that goes into the
+ATM, BOT and LOG files
+
+This configuration contains some basic settings that you will need for most of
+your own experiments:
+
+\begin{enumerate}
+
+\item
+The header comment text (starting with \texttt{\#}) will be used as experiment
+description. When writing your own files, take care to describe important
+characteristics of your experiment here.
+
+\item
+The name of the configuration file determines the experiment identifier. For
+\verb|jus0001.config| the experiment identifier is \verb|jus0001|. Setting
+\verb|EXP_ID| overrides the file name:
+%
+\begin{quote}
+\begin{verbatim}
+EXP_ID = jus0001 ### ID is 'jus0001', regardless of file name
+\end{verbatim}
+\end{quote}
+
+Make sure to choose a unique identifier for each experiment.
+
+\item
+The experiment type \texttt{EXP\_TYPE} may be set to one of the standard types
+which define the AMIP and SSTClimatology atmosphere model experiments, with the
+LR or MR model, respectively (see table
+\ref{runscripts:generation:type_table}):
+%
+\begin{quote}
+\begin{verbatim}
+amip-LR
+amip-MR
+sstClim-LR
+sstClim-MR
+\end{verbatim}
+\end{quote}
+
+\item
+\texttt{ENVIRONMENT} defines the compute host settings. May currently be set to
+\texttt{blizzard}, \texttt{thunder}, or \texttt{DEFAULT} (for CIS desktops).
+
+\item 
+For running your experiment on \thunder, compute and disk accounting must
+be set to your project's name. On \blizzard{} this may also be used; if
+unset it defaults to your standard project as set in \verb|$HOME/.acct|:
+%
+\begin{quote}
+\begin{verbatim}
+ACCOUNT = <project_name>
+\end{verbatim}
+\end{quote}
+
+\item
+Set the model sub-directory:
+%
+\begin{quote}
+\begin{verbatim}
+MODEL_SUBDIR = echam-<version_tag>
+\end{verbatim}
+\end{quote}
+
+Model source and binaries, experiment scripts, working files, and
+post-processed data may reside in different parts of the file system. By
+default, in each of these locations a subdirectory \texttt{MODEL\_SUBDIR} is
+expected for the model files, or will be created otherwise.
+
+The standard locations depend on your host environment; they're usually one of
+\verb|$HOME|, \verb|/work/<project_name>/$USER|,
+\verb|/scratch/<user_prefix>/$USER|, or
+\verb|/scratch/mpi/<project_name>/$USER|, where \verb|HOME| and \verb|USER|
+refer to the UNIX standard environment variables.
+
+For details, refer to section \ref{runscripts:generation:directories}.
+
+\item
+The \verb|[namelists]| section contains all namelist settings, with subsections
+for each namelist file name, e.g. \verb|[[namelist.echam]]|. Namelist groups
+are set with sub-subsections like \verb|[[[runctl]]]|. Use lower case for
+namelist groups and their variables. See section \ref{secnamelist} for details.
+
+\end{enumerate}
+
+
+\subsubsection{Customization of experiment setups}
+\label{runscripts:generation:customization}
+
+\paragraph*{Using different directories}
+\label{runscripts:generation:directories}
+
+\emph{mkexp} may store model code, scripts, working files, and
+output data in different directories. Though they all may be set manually,
+most of the time you will only want to change the base directories, e.g. from
+\texttt{/work} to \texttt{/scratch} when using \blizzard{} (see
+\ref{runscripts:generation:blizzard_dirs}). For this, there is a number of
+variables that allows using the same structure within all four directories.
+They are pre-set as:
+%
+\begin{quote}
+\begin{verbatim}
+MODEL_DIR = $MODEL_ROOT/$MODEL_SUBDIR
+SCRIPT_DIR = $SCRIPT_ROOT/$MODEL_SUBDIR/$EXPERIMENTS_SUBDIR/$EXP_ID/
+                                                             $SCRIPTS_SUBDIR
+DATA_DIR = $DATA_ROOT/$MODEL_SUBDIR/$EXPERIMENTS_SUBDIR/$EXP_ID/$DATA_SUBDIR
+WORK_DIR = $WORK_ROOT/$MODEL_SUBDIR/$EXPERIMENTS_SUBDIR/$EXP_ID/$WORK_SUBDIR
+\end{verbatim}
+\end{quote}
+
+The default settings are:
+%
+\begin{quote}
+\begin{verbatim}
+MODEL_ROOT = /scratch/mpi/$ACCOUNT/$USER for thunder,
+             $HOME for blizzard and others
+SCRIPT_ROOT = $MODEL_ROOT
+DATA_ROOT = /work/$ACCOUNT/$USER for blizzard,
+            /scratch/mpi/$ACCOUNT/$USER for thunder, and
+            $MODEL_ROOT for others
+WORK_ROOT = $SCRATCH for blizzard,
+            $DATA_ROOT for thunder and others
+
+MODEL_SUBDIR = echam-<version_tag>
+EXPERIMENTS_SUBDIR = experiments
+WORK_SUBDIR = ### empty string
+\end{verbatim}
+\end{quote}
+
+Sub-directories may be omitted by setting them to an empty string (see
+\texttt{WORK\_SUBDIR}). \texttt{HOME} and \texttt{USER} refer to the UNIX
+standard environment variables, and may be used in the configuration file like
+any other variable.
+
+
+\paragraph*{Change global experiment settings}
+
+Besides directory definitions, the top section of a configuration may contain
+more pre-defined variables controlling the experiment. The examples below show
+their names and respective default values.
+
+\begin{description}
+  
+\item[\code{ECHAM\_EXE = echam}]\leavevmode\\ 
+  Name of model executable
+
+\item[\code{POST\_FILETAG = echamm}]\leavevmode\\ 
+  Name of output stream for post-processing
+
+\item[{\parbox[b]{\linewidth}{
+  \code{PLOT\_START\_YEAR}\\
+  \code{PLOT\_END\_YEAR}
+}}]
+  Years covered by the plot scripts; values are given as integers
+
+\item[\code{PARENT\_EXP\_ID}]\leavevmode\\ 
+  Identifier of experiment from which restart files are taken
+
+\end{description}
+
+
+\paragraph*{Change job resource settings}
+
+Variables defining job resources go into section:
+
+\begin{quote}
+\begin{verbatim}
+[jobs]
+  [[<job_id>]]
+\end{verbatim}
+\end{quote}
+
+where \code{\tvar{job\_id}} may be a comma separated list of job identifiers,
+e.g. \code{run, run\_start, run\_init}.
+
+\begin{description}
+
+\item[\code{time\_limit}]\leavevmode\\
+  Maximum run time for the given jobs; value is given as string (hh:mm:ss)
+
+\item[{\parbox[b]{\linewidth}{
+  \code{nodes}\\
+  \code{tasks\_per\_node}\\
+  \code{threads\_per\_task}
+}}]
+  Process distribution on the compute host; values are given as integers
+
+\item[\code{tasks}]\leavevmode\\
+  Usually the number of processes is computed as
+  $\code{nodes}\times\code{tasks\_per\_node}$. For testing reasons or
+  over-committing, this number may also be set explicitly.
+
+\end{description}
+
+\paragraph*{Change namelist settings}
+
+Within the \texttt{{[}namelists{]}} section you may modify any namelist
+settings that are defined for \echam{}.
+
+For example, to enable writing of 6 hourly output as used for AMIP simulations,
+locate or add the \code{namelists/namelist.echam/runctl} section and add the
+appropriate settings. In our \code{amiptest.config} example this would look
+like:
+
+\begin{quote}
+\begin{verbatim}
+[namelists]
+
+  [[namelist.echam]]
+
+    [[[runctl]]]
+      dt_stop = 1979, 12, 31, 23, 50, 00
+
+      # Additional settings to enable 6 hourly output
+      default_output = true
+      putdata = 6, hours, first, 0
+\end{verbatim}
+\end{quote}
+
+Empty lines and text after \code{\#} are treated as a comment and ignored.
+
+To change the parallelization of ECHAM, use:
+
+\begin{quote}
+\begin{verbatim}
+[[[parctl]]]
+  nproca = 16
+  nprocb = 8
+
+[[[runctl]]]
+  nproma = 72
+\end{verbatim}
+\end{quote}
+
+Note that in \emph{mkexp} all namelist variables are lower-case. When setting
+the variables, quotes around strings and periods around truth values may be
+omitted. As in Fortran namelists, truth values may also be set using \texttt{t}
+or \texttt{f}. Lists of values use comma as separator.
+
+Thus, to perform an initialisation run with a non-standard output interval and
+with explicit stratosphere, use:
+%
+\begin{quote}
+\begin{verbatim}
+[[[runctl]]]
+  lresume = false
+  lmidatm = t
+  putdata = 1, days, last, 0
+\end{verbatim}
+\end{quote}
+
+which will then translate into the Fortran namelist:
+%
+\begin{quote}
+\begin{verbatim}
+&runctl
+    lresume = .false.
+    lmidatm = .true.
+    putdata = 1, 'days', 'last', 0
+/
+\end{verbatim}
+\end{quote}
+
+\emph{mkexp} currently does not impose any restrictions on namelist file names
+or group names. When you need to use additional namelist files or groups, you
+may directly set them in the configuration file, without any further
+programming.
+
+Some namelist groups like \verb|mvstreamctl| may be used repeatedly. For each
+group, a unique identifier must be added to the group name, separated from
+the group name by at least one space character:
+%
+\begin{quote}
+\begin{verbatim}
+[[[mvstreamctl spm]]]
+  ...
+
+[[[mvstreamctl glm]]]
+  ...
+
+[[[mvstreamctl g3bm]]]
+  ...
+\end{verbatim}
+\end{quote}
+
+\paragraph*{Suppress standard namelist groups%
+  \label{suppress-standard-namelist-groups}%
+}
+
+Sometimes you need to switch off optional namelist groups that are defined by
+default. For instance, to remove all \texttt{mvstreamctl} output from
+\texttt{amip-LR}, use:
+%
+\begin{quote}
+\begin{verbatim}
+[[namelist.echam]]
+  remove = mvstreamctl spm, mvstreamctl glm, mvstreamctl g3bm
+\end{verbatim}
+\end{quote}
+
+or:
+%
+\begin{quote}
+\begin{verbatim}
+[[namelist.echam]]
+  remove = mvstreamctl *m
+\end{verbatim}
+\end{quote}
+
+The latter disables \emph{all} namelist groups that begin with 'mvstreamctl '
+and end in 'm'. Note that the \texttt{remove} list is applied to \emph{all}
+groups in \texttt{namelist.echam}, so use with care.
+
+\begin{quote}\colorbox{dgray}{\parbox{\linewidth}{ 
+  Note that when removing all \code{mvstreamctl} output, you need to configure
+  postprocessing to use 6h output by adding
+  \begin{quote}
+    \code{POST\_FILETAG = echam}
+  \end{quote}
+  to the top section of your configuration. When starting from a restart
+  file, you also have to give the correct parent experiment, e.g.::
+  \begin{quote}
+    \code{PARENT\_EXP\_ID = mbe0495}
+  \end{quote}
+}}\end{quote}
+
+
+\paragraph*{Special expressions%
+  \label{special-expressions}%
+}
+
+\emph{mkexp} supports the usual arithmetic expressions in the config file:
+%
+\begin{quote}
+\begin{verbatim}
+hours = 6
+seconds = eval($hours * 3600)
+\end{verbatim}
+\end{quote}
+
+evaluates to
+%
+\begin{quote}
+\begin{verbatim}
+hours = 6
+seconds = 21600
+\end{verbatim}
+\end{quote}
+
+Date strings -- as used in many tools, e.g. \verb|cdo| -- may be split into
+a date \emph{list} as used in namelists for \echam:
+%
+\begin{quote}
+\begin{verbatim}
+date = 2013-12-11 12:34:56
+date_list = split_date($date)
+\end{verbatim}
+\end{quote}
+
+is equivalent to
+%
+\begin{quote}
+\begin{verbatim}
+date = 2013-12-11 12:34:56
+date_list = 2013, 12, 11, 12, 34, 56
+\end{verbatim}
+\end{quote}
+
+
+\subsubsection{Extending the standard configuration}
+
+
+\paragraph*{Standard experiment types%
+  \label{standard-experiment-types}%
+}
+
+Standard experiment setups are stored in the \texttt{standard\_experiments}
+sub-directory. The experiment type defines a certain \emph{kind} of experiment,
+e.g. \code{amip} or \code{sstClim}, and an experiment \emph{quality}, e.g.
+\code{LR} or \code{MR}.
+
+All experiments of the same \emph{kind} share one set of template files,
+\texttt{kind.*.tmpl}, that define the basic work flow of the experiment.
+
+For each experiment type \emph{kind-quality} there is a file
+\texttt{kind-quality.config} with the settings needed for this type of
+experiment. There may be different qualities for one experiment kind, allowing
+to e.g. run the same experiment in different resolutions. In this case
+\texttt{kind-quality1.config} and \texttt{kind-quality2.config} will mainly
+differ in the model resolution settings.
+
+The currently supported experiment types are:
+
+\setlength{\DUtablewidth}{\linewidth}
+\begin{longtable*}[c]{|p{0.098\DUtablewidth}|p{0.145\DUtablewidth}|p{0.528\DUtablewidth}|}
+\hline
+\label{runscripts:generation:type_table}
+\textbf{%
+kind
+} & \textbf{%
+quality
+} & \textbf{%
+description
+} \\
+\hline
+\endfirsthead
+\hline
+\textbf{%
+kind
+} & \textbf{%
+quality
+} & \textbf{%
+description
+} \\
+\hline
+\endhead
+\multicolumn{3}{c}{\hfill ... continued on next page} \\
+\endfoot
+\endlastfoot
+\multirow{3}{0.10\DUtablewidth}{%
+amip
+} & 
+LR
+ & 
+T63L47, prescribed AMIP SST and sea-ice
+ \\
+\cline{2-2}
+\cline{3-3}
+ & 
+MR
+ & 
+T63L95
+ \\
+\hline
+\multirow{2}{0.10\DUtablewidth}{%
+sstClim
+} & 
+LR
+ & 
+T63L47, prescribed climatological SST
+ \\
+\cline{2-2}
+\cline{3-3}
+ & 
+MR
+ & 
+T63L95
+ \\
+\hline
+\end{longtable*}
+
+
+\paragraph*{Standard host environments%
+  \label{standard-host-environments}%
+}
+
+Host environments are stored in the \texttt{standard\_environments}
+sub-directory. Currently supported hosts are \texttt{blizzard} and
+\texttt{thunder}. The \texttt{DEFAULT} settings are for CIS desktops.
+
+The corresponding \texttt{.config} files contain mainly settings for job
+queuing, directory structure and MPI environment. The \texttt{.tmpl} files
+contain specific code for queuing and submitting.
+
+\subsubsection{Directory structure and file systems on \blizzard}
+\label{runscripts:generation:blizzard_dirs}
+
+The supercomputer platform \blizzard{} provides a number
+of file systems for different purposes.
+
+\begin{enumerate}
+
+\item
+
+The {\tt \$HOME} file system (located in {\tt /pf}) has a quota per user (8GB)
+and provides regular backups. This file system is good for holding the source
+code of the echam model and the run scripts that are used to perform a computer
+experiment.
+
+\item
+
+The {\tt \$SCRATCH} file system (located in {\tt /scratch}) has very fast I/O
+but data will be deleted automatically after a system-defined period (currently
+14~days). There is no backup available. This file system is good for the
+primary output from a model that will be treated by some postprocessing
+immediately after the run. By default, it is not used by the automatically
+generated run scripts mentioned above.
+
+\item
+
+The {\tt /work/\{PROJECT\}} file system that also has fast I/O
+possibilities. There is no backup available, but data are not deleted
+automatically. There is a quota per project and \emph{not} per user. Reasonable
+use of this file system requires the coordination of your work with the other
+members of this project. Although data are not automatically deleted, it is
+\emph{not} an archive. It is meant for frequently accessed data only.
+
+\item
+
+There are two kinds of archive systems: {\tt /hpss/arch} and {\tt /hpss/doku},
+both accessible by {\tt pftp}. Be careful to move your results into the archive
+as soon as you do not work with them regularly.
+
+\end{enumerate}
+
+\subsection{Runs with parallel I/O}
+
+Runs with parallel I/O need a slight modification of the standard run scripts.
+An additional node should be reserved for output, and ${\tt nprocio}$
+set to 32 on 
+\blizzard, or to 16 on \thunder. On \blizzard, you
+need to adjust the total number of tasks accordingly. Thus, the changes
+in your \code{.config} file are the following: 
+
+\begin{quote}
+\begin{verbatim}
+    [[[parctl]]]
+      ...
+      nprocio = 32 ### 16 on thunder
+      iomode = 2 ### or 1 on thunder
+...
+[jobs]
+  [[run]]
+    nodes = 5
+    tasks = 288 ### nproca * nprocb + nprocio; only for blizzard!
+\end{verbatim}
+\end{quote}
+
+The order of the variables in the output files can vary from file to file. If
+comparisons between outputfiles shall be made, the command
+\begin{lstlisting}
+cdo sortcode <ifile> <ofile>
+\end{lstlisting}
+has to be applied to every output file before the ``diff'' command is
+used.

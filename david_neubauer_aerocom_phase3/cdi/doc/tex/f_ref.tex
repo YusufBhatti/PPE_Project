@@ -1,0 +1,1792 @@
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridCreate]{gridCreate}
+\else
+gridCreate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridCreate(INTEGER gridtype, INTEGER size)
+\end{verbatim}
+
+Create a horizontal Grid
+\ifpdfoutput{}{(\ref{gridCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefNP]{gridDefNP}
+\else
+gridDefNP
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefNP(INTEGER gridID, INTEGER np)
+\end{verbatim}
+
+Define the number of parallels between a pole and the equator
+\ifpdfoutput{}{(\ref{gridDefNP})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefNumber]{gridDefNumber}
+\else
+gridDefNumber
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefNumber(INTEGER gridID, INTEGER number)
+\end{verbatim}
+
+Define the reference number for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefNumber})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefPosition]{gridDefPosition}
+\else
+gridDefPosition
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefPosition(INTEGER gridID, INTEGER position)
+\end{verbatim}
+
+Define the position of grid in the reference file
+\ifpdfoutput{}{(\ref{gridDefPosition})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefReference]{gridDefReference}
+\else
+gridDefReference
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefReference(INTEGER gridID, CHARACTER*(*) reference)
+\end{verbatim}
+
+Define the reference URI for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefReference})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefUUID]{gridDefUUID}
+\else
+gridDefUUID
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefUUID(INTEGER gridID, CHARACTER*(*) uuid)
+\end{verbatim}
+
+Define the UUID for an unstructured grid
+\ifpdfoutput{}{(\ref{gridDefUUID})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXbounds]{gridDefXbounds}
+\else
+gridDefXbounds
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefXbounds(INTEGER gridID, REAL*8 xbounds)
+\end{verbatim}
+
+Define the bounds of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXlongname]{gridDefXlongname}
+\else
+gridDefXlongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefXlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the longname of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXname]{gridDefXname}
+\else
+gridDefXname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefXname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXsize]{gridDefXsize}
+\else
+gridDefXsize
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefXsize(INTEGER gridID, INTEGER xsize)
+\end{verbatim}
+
+Define the number of values of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXunits]{gridDefXunits}
+\else
+gridDefXunits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefXunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefXvals]{gridDefXvals}
+\else
+gridDefXvals
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefXvals(INTEGER gridID, REAL*8 xvals)
+\end{verbatim}
+
+Define the values of a X-axis
+\ifpdfoutput{}{(\ref{gridDefXvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYbounds]{gridDefYbounds}
+\else
+gridDefYbounds
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefYbounds(INTEGER gridID, REAL*8 ybounds)
+\end{verbatim}
+
+Define the bounds of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYlongname]{gridDefYlongname}
+\else
+gridDefYlongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefYlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the longname of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYname]{gridDefYname}
+\else
+gridDefYname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefYname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYsize]{gridDefYsize}
+\else
+gridDefYsize
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefYsize(INTEGER gridID, INTEGER ysize)
+\end{verbatim}
+
+Define the number of values of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYunits]{gridDefYunits}
+\else
+gridDefYunits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefYunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDefYvals]{gridDefYvals}
+\else
+gridDefYvals
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDefYvals(INTEGER gridID, REAL*8 yvals)
+\end{verbatim}
+
+Define the values of a Y-axis
+\ifpdfoutput{}{(\ref{gridDefYvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDestroy]{gridDestroy}
+\else
+gridDestroy
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridDestroy(INTEGER gridID)
+\end{verbatim}
+
+Destroy a horizontal Grid
+\ifpdfoutput{}{(\ref{gridDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridDuplicate]{gridDuplicate}
+\else
+gridDuplicate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridDuplicate(INTEGER gridID)
+\end{verbatim}
+
+Duplicate a horizontal Grid
+\ifpdfoutput{}{(\ref{gridDuplicate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqNP]{gridInqNP}
+\else
+gridInqNP
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqNP(INTEGER gridID)
+\end{verbatim}
+
+Get the number of parallels between a pole and the equator
+\ifpdfoutput{}{(\ref{gridInqNP})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqNumber]{gridInqNumber}
+\else
+gridInqNumber
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqNumber(INTEGER gridID)
+\end{verbatim}
+
+Get the reference number to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqNumber})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqPosition]{gridInqPosition}
+\else
+gridInqPosition
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqPosition(INTEGER gridID)
+\end{verbatim}
+
+Get the position of grid in the reference file
+\ifpdfoutput{}{(\ref{gridInqPosition})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqReference]{gridInqReference}
+\else
+gridInqReference
+\fi
+}
+\begin{verbatim}
+    char *gridInqReference(INTEGER gridID, CHARACTER*(*) reference)
+\end{verbatim}
+
+Get the reference URI to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqReference})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqSize]{gridInqSize}
+\else
+gridInqSize
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqSize(INTEGER gridID)
+\end{verbatim}
+
+Get the size of a Grid
+\ifpdfoutput{}{(\ref{gridInqSize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqType]{gridInqType}
+\else
+gridInqType
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqType(INTEGER gridID)
+\end{verbatim}
+
+Get the type of a Grid
+\ifpdfoutput{}{(\ref{gridInqType})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqUUID]{gridInqUUID}
+\else
+gridInqUUID
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqUUID(INTEGER gridID, CHARACTER*(*) uuid)
+\end{verbatim}
+
+Get the UUID to an unstructured grid
+\ifpdfoutput{}{(\ref{gridInqUUID})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXbounds]{gridInqXbounds}
+\else
+gridInqXbounds
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqXbounds(INTEGER gridID, REAL*8 xbounds)
+\end{verbatim}
+
+Get the bounds of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXlongname]{gridInqXlongname}
+\else
+gridInqXlongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqXlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXname]{gridInqXname}
+\else
+gridInqXname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqXname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXsize]{gridInqXsize}
+\else
+gridInqXsize
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqXsize(INTEGER gridID)
+\end{verbatim}
+
+Get the number of values of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXunits]{gridInqXunits}
+\else
+gridInqXunits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqXunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqXvals]{gridInqXvals}
+\else
+gridInqXvals
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqXvals(INTEGER gridID, REAL*8 xvals)
+\end{verbatim}
+
+Get all values of a X-axis
+\ifpdfoutput{}{(\ref{gridInqXvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYbounds]{gridInqYbounds}
+\else
+gridInqYbounds
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqYbounds(INTEGER gridID, REAL*8 ybounds)
+\end{verbatim}
+
+Get the bounds of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYbounds})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYlongname]{gridInqYlongname}
+\else
+gridInqYlongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqXlongname(INTEGER gridID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYlongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYname]{gridInqYname}
+\else
+gridInqYname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqYname(INTEGER gridID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYsize]{gridInqYsize}
+\else
+gridInqYsize
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqYsize(INTEGER gridID)
+\end{verbatim}
+
+Get the number of values of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYsize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYunits]{gridInqYunits}
+\else
+gridInqYunits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE gridInqYunits(INTEGER gridID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYunits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[gridInqYvals]{gridInqYvals}
+\else
+gridInqYvals
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION gridInqYvals(INTEGER gridID, REAL*8 yvals)
+\end{verbatim}
+
+Get all values of a Y-axis
+\ifpdfoutput{}{(\ref{gridInqYvals})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamClose]{streamClose}
+\else
+streamClose
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamClose(INTEGER streamID)
+\end{verbatim}
+
+Close an open dataset
+\ifpdfoutput{}{(\ref{streamClose})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefByteorder]{streamDefByteorder}
+\else
+streamDefByteorder
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamDefByteorder(INTEGER streamID, INTEGER byteorder)
+\end{verbatim}
+
+Define the byte order
+\ifpdfoutput{}{(\ref{streamDefByteorder})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefRecord]{streamDefRecord}
+\else
+streamDefRecord
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamDefRecord(INTEGER streamID, INTEGER varID, INTEGER levelID)
+\end{verbatim}
+
+Define the next record
+\ifpdfoutput{}{(\ref{streamDefRecord})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefTimestep]{streamDefTimestep}
+\else
+streamDefTimestep
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamDefTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+Define time step
+\ifpdfoutput{}{(\ref{streamDefTimestep})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamDefVlist]{streamDefVlist}
+\else
+streamDefVlist
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamDefVlist(INTEGER streamID, INTEGER vlistID)
+\end{verbatim}
+
+Define the variable list
+\ifpdfoutput{}{(\ref{streamDefVlist})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqByteorder]{streamInqByteorder}
+\else
+streamInqByteorder
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamInqByteorder(INTEGER streamID)
+\end{verbatim}
+
+Get the byte order
+\ifpdfoutput{}{(\ref{streamInqByteorder})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqFiletype]{streamInqFiletype}
+\else
+streamInqFiletype
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamInqFiletype(INTEGER streamID)
+\end{verbatim}
+
+Get the filetype
+\ifpdfoutput{}{(\ref{streamInqFiletype})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqTimestep]{streamInqTimestep}
+\else
+streamInqTimestep
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamInqTimestep(INTEGER streamID, INTEGER tsID)
+\end{verbatim}
+
+Get time step
+\ifpdfoutput{}{(\ref{streamInqTimestep})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamInqVlist]{streamInqVlist}
+\else
+streamInqVlist
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamInqVlist(INTEGER streamID)
+\end{verbatim}
+
+Get the variable list
+\ifpdfoutput{}{(\ref{streamInqVlist})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamOpenRead]{streamOpenRead}
+\else
+streamOpenRead
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenRead(CHARACTER*(*) path)
+\end{verbatim}
+
+Open a dataset for reading
+\ifpdfoutput{}{(\ref{streamOpenRead})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamOpenWrite]{streamOpenWrite}
+\else
+streamOpenWrite
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION streamOpenWrite(CHARACTER*(*) path, INTEGER filetype)
+\end{verbatim}
+
+Create a new dataset
+\ifpdfoutput{}{(\ref{streamOpenWrite})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamReadVar]{streamReadVar}
+\else
+streamReadVar
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamReadVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                             INTEGER nmiss)
+\end{verbatim}
+
+Read a variable
+\ifpdfoutput{}{(\ref{streamReadVar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamReadVarSlice]{streamReadVarSlice}
+\else
+streamReadVarSlice
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamReadVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                  REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+Read a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamReadVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteRecord]{streamWriteRecord}
+\else
+streamWriteRecord
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteRecord(INTEGER streamID, REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteRecord})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVar]{streamWriteVar}
+\else
+streamWriteVar
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteVar(INTEGER streamID, INTEGER varID, REAL*8 data, 
+                              INTEGER nmiss)
+\end{verbatim}
+
+Write a variable
+\ifpdfoutput{}{(\ref{streamWriteVar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarF]{streamWriteVarF}
+\else
+streamWriteVarF
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteVarF(INTEGER streamID, INTEGER varID, REAL*4 data, 
+                               INTEGER nmiss)
+\end{verbatim}
+
+Write a variable
+\ifpdfoutput{}{(\ref{streamWriteVarF})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarSlice]{streamWriteVarSlice}
+\else
+streamWriteVarSlice
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSlice(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                   REAL*8 data, INTEGER nmiss)
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteVarSlice})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[streamWriteVarSliceF]{streamWriteVarSliceF}
+\else
+streamWriteVarSliceF
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE streamWriteVarSliceF(INTEGER streamID, INTEGER varID, INTEGER levelID, 
+                                    REAL*4 data, INTEGER nmiss)
+\end{verbatim}
+
+Write a horizontal slice of a variable
+\ifpdfoutput{}{(\ref{streamWriteVarSliceF})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisCreate]{taxisCreate}
+\else
+taxisCreate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION taxisCreate(INTEGER taxistype)
+\end{verbatim}
+
+Create a Time axis
+\ifpdfoutput{}{(\ref{taxisCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefCalendar]{taxisDefCalendar}
+\else
+taxisDefCalendar
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE taxisDefCalendar(INTEGER taxisID, INTEGER calendar)
+\end{verbatim}
+
+Define the calendar
+\ifpdfoutput{}{(\ref{taxisDefCalendar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefRdate]{taxisDefRdate}
+\else
+taxisDefRdate
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE taxisDefRdate(INTEGER taxisID, INTEGER rdate)
+\end{verbatim}
+
+Define the reference date
+\ifpdfoutput{}{(\ref{taxisDefRdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefRtime]{taxisDefRtime}
+\else
+taxisDefRtime
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE taxisDefRtime(INTEGER taxisID, INTEGER rtime)
+\end{verbatim}
+
+Define the reference time
+\ifpdfoutput{}{(\ref{taxisDefRtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefVdate]{taxisDefVdate}
+\else
+taxisDefVdate
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE taxisDefVdate(INTEGER taxisID, INTEGER vdate)
+\end{verbatim}
+
+Define the verification date
+\ifpdfoutput{}{(\ref{taxisDefVdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDefVtime]{taxisDefVtime}
+\else
+taxisDefVtime
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE taxisDefVtime(INTEGER taxisID, INTEGER vtime)
+\end{verbatim}
+
+Define the verification time
+\ifpdfoutput{}{(\ref{taxisDefVtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisDestroy]{taxisDestroy}
+\else
+taxisDestroy
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE taxisDestroy(INTEGER taxisID)
+\end{verbatim}
+
+Destroy a Time axis
+\ifpdfoutput{}{(\ref{taxisDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqCalendar]{taxisInqCalendar}
+\else
+taxisInqCalendar
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqCalendar(INTEGER taxisID)
+\end{verbatim}
+
+Get the calendar
+\ifpdfoutput{}{(\ref{taxisInqCalendar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqRdate]{taxisInqRdate}
+\else
+taxisInqRdate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqRdate(INTEGER taxisID)
+\end{verbatim}
+
+Get the reference date
+\ifpdfoutput{}{(\ref{taxisInqRdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqRtime]{taxisInqRtime}
+\else
+taxisInqRtime
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqRtime(INTEGER taxisID)
+\end{verbatim}
+
+Get the reference time
+\ifpdfoutput{}{(\ref{taxisInqRtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqVdate]{taxisInqVdate}
+\else
+taxisInqVdate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqVdate(INTEGER taxisID)
+\end{verbatim}
+
+Get the verification date
+\ifpdfoutput{}{(\ref{taxisInqVdate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[taxisInqVtime]{taxisInqVtime}
+\else
+taxisInqVtime
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION taxisInqVtime(INTEGER taxisID)
+\end{verbatim}
+
+Get the verification time
+\ifpdfoutput{}{(\ref{taxisInqVtime})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCat]{vlistCat}
+\else
+vlistCat
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistCat(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+Concatenate two variable lists
+\ifpdfoutput{}{(\ref{vlistCat})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCopy]{vlistCopy}
+\else
+vlistCopy
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistCopy(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+Copy a variable list
+\ifpdfoutput{}{(\ref{vlistCopy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCopyFlag]{vlistCopyFlag}
+\else
+vlistCopyFlag
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistCopyFlag(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+Copy some entries of a variable list
+\ifpdfoutput{}{(\ref{vlistCopyFlag})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistCreate]{vlistCreate}
+\else
+vlistCreate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistCreate()
+\end{verbatim}
+
+Create a variable list
+\ifpdfoutput{}{(\ref{vlistCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttFlt]{vlistDefAttFlt}
+\else
+vlistDefAttFlt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttFlt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                    REAL*8 dp)
+\end{verbatim}
+
+Define a floating point attribute
+\ifpdfoutput{}{(\ref{vlistDefAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttInt]{vlistDefAttInt}
+\else
+vlistDefAttInt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttInt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER type, INTEGER len, 
+                                    INTEGER ip)
+\end{verbatim}
+
+Define an integer attribute
+\ifpdfoutput{}{(\ref{vlistDefAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefAttTxt]{vlistDefAttTxt}
+\else
+vlistDefAttTxt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefAttTxt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER len, 
+                                    CHARACTER*(*) tp)
+\end{verbatim}
+
+Define a text attribute
+\ifpdfoutput{}{(\ref{vlistDefAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefTaxis]{vlistDefTaxis}
+\else
+vlistDefTaxis
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefTaxis(INTEGER vlistID, INTEGER taxisID)
+\end{verbatim}
+
+Define the time axis
+\ifpdfoutput{}{(\ref{vlistDefTaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVar]{vlistDefVar}
+\else
+vlistDefVar
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefVar(INTEGER vlistID, INTEGER gridID, INTEGER zaxisID, 
+                                 INTEGER tsteptype)
+\end{verbatim}
+
+Define a Variable
+\ifpdfoutput{}{(\ref{vlistDefVar})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarCode]{vlistDefVarCode}
+\else
+vlistDefVarCode
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarCode(INTEGER vlistID, INTEGER varID, INTEGER code)
+\end{verbatim}
+
+Define the code number of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarCode})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarDatatype]{vlistDefVarDatatype}
+\else
+vlistDefVarDatatype
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarDatatype(INTEGER vlistID, INTEGER varID, INTEGER datatype)
+\end{verbatim}
+
+Define the data type of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarDatatype})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarLongname]{vlistDefVarLongname}
+\else
+vlistDefVarLongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarLongname(INTEGER vlistID, INTEGER varID, 
+                                   CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the long name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarMissval]{vlistDefVarMissval}
+\else
+vlistDefVarMissval
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarMissval(INTEGER vlistID, INTEGER varID, REAL*8 missval)
+\end{verbatim}
+
+Define the missing value of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarMissval})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarName]{vlistDefVarName}
+\else
+vlistDefVarName
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarName(INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarStdname]{vlistDefVarStdname}
+\else
+vlistDefVarStdname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+Define the standard name of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarStdname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDefVarUnits]{vlistDefVarUnits}
+\else
+vlistDefVarUnits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDefVarUnits(INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a Variable
+\ifpdfoutput{}{(\ref{vlistDefVarUnits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDestroy]{vlistDestroy}
+\else
+vlistDestroy
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistDestroy(INTEGER vlistID)
+\end{verbatim}
+
+Destroy a variable list
+\ifpdfoutput{}{(\ref{vlistDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistDuplicate]{vlistDuplicate}
+\else
+vlistDuplicate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistDuplicate(INTEGER vlistID)
+\end{verbatim}
+
+Duplicate a variable list
+\ifpdfoutput{}{(\ref{vlistDuplicate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAtt]{vlistInqAtt}
+\else
+vlistInqAtt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAtt(INTEGER vlistID, INTEGER varID, INTEGER attnum, 
+                                 CHARACTER*(*) name, INTEGER typep, INTEGER lenp)
+\end{verbatim}
+
+Get information about an attribute
+\ifpdfoutput{}{(\ref{vlistInqAtt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttFlt]{vlistInqAttFlt}
+\else
+vlistInqAttFlt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttFlt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, REAL*8 dp)
+\end{verbatim}
+
+Get the value(s) of a floating point attribute
+\ifpdfoutput{}{(\ref{vlistInqAttFlt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttInt]{vlistInqAttInt}
+\else
+vlistInqAttInt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttInt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, INTEGER ip)
+\end{verbatim}
+
+Get the value(s) of an integer attribute
+\ifpdfoutput{}{(\ref{vlistInqAttInt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqAttTxt]{vlistInqAttTxt}
+\else
+vlistInqAttTxt
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqAttTxt(INTEGER vlistID, INTEGER varID, 
+                                    CHARACTER*(*) name, INTEGER mlen, 
+                                    CHARACTER*(*) tp)
+\end{verbatim}
+
+Get the value(s) of a text attribute
+\ifpdfoutput{}{(\ref{vlistInqAttTxt})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqNatts]{vlistInqNatts}
+\else
+vlistInqNatts
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqNatts(INTEGER vlistID, INTEGER varID, INTEGER nattsp)
+\end{verbatim}
+
+Get number of variable attributes
+\ifpdfoutput{}{(\ref{vlistInqNatts})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqTaxis]{vlistInqTaxis}
+\else
+vlistInqTaxis
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqTaxis(INTEGER vlistID)
+\end{verbatim}
+
+Get the time axis
+\ifpdfoutput{}{(\ref{vlistInqTaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarCode]{vlistInqVarCode}
+\else
+vlistInqVarCode
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarCode(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the Code number of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarCode})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarDatatype]{vlistInqVarDatatype}
+\else
+vlistInqVarDatatype
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarDatatype(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the data type of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarDatatype})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarGrid]{vlistInqVarGrid}
+\else
+vlistInqVarGrid
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarGrid(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the Grid ID of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarGrid})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarLongname]{vlistInqVarLongname}
+\else
+vlistInqVarLongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistInqVarLongname(INTEGER vlistID, INTEGER varID, 
+                                   CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarMissval]{vlistInqVarMissval}
+\else
+vlistInqVarMissval
+\fi
+}
+\begin{verbatim}
+    REAL*8 FUNCTION vlistInqVarMissval(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the missing value of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarMissval})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarName]{vlistInqVarName}
+\else
+vlistInqVarName
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistInqVarName(INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarStdname]{vlistInqVarStdname}
+\else
+vlistInqVarStdname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistInqVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+Get the standard name of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarStdname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarUnits]{vlistInqVarUnits}
+\else
+vlistInqVarUnits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE vlistInqVarUnits(INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarUnits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistInqVarZaxis]{vlistInqVarZaxis}
+\else
+vlistInqVarZaxis
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarZaxis(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+Get the Zaxis ID of a Variable
+\ifpdfoutput{}{(\ref{vlistInqVarZaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistNgrids]{vlistNgrids}
+\else
+vlistNgrids
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistNgrids(INTEGER vlistID)
+\end{verbatim}
+
+Number of grids in a variable list
+\ifpdfoutput{}{(\ref{vlistNgrids})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistNvars]{vlistNvars}
+\else
+vlistNvars
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistNvars(INTEGER vlistID)
+\end{verbatim}
+
+Number of variables in a variable list
+\ifpdfoutput{}{(\ref{vlistNvars})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[vlistNzaxis]{vlistNzaxis}
+\else
+vlistNzaxis
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION vlistNzaxis(INTEGER vlistID)
+\end{verbatim}
+
+Number of zaxis in a variable list
+\ifpdfoutput{}{(\ref{vlistNzaxis})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisCreate]{zaxisCreate}
+\else
+zaxisCreate
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION zaxisCreate(INTEGER zaxistype, INTEGER size)
+\end{verbatim}
+
+Create a vertical Z-axis
+\ifpdfoutput{}{(\ref{zaxisCreate})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefLevels]{zaxisDefLevels}
+\else
+zaxisDefLevels
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisDefLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+Define the levels of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefLevels})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefLongname]{zaxisDefLongname}
+\else
+zaxisDefLongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisDefLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Define the longname of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefName]{zaxisDefName}
+\else
+zaxisDefName
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisDefName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+Define the name of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDefUnits]{zaxisDefUnits}
+\else
+zaxisDefUnits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisDefUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+Define the units of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisDefUnits})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisDestroy]{zaxisDestroy}
+\else
+zaxisDestroy
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisDestroy(INTEGER zaxisID)
+\end{verbatim}
+
+Destroy a vertical Z-axis
+\ifpdfoutput{}{(\ref{zaxisDestroy})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqLevel]{zaxisInqLevel}
+\else
+zaxisInqLevel
+\fi
+}
+\begin{verbatim}
+    REAL*8 FUNCTION zaxisInqLevel(INTEGER zaxisID, INTEGER levelID)
+\end{verbatim}
+
+Get one level of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqLevel})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqLevels]{zaxisInqLevels}
+\else
+zaxisInqLevels
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisInqLevels(INTEGER zaxisID, REAL*8 levels)
+\end{verbatim}
+
+Get all levels of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqLevels})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqLongname]{zaxisInqLongname}
+\else
+zaxisInqLongname
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisInqLongname(INTEGER zaxisID, CHARACTER*(*) longname)
+\end{verbatim}
+
+Get the longname of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqLongname})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqName]{zaxisInqName}
+\else
+zaxisInqName
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisInqName(INTEGER zaxisID, CHARACTER*(*) name)
+\end{verbatim}
+
+Get the name of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqName})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqSize]{zaxisInqSize}
+\else
+zaxisInqSize
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqSize(INTEGER zaxisID)
+\end{verbatim}
+
+Get the size of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqSize})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqType]{zaxisInqType}
+\else
+zaxisInqType
+\fi
+}
+\begin{verbatim}
+    INTEGER FUNCTION zaxisInqType(INTEGER zaxisID)
+\end{verbatim}
+
+Get the type of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqType})}
+
+
+\section*{\tt 
+\ifpdf
+\hyperref[zaxisInqUnits]{zaxisInqUnits}
+\else
+zaxisInqUnits
+\fi
+}
+\begin{verbatim}
+    SUBROUTINE zaxisInqUnits(INTEGER zaxisID, CHARACTER*(*) units)
+\end{verbatim}
+
+Get the units of a Z-axis
+\ifpdfoutput{}{(\ref{zaxisInqUnits})}

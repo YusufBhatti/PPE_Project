@@ -1,0 +1,225 @@
+In a general atmospheric circulation model such as \echam{} that can
+be used for simulations of historic time periods but also in a
+``climate mode'' for 
+prehistorical time periods together with an ocean model, the orbit of
+the Earth around the sun has to be rather flexible. The solar
+irradiance is closely linked to the orbit.
+From the perspective of the Earth, certain aspects of the orbit can be
+described with the help of a calendar. There are two different orbits
+implemented in \echam: An orbit with strictly 360~days of 24 hours in
+a year and another orbit that can be characterized as proleptic
+Gregorian meaning that the Gregorian calendar of our days is applied
+back to the past. Consequently, the historic dates before the 15th
+October 1582 are
+different from those of the proleptic Gregorian calendar. E.g.,
+historically, there is no 14th October 1582, but this date is
+identified with the 4th October 1582 of the historic Julian calendar.
+The proleptic Gregorian calendar goes back to 4712/01/01 12:00:00 UTC
+time B.C. including a year 0. 
+Fortran90 data structures are ideal to store and manipulate 
+the heterogeneous structure of time expressed in a calendar date and time
+of a day. We describe these data structures and their usage in the following
+
+\subsection[Date--time variables in \echambw]{Date--time variables in \echam}
+The date and time of the Gregorian proleptic
+calendar 
+can be represented in various ways
+leading to the following definitions of 
+date--time (DT) data types\index{date--time data types}: 
+{\tt time\_days}\index{data type!time\_days}, 
+{\tt time\_intern}\index{data type!time\_intern}, {\tt
+  time\_native}.\index{data type!time\_native}
+Their definition can be found in 
+{\tt mo\_time\_conversion.f90}\index{time manager!mo\_time\_conversion.f90}.
+
+  \begin{itemize}
+  \item[]
+    \begin{lstlisting}[caption= time\_days]
+type time_days\index{data type!time\_days}
+! ...
+  integer :: day    ! day in the proleptic Gregorian 
+                    ! calendar since 4712/01/01 B.C.
+  integer :: second ! second in the day [0, 86399]
+end type time_days
+    \end{lstlisting}
+
+  \item[]
+    \begin{lstlisting}[caption= time\_intern]
+type time_intern\index{data type!time\_intern}
+! ...
+  integer :: ymd    ! `year month day` of the proleptic 
+                    ! Gregorian calendar
+                    ! (leading zeros omitted);
+                    ! e.g. 2001008 is the 8th of Oct. 200.
+ integer :: hms     ! `hour minute second` of ymd
+                    ! (leading zeros omitted);
+end type time_intern
+    \end{lstlisting}
+
+  \item[]
+    \begin{lstlisting}[caption= time\_native]
+type time_nativ \index{data type!time\_native}
+! ...
+  integer :: year, month, day, hour, minute, second
+end type_native
+    \end{lstlisting}
+
+  \item[]
+    One can also use an array of 6 elements containing year, month,
+    hour, minute, second. 
+  \end{itemize}
+
+  For the composed data types {\tt time\_days}, {\tt time\_intern},
+  and {\tt time\_native}, a direct access of the components is not
+  possible because they are declared being ``PRIVATE''. Instead, they
+  are accessible by the use of subprograms
+  defined in {\tt mo\_time\_conversion.f90}. The reason for this is
+  the fact that it is easy to create dates and times that
+  is not valid. Then, all subroutines using such an invalid
+  DT--variable would fail. In order to avoid this, all the subroutines 
+  changing one of the components of the DT--variables test whether the
+  resulting dates and times are correct.
+
+\subsection{Usage of DT--variables}
+
+ A family of overloaded subroutines and functions 
+ is provided in the module {\tt
+   mo\_time\_conversion.f90} by
+ \echam{} to handle date--time variables:
+
+  \begin{itemize}
+  \item Set a DT--variable of type {\tt time\_days}, {\tt time\_native} or
+    {\tt time\_intern} by the use of the overloaded routine
+    {\tt tc\_set}. Example\index{time manager!tc\_set}:
+
+    \begin{lstlisting}[caption=tc\_set]
+  type(time_native) :: my_date
+  call tc_set(kyear, kmonth, kday, khour, kminute, ksecond, mydate)
+    \end{lstlisting}
+
+This call of {\tt tc\_set} will search for the special routine
+{\tt set\_native}\index{time manager!set\_native} 
+that actually sets a variable of type
+{\tt time\_native} from the input variables {\tt kyear}, {\tt kmonth},
+{\tt kday}, {\tt khour}, {\tt kminute}, and {\tt ksecond}.
+
+
+\item Conversion of a variable of one time format into another:
+
+  There are $3*2 = 6$ possible conversions which can all be performed
+  by a call of\\
+  {\tt tc\_convert}({\tt var1},{\tt var2})\index{time manager!tc\_convert},
+  {\tt var1}, {\tt var2} being of one of the 3 types.
+
+
+\item Getting components of a DT--variable
+ 
+The components of a DT--variable can be retrieved by a call to the
+subroutine {\tt tc\_get}\index{time manager!tc\_get}. 
+The first argument of {\tt tc\_get} is a
+variable of one of the DT--variable types, the following arguments are
+all optional. Their names are the names of the components of the
+corresponding DT--variable of the first argument. Example:
+
+\begin{lstlisting}[caption=tc\_get]
+type(time_native) :: my_date
+call tc_get(my_date,year=kyear)\index{time manager!tc\_get}
+call tc_get(my_date,year=kyear,second=ksecond)
+\end{lstlisting}
+
+In that case, the first call of {\tt tc\_get} only retrieves the value
+of the year, whereas the second call retrieves the year and the second
+of {\tt my\_date}.
+
+
+
+\item Comparison of DT--variables
+
+  DT--variables can be compared using certain
+  operators in order to know whether a certain date is before or after a
+  second date. Fortran90 provides the possibility to overload
+  intrinsic Fortran90 functions such as ``$<$'', ``$>$'' or
+  ``$==$''.\index{time manager!''$<$''}\index{time manager!''$>$''}
+  \index{time manager!''$==$''} You can then use 
+  these operator symbols also for the comparison of user defined data
+  types. In that case, the user has to provide an order on the domain
+  of these variables.
+
+
+  \begin{lstlisting} [caption=overloaded operators]
+  USE mo_time_conversion, ONLY: operator(<),operator(==),operator(>)
+  TYPE(time_native)          :: var1, var2
+  ! ...
+  IF (var1 < var2) THEN
+  !...
+  \end{lstlisting}
+  \end{itemize}
+
+  The argument of the if statement is true if the date of {\tt var1}
+  is before the date of {\tt var2}. 
+
+\subsection[Information about actual date and time in \echambw]{Information about actual date and time in \echam}
+
+There are three variables in which the time and date of the previous
+($t-\Delta t$),
+the current ($t$), and the next time step ($t+\Delta t$) are
+stored. These variables are 
+defined in {\tt mo\_time\_control}\index{time manager!mo\_time\_control}:
+
+\index{time variables!previous\_date}
+\index{time variables!current\_date}
+\index{time variables!next\_date}
+\begin{lstlisting}[caption=date and time variables]
+type(time_days) :: previous_date, current_date, next_date
+\end{lstlisting}
+
+\subsection{Variables describing repeated events.}
+
+The variable types of DT variables described so far are used for a
+representation of absolute date and time in \echam. In this paragraph,
+the data structure associated with repeated events is presented.
+This data structure is used in the namelists
+(section~\ref{secnamelist}) to determine the frquency of certain events.
+Each variable describing repeated events consist of
+an integer number and the unit, describing the frequency of the
+event. In addition, some keywords can be set which determine the
+position of the repeated events relative to the absolute time axis.
+The underlying data structure is defined in
+{\tt mo\_time\_event}\index{time manager!mo\_time\_event}:
+
+\begin{lstlisting}[caption=io\_time\_event]
+type io_time_event\index{data type!io\_time\_event}
+  integer           :: counter    ! interval
+  character(len=20) :: unit       ! unit
+  character(len=20) :: adjustment ! adjustment
+  integer           :: offset     ! offset
+end type io_time_event 
+\end{lstlisting}
+
+With the help of this data structure, we may define a variable
+{\tt outfrq} that will describe the output frequency of a stream for
+example.
+
+\begin{lstlisting}[caption=outfrq]
+type(io_time_event) :: outfrq  
+\end{lstlisting}
+
+A variable of such a type can be read from the namelist like all the
+other variables describing repeated events 
+({\tt putdata}\index{time variables!putdata},
+{\tt putrerun}\index{time variables!putdata}) 
+but we also may whish to communicate it to all processors. For
+this purpose, there is a special subroutine {\tt p\_bcast\_event}
+\index{time manager!p\_bcast\_event}
+defined in {\tt mo\_time\_control.f90}
+\index{time manager!mo\_time\_control} 
+which is used in the following way:
+
+\begin{lstlisting}[caption= p\_bcast\_event]
+USE mo_time_control,       ONLY: p_bcast_event
+call p_bcast_event(outfrq, pe_io)
+\end{lstlisting}
+ 
+The call of {\tt p\_bcast\_event} sends this variable to all processors.
+Then, the variable {\tt outfrq} can be used in the definition of a
+new stream.

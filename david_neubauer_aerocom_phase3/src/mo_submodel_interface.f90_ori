@@ -1,0 +1,2096 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+!! #define HAMMOZ
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! This file is supposed to provide all necessary interfaces of submodels
+!! to the main ECHAM6 model. It controls submodel initialisation, including
+!! tracer and stream definitions and it contains standard interfaces to allow
+!! chemistry and aerosol processes interacting with the physical climate model.
+!! The coding objective is to use mo_submodel_interface as "single entry point"
+!! into the details of each individual submodel. The core ECHAM code should
+!! only make use of flags and switches in mo_submodel and *not* contain any 
+!! references to submodel-specific switches or values. 
+!!
+!! Note: this is the only file which may contain preprocessor definitions for submodels!!
+!!
+!! Change this file to attach extra submodels to ECHAM.
+!!
+!!
+!! @author 
+!! <ol>
+!! <li>M. Schultz (FZ-Juelich)
+!! <li>S. Rast    (MPI-Met)
+!! <li>K. Zhang   (MPI-Met)
+!! </ol>
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! <ol>
+!! <li>M. Schultz   (FZ-Juelich) -  original idea and code structure - (2009-05-xx) 
+!! <li>S. Rast      (MPI-Met)    -  original idea and code structure - (2009-06-xx) 
+!! <li>K. Zhang     (MPI-Met)    -  restucture and new style, implementation in ECHAM6  - (2009-07-16)
+!! <li>K. Zhang     (MPI-Met)    -  doxygen support - (2009-07-24)
+!! <li>M. Schultz   (FZ-Juelich) -  Zuerich code structure and cleanup - (2009-08-25) 
+!! <li>M. Schultz&S. Rast   (FZ-Juelich, MPI-Met) -  merge to include HAMMOZ revision 0004 - (2010-01-27)
+!! <li>M. Schultz   (FZ-Juelich) -  merge for HAMMOZ rev0008 - (2010-04-14)
+!!                                  
+!! </ol>
+!!
+!! @par This module is used by
+!! physc
+!! vdiff
+!! cloud
+!! and to_be_added
+!! 
+!! @par Responsible coder
+!! sebastian.rast@zmaw.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+MODULE mo_submodel_interface
+
+  IMPLICIT NONE
+
+  PRIVATE
+
+! public interfaces                 ! 
+                                    ! === initialisation and administration part 
+                                    ! 
+  PUBLIC :: init_subm               ! submodel registration, general settings, before tracer definition
+                                    !
+  PUBLIC :: init_subm_memory        ! initialize memory for submodels
+  PUBLIC :: free_subm_memory        ! free memory for submodels
+                                    ! 
+                                    ! === chemistry interfaces 
+                                    ! 
+  PUBLIC :: stepon_subm             ! read monthly fields
+  PUBLIC :: physc_subm_1            ! called from physc before radiation. Prepare stuff.
+                                    ! used specifically for SOA gas-phase/particle-phase equilibrium
+                                    ! 
+  PUBLIC :: radiation_subm_1        ! initialize submodel fields needed for radiation calculation
+                                    ! 
+  PUBLIC :: radiation_subm_2        ! diagnose radiation after radiation calculation
+!
+  PUBLIC :: radheat_subm            ! diagnose heating of radiation here
+                                    !
+  PUBLIC :: physc_subm_2            ! optional starting point for chemistry calculations
+                                    ! called after vdiff but before cuflx and cloud.
+                                    ! MOZART2 chemistry used to be called from here --
+                                    ! now all chemistry calls in physc_interface_4 (needs testing!)
+                                    !
+  PUBLIC :: scan1_subm
+  PUBLIC :: cuflx_subm              ! called from cuflx.: first interface to wetdep
+                                    ! 
+  PUBLIC :: vdiff_subm              ! called from vdiff - use for chemical flux form boundary conditions
+                                    ! such as surface emissions and dry deposition
+                                    !
+  PUBLIC :: cloud_subm              ! called from cloud / cloud_cdnc, etc.: aerosol wet chemistry
+                                    ! 
+  PUBLIC :: physc_subm_3            ! called from physc. 
+                                    ! aerosol and chemistry interface:
+                                    ! m7 or salsa, MOZART chemistry, sedimentation, etc.
+                                    ! WILL INCLUDE DIAGNOSTICS ###
+                                    !
+  PUBLIC :: physc_subm_4            ! called from physc after the ocean coupling.
+                                    ! CO2 tendency limitation and CO2 diagnostics
+
+!!  PUBLIC :: scan1_subm              ! called from scan1. interface for global diagnostics
+!++mgs: presently unused: see code in hammoz_rev0003 if needed
+
+  LOGICAL, PARAMETER  :: luse_p1_vars = .TRUE.    ! use updated physical variables in submodel 
+                                                  ! routines. This affects pressure, temperature,
+                                                  ! humidity and cloud water/ice.
+                                                  ! Submodel routines will only receive tendency
+                                                  ! variables if they modify them (often only xtte)
+
+  CONTAINS
+                                                             
+  
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!!
+  !!!   subroutine interfaces to the host atmospheric model 
+  !!!
+  !!!   the following interface routines are arranged in the order 
+  !!!   in which they are called
+  !!!
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Initialization of submodels: 
+!! 
+!! <ol>
+!! <li>register submodels 
+!! <li>set namelist variables for submodels
+!! <li>set output control (yes/no simplified output)
+!! <li>initialize module variables
+!! <li>register species
+!! <li>register modes
+!! </ol>
+!! 
+!! All generic submodel switches (mo_submodel) were processed and the active 
+!! submodels have been registered. Use this routine to read submodel specific 
+!! namelists, initialize submodel tracers and perform other initialisations. 
+!! Please avoid inflation of subroutine calls from this routine.
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! initialize
+!!
+!! @par Externals:
+!! <ol>
+!! <li>init_ham
+!! <li>init_megan
+!! <li>init_moz
+!! <li>isccp_initialize
+!! </ol>
+!!
+!! @par Notes
+!! mo_xt shall replace old tracer functionality (mo_sub_nml): to be done 
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  SUBROUTINE init_subm
+  
+  USE mo_exception,        ONLY: message, em_warn, em_info
+  USE mo_species,          ONLY: init_splist, printspec
+  USE mo_submodel,         ONLY: starttracdef, &
+                                 endtracdef, &
+                                 lmethox,  &
+                                 ltransdiag,     &
+                                 lmegan,   &
+                                 lxt,      &
+                                 lham,     &
+                                 lmoz,     &
+                                 lhammoz,  &
+                                 lhmzoxi,  &
+                                 laoa,     &
+                                 id_ham,   &
+                                 id_moz
+  USE mo_sub_nml,          ONLY: request_tracer_nml, set_tracer_nml
+  USE mo_aoa,              ONLY: init_aoa
+#ifdef HAMMOZ
+  USE mo_ham_init,         ONLY: start_ham, ham_define_tracer, ham_initialize
+  USE mo_moz_init,         ONLY: start_moz, moz_define_tracer, moz_initialize
+  USE mo_hammoz,           ONLY: hammoz_initialize
+#endif
+
+  USE mo_hyb,              ONLY: cetah
+!!  USE mo_isccpsimulator,   ONLY: isccp_initialize
+!  USE mo_meganv2,          ONLY: start_megan
+  USE mo_methox,           ONLY: init_methox
+  !! rs USE mo_co2,              ONLY: init_co2
+#ifdef HAMMOZ
+  USE mo_emi_interface,    ONLY: init_emissions
+#endif
+
+!!mgs!!   USE mo_xt,               ONLY: idm_xt, setxt, xt_define_tracers, xt_init    ! to be completed
+
+  ! 0) --- Preparations: initialize species list
+
+  CALL init_splist
+
+  ! 1) --- Start various submodels
+
+#ifdef HAMMOZ
+  ! -- initialize aerosol module and its species
+  IF (lham) CALL start_ham              !ham aerosol module
+!!mgs!! IF (lsalsa) CALL start_salsa           !salsa aerosol module
+
+  ! -- initialize chemistry module and its species
+  IF (lmoz) CALL start_moz(lhmzoxi)   !moz chemistry module
+#endif
+
+!!rs  init_co2 is now call in initialize (in all cases, also for lco2=false)
+  !if (lco2) CALL init_co2(co2mmr)
+!!rs
+
+  IF (lmethox) CALL init_methox                !upper atmospheric H2O production
+
+  !!mgs!!IF (lxt)    CALL setxt                !simple tracer module
+
+  ! 2) --- Define submodel species and tracers
+  !!mgs!!! Simple tracer module (former XT_ functionality)
+  !!mgs!!IF (lxt) THEN
+  !!mgs!!  CALL starttracdef(idm_xt)
+  !!mgs!!  CALL xt_define_tracers
+  !!mgs!!  CALL endtracdef(idm_xt)
+  !!mgs!!END IF
+
+#ifdef HAMMOZ
+  ! -- HAM aerosol module
+  IF (lham) THEN
+    CALL starttracdef(id_ham)
+    CALL ham_define_tracer
+    CALL endtracdef(id_ham)
+  END IF
+
+  ! -- MOZ chemistry module
+  IF (lmoz) THEN
+    CALL starttracdef(id_moz)
+    CALL moz_define_tracer
+    CALL endtracdef(id_moz)
+  END IF
+
+  ! 3) --- Submodel-specific initialisation routines
+
+  !!mgs!!    !
+  !!mgs!!    ! Simple tracer module (former XT_ functionality)
+  !!mgs!!    IF (lxt) CALL xt_init
+
+  ! -- HAM aerosol module
+  IF (lham) THEN
+    CALL ham_initialize
+  END IF
+
+  ! -- MOZ chemistry module
+  IF (lmoz) CALL moz_initialize
+#endif
+
+  ! -- initialize biogenic emissions module
+!  IF (lmegan) CALL start_megan          !megan v2
+
+  ! -- Lightning module (can be run independent of MOZ)
+  !!mgs!! IF (llght) CALL start_lightning
+
+  !!mgs!!!*** remnant from January 2009 merger: still needed?
+  !!mgs!!!   ! --- set all jdefined true if MOZART photolysis scheme is used
+  !!mgs!!!   IF (lmoz .AND. .NOT. lfastj) jdefined(:) = .true.
+  !!mgs!!!***
+
+  !
+  !--- 4) perform cross-submodel initialisations
+  !
+#ifdef HAMMOZ
+  IF (lhammoz) CALL hammoz_initialize
+#endif
+
+#ifdef HAMMOZ
+  ! --- report on tracer, species and mode definitions
+  IF (lham .OR. lmoz) THEN
+    CALL printspec
+    CALL print_debug
+  END IF
+
+  !--- parse emission matrix and prepare use of emissions
+  CALL init_emissions
+#endif
+
+  IF (laoa) CALL init_aoa !initialization of age of air tracers
+
+!!$  !--- require additional independent test tracer via namelist
+!!$  CALL request_tracer_nml
+!!$  !--- Set tracer for tests. This tracer must be already defined by e.g.
+!!$  !    request_tracer_nml
+!!$  CALL set_tracer_nml
+
+  END SUBROUTINE init_subm
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Routines are called from here to initialize diagnostiv streams and allocate buffers
+!!
+!! @author see module info of mo_submodel_interface
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see module info of mo_submodel_interface
+!!
+!! @par This subroutine is called by
+!! init_memory in mo_memory_streams
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ 
+  SUBROUTINE init_subm_memory
+
+    USE mo_submodel,         ONLY: lco2, lham, lmoz, llght, lmegan,  &
+                                   lemissions, lanysubmodel, ltransdiag, &
+                                   laoa
+    USE mo_tracdef,          ONLY: trlist
+
+    !   general process streams and diagnostics
+    USE mo_submodel_streams, ONLY: init_submodel_streams
+    USE mo_vphysc,           ONLY: init_vphysc_stream
+#ifdef HAMMOZ
+    USE mo_wetdep_interface, ONLY: init_wetdep_stream
+    USE mo_drydep_interface, ONLY: init_drydep_stream
+    USE mo_sedi_interface,   ONLY: init_sedi_stream
+    USE mo_emi_interface,    ONLY: init_emi_stream
+#endif
+
+    !   specific submodel streams
+    USE mo_co2,              ONLY: init_co2_memory, reference_co2
+    USE mo_radiation_parameters, ONLY: co2mmr
+    USE mo_transdiag,        ONLY: construct_transdiag_stream
+#ifdef HAMMOZ
+    USE mo_ham_init,         ONLY: ham_init_memory
+    USE mo_moz_init,         ONLY: moz_init_memory
+!!   USE mo_moz_stream_references, ONLY: set_stream_references_moz
+!!   USE mo_lightning,      ONLY: lightning_init_memory
+#endif
+!    USE mo_meganv2,          ONLY: construct_megan_streams
+!!    USE mo_isccpsimulator,   ONLY: construct_stream_isccp
+    USE mo_aoa,              ONLY: get_pointer2trac
+
+    IMPLICIT NONE
+
+    ! Initialize memory for CO2 module
+    ! This is done even if interactive CO2 tracer is not used
+    CALL init_co2_memory(co2mmr)
+
+    IF (.NOT. lanysubmodel) RETURN
+
+    IF (lco2) CALL reference_co2  ! assign a pointer to co2 tracer (only for interactive CO2 transport)
+
+    ! initialization of generic submodel variables and diagnostics:
+    ! * vphysc
+    ! * wetdep    IF (.NOT. lanysubmodel) RETURN
+    ! * drydep
+    ! * sedi
+    CALL init_submodel_streams      ! namelist read etc.
+    CALL init_vphysc_stream
+#ifdef HAMMOZ
+    IF (ANY(trlist%ti(:)%ndrydep > 0)) CALL init_wetdep_stream
+    IF (ANY(trlist%ti(:)%nwetdep > 0)) CALL init_drydep_stream
+    IF (ANY(trlist%ti(:)%nsedi   > 0)) CALL init_sedi_stream
+  ! -- initialize the emissions diagnostics
+  ! NB: this is done here and not in alloc_mem, because the initialisation of the dust module
+  !     makes use of this stream reference already (called from ham_initialize)
+  IF (lemissions) CALL init_emi_stream
+#endif
+
+#ifdef HAMMOZ
+    !! allocate memory for HAM aerosol model
+    IF (lham) CALL ham_init_memory
+
+    !! allocate memory for MOZ chemistry module
+    IF (lmoz) CALL moz_init_memory
+#endif
+
+!!$    IF (lmegan) THEN
+!!$      CALL construct_megan_streams
+!!$      !## Note: construct_megan_streams should find out if it has anything to do (avoid empty stream)
+!!$    END IF
+
+    IF (ltransdiag) CALL construct_transdiag_stream
+
+!!mgs!!IF (lmoz)    CALL moz_init_memory
+!!mgs!!IF (llght)   CALL lightning_init_memory
+!!mgs!!
+!!mgs!!!--- initialisation of generic submodel streams
+!!mgs!!
+!!mgs!!!IF (llocaltimed) THEN
+!!mgs!!!   CALL mo_localtime_init
+!!mgs!!!END IF
+
+    IF (laoa) CALL get_pointer2trac  ! get pointers to age of air tracers
+
+  END SUBROUTINE init_subm_memory
+   
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Routines are called from here to deallocate memory
+!!
+!! @author see module info of mo_submodel_interface
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see module info of mo_submodel_interface
+!!
+!! @par This subroutine is called by
+!! free_memory in mo_memory_streams
+!!
+!! @par Externals:
+!! <ol>
+!! <li>term_kappa
+!! <li>aero_rad_mem_cleanup
+!! <li>bgc_dust_cleanup
+!! <li>gcr_cleanup
+!! <li>aero_nucl_cleanup
+!! <li>aero_nucl_stat_cleanup
+!! <li>free_megan_streams
+!! </ol>
+!!
+!! @par Notes
+!! each init_memory routine must have free_memory counterpart; init_streams doesn't need this.
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+!### may need to add various routines to avoid memory leaks!!!
+
+  SUBROUTINE free_subm_memory
+
+    USE mo_submodel,       ONLY: lham, lsalsa, llght, lmegan, lmoz
+    USE mo_co2,            ONLY: cleanup_co2_memory
+#ifdef HAMMOZ
+    USE mo_ham_init,       ONLY: ham_free_memory
+#endif
+!    USE mo_meganv2,        ONLY: free_megan_streams
+
+    !!mgs!!USE mo_aero_mem,       ONLY: ham_free_memory
+    !!mgs!!USE mo_moz_mem,        ONLY: moz_free_memory
+    !!mgs!!USE mo_lightning,      ONLY: lightning_free_memory
+    !!mgs!!USE mo_moz_wetdep,     ONLY: moz_free_wetdep_memory
+    !!mgs!!USE mo_megan,          ONLY: megan_free_memory
+
+    IMPLICIT NONE
+
+    CALL cleanup_co2_memory
+
+!    IF (lmegan) CALL free_megan_streams
+
+#ifdef HAMMOZ
+    IF (lham)   CALL ham_free_memory
+!    IF (lmoz)   CALL moz_free_memory
+#endif
+
+    !!mgs!!IF (llght) CALL lightning_free_memory
+    !!mgs!!!--- deallocate memory of generic submodel components
+    !!mgs!!! ...
+    !!mgs!!! CALL drydep_free_memory
+    !!mgs!!! CALL wetdep_free_memory
+
+  END SUBROUTINE free_subm_memory
+
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Interface for reading submodel boundary conditions
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! stepon before first scans over gaussian latitudes
+!!
+!! @par Notes
+!! Most emissions now make use of the boundary condition scheme in mo_boundary_condition
+!! Their reading is handled automatically via the call to bc_list_read in stepon
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  SUBROUTINE stepon_subm (current_date, next_date)
+
+  USE mo_time_conversion,     ONLY: time_days
+  USE mo_time_control,        ONLY: get_date_components, lstart, lresume
+  USE mo_submodel,            ONLY: lco2, lham, lmegan
+#ifdef HAMMOZ
+  USE mo_ham_tools,           ONLY: calc_daylength
+  USE mo_ham_emissions,       ONLY: idsec_dust, idsec_biogenic
+  USE mo_bgc_dust,            ONLY: bgc_dust_read_monthly, ndurough
+#endif
+!  USE mo_meganv2,             ONLY: read_bio_voc_emiss_fields
+  USE mo_co2,                 ONLY: read_co2_emission
+
+  IMPLICIT NONE
+
+  TYPE(time_days)     :: current_date
+  TYPE(time_days)     :: next_date
+
+  INTEGER             :: iyear, imonth, iday
+  INTEGER, SAVE       :: imonthm1 = -1           ! previous month
+
+
+  !--- obtain current date
+  CALL get_date_components (current_date, year=iyear, month=imonth, day=iday)
+
+#ifdef HAMMOZ
+  !--- calculate daylength for HAM
+  IF (lham) CALL calc_daylength
+#endif
+
+  !--- read monthly fields (### should be replaced by BC scheme)
+  IF (imonth /= imonthm1) THEN
+#ifdef HAMMOZ
+    !-- BGC dust emissions
+    IF (lham .AND. idsec_dust > 0) CALL bgc_dust_read_monthly(imonth, ndurough)
+
+!!$    !-- MEGAN biogenic emission parameters
+!!$    IF (lmegan .AND. idsec_biogenic > 0) THEN
+!!$      CALL read_bio_voc_emiss_fields
+!!$    END IF
+#endif
+
+    !-- JSBACH CO2 emissions
+!!mgs!!    IF (lco2) CALL read_co2_emission  
+  END IF
+
+  IF (lco2) CALL read_co2_emission       ! all date calculations done internally
+
+  !--- save month
+  imonthm1 = imonth
+
+  END SUBROUTINE stepon_subm
+
+
+!! ### DEBUGGING OUTPUT ### print tracer, species and aeromode definitions in condensed form
+!!
+!!
+
+#ifdef HAMMOZ
+  SUBROUTINE print_debug
+
+  USE mo_mpi,       ONLY: p_parallel_io
+  USE mo_tracdef,   ONLY: ntrac, trlist
+  USE mo_species,   ONLY: nspec, speclist
+  USE mo_aero,      ONLY: naermod, aeromode
+  USE mo_m7ctl,     ONLY: m7_ngasspec, m7_gasspec, m7_naerospec, m7_aerospec
+
+  INTEGER     :: jt
+
+  IF (p_parallel_io) THEN
+    WRITE(0,*) '---- SUBMODEL DEBUG OUTPUT ----- all indices should be set by now.'
+    WRITE(0,*) ntrac, ' tracers.'
+    WRITE(0,*) 'Tracer index   name                   spid     mode'
+    DO jt=1,ntrac
+      WRITE(0,'(i8,6x,a24,2x,i6,2x,i6)') jt, trlist%ti(jt)%fullname, trlist%ti(jt)%spid, trlist%ti(jt)%mode
+    END DO
+
+    WRITE(0,*) '------------------------------------------------------'
+    WRITE(0,*) nspec, ' species.'
+    WRITE(0,*) 'Species index   name                   itrtype      idt'
+    DO jt=1,nspec
+      WRITE(0,'(i8,6x,a24,2x,i6,2x,i6)') jt, speclist(jt)%shortname, speclist(jt)%itrtype, speclist(jt)%idt
+    END DO
+
+    WRITE(0,*) '------------------------------------------------------'
+    WRITE(0,*) naermod, ' aeromodes.'
+    WRITE(0,*) 'Aeromodeindex   imode   spid    idt'
+    DO jt=1,naermod
+      WRITE(0,'(i8,6x,i6,2x,i6,2x,i6)') jt, aeromode(jt)%imode, aeromode(jt)%spid, aeromode(jt)%idt
+    END DO
+
+    IF (m7_naerospec > 0) THEN
+      WRITE(0,*) '------------------------------------------------------'
+      WRITE(0,*) 'M7 aerosol species indices:'
+      WRITE(0,*) m7_aerospec(1:m7_naerospec)
+    ELSE
+      WRITE(0,*) 'No aerosol species indices in M7!'
+    END IF
+    IF (m7_ngasspec > 0) THEN
+      WRITE(0,*) '------------------------------------------------------'
+      WRITE(0,*) 'M7 gas-phase species indices:'
+      WRITE(0,*) m7_gasspec(1:m7_ngasspec)
+    ELSE
+      WRITE(0,*) 'No gas-phase species indices in M7!'
+    END IF
+
+    WRITE(0,*) '---- END SUBMODEL DEBUG OUTPUT ----  '
+  END IF
+
+  END SUBROUTINE print_debug
+#endif
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! First interface to submodels that is called in physc before WMO tropopause 
+!! and radiation calculation.
+!! Historically this was call_chem0 in call_submodels. 
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! physc
+!!
+!! @par Externals:
+!! <ol>
+!! <li>soa_equi0
+!! </ol>
+!!
+!! @par Notes
+!! this subroutine calls routines that must be executed before the radiation 
+!! calculation
+!! pressure has not been updated yet to t+dt
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  SUBROUTINE physc_subm_1 (kproma, kbdim, klev, &
+                           klevp1, ktrac, krow, &
+                           papm1,  paphm1,      &
+                           ptm1,   ptte,        &
+                           pxtm1,  pxtte,       &  
+                           pqm1,   pqte          ) 
+
+
+  USE mo_kind,          ONLY : wp
+  USE mo_control,       ONLY : ltimer
+  USE mo_timer,         ONLY : timer_start, timer_stop, timer_physc_subm_1
+  USE mo_time_control,  ONLY : time_step_len
+  USE mo_submodel,      ONLY : lco2
+  USE mo_co2,           ONLY : co2_mbalance
+#ifdef HAMMOZ
+  USE mo_aero,          ONLY : lsoa
+  USE mo_ham_soa_processes, ONLY : soa_equi0
+#endif
+
+  IMPLICIT NONE
+
+! arguments
+! pxtm1 must be intent(inout) for soa
+  
+  INTEGER,  INTENT(in)    :: kproma                 ! geographic block number of locations
+  INTEGER,  INTENT(in)    :: kbdim                  ! geographic block maximum number of locations 
+  INTEGER,  INTENT(in)    :: klev                   ! number of levels
+  INTEGER,  INTENT(in)    :: klevp1                 ! number of levels + 1 
+  INTEGER,  INTENT(in)    :: ktrac                  ! number of tracers
+  INTEGER,  INTENT(in)    :: krow                   ! geographic block number
+
+  REAL(wp), INTENT(in)    :: ptm1  (kbdim,klev)     ! air temperature (t-dt)   [K]
+  REAL(wp), INTENT(in)    :: ptte  (kbdim,klev)     ! air temperature tendency [K]
+  REAL(wp), INTENT(in)    :: pqm1  (kbdim,klev)     ! specific humidity (t-dt) [kg/kg]
+  REAL(wp), INTENT(in)    :: pqte  (kbdim,klev)     ! specific humidity tendency (t-dt) [kg/kg]
+  REAL(wp), INTENT(in)    :: papm1 (kbdim,klev)     ! air pressure at layer center    (t-dt) [Pa]
+  REAL(wp), INTENT(in)    :: paphm1(kbdim,klevp1)   ! air pressure at layer interface (t-dt) [Pa]
+  REAL(wp), INTENT(inout) :: pxtm1 (kbdim,klev,ktrac) ! tracer mass/number mixing ratio (t-dt)
+  REAL(wp), INTENT(inout) :: pxtte (kbdim,klev,ktrac) ! tracer mass/number mixing ratio tendency
+
+! local variables
+  REAL(wp) :: zt(kbdim,klev)
+  REAL(wp) :: zq(kbdim,klev)
+  REAL(wp) :: zxt(kbdim,klev,ktrac)
+  INTEGER  :: jt
+
+  IF (ltimer) CALL timer_start(timer_physc_subm_1)
+
+  !-- update physical variables
+  IF (luse_p1_vars) THEN
+    zt(1:kproma,:) = ptm1(1:kproma,:) + ptte(1:kproma,:)*time_step_len
+    zq(1:kproma,:) = pqm1(1:kproma,:) + pqte(1:kproma,:)*time_step_len
+    DO jt=1,ktrac
+      zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt)*time_step_len
+    END DO
+  ELSE
+    zt(1:kproma,:) = ptm1(1:kproma,:)
+    zq(1:kproma,:) = pqm1(1:kproma,:)
+    DO jt=1,ktrac
+      zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt)
+    END DO
+
+  END IF
+
+  CALL co2_mbalance (kproma,          kbdim,             klev,             &
+                     klevp1,          krow,            paphm1)
+
+#ifdef HAMMOZ
+  ! set diagnostic tracers for SOA and calculate gas/aerosol equilibrium
+  IF (lsoa .AND. ktrac > 0) THEN 
+     CALL soa_equi0(kproma, kbdim, klev, &
+                    krow,   ktrac,       &
+                    papm1,               &
+                    zt,     zq,          &
+                    pxtm1,  pxtte     )
+  END IF
+#endif
+  IF (ltimer) CALL timer_stop(timer_physc_subm_1)
+
+  END SUBROUTINE physc_subm_1
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Radiative heating diagnostics
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! radheat
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!!
+!! @par Responsible coder
+!! sebastian.rast@zmaw.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  SUBROUTINE radheat_subm(kproma       ,kbdim           ,klev             ,&
+                          klevp1       ,krow            ,pconvfact        ,&
+                          pflxs        ,pflxt)
+
+  USE mo_kind,        ONLY: wp
+
+!! This subroutine is for diagnostics of heat rates
+  IMPLICIT NONE
+! arguments
+  
+  INTEGER, INTENT(in)  :: kproma     ! actual length of grid point block
+  INTEGER, INTENT(in)  :: kbdim      ! maximum length of grod point block
+  INTEGER, INTENT(in)  :: klev       ! number of levels
+  INTEGER, INTENT(in)  :: klevp1     ! number of levels + 1
+  INTEGER, INTENT(in)  :: krow       ! geographic block number
+  REAL(wp), INTENT(in) :: pconvfact(kbdim,klev) ! conversion factor
+  REAL(wp), INTENT(in) :: pflxs(kbdim,klevp1), pflxt(kbdim,klevp1) ! heat fluxes for solar and thermal wave lengths
+
+  END SUBROUTINE radheat_subm
+
+ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! This subroutine is one of the main "portals" to the chemistry submodules. 
+!! It is called from physc after vdiff and radheat, before gwspectrum, 
+!! cucall, etc.
+!! In the past, call_chem1 (equivalent to this interface routine) was used to 
+!! drive the MOZART2 chemistry, while HAMMONIA/MOZART3 was called via call_chem2
+!! (which is now physc_interface_3). 
+!! This should now be controlled by a namelist switch (at least until we know 
+!! what works best)
+!! Note that HAM was always called from call_chem2 and radionucl_sink always 
+!! from call_chem1.
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! physc
+!!
+!! @par Externals:
+!! <ol>
+!! <li>to_be_added
+!! </ol>
+!!
+!! @par Notes
+!! not yet used
+!! try to keep arguments similar to physc_subm_2 in order to maintain flexibility for
+!! chemistry calls
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  SUBROUTINE physc_subm_2                               &
+            (kproma, kbdim, klev,  klevp1, ktrac, krow, &
+             itrpwmo, itrpwmop1,                        &
+             paphm1, papm1, paphp1, papp1,              &
+             ptm1,   ptte,  ptsurf,                     &
+             pqm1,   pqte,  pxlm1, pxlte, pxim1, pxite, &
+             pxtm1,  pxtte,                             &
+             paclc,  ppbl,                              &
+             loland, loglac                            )   
+
+  
+  USE mo_kind,              ONLY: wp
+  USE mo_control,           ONLY: ltimer
+  USE mo_time_control,      ONLY: time_step_len
+  USE mo_timer,             ONLY: timer_start,   &
+                                  timer_stop,    &
+                                  timer_physc_subm_2
+  USE mo_physical_constants,ONLY: vtmpc1
+  USE mo_submodel,          ONLY: lmoz, llght, laircraft, lemissions
+  USE mo_sub_echam,         ONLY: radionucl_sink
+  USE mo_vphysc,            ONLY: set_vphysc_var
+#ifdef HAMMOZ
+  USE mo_aero,              ONLY: lsoa
+! USE mo_moz,               ONLY: ichem
+! USE mo_moz_aircraft,      ONLY: moz_aircraft_emissions
+! USE mo_lightning,         ONLY: lightning_emissions
+  USE mo_ham_soa_processes, ONLY: soa2prod, soa_progn, soa_equi0
+#endif
+
+
+  IMPLICIT NONE
+
+  
+! arguments
+  
+  INTEGER, INTENT(in)  :: kproma                      ! geographic block number of locations
+  INTEGER, INTENT(in)  :: kbdim                       ! geographic block maximum number of locations 
+  INTEGER, INTENT(in)  :: klev                        ! numer of levels
+  INTEGER, INTENT(in)  :: klevp1                      ! numer of levels + 1
+  INTEGER, INTENT(in)  :: ktrac                       ! numer of tracers
+  INTEGER,  INTENT(in) :: krow                        ! geographic block number
+  INTEGER,  INTENT(in) :: itrpwmo  (kbdim)            ! tropopause on model levels
+  INTEGER,  INTENT(in) :: itrpwmop1(kbdim)            ! tropopause on model levels + 1 
+
+  REAL(wp), INTENT(in) :: paphm1   (kbdim,klev+1)     ! air pressure at layer interface (t-dt) [Pa]
+  REAL(wp), INTENT(in) :: papm1    (kbdim,klev)       ! air pressure at layer center    (t-dt) [Pa]
+  REAL(wp), INTENT(in) :: paphp1   (kbdim,klev+1)     ! air pressure at layer interface (t+dt) [Pa]
+  REAL(wp), INTENT(in) :: papp1    (kbdim,klev)       ! air pressure at layer center    (t+dt) [Pa]
+  REAL(wp), INTENT(in) :: ptm1     (kbdim,klev)       ! air temperature (t-dt)   [K]
+  REAL(wp), INTENT(in) :: ptte     (kbdim,klev)       ! air temperature tendency [K/s]
+  REAL(wp), INTENT(in) :: ptsurf   (kbdim)            ! surface temperature [K]
+  REAL(wp), INTENT(in) :: pqm1     (kbdim,klev)       ! specific humidity             [kg/kg]
+  REAL(wp), INTENT(in) :: pqte     (kbdim,klev)       ! specific humidity tendency    [kg/kg/s]
+  REAL(wp), INTENT(in) :: pxlm1    (kbdim,klev)       ! cloud liquid content (t-dt)   [kg/kg]
+  REAL(wp), INTENT(in) :: pxlte    (kbdim,klev)       ! cloud liquid content tendency [kg/kg/s]
+  REAL(wp), INTENT(in) :: pxim1    (kbdim,klev)       ! cloud ice    content (t-dt)   [kg/kg]
+  REAL(wp), INTENT(in) :: pxite    (kbdim,klev)       ! cloud ice    content tendency [kg/kg/s]
+  REAL(wp), INTENT(in) :: paclc    (kbdim,klev)       ! cloud fraction [0~1] 
+  REAL(wp), INTENT(in) :: ppbl     (kbdim)            ! level of PBL upper boundary
+  REAL(wp), INTENT(inout) :: pxtm1 (kbdim,klev,ktrac) ! tracer mass/number mixing ratio (t-dt)   [kg/kg]/[#/kg]
+  REAL(wp), INTENT(inout) :: pxtte (kbdim,klev,ktrac) ! tracer mass/number mixing ratio tendency [kg/kg]/[#/kg]
+  LOGICAL,  INTENT(in) :: loland   (kbdim)            ! land mask 
+  LOGICAL,  INTENT(in) :: loglac   (kbdim)            ! glacier mask 
+  
+! local variables
+  REAL(wp) :: zaph(kbdim, klevp1), zap(kbdim, klev)
+  REAL(wp) :: zt(kbdim,klev)
+  REAL(wp) :: ztv(kbdim,klev)         ! virtual temperature
+  REAL(wp) :: zq(kbdim,klev)
+  REAL(wp) :: zxl(kbdim,klev), zxi(kbdim,klev)
+  REAL(wp) :: zxt(kbdim,klev,ktrac)
+  INTEGER  :: jt
+
+  IF (ltimer) call timer_start(timer_physc_subm_2)
+
+  !-- update physical variables
+  IF (luse_p1_vars) THEN
+    zaph(1:kproma,:) = paphp1(1:kproma,:)
+    zap(1:kproma,:) = papp1(1:kproma,:)
+    zt(1:kproma,:) = ptm1(1:kproma,:) + ptte(1:kproma,:)*time_step_len
+    zq(1:kproma,:) = pqm1(1:kproma,:) + pqte(1:kproma,:)*time_step_len
+    zxl(1:kproma,:) = pxlm1(1:kproma,:) + pxlte(1:kproma,:)*time_step_len
+    zxi(1:kproma,:) = pxim1(1:kproma,:) + pxite(1:kproma,:)*time_step_len
+    DO jt=1,ktrac
+      zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt)*time_step_len
+    END DO
+  ELSE
+    zaph(1:kproma,:) = paphm1(1:kproma,:)
+    zap(1:kproma,:) = papm1(1:kproma,:)
+    zt(1:kproma,:) = ptm1(1:kproma,:)
+    zq(1:kproma,:) = pqm1(1:kproma,:)
+    zxl(1:kproma,:) = pxlm1(1:kproma,:)
+    zxi(1:kproma,:) = pxim1(1:kproma,:)
+    DO jt=1,ktrac
+      zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt)
+    END DO
+  END IF
+
+  !-- compute virtual temperature (pure diagnostics at present)  
+  ztv(1:kproma,:) = zt(1:kproma,:)*(1._wp+vtmpc1*zq(1:kproma,:)-(zxl(1:kproma,:)+zxi(1:kproma,:)))
+
+  !-- save physical variables for diagnostic output
+  CALL set_vphysc_var &
+                      (kproma,                   klev,                &
+                       krow,                     paphm1=zaph,         &
+                       papm1=zap,                ptvm1=ztv,           &
+                       ppbl=ppbl,                ktrpwmo=itrpwmo,     &
+                       ktrpwmop1=itrpwmop1)
+
+  IF (ktrac.GT.0) THEN
+
+#ifdef HAMMOZ 
+    !--- secondary organic aerosol processes
+    IF (lsoa)THEN 
+       !  IF (.NOT. lmoz) THEN 
+       CALL soa2prod(kproma, kbdim, klev, klevp1, krow,  ktrac, &
+                     paphp1, papp1, ptm1, ptte,   pxtm1, pxtte)
+       ! END IF
+       CALL soa_progn(kproma, kbdim, klev, krow,  ktrac, pxtm1, pxtte)
+       CALL soa_equi0(kproma, kbdim, klev, krow,  ktrac, &
+                      zap,    zt,    zq,   pxtm1, pxtte)
+    END IF
+#endif
+
+    !
+    ! commonly used processes calculated by ECHAM:
+    !
+    CALL radionucl_sink (kproma, kbdim, klev, zxt, pxtte)
+    
+  ENDIF
+
+  IF (ltimer) call timer_stop(timer_physc_subm_2)
+  
+  END SUBROUTINE physc_subm_2
+
+ 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! This is the interface routine for submodel surface flux calculations
+!! (deposition and emissions)
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! vdiff
+!!
+!! @par Externals:
+!! <ol>
+!! <li>call_chem_bcond
+!! <li>xt_drydep
+!! </ol>
+!!
+!! @par Notes
+!! 
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  SUBROUTINE vdiff_subm      (kproma, kbdim,  klev,   klevp1,        &
+                              ktrac,  krow,                          &
+                              ptm1,   pum1,   pvm1,   pqm1,          &
+                              papm1,  paphm1, paphp1, pgeom1, ptslm1,&
+                              pxtm1,  pseaice,pforest,               &
+                              pfrl,   pfrw,   pfri,   pcvs,   pcvw,  &
+                              pvgrat, ptsw,   ptsi,                  &
+                              pu10,   pv10,                          &
+                              paz0,   paz0l,  paz0w,  paz0i,         &
+                              pcfm,   pcfnc,  pepdu2, pkap,          &       !!mgs!! pcfm !
+                              pri,    ptvir1, ptvl,                  &
+! TS                              psrfl,  pcdnl,  pqss,   pvlt,          &
+                              psrfl,  pcdn,  pqss,   pvlt,           &
+                              loland,                                &
+                              pxtte,  pxtems,                        &
+                              pxlm1,  pxim1                          )
+
+
+  USE mo_kind,               ONLY: wp
+  USE mo_control,            ONLY: ltimer
+  USE mo_timer,              ONLY: timer_start,       &
+                                   timer_stop,        &
+                                   timer_vdiff_subm,  &
+                                   timer_emissions,   &
+                                   timer_drydep
+  USE mo_physical_constants, ONLY: vtmpc1, rd
+  USE mo_submodel,           ONLY: lham,       &
+                                   lsalsa,     &
+                                   losat,      &
+                                   lmoz,       &
+                                   lmegan,     &
+                                   lco2,       &
+                                   ltransdiag, &
+                                   lemissions, &
+                                   ldrydep
+  USE mo_tracdef,            ONLY: trlist
+  USE mo_mpi,                ONLY: p_parallel_io
+  USE mo_time_control,       ONLY: lstart
+  USE mo_co2,                ONLY: co2_exchange
+  USE mo_transdiag,          ONLY: transdiag
+!  USE mo_meganv2,            ONLY: biogenic_emissions
+#ifdef HAMMOZ
+  USE mo_drydep_interface,   ONLY: drydep_interface
+  USE mo_emi_interface,      ONLY: emi_interface
+#endif
+
+
+
+
+! arguments
+
+  INTEGER,  INTENT(in) :: kproma                      ! geographic block number of locations
+  INTEGER,  INTENT(in) :: kbdim                       ! geographic block maximum number of locations
+  INTEGER,  INTENT(in) :: klev                        ! number of levels
+  INTEGER,  INTENT(in) :: klevp1                      ! number of levels + 1
+  INTEGER,  INTENT(in) :: ktrac                       ! number of tracers
+  INTEGER,  INTENT(in) :: krow                        ! geographic block number
+
+  LOGICAL,  INTENT(in) :: loland   (kbdim)            ! logical land mask (including glaciers)
+  REAL(wp), INTENT(in) :: pcfm     (kbdim,klev)       ! stability dependend momentum transfer coeff.
+  REAL(wp), INTENT(in) :: pcfnc    (kbdim)            ! function of heat transfer coeff.
+  REAL(wp), INTENT(in) :: pepdu2                      ! constant
+  REAL(wp), INTENT(in) :: pkap                        ! constant
+  REAL(wp), INTENT(in) :: pum1     (kbdim,klev)       ! u-wind (t-dt)
+  REAL(wp), INTENT(in) :: pvm1     (kbdim,klev)       ! v-wind (t-dt)
+  REAL(wp), INTENT(in) :: ptm1     (kbdim,klev)       ! temperature (t-dt)
+  REAL(wp), INTENT(in) :: pqm1     (kbdim,klev)       ! specific humidity (t-dt)
+  REAL(wp), INTENT(in) :: papm1    (kbdim,klev)       ! air pressure at layer center (t-dt)
+  REAL(wp), INTENT(in) :: paphp1   (kbdim,klev+1)     ! air pressure at layer interface (t+dt)
+  REAL(wp), INTENT(in) :: paphm1   (kbdim,klev+1)     ! air pressure at layer interface (t-dt)  (### unus
+  REAL(wp), INTENT(in) :: pgeom1   (kbdim,klev)       ! geopotential (t-dt)
+  REAL(wp), INTENT(in) :: pri      (kbdim)            ! moist richardson number
+  REAL(wp), INTENT(in) :: ptvir1   (kbdim,klev)       ! see vdiff
+  REAL(wp), INTENT(in) :: ptvl     (kbdim)            ! see mo_surface_land
+  REAL(wp), INTENT(in) :: paz0     (kbdim)            ! roughness length
+  REAL(wp), INTENT(in) :: ptslm1   (kbdim)            ! surface temperature (t-dt)
+  REAL(wp), INTENT(in) :: pfrl     (kbdim)            ! land fraction
+  REAL(wp), INTENT(in) :: pfrw     (kbdim)            ! water fraction
+  REAL(wp), INTENT(in) :: pfri     (kbdim)            ! ice fraction
+  REAL(wp), INTENT(in) :: pcvs     (kbdim)            ! snow cover fraction
+  REAL(wp), INTENT(in) :: pcvw     (kbdim)            ! wet skin fraction
+  REAL(wp), INTENT(in) :: pvgrat   (kbdim)            ! vegetation ratio
+  REAL(wp), INTENT(in) :: psrfl    (kbdim)            ! surface solar flux
+  REAL(wp), INTENT(in) :: pu10     (kbdim)            ! 10m w-wind
+  REAL(wp), INTENT(in) :: pv10     (kbdim)            ! 10m v-wind
+  REAL(wp), INTENT(in) :: pforest  (kbdim)            ! forest fraction
+  REAL(wp), INTENT(in) :: pseaice  (kbdim)            ! sea ice fraction
+  REAL(wp), INTENT(in) :: ptsi     (kbdim)            ! surface temperature over ice
+  REAL(wp), INTENT(in) :: paz0l    (kbdim)            ! roughness length over land
+  REAL(wp), INTENT(in) :: paz0w    (kbdim)            ! roughness length over water
+  REAL(wp), INTENT(in) :: paz0i    (kbdim)            ! roughness length over ice
+  REAL(wp), INTENT(in) :: pcdn     (kbdim)            ! see mo_surface_land
+  REAL(wp), INTENT(in) :: ptsw     (kbdim)            ! surface temperature over water
+  REAL(wp), INTENT(in) :: pvlt     (kbdim)            ! see vdiff    (### unused ###)
+  REAL(wp), INTENT(in) :: pqss     (kbdim,klev)       ! see vdiff
+
+  REAL(wp), INTENT(in) :: pxlm1    (kbdim,klev)       ! cloud liquid content (t-dt)   [kg/kg]
+  REAL(wp), INTENT(in) :: pxim1    (kbdim,klev)       ! cloud ice    content (t-dt)   [kg/kg]
+
+  REAL(wp), INTENT(inout) :: pxtems   (kbdim,ktrac)      ! surface emissions
+  REAL(wp), INTENT(inout) :: pxtm1    (kbdim,klev,ktrac) ! tracer mass/number mixing ratio (t-dt)
+!NB: pxtm1 should definitively be INTENT(in) !!!
+  REAL(wp), INTENT(inout) :: pxtte    (kbdim,klev,ktrac) ! tracer mass/number mixing ratio tendency
+
+
+  !++mgs: temporary fix for workaround due to "land" bug. The following three arguments can be ###
+  ! restored as intent(in) once this bug is fixed.
+! TS  REAL(wp), INTENT(inout) :: pcfnc(kbdim), pri(kbdim), pcdnl(kbdim)
+  !--mgs
+
+! local variables
+
+  REAL(wp) :: zdensair (kbdim)            ! air density in surface layer
+
+!++mgs
+  REAL(wp) :: zqsfc(kbdim), zqsssfc(kbdim), ztsfc(kbdim)     ! lowest model level values
+                                                             ! for humidity, saturation and temperature
+
+  IF (ltimer) CALL timer_start(timer_vdiff_subm)
+
+  ! preparations
+  zqsfc(:)   = 0._wp
+  zqsssfc(:) = 0._wp
+  ztsfc(:)   = 0._wp
+  zqsfc(1:kproma)   = pqm1(1:kproma,klev)
+  zqsssfc(1:kproma) = pqss(1:kproma,klev)
+  ztsfc(1:kproma)   = ptm1(1:kproma,klev)
+  zdensair(1:kproma)= papm1(1:kproma,klev)/(ptm1(1:kproma,klev)*rd*(1._wp+vtmpc1*pqm1(1:kproma,klev)))
+
+  ! collect variable from physc (now done in vdiff by set_vphysc_var)
+!!mgs&jsr!!  velo10m      (1:kproma,krow) = pw10(1:kproma)
+
+  !-------------------------------------
+  ! submodel interface: emissions
+  !-------------------------------------
+
+  IF (lemissions) THEN
+    IF (ltimer) CALL timer_start(timer_emissions)
+    !--- general emissions controlled by emi_matrix
+#ifdef HAMMOZ    
+    CALL emi_interface(kproma, kbdim, ktrac, klev, klevp1, krow, paphp1, pgeom1, pxtems, pxtte)
+#endif
+
+    !--- biogenic (MEGAN) emissions
+!    IF (lmegan) CALL biogenic_emissions(kproma, kbdim, klev, krow, loland, ptm1, pxtems)
+    IF (ltimer) CALL timer_stop(timer_emissions)
+
+!! ### TEMPORARY CODE ###
+!!    IF(lham) THEN
+!!      CALL emissions_old(kproma, kbdim,  klev,  klevp1, krow,   ptsw,   &
+!!                         pgeom1, pxtems, paphp1, pxtte, loland, pseaice, ptm1 )
+!!    END IF
+!!  IF (lmoz) ...
+
+  END IF  !   lemissions
+
+  !--- CO2 module - this puts all CO2 fluxes from ocean and land into atmosphere
+  IF (lco2) CALL co2_exchange(kproma, kbdim, ktrac, pfrl, pxtems, krow)
+
+  !-------------------------------------
+  ! submodel interface: dry depostion
+  !-------------------------------------
+
+#ifdef HAMMOZ
+  IF (ldrydep .AND. trlist%anydrydep>0 .AND..NOT.lstart) THEN
+
+  ! to avoid instabilities the sink processes are switched off
+  ! on the first day of the calculations.      ### IS THIS STILL NECESSARY ???
+
+    IF (ltimer) CALL timer_start(timer_drydep)
+    CALL drydep_interface(kbdim, kproma,  klev,     krow,                    &
+                          zqsfc,  zqsssfc, ztsfc,  pcfm,   pcfnc,            &
+                          pepdu2, pkap,  pum1,     pvm1,   pgeom1,   pri,    &
+                          ptvir1, ptvl,            paz0,   ptslm1,   loland, &
+                          pfrl,   pfrw,  pfri,     pcvs,   pcvw,     pvgrat, &
+                          psrfl,                           pu10,     pv10,   &
+                          pxtems, pxtm1, zdensair, paphp1, pforest,  ptsi,   &
+! TS                                         paz0l,    paz0w,  paz0i,    pcdnl   )
+                                         paz0l,    paz0w,  paz0i,    pcdn    )
+    IF (ltimer) CALL timer_stop(timer_drydep)
+
+  END IF
+#endif
+  
+  IF (ltransdiag) CALL transdiag(kproma,   kbdim,   klev,   klevp1,   krow,  &
+                                 pum1,     pvm1,    ptm1,   pqm1,            &
+                                 pxlm1,    pxim1,                            &
+                                 paphm1,   pgeom1                            )
+
+  IF (ltimer) CALL timer_stop(timer_vdiff_subm)
+
+  END SUBROUTINE vdiff_subm
+
+         
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! interface between cloud physics and sulfur chemistry
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! <ol>
+!! <li> S. Ferrachat, ETH Zurich. Replacement of old xt_chemistry call by new ham_wet_chemistry
+!!                                and wetdep_interface calls (2009.08; 2009.12)
+!! </ol>
+!!
+!! @par This subroutine is called by
+!! cloud
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!! The wet deposition interface is also called from cuflx_subm.
+!! 
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+
+  SUBROUTINE cloud_subm(                                   &
+             kproma,     kbdim,      klev,       ktop,     &
+             krow,                                         &
+             pmlwc,      pmiwc,      pmratepr,   pmrateps, &
+             pfrain,     pfsnow,     pfevapr,    pfsubls,  &
+             pmsnowacl,  paclc,      ptm1,       ptte,     &
+             pxtm1,      pxtte,      paphp1,     papp1,    &
+             prhop1,     pclcpre)
+
+  USE mo_kind,              ONLY: wp
+  USE mo_physical_constants,ONLY: grav
+  USE mo_control,           ONLY: ltimer
+  USE mo_timer,             ONLY: timer_start,          &
+                                  timer_stop,           &
+                                  timer_cloud_subm,     &
+                                  timer_ham_wetchem,    &
+                                  timer_wetdep
+  USE mo_time_control,      ONLY: time_step_len
+  USE mo_submodel,          ONLY: lchemistry,           &
+                                  lham,                 &
+                                  lhammoz,              &
+                                  lwetdep
+  USE mo_tracdef,           ONLY: ntrac, trlist
+#ifdef HAMMOZ
+  USE mo_hammoz,            ONLY: hammoz_set_oxidants
+  USE mo_ham_trac,          ONLY: idt_so2
+  USE mo_ham_chemistry,     ONLY: ham_wet_chemistry
+  USE mo_wetdep_interface,  ONLY: wetdep_interface
+#endif
+
+! arguments
+
+  INTEGER,  INTENT(in)    :: kproma                      ! geographic block number of locations
+  INTEGER,  INTENT(in)    :: kbdim                       ! maximum number of locations in block
+  INTEGER,  INTENT(in)    :: klev                        ! number of levels
+  INTEGER,  INTENT(in)    :: ktop                        ! top level index
+  INTEGER,  INTENT(in)    :: krow                        ! geographic block number
+  REAL(wp), INTENT(in)    :: pclcpre  (kbdim,klev)       ! fraction of grid box covered by precip
+  REAL(wp), INTENT(in)    :: pfrain   (kbdim,klev)       ! rain flux before evaporation [kg/m2/s]
+  REAL(wp), INTENT(in)    :: pfsnow   (kbdim,klev)       ! snow flux before evaporation [kg/m2/s]
+  REAL(wp), INTENT(in)    :: pfevapr  (kbdim,klev)       ! evaporation of rain [kg/m2/s]
+  REAL(wp), INTENT(in)    :: pfsubls  (kbdim,klev)       ! sublimation of snow [kg/m2/s]
+  REAL(wp), INTENT(in)    :: pmsnowacl(kbdim,klev)       ! accretion rate of snow with cloud droplets in
+  REAL(wp), INTENT(in)    :: ptm1     (kbdim,klev)       ! air temperature (t-dt)   [K]
+  REAL(wp), INTENT(in)    :: ptte     (kbdim,klev)       ! air temperature tendency [K]
+  REAL(wp), INTENT(in)    :: prhop1   (kbdim,klev)       ! air density (t-dt)
+  REAL(wp), INTENT(in)    :: papp1    (kbdim,klev)       ! air pressure at layer center    (t+dt) [Pa]
+  REAL(wp), INTENT(in)    :: paphp1   (kbdim,klev+1)     ! air pressure at layer interface (t+dt) [Pa]
+  REAL(wp), INTENT(inout) :: paclc    (kbdim,klev)       ! cloud fraction [0~1]
+  REAL(wp), INTENT(inout) :: pmlwc    (kbdim,klev)       ! cloud liquid content before rain [kg/kg]
+  REAL(wp), INTENT(inout) :: pmiwc    (kbdim,klev)       ! cloud ice    content before rain [kg/kg]
+  REAL(wp), INTENT(inout) :: pmratepr (kbdim,klev)       ! rain formation rate in cloudy part
+  REAL(wp), INTENT(inout) :: pmrateps (kbdim,klev)       ! ice  formation rate in cloudy part
+  REAL(wp), INTENT(in)    :: pxtm1    (kbdim,klev,ntrac) ! tracer mass/number mixing ratio (t-dt)   [kg/k
+  REAL(wp), INTENT(inout) :: pxtte    (kbdim,klev,ntrac) ! tracer mass/number mixing ratio tendency [kg/k
+
+! local variables
+
+  REAL(wp) :: zdum2d (kbdim,klev)
+  REAL(wp) :: zdum3d (kbdim,klev,ntrac)
+  REAL(wp) :: zxtp1    (kbdim,klev,ntrac) ! updated tracer mass/number mixing ratio
+  REAL(wp) :: zxtp10   (kbdim,klev,ntrac) ! ambient tracer mass/number mixing ratio
+  REAL(wp) :: zxtp1c   (kbdim,klev,ntrac) ! in-cloud tracer mass/number mixing ratio
+  REAL(wp) :: zlfrac_so2   (kbdim,klev)   ! liquid tracer fraction (SO2) -ham specific-
+  REAL(wp) :: zdpg(kbdim,klev)
+
+  LOGICAL, PARAMETER :: lstrat = .TRUE.   !SF this switch is used to keep track in wetdep_interface
+                                          !   whether the call comes from the stratiform routine or
+                                          !   the convective one - that's why it's hardcoded here
+  INTEGER  :: jk, jl, jt
+
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  !!baustelle!! Check following condition:
+  !!if MOZART also has het. SO2 chemistry, we run into trouble here
+  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  IF (ltimer) CALL timer_start(timer_cloud_subm)
+
+  zlfrac_so2(1:kproma,:) = 0._wp                   ! liquid fraction of SO2 for HAM
+  zdpg(:,:) = 0._wp
+
+  !-- (re-) compute geopotential height
+  DO jk=1,klev
+    DO jl=1,kproma
+      zdpg(jl,jk)=(paphp1(jl,jk+1)-paphp1(jl,jk))/grav
+    END DO
+  END DO
+  !-- initialise in-cloud and interstitial mixing ratios
+  !   set both equal to tracer mixing ratio as starting point
+  !   ham_wet_chemistry will re-compute these values if lham=true
+  DO jt = 1,ntrac
+    zxtp1(1:kproma,:,jt)  = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt) * time_step_len
+    zxtp1c(1:kproma,:,jt) = zxtp1(1:kproma,:,jt)
+    zxtp10(1:kproma,:,jt) = zxtp1(1:kproma,:,jt)
+  END DO
+
+#ifdef HAMMOZ
+  !-- heterogeneous (wet) chemistry calculation
+  IF ( lham .AND. lchemistry ) THEN  !SF aero wet chemistry
+
+       IF (lhammoz) CALL hammoz_set_oxidants(kproma, kbdim, klev, krow, ntrac, pxtm1, pxtte)
+
+       IF (ltimer) CALL timer_start(timer_ham_wetchem)
+       CALL ham_wet_chemistry(kproma,     kbdim,      klev,                     &
+                              ktop,       krow,       pmlwc,      pmiwc,        &
+                              paclc,      ptm1,       ptte,                     &
+                              pxtm1,      pxtte,      zxtp1,                    &
+                              zxtp10,     zxtp1c,                               &
+                              paphp1,     papp1,      prhop1,     zlfrac_so2,   &
+                              zdpg  )
+       IF (ltimer) CALL timer_stop(timer_ham_wetchem)
+
+  END IF
+
+  !-- interface to wet deposition routine (also from cuflx_subm)
+  IF ( lwetdep .AND. ANY(trlist%ti(:)%nwetdep > 0) ) THEN
+!!mgs!! write(0,*) 'calling wetdep_interface from cloud_subm...'
+      IF (ltimer) CALL timer_start(timer_wetdep)
+      CALL wetdep_interface(kproma, kbdim,    klev, ktop, krow,      lstrat, &
+                            zdpg,   pmratepr, pmrateps,   pmsnowacl,         &
+                            pmlwc,  pmiwc,                                   &
+                            ptm1, pxtm1, zlfrac_so2, pxtte, zxtp10, zxtp1c,  &
+                            pfrain, pfsnow, pfevapr, pfsubls,                &
+                            zdum2d, zdum3d,         &
+                            paclc,  pclcpre, prhop1)
+      IF (ltimer) CALL timer_stop(timer_wetdep)
+
+  END IF
+#endif
+
+  IF (ltimer) CALL timer_stop(timer_cloud_subm)
+
+  END SUBROUTINE cloud_subm
+
+  
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! This subroutine is the second "portal" to the chemistry submodules. 
+!! It is called from physc after cloud and before surf.
+!! The argument list is identical to that of physc_interface_2, so that
+!! it is easy to move submodel routines around.
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! cloud
+!!
+!! @par Externals:
+!! <ol>
+!! <li>m7_interface
+!! <li>xt_aero_prop
+!! <li>xt_sedimentation
+!! <li>timer_start
+!! <li>timer_stop
+!! </ol>
+!!
+!! @par Notes
+!! 
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+ 
+  SUBROUTINE physc_subm_3                               &
+            (kproma, kbdim, klev,  klevp1, ktrac, krow, &
+             paphm1, papm1, paphp1, papp1,              &     ! pressure variables
+             ptm1,   ptte,  ptsurf,                     &     ! temperature variables
+             pqm1,   pqte,                              &     ! gas-pase water (humidity)
+             pxlm1,  pxlte, pxim1, pxite,               &     ! cloud water and ice
+             pxtm1,  pxtte,                             &     ! tracer mass mixing ratios
+             pgeom1, pgeohm1,                           &     ! geopotential height
+             paclc,                                     &     ! cloud cover
+             ppbl,   pvervel,                           &     ! PBL height and vertical velocity
+             loland, loglac                              )    ! land and ice mask
+
+
+
+  USE mo_kind,            ONLY: wp
+  USE mo_time_control,    ONLY: time_step_len
+  USE mo_control,         ONLY: ltimer
+  USE mo_timer,           ONLY: timer_start,          &
+                                timer_stop,           &
+                                timer_physc_subm_3,   &
+                                timer_m7,             &
+                                timer_sedimentation,  &
+                                timer_ham_gaschem,    &
+                                timer_moz_chem,       &
+                                timer_burden
+  USE mo_tracdef,         ONLY: trlist
+  USE mo_submodel,        ONLY: lmethox,              &
+                                lham,                 &
+                                lsalsa,               &
+                                lmoz,                 &
+                                llght,                &
+                                laircraft,            &
+                                lhmzoxi,              &
+                                lchemistry,           &
+                                lsedimentation,       &
+                                lmicrophysics,        &
+                                lburden,              &
+                                losat,                &
+                                loisccp
+  USE mo_vphysc,          ONLY: vphysc
+  USE mo_methox,          ONLY: methox
+!!  USE mo_isccpsimulator,  ONLY: call_isccpsimulator
+  USE mo_tracer_processes,   ONLY: xt_burden
+#ifdef HAMMOZ
+  USE mo_sedi_interface,  ONLY: sedi_interface
+  USE mo_aero,            ONLY: lsoa
+  USE mo_m7,              ONLY: m7_interface
+  USE mo_ham_trac,        ONLY: idt_cdnc
+!!mgs!!  USE mo_aero_diag,       ONLY: aero_diag
+  USE mo_ham_chemistry,   ONLY: ham_gas_chemistry
+  USE mo_moz_chemistry,   ONLY: moz_chemistry        !++mgs rev0008
+!!  USE mo_moz,             ONLY: ichem
+!!  USE mo_moz_aircraft,    ONLY: moz_aircraft_emissions
+!!  USE mo_lightning,       ONLY: lightning_emissions
+  USE mo_ham_soa_processes,   ONLY: soa_progn, soa_equi0
+#endif
+
+
+! arguments
+! pxtm1 must be intent(inout) for soa
+
+  INTEGER,  INTENT(in)    :: kproma                      ! geographic block number of locations
+  INTEGER,  INTENT(in)    :: kbdim                       ! geographic block maximum number of locations
+  INTEGER,  INTENT(in)    :: klev                        ! number of levels
+  INTEGER,  INTENT(in)    :: klevp1                      ! number of levels + 1
+  INTEGER,  INTENT(in)    :: ktrac                       ! number of tracers
+  INTEGER,  INTENT(in)    :: krow                        ! geographic block number
+  REAL(wp), INTENT(in)    :: paphm1   (kbdim,klevp1)     ! air pressure at layer interface (t-dt) [Pa]
+  REAL(wp), INTENT(in)    :: papm1    (kbdim,klev)       ! air pressure at layer center    (t-dt) [Pa]
+  REAL(wp), INTENT(in)    :: paphp1   (kbdim,klevp1)     ! air pressure at layer interface (t+dt) [Pa]
+  REAL(wp), INTENT(in)    :: papp1    (kbdim,klev)       ! air pressure at layer center    (t+dt) [Pa]
+  REAL(wp), INTENT(in)    :: ptm1     (kbdim,klev)       ! air temperature (t-dt)   [K]
+  REAL(wp), INTENT(inout) :: ptte     (kbdim,klev)       ! air temperature tendency [K]
+  REAL(wp), INTENT(in)    :: ptsurf   (kbdim)            ! surface temperature [K]
+  REAL(wp), INTENT(in)    :: pqm1     (kbdim,klev)       ! specific humidity             [kg/kg]
+  REAL(wp), INTENT(inout) :: pqte     (kbdim,klev)       ! specific humidity tendency    [kg/kg]
+  REAL(wp), INTENT(in)    :: pxlm1    (kbdim,klev)       ! cloud liquid content (t-dt)   [kg/kg]
+  REAL(wp), INTENT(inout) :: pxlte    (kbdim,klev)       ! cloud liquid content tendency [kg/kg]
+  REAL(wp), INTENT(in)    :: pxim1    (kbdim,klev)       ! cloud ice    content (t-dt)   [kg/kg]
+  REAL(wp), INTENT(inout) :: pxite    (kbdim,klev)       ! cloud ice    content tendency [kg/kg]
+  REAL(wp), INTENT(inout) :: pxtm1    (kbdim,klev,ktrac) ! tracer mass/number mixing ratio (t-dt)   [kg/kg]/[#/kg]
+  REAL(wp), INTENT(inout) :: pxtte    (kbdim,klev,ktrac) ! tracer mass/number mixing ratio tendency [kg/kg]/[#/kg]
+  REAL(wp), INTENT(in)    :: pgeom1   (kbdim,klev)       ! geopotential height at full levels (t-dt) [m]
+  REAL(wp), INTENT(in)    :: pgeohm1  (kbdim,klevp1)     ! geopotential height at interfaces (t-dt) [m]
+  REAL(wp), INTENT(in)    :: paclc    (kbdim,klev)       ! cloud fraction [0~1]
+  REAL(wp), INTENT(in)    :: ppbl     (kbdim)            ! PBL top level
+  REAL(wp), INTENT(in)    :: pvervel  (kbdim,klev)       ! lage scale vertical velocity [Pa s-1]
+  LOGICAL,  INTENT(in)    :: loland   (kbdim)            ! land mask
+  LOGICAL,  INTENT(in)    :: loglac   (kbdim)            ! glacier mask
+
+! local variables
+  REAL(wp) :: zaph(kbdim, klevp1), zap(kbdim, klev)
+  REAL(wp) :: zt(kbdim, klev)
+  REAL(wp) :: zq(kbdim, klev)
+  REAL(wp) :: zxl(kbdim, klev), zxi(kbdim, klev)
+  REAL(wp) :: zxt(kbdim, klev, ktrac)
+
+  REAL(wp) :: zgrvolm1 (kbdim,klev)        ! grid box volume
+
+  INTEGER  :: jt
+
+
+  IF (ltimer) CALL timer_start(timer_physc_subm_3)
+
+  !--- Copy or update physical variables
+  IF (luse_p1_vars) THEN
+    zaph(1:kproma,:) = paphp1(1:kproma,:)
+    zap(1:kproma,:)  = papp1(1:kproma,:)
+    zt(1:kproma,:)   = ptm1(1:kproma,:) + ptte(1:kproma,:)*time_step_len
+    zq(1:kproma,:)   = pqm1(1:kproma,:) + pqte(1:kproma,:)*time_step_len
+    zxl(1:kproma,:)  = pxlm1(1:kproma,:) + pxlte(1:kproma,:)*time_step_len
+    zxi(1:kproma,:)  = pxim1(1:kproma,:) + pxite(1:kproma,:)*time_step_len
+    ! zxt must be recomputed before each submodel process
+  ELSE
+    zaph(1:kproma,:) = paphm1(1:kproma,:)
+    zap(1:kproma,:)  = papm1(1:kproma,:)
+    zt(1:kproma,:)   = ptm1(1:kproma,:)
+    zq(1:kproma,:)   = pqm1(1:kproma,:)
+    zxl(1:kproma,:)  = pxlm1(1:kproma,:)
+    zxi(1:kproma,:)  = pxim1(1:kproma,:)
+    DO jt = 1, ktrac
+      zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt)
+    END DO
+  END IF
+
+  !--- compute virtual temperature (not needed (?))
+!!  ztv(1:nproma,:) = zt(1:nproma,:)*(1._wp+vtmpc1*zq(1:nproma,:)-(zxl(1:nproma,:)+zxi(1:nproma,:)))
+
+  !--- Upper atmospheric H2O production from methane oxidation and destruction from HO photolysis
+  IF (lmethox) THEN
+    CALL methox(kproma, kbdim, klev, zq, pqte, papm1)
+  ENDIF
+
+  !--- M7 aerosol microphysics
+
+#ifdef HAMMOZ
+  IF (lham .AND. lmicrophysics) THEN
+
+    zgrvolm1(:,:) = vphysc%grvolm1(:,:,krow)
+
+    IF (ltimer) CALL timer_start(timer_m7)
+
+    IF (luse_p1_vars) THEN
+      DO jt = 1, ktrac
+        zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt)*time_step_len
+      END DO
+    END IF
+
+    CALL m7_interface(kproma,  kbdim, klev, krow, ktrac, & 
+                      zap,     zaph,  zt,   zq,          & 
+                      zxt,     pxtte,                    & 
+                      paclc,   zgrvolm1,    ppbl,        &
+                      luse_p1_vars                     )     ! needed for Jan's SO4 nucl. scheme
+
+    IF (ltimer) CALL timer_stop(timer_m7)
+
+!!++mgs : in old version it was possible to run HAM without M7. Then xt_aero_prop would be called
+!!      instead of m7_interface.  Now de-activated because lm7 switch was removed.
+!!      xt_aero_prop renamed to ham_aero_prop
+!!    CALL ham_aero_prop(kproma, kbdim, klev, krow,         &  ! ECHAM indices
+!!                      pxtm1,  pxtte  )                      !   "   tracers
+!!--mgs
+
+
+  END IF
+
+  !--- aerosol sedimentation
+
+  IF (lsedimentation .AND. trlist%anysedi>0) THEN
+
+    IF (ltimer) CALL timer_start(timer_sedimentation)
+
+    IF (ANY(trlist%ti(:)%nsedi > 0)) THEN
+      IF (luse_p1_vars) THEN
+        DO jt = 1, ktrac
+          zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt)*time_step_len
+        END DO
+      END IF
+      CALL sedi_interface(kbdim, kproma, klev, krow,      &
+                          zt,    zq,     zap,  zaph,      &
+                          zxt,   pxtte                )
+    END IF
+
+    IF (ltimer) CALL timer_stop(timer_sedimentation)
+
+  END IF
+
+  !--- Chemistry solvers
+
+  ! ... interface to HAM gas-phase chemistry
+  IF (lchemistry .AND. lham .AND. .NOT. lhmzoxi ) THEN
+    IF (ltimer) CALL timer_start(timer_ham_gaschem)
+    IF (luse_p1_vars) THEN
+      DO jt = 1, ktrac
+        zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt)*time_step_len
+      END DO
+    END IF
+    CALL ham_gas_chemistry(kbdim, klev, kproma, krow,        &
+                           zaph,  zap,  zt,                  &
+                           zxt,   pxtte                  )
+    IF (ltimer) CALL timer_stop(timer_ham_gaschem)
+  END IF
+
+
+!!mgs!!     ! ... interface to MOZART chemistry including independent submodules
+!!mgs!!     IF (lemissions .AND. llght .and. ichem >= 10) THEN
+!!mgs!!        CALL lightning_emissions(kproma, kbdim, klev, ktrac, pxtte, krow)
+!!mgs!!     END IF
+  IF (lchemistry .AND. lmoz) THEN
+    IF (ltimer) CALL timer_start(timer_moz_chem)
+    IF (luse_p1_vars) THEN
+      DO jt = 1, ktrac
+        zxt(1:kproma,:,jt) = pxtm1(1:kproma,:,jt) + pxtte(1:kproma,:,jt)*time_step_len
+      END DO
+    END IF
+    CALL moz_chemistry (kproma, kbdim, klev, klevp1, ktrac, krow,       &
+                        zaph,   zap,   zt,   ptte,                      &
+                        zq,     pqte,  zxl,  pxlte,  zxi,   pxite,      &
+                        zxt,    pxtte,                                  &
+                        pgeom1, pgeohm1,     ptsurf, paclc,             & 
+                        loland, loglac                                )
+    IF (ltimer) CALL timer_stop(timer_moz_chem)
+  END IF
+!!mgs!!     IF (lemissions .AND. laircraft .AND. .NOT. lmoz) THEN
+!!mgs!!     ! with lmoz=true, aircraft emissions are treated as "external forcing"
+!!mgs!!        CALL moz_aircraft_emissions (kproma,     kbdim,       klev, &
+!!mgs!!                                     klevp1,     ktrac,     paphp1, &
+!!mgs!!                                     papp1,      pgeom1,     ptte,       ptm1, &
+!!mgs!!                                     pxtm1,     pxtte,       krow)
+!!mgs!!     END IF
+
+
+  !--- extended aerosol diagnostics:
+
+!!mgs!!  IF (lham .AND. lodiag) CALL aero_diag(kproma, kbdim, klev, krow, &
+!!mgs!!                                        pxtm1,  pxtte, &
+!!mgs!!                                        pxlm1,  pxlte, &
+!!mgs!!                                        pxim1,  pxite, &
+!!mgs!!                                        ptm1,   ptte,  &
+!!mgs!!                                        papp1,  paphp1  )
+
+
+!    !--- Extended MOZ diagnostics
+!    IF (lmoz) THEN
+!    ! save total tracer tendency
+!       IF (llocaltimed) CALL buffer_localtime(krow)
+!       CALL moz_diagn(krow)
+!    END IF
+! soa_progn
+! soa_equi0: set diagnostic tracers for SOA and calculate gas/aerosol equilibrium
+
+  IF (lsoa) THEN
+      CALL soa_progn(kproma, kbdim, klev, krow,  ktrac, pxtm1, pxtte)
+      CALL soa_equi0(kproma, kbdim, klev, krow,  ktrac, &
+                     zap,    zt,    zq,   pxtm1, pxtte)
+  END IF
+#endif
+
+  ! -- calculate tracer burdens
+  IF (lburden) THEN
+    IF (ltimer) CALL timer_start(timer_burden)
+    CALL xt_burden(kproma, kbdim, klev, klevp1, krow,  &
+                   zap,    zaph,                       &
+                   pxtm1,  pxtte                      )
+    IF (ltimer) CALL timer_stop(timer_burden)
+  END IF
+
+  IF (ltimer) CALL timer_stop(timer_physc_subm_3)
+
+  END SUBROUTINE physc_subm_3
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! interface after hydrology_collect in physc. Needed for CO2 diagnostics and coupling
+!!
+!! @author see module info of mo_submodel_interface
+!!
+  SUBROUTINE physc_subm_4 (kproma,                kbdim,              klev,            &
+                           klevp1,                ktrac,              krow,            &
+                           paphm1,                pfrl,               pfrw,            &
+                           pfri,                  loland,             pxtm1,           &
+                           pxtte)
+
+    USE mo_kind,       ONLY : wp
+    USE mo_control,    ONLY : ltimer
+    USE mo_timer,      ONLY : timer_start, timer_stop, timer_physc_subm_4
+    USE mo_submodel,   ONLY : lco2, laoa
+    USE mo_co2,        ONLY : co2_te_check, diag_co2
+    USE mo_aoa,        ONLY : bcond_aoa, tracer_reset  ! age of air tracers
+
+    INTEGER, INTENT(in)   :: kproma, kbdim, klev, klevp1, ktrac, krow
+    REAL(wp), INTENT(in)  :: paphm1(kbdim,klevp1), & ! pressure at half levels t-dt
+                             pfrl(kproma),         & ! fractional land coverage
+                             pfrw(kproma),         & ! fractional water (ocean+lake) cov.
+                             pfri(kproma),         & ! fractional ice coverage
+                             pxtm1(kbdim,klev,ktrac) ! tracer mixing ratios at t-dt
+    REAL(wp), INTENT(inout)::pxtte(kbdim,klev,ktrac) ! tracer tendencies
+    LOGICAL, INTENT(in)   :: loland(kproma)          ! logical land mask
+
+    IF (ltimer) CALL timer_start(timer_physc_subm_4)
+    IF (lco2) THEN
+       CALL co2_te_check(kproma,                 kbdim,               klev,            &
+                         klevp1,                 ktrac,               krow,            &
+                         paphm1,                 loland,              pxtm1,           &
+                         pxtte)
+    END IF
+    CALL diag_co2(kproma,                                         krow,             &
+                  pfrl,                      pfrw,                pfri)
+
+    IF (laoa) THEN
+       CALL tracer_reset(kproma, kbdim, klev, krow, pxtte)
+       CALL bcond_aoa(kproma, kbdim, klev, krow, pxtte, pxtm1)
+    END IF 
+
+    IF (ltimer) CALL timer_stop(timer_physc_subm_4)
+
+  END SUBROUTINE physc_subm_4
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! interface before the radiation calculations
+!! modified from call_init_rad_submodels in call_submodels
+!!
+!! @author see module info of mo_submodel_interface
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see module info of mo_submodel_interface
+!!
+!! @par This subroutine is called by
+!! radiation (rrtm_interface)
+!!
+!! @par Externals:
+!! <ol>
+!! <li>aero_rad_cache
+!! <li>aero_rad
+!! </ol>
+!!
+!! @par Notes
+!! new radiation submodels must be introduced from here
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  SUBROUTINE radiation_subm_1(kproma           ,kbdim            ,klev         ,krow  ,&
+                              ktrac            ,kaero            ,kpband       ,kb_sw ,&
+                              aer_tau_sw_vr    ,aer_piz_sw_vr    ,aer_cg_sw_vr        ,&
+                              aer_tau_lw_vr                                           ,&
+                              ppd_hl           ,pxtm1                                  )
+
+
+
+  USE mo_kind,           ONLY: wp
+  USE mo_control,        ONLY: ltimer
+  USE mo_timer,          ONLY: timer_start, timer_stop, &
+                               timer_radiation_subm_1
+  USE mo_submodel,       ONLY: lham    !, lsalsa
+#ifdef HAMMOZ
+  USE mo_aero_rad,       ONLY: aero_rad_cache,          &
+                               aero_rad_cache_cleanup,  &
+                               aero_rad
+#endif
+
+  IMPLICIT NONE
+
+  ! arguments
+
+  INTEGER, INTENT(in) :: kproma                     ! geographic block number of locations
+  INTEGER, INTENT(in) :: kbdim                      ! geographic block maximum number of locations
+  INTEGER, INTENT(in) :: klev                       ! numer of levels
+  INTEGER, INTENT(in) :: ktrac                      ! numer of tracers
+  INTEGER, INTENT(in) :: krow                       ! geographic block number
+  INTEGER, INTENT(in) :: kaero                      ! switch for aerosol radiation coupling
+  INTEGER, INTENT(in) :: kpband                     ! number of LW bands
+  INTEGER, INTENT(in) :: kb_sw                      ! number of SW bands
+  REAL(wp), INTENT(in):: ppd_hl(kbdim,klev)         ! pressure diff between half levels [Pa]
+  REAL(wp), INTENT(in):: pxtm1(kbdim,klev,ktrac)    ! tracer mass/number mixing ratio (t-dt)   [kg/kg]/[
+
+  REAL(wp), INTENT(inout) :: aer_tau_lw_vr(kbdim,klev,kpband),& !< LW optical thickness of aerosols
+                             aer_tau_sw_vr(kbdim,klev,kb_sw), & !< aerosol optical thickness
+                             aer_cg_sw_vr(kbdim,klev,kb_sw),  & !< aerosol asymmetry factor
+                             aer_piz_sw_vr(kbdim,klev,kb_sw)    !< aerosol single scattering albedo
+
+
+  IF (ltimer) CALL timer_start(timer_radiation_subm_1)
+
+#ifdef HAMMOZ
+  ! a) initialize HAM radiation submodule:
+  IF (kaero==1) THEN !explicit HAM aerosol-radiation calculation
+    ! for HAM-M7
+    IF (lham) THEN
+      CALL aero_rad_cache(kbdim, klev) !allocate memory
+      CALL aero_rad(kproma, kbdim, klev, krow, kpband, kb_sw,                 &
+                    pxtm1,         ppd_hl,                                    &
+                    aer_tau_sw_vr, aer_piz_sw_vr, aer_cg_sw_vr, aer_tau_lw_vr )
+    END IF
+  END IF
+#endif
+
+  IF (ltimer) CALL timer_stop(timer_radiation_subm_1)
+
+
+  END SUBROUTINE radiation_subm_1
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Interface after the radiation calculations. 
+!! Modified from call_finalize_rad_submodels in call_submodels. 
+!!
+!! @author see see module info of mo_submodel_interface
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see module info of mo_submodel_interface
+!!
+!! @par This subroutine is called by
+!! radiation
+!!
+!! @par Externals:
+!! <ol>
+!! <li>aero_rad_diag
+!! <li>aero_rad_cache_cleanup
+!! </ol>
+!!
+!! @par Notes
+!! 
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  SUBROUTINE radiation_subm_2(kproma, kbdim, krow, klev, &
+                              ktrac, kaero,              &
+                              pxtm1                      )
+
+  USE mo_kind,           ONLY: wp
+  USE mo_control,        ONLY: ltimer
+  USE mo_timer,          ONLY: timer_start, timer_stop, &
+                               timer_radiation_subm_2
+  USE mo_submodel,       ONLY: lham
+#ifdef HAMMOZ
+  USE mo_aero_rad,       ONLY: aero_rad_diag, aero_rad_cache_cleanup
+#endif
+
+  IMPLICIT NONE
+
+  INTEGER,  INTENT(in) :: kproma                   ! geographic block number of locations
+  INTEGER,  INTENT(in) :: kbdim                    ! geographic block maximum number of locations
+  INTEGER,  INTENT(in) :: klev                     ! numer of levels
+  INTEGER,  INTENT(in) :: ktrac                    ! numer of tracers
+  INTEGER,  INTENT(in) :: krow                     ! geographic block number
+  INTEGER,  INTENT(in) :: kaero                    ! geographic block number
+  REAL(wp), INTENT(in) :: pxtm1 (kbdim,klev,ktrac) ! tracer mass/number mixing ratio (t-dt)   [kg/kg]/[#/k
+
+
+  IF (ltimer) CALL timer_start(timer_radiation_subm_2)
+
+#ifdef HAMMOZ
+  !--- 1) HAM radiation submodule:
+  IF (kaero==1) THEN
+    !--- Diagnostics:
+    IF (lham) THEN
+      CALL aero_rad_diag(kproma, kbdim, klev, krow, &
+                         pxtm1                      )
+      ! free memory for HAM aerosol optical properties:
+      CALL aero_rad_cache_cleanup
+    END IF
+  END IF
+#endif
+
+  IF (ltimer) CALL timer_stop(timer_radiation_subm_2)
+
+  END SUBROUTINE radiation_subm_2
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Interface of scan1
+!! 
+!!
+!! @author see module info of mo_submodel_interface
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see module info of mo_submodel_interface
+!!
+!! @par This subroutine is called by
+!! scan1
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!! 
+!!
+!! @par Responsible coder
+!! sebastian.rast@mpimet.mpg.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  SUBROUTINE scan1_subm
+
+    USE mo_submodel,      ONLY : laoa
+    USE mo_aoa,           ONLY : tf_reset
+
+    IMPLICIT NONE
+    
+    IF (laoa) CALL tf_reset
+
+  END SUBROUTINE scan1_subm
+
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! interface between convective cloud physics and sulfur chemistry
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! <ol>
+!! <li> S. Ferrachat, ETH Zurich. Wetdep_interface call (2009.08; 2009.12)
+!! </ol>
+!!
+!! @par This subroutine is called by
+!! cuflx
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!! The wet deposition interface is also called from cloud_subm.
+!!
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  !! Interface for wet chemical processes called from cuflx
+  !! calculates liquid fraction of SO2 (HAM) and calls the wet deposition interface
+
+  SUBROUTINE cuflx_subm(kbdim, kproma,   klev,     ktop,      krow,      &
+                        pxtenh, pxtu, prhou,                             & ! tracers
+                        pmfu,   pmfuxt,                                  & ! convective fluxes and corresp. mmr
+                        pmlwc,  pmiwc,     pmratepr, pmrateps,           & ! cloud properties
+                        pfrain, pfsnow,    pfevapr,  pfsubls,            & !   "       "
+                        paclc,  pmsnowacl,                               & !   "       "           !--mgs: lstrat remo
+                        ptu,    pdpg,                                    & ! thermodynamic quantities
+                        pxtte                                           )
+
+
+  USE mo_kind,               ONLY: wp
+  USE mo_control,            ONLY: ltimer
+  USE mo_timer,              ONLY: timer_start,            &
+                                   timer_stop,             &
+                                   timer_cuflx_subm,       &
+                                   timer_wetdep
+  USE mo_tracdef,            ONLY: ntrac, trlist
+  USE mo_submodel,           ONLY: lwetdep, lchemistry, lham
+#ifdef HAMMOZ
+  USE mo_wetdep_interface,   ONLY: wetdep_interface
+  USE mo_ham_wetdep,         ONLY: ham_conv_lfraq_so2
+#endif
+
+  !--- Arguments:
+
+  INTEGER, INTENT(in)     :: kbdim, kproma, klev, ktop, & ! dimensions
+                             krow
+
+  REAL(wp), INTENT(in)    :: pdpg(kbdim,klev),          & ! geopotential height
+                             pmratepr(kbdim,klev),      & !
+                             pmrateps(kbdim,klev),      &
+                             pmsnowacl(kbdim,klev),     &
+                             ptu(kbdim,klev),           & ! temperature at beginning of time step
+                             pfrain(kbdim,klev),        &
+                             pfsnow(kbdim,klev),        &
+                             pfevapr(kbdim,klev),       &
+                             pfsubls(kbdim,klev),       &
+                             pmfu(kbdim,klev),          & !
+                             paclc(kbdim,klev),         & ! 3D cloud cover
+                             prhou(kbdim,klev)            ! air density
+  REAL(wp), INTENT(inout) :: pxtte(kbdim,klev,ntrac),   & ! tracer tendency
+                             pmlwc(kbdim,klev),         & ! liquid water content in ???
+                             pmiwc(kbdim,klev),         & ! ice water content in ???
+                             pxtenh(kbdim,klev,ntrac),  & ! ambient tracer mmr at t=t+dt
+                                                          ! units: [kg(tracer) kg-1(air)] in/out
+                                                          !        [kg(tracer) m-2]       inside
+                             pxtu(kbdim,klev,ntrac),    & ! in-cloud tracer mmr at t=t+dt
+                                                          ! units as pxtenh
+                             pmfuxt(kbdim,klev,ntrac)
+
+  !--- Local variables
+  LOGICAL, PARAMETER  :: lstrat = .FALSE.    !mgs: hardcoded here for call to wetdep_interface
+
+  REAL(wp)            :: zdummy(kbdim,klev,ntrac), & ! for wetdep_interface call (pxtm1)
+                         zdum2d(kbdim,klev),       & ! dto. (pclc)
+                         zlfrac_so2(kbdim,klev)      ! liquid fraction of SO2 (for HAM)
+
+
+  IF (ltimer) CALL timer_start(timer_cuflx_subm)
+
+  ! 1)-- calculate liquid fraction of SO2 for HAM
+  zlfrac_so2(1:kproma,:) = 0._wp
+
+#ifdef HAMMOZ
+  IF (lham .AND. lchemistry) THEN
+    IF (ltimer) CALL timer_start(timer_wetdep)
+    CALL ham_conv_lfraq_so2(kproma, kbdim, klev, &
+                            ptu, pxtu, prhou,    &
+                            pmlwc, zlfrac_so2    )
+    IF (ltimer) CALL timer_stop(timer_wetdep)
+
+  END IF
+
+  ! 2)-- call wet deposition routine
+!!mgs!! write(0,*) 'calling wetdep_interface from cuflx_subm...'
+  IF (lwetdep .AND. ANY(trlist%ti(:)%nwetdep > 0)) THEN
+    IF (ltimer) CALL timer_start(timer_wetdep)
+    CALL wetdep_interface(kproma, kbdim,    klev,     ktop,      krow, lstrat,  &
+                          pdpg,   pmratepr, pmrateps, pmsnowacl,                &
+                          pmlwc,  pmiwc,                                        &
+                          ptu,    zdummy,   zlfrac_so2, pxtte,    pxtenh, pxtu, &
+                          pfrain, pfsnow,   pfevapr,  pfsubls,                  &
+                          pmfu,   pmfuxt,                                       &
+                          paclc,  zdum2d,   prhou)
+    IF (ltimer) CALL timer_stop(timer_wetdep)
+  END IF
+#endif
+
+  IF (ltimer) CALL timer_stop(timer_cuflx_subm)
+
+  END SUBROUTINE cuflx_subm
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! interface for global diagnostics in submodels
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! <ol>
+!! </ol>
+!!
+!! @par This subroutine is called by
+!! scan1     (presently de-activated !)
+!!
+!! @par Externals:
+!! <ol>
+!! </ol>
+!!
+!! @par Notes
+!!
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+
+!!mgs!!  SUBROUTINE scan1_subm
+  !
+  ! This routine is called by scan1 after the loop over jrow = 1, ngpblks
+  ! Diagnostics on global fields should be inserted here
+  !
+!!USE mo_submodel,           ONLY: lmoz, llght, lmegan
+!!USE mo_time_control,       ONLY: next_date, get_date_components
+!!USE mo_lightning,          ONLY: lightning_diagn
+!!USE mo_localtime,          ONLY: localtime_output
+!!USE mo_moz,                ONLY: ichem, llocaltimed
+!!USE mo_megan,              ONLY: diagg_biogenic_emissions
+!!USE mo_moz_wetdep,         ONLY: diagg_wetdep_mflux
+
+!! INTEGER                       :: imonthp1,idayp1
+
+!! IF (lmoz) THEN
+!!    IF ( ichem == 2 .or. ichem == 12 ) THEN
+!!        diagnostics for MOZART3 not yet implemented
+!!      IF (llocaltimed) THEN
+!!          CALL get_date_components (next_date, month=imonthp1)
+!!         CALL get_date_components (next_date, day=idayp1)
+!!         CALL localtime_output(idayp1)
+!!      END IF
+!!!     CALL diagg_drydep_velocity
+!!      CALL diagg_wetdep_mflux
+!!    ENDIF
+!! END IF
+!!
+!! IF (llght) THEN
+!!    CALL lightning_diagn
+!! END IF
+!! IF (lmegan) THEN
+!!    CALL diagg_biogenic_emissions
+!! ENDIF
+
+!!mgs!!  END SUBROUTINE scan1_subm
+  
+   
+
+END MODULE mo_submodel_interface
+

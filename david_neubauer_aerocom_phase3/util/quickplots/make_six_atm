@@ -1,0 +1,44 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+EXP=$2
+#
+PRINTERC=$3
+
+echo QUELLE path $QUELLE
+
+##---------------ATM-------------------------
+
+#
+prefix=atm_${TYP}_${EXP}_
+afiles=$(ls  ${prefix}*.eps )
+${QUELLE}/sixplot_latex.sh ATM_${TYP}_${EXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv ATM_${TYP}_${EXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname ATM_${TYP}_${EXP}.ps 
+else
+lpr -P${PRINTERC} -o sides=one-sided ATM_${TYP}_${EXP}.ps 
+fi
+rm ATM_${TYP}_${EXP}.dvi ATM_${TYP}_${EXP}.aux ATM_${TYP}_${EXP}.log  
+
+prefix=atmlola_${TYP}_${EXP}_
+afiles=$(ls  ${prefix}*.eps )
+${QUELLE}/sixplot_latex.sh ATMlola_${TYP}_${EXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv ATMlola_${TYP}_${EXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname ATMlola_${TYP}_${EXP}.ps 
+else
+lpr -P${PRINTERC} -o sides=one-sided ATMlola_${TYP}_${EXP}.ps 
+fi
+rm ATMlola_${TYP}_${EXP}.dvi ATMlola_${TYP}_${EXP}.aux ATMlola_${TYP}_${EXP}.log  
+exit

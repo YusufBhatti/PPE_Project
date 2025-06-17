@@ -300,11 +300,11 @@ CONTAINS
 
    !>>YAB Adding perturbed physics scaling for OC imaginary refractive index (SW
    !only):
-   IF (lo_hammoz_perturbations) THEN
+
+   IF (lo_hammoz_perturbations) THEN 
        scale_oc_rad_ni = oc_rad_ni / cni(Nwv_sw+1,iradoc)
        cni(1:Nwv_sw_tot,iradoc) = cni(1:Nwv_sw_tot,iradoc) * scale_oc_rad_ni
    ENDIF
-
    !--- Sea Salt (Nilsson, 1979):
 
    cnr(1:Nwv_sw,iradss) = &

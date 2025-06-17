@@ -1,0 +1,25 @@
+#%# -*- mode: sh -*-
+#
+# Setup for daint (SLURM)
+#
+#SBATCH --job-name=%{EXP_ID}_%{JOB.id}
+#SBATCH --partition=%{JOB.queue}
+#%if JOB.node_usage == 'not_shared':
+#SBATCH --exclusive
+#%endif
+#%if JOB.nodes is defined: 
+#SBATCH --nodes=%{JOB.nodes}
+#%endif
+#%if JOB.tasks_per_node is defined: 
+#SBATCH --tasks-per-node=%{JOB.tasks_per_node}
+#%endif
+#%if JOB.memory.upper().endswith('MB'):
+# Memory config broken #SBATCH --mem=%{JOB.memory[:-2]}
+#%else
+# Memory config broken #SBATCH --mem=%{JOB.memory}
+#%endif
+#SBATCH --cpus-per-task=%{JOB.threads_per_task}
+#SBATCH --time=%{JOB.time_limit}
+#SBATCH --output=%{EXP_ID}_%{JOB.id}_%j.log
+#SBATCH --error=%{EXP_ID}_%{JOB.id}_%j.log
+

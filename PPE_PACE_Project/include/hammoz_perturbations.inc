@@ -38,15 +38,15 @@
 
 NAMELIST /hammoz_perturbations/ &
 !--- Sources:
-  scale_nuc_bl,             & ! Scale factor for BL nucleation scheme (activation or kinetic)
+!  scale_nuc_bl,             & ! Scale factor for BL nucleation scheme (activation or kinetic)
   scale_nuc_ft,             & ! Scale factor for free tropospheric nucleation scheme (Vehkamaeki or Kazil & Lovejoy)
   scale_emi_cmr_ff,         & ! Scale factor for emission count median raduius for fossil fules
   scale_emi_cmr_bb,         & ! Scale factor for emission count median raduius for wildfires
-  scale_emi_cmr_bf,         & ! Scale factor for emission count median raduius for biogenic emissions
+!  scale_emi_cmr_bf,         & ! Scale factor for emission count median raduius for biogenic emissions
   scale_emi_ff,             & ! Scale factor for fossil fule emissions
   scale_emi_bb,             & ! Scale factor for wildfire emissions
   scale_emi_bf,             & ! Scale factor for biofuel emissions
-  scale_emi_bc,             & ! Scale factor for BC emissions (all sectors)
+!  scale_emi_bc,             & ! Scale factor for BC emissions (all sectors)
   scale_emi_dms,            & ! Scale factor for dms emissions (terrestrial)
   scale_emi_ssa,            & ! Scale factor for SSA emissions (all sectors) 
   scale_emi_du,             & ! Scale factor for DUST emissions (all sectors)
@@ -57,9 +57,9 @@ NAMELIST /hammoz_perturbations/ &
 !  prop_fire_in_pbl_p2,      & ! The proportion of (G/F)FIRE tracer emitted into PBL+2
 !  prop_fire_in_pbl,         & ! The proportion of (G/F)FIRE tracer emitted into the PBL
 !--- Sinks:
-  scale_drydep_ait,         & !< Scale factors for dry deposition of Aitken modes
+!  scale_drydep_ait,         & !< Scale factors for dry deposition of Aitken modes
   scale_drydep_acc,         & !< Scale factors for dry deposition of accumulation modes
-  scale_drydep_coa,         & !< Scale factors for dry deposition of coarse modes i
+!  scale_drydep_coa,         & !< Scale factors for dry deposition of coarse modes i
   scale_wetdep_ic,          & ! Scale factor for in-cloud wet deposition
   scale_wetdep_bc,          & ! Scale factor for below-cloud wet deposition
 !  scale_wetdep_ic_bc_only,  & ! Scale factor for in-cloud wet deposition of BC (independantly of the above scalings)
@@ -76,7 +76,7 @@ NAMELIST /hammoz_perturbations/ &
 !---
 !--- Radiative properties:
   bc_rad_ni,          & ! Scale the imaginary part of the refractive index (for BC)
-!  oc_rad_ni,          & ! Scale the imaginary part of the refractive index (for OC)
+  oc_rad_ni,          & ! Scale the imaginary part of the refractive index (for OC)
   du_rad_ni,          & ! Scale the imaginary part of the refractive index (for DUST)
 !--- Cloud scheme (ONLY for naut == 2):
 !  KK_exponent,              & ! The exponent to use in the KK autoconversion scheme
@@ -87,6 +87,8 @@ NAMELIST /hammoz_perturbations/ &
   scale_so2_reactions, &
 !  scale_water, &
 !  scale_RH,    &
-  pH_pert,     & ! Scale the cloud-water pH
-  scale_kappa_ss, &
-  scale_kappa_so4
+!  pH_pert,     & ! Scale the cloud-water pH
+!  scale_kappa_ss, &
+  scale_kappa_so4, &
+  scale_dms_sc, &          & ! Scale the imaginary part of the refractive index (for DUST)
+  scale_seasalt_expo

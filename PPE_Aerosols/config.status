@@ -430,7 +430,7 @@ Copyright (C) 2021 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/ybhatti/yusufb/Branches/PPE_Aerosols'
+ac_pwd='/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols'
 srcdir='.'
 INSTALL='/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -1092,12 +1092,12 @@ S["mkdir_p"]="$(MKDIR_P)"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /home/ybhatti/yusufb/Branches/PPE_Aerosols/config/install-sh"
-S["MAKEINFO"]="${SHELL} '/home/ybhatti/yusufb/Branches/PPE_Aerosols/config/missing' makeinfo"
-S["AUTOHEADER"]="${SHELL} '/home/ybhatti/yusufb/Branches/PPE_Aerosols/config/missing' autoheader"
-S["AUTOMAKE"]="${SHELL} '/home/ybhatti/yusufb/Branches/PPE_Aerosols/config/missing' automake-1.16"
-S["AUTOCONF"]="${SHELL} '/home/ybhatti/yusufb/Branches/PPE_Aerosols/config/missing' autoconf"
-S["ACLOCAL"]="${SHELL} '/home/ybhatti/yusufb/Branches/PPE_Aerosols/config/missing' aclocal-1.16"
+S["install_sh"]="${SHELL} /home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols/config/install-sh"
+S["MAKEINFO"]="${SHELL} '/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols/config/missing' makeinfo"
+S["AUTOHEADER"]="${SHELL} '/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols/config/missing' autoheader"
+S["AUTOMAKE"]="${SHELL} '/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols/config/missing' automake-1.16"
+S["AUTOCONF"]="${SHELL} '/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols/config/missing' autoconf"
+S["ACLOCAL"]="${SHELL} '/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols/config/missing' aclocal-1.16"
 S["VERSION"]="6.3.00"
 S["PACKAGE"]="echam-6.3.00"
 S["CYGPATH_W"]="echo"
@@ -1149,7 +1149,7 @@ S["libexecdir"]="${exec_prefix}/libexec"
 S["sbindir"]="${exec_prefix}/sbin"
 S["bindir"]="${exec_prefix}/bin"
 S["program_transform_name"]="s,x,x,"
-S["prefix"]="/home/ybhatti/yusufb/Branches/PPE_Aerosols"
+S["prefix"]="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Aerosols"
 S["exec_prefix"]="${prefix}"
 S["PACKAGE_URL"]=""
 S["PACKAGE_BUGREPORT"]="luis.kornblueh@mpimet.mpg.de"

@@ -1,0 +1,250 @@
+#! /bin/bash
+#%include 'standard_environments/'+ENVIRONMENT+'.tmpl' ignore missing
+#-----------------------------------------------------------------------------
+#
+#                        Job file to run ECHAM 6
+#
+#-----------------------------------------------------------------------------
+#
+
+DEBUG_LEVEL=%{DEBUG_LEVEL|default(0)}
+
+# If a command has a non-zero exit status, execute ERR trap and exit
+set -e
+trap 'echo Error at line $LINENO: $BASH_COMMAND >&2' ERR
+# Print command info
+[ $DEBUG_LEVEL -ge 2 ] && set -x
+
+#
+# Suppress core dumps
+#
+ulimit -c 0
+#
+#-----------------------------------------------------------------------------
+#
+# experiment identifier: your given experimenter-id according to
+# http://svn.zmaw.de/dokuwiki/doku.php?id=listofids:list_of_experimenter_ids
+# followed by a number for the current experiment
+#
+EXP="%{EXP_ID}"      # experiment identifier
+#
+NTHREADS=%{JOB.threads_per_task}
+export ECHAM6_THREADS=$NTHREADS
+#
+RES=%{RES}
+LEVELS=%{LEVELS}
+OCERES=%{OCERES}
+#
+#-----------------------------------------------------------------------------
+#
+# absolute path to directory with job scripts:
+SCRIPTDIR=%{SCRIPT_DIR}
+#
+# absolute path to directory with plenty of space:
+EXPDIR=%{WORK_DIR}
+#
+# absolute paths to directories with initial data:
+ATMO_DATA=%{ATMO_INPUT_ROOT}
+ATMO_MAP_DATA=$ATMO_DATA/T${RES}
+#
+# absolute path to directory with SST and sea ice files:
+AMIP_DATA=${ATMO_MAP_DATA}/%{AMIP_SUBDIR}
+#
+# absolute path to directory with aerosol files:
+AEROSOL_DATA=${ATMO_MAP_DATA}/%{AEROSOL_SUBDIR}
+#
+# absolute path to directory with ozone files:
+OZONE_DATA=${ATMO_MAP_DATA}/%{OZONE_SUBDIR}
+#
+# absolute path to directory with initial data for JSBACH:
+LAND_MAP_DATA=%{LAND_INPUT_ROOT}/T${RES}
+#
+# absolute path to directory with land-use data for JSBACH:
+LAND_USE_DATA=$LAND_MAP_DATA/New_Hampshire_LCC
+
+LAND_CONFIG_DATA=%{ATMO_INPUT_ROOT}/jsbach
+#
+# absolute path to model binary, including the executable
+MODEL=%{MODEL_DIR}/bin/%{ECHAM_EXE}
+#
+# Number of ECHAM subjobs
+nsub=%{namelists['namelist.echam'].runctl.nsub|default(0)}
+#
+# Fractional sea-land mask
+#% if 't' in namelists['namelist.echam'].runctl.lfractional_mask|lower:
+fractional_tag=_fractional
+#% else
+fractional_tag=
+#% endif
+#
+#-----------------------------------------------------------------------------
+#
+# the directory for the experiment will be created, if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+
+cd $EXPDIR           #  output and rerun files are written into $EXPDIR
+#-----------------------------------------------------------------------------
+#
+# specification of files for ECHAM
+#
+#-----------------------------------------------------------------------------
+#
+rm -f unit.?? sst* ice* lctlib.def jsbach.nc rrtmg_[ls]w.nc
+rm -f ECHAM6_CldOptProps.nc aero* swflux* ozon* greenhouse_gases.nc strat_aerosol_*
+rm -f landuse*
+#
+ln -s  ${ATMO_MAP_DATA}/T${RES}L${LEVELS}_jan_spec.nc  unit.23
+ln -s  ${ATMO_MAP_DATA}/T${RES}${OCERES}_jan_surf.nc  unit.24
+#
+ln -s  ${ATMO_MAP_DATA}/T${RES}${OCERES}_VLTCLIM.nc  unit.90
+ln -s  ${ATMO_MAP_DATA}/T${RES}${OCERES}_VGRATCLIM.nc  unit.91
+ln -s  ${ATMO_MAP_DATA}/T${RES}_TSLCLIM.nc  unit.92
+#
+ln -s  ${ATMO_DATA}/rrtmg_lw.nc  rrtmg_lw.nc
+ln -s  ${ATMO_DATA}/rrtmg_sw.nc  rrtmg_sw.nc 
+ln -s  ${ATMO_DATA}/ECHAM6_CldOptProps.nc  ECHAM6_CldOptProps.nc
+#
+# Input data for AMIP
+#
+year=1975
+while [[ $year -le 2009 ]]
+do
+    # AMIP ocean surface
+    ln -s  ${AMIP_DATA}/T${RES}_amipsst_${year}.nc                  sst${year}
+    ln -s  ${AMIP_DATA}/T${RES}_amipsic_${year}.nc                  ice${year}
+
+    # Aerosol
+    # Data after 2000 is taken from CMIP5's RCP 4.5
+    ln -s ${AEROSOL_DATA}/T${RES}_aeropt_kinne_lw_b16_coa.nc  aero_farir_${year}.nc
+    ln -s ${AEROSOL_DATA}/T${RES}_aeropt_kinne_sw_b14_coa.nc  aero_coarse_${year}.nc
+    if [[ $year -le 2000 ]]
+    then
+        ln -s ${AEROSOL_DATA}/T${RES}_aeropt_kinne_sw_b14_fin_${year}.nc  aero_fine_${year}.nc
+    else
+        ln -s ${AEROSOL_DATA}/T${RES}_aeropt_kinne_sw_b14_fin_rcp45_${year}.nc  aero_fine_${year}.nc
+    fi
+
+    # Ozone
+    # Data after 2008 is taken from CMIP5's RCP 4.5
+    if [[ $year -le 2008 ]]
+    then
+        ln -s ${OZONE_DATA}/T${RES}_ozone_CMIP5_${year}.nc  ozon${year}
+    else
+        ln -s ${OZONE_DATA}/T${RES}_ozone_CMIP5_RCP45_${year}.nc  ozon${year}
+    fi
+
+    # Solar irradiance
+    ln -s ${ATMO_DATA}/solar_irradiance/swflux_14band_${year}.nc  swflux_${year}.nc
+
+    # Volcanic aerosols
+    # Data after 1999 is duplicated from 1999
+    if [[ $year -le 1999 ]]
+    then
+        ln -s ${ATMO_MAP_DATA}/volcano_aerosols/strat_aerosol_ir_T${RES}_${year}.nc  strat_aerosol_ir_${year}.nc
+        ln -s ${ATMO_MAP_DATA}/volcano_aerosols/strat_aerosol_sw_T${RES}_${year}.nc  strat_aerosol_sw_${year}.nc
+    else
+        ln -s ${ATMO_MAP_DATA}/volcano_aerosols/strat_aerosol_ir_T${RES}_1999.nc  strat_aerosol_ir_${year}.nc
+        ln -s ${ATMO_MAP_DATA}/volcano_aerosols/strat_aerosol_sw_T${RES}_1999.nc  strat_aerosol_sw_${year}.nc
+    fi
+
+    # JSBACH transitions
+    ln -s ${LAND_USE_DATA}/hist/LUH_harvest_T${RES}_${year}.nc  landuseHarvest.${year}.nc
+    ln -s ${LAND_USE_DATA}/hist/LUH_transitions_T${RES}_${year}.nc  landuseTransitions.${year}.nc
+
+    (( year = year+1 ))
+done
+#
+# greenhouse gases
+#
+ln -s ${ATMO_DATA}/greenhouse_rcp45.nc  greenhouse_gases.nc
+#
+#-----------------------------------------------------------------------------
+#
+# specification of files for JSBACH
+# jsbach.nc has to fit the first year of transitions (e.g. 1976)
+#
+#-----------------------------------------------------------------------------
+ln -s  ${LAND_CONFIG_DATA}/lctlib_nlct21.def_rev7624  lctlib.def
+ln -s  ${LAND_MAP_DATA}/jsbach_T${RES}${OCERES}${fractional_tag}_11tiles_5layers_1976.nc  jsbach.nc
+#-----------------------------------------------------------------------------
+#
+# ECHAM6 namelist
+#
+cat > namelist.echam << EOF
+%{NAMELIST_ECHAM}
+EOF
+echo "* ----------------------------------------------------------------------"
+echo "* Namelist of ECHAM6: namelist.echam"
+echo "* ----------------------------------------------------------------------"
+cat namelist.echam
+echo "* ----------------------------------------------------------------------"
+echo "*    end of namelist.echam"
+echo "* ----------------------------------------------------------------------"
+echo ""
+#------------------------------------------------------------------------------
+#-- Namelist JSBACH
+#
+cat > namelist.jsbach << EOF
+%{NAMELIST_JSBACH}
+EOF
+echo "* ----------------------------------------------------------------------"
+echo "* Namelist of JSBACH: namelist.jsbach"
+echo "* ----------------------------------------------------------------------"
+cat namelist.jsbach
+echo "* ----------------------------------------------------------------------"
+echo "*    end of namelist.jsbach"
+echo "* ----------------------------------------------------------------------"
+echo ""
+#-----------------------------------------------------------------------------
+# Start the run:
+#
+for (( j=1; j<=nsub; ++j )); do
+    cp $SCRIPTDIR/$EXP.job$j job$j
+done
+#
+# startup
+#
+set +e
+%{MPI.command|replace('%x', '$MODEL')|replace('%n', JOB.tasks)}
+model_status=$?
+set -e
+#
+case $model_status in
+0|127)
+    # Make subjob files executable
+    for (( j=1; j<=nsub; ++j )); do
+        chmod +x subjob$j
+    done
+    # Make sure subjob2 is not overwritten by ECHAM running in parallel
+    # File name is passed to subjob1's environment
+    if (( nsub >= 2 )); then
+       export SUBJOB2=subjob2.$$
+       mv subjob2 $SUBJOB2
+    fi
+    #-- submit post-processing job
+    if (( nsub >= 1 )); then
+        %{JOB.batch_command|replace('%x', 'subjob1')}
+    fi
+    #-- submit next production job
+    case $model_status in
+    0)
+        echo "Model experiment checkpointed."
+        cd $SCRIPTDIR
+        %{JOB.batch_command|replace('%x', '$EXP.run')}
+        ;;
+    *)
+        echo "Model finished experiment."
+        ;;
+    esac
+    ;;
+*)
+    echo "ERROR: model run stopped with return value ${model_status}."
+    exit 1
+    ;;
+esac
+#
+exit
+#
+#-----------------------------------------------------------------------------

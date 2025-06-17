@@ -1,0 +1,225 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+!! @brief: mo_submodel_streams: manages generic diagnostic output from submodels
+!!
+!! @remarks
+!! This module reads the submdiagctl namelist and collects the information necessary for
+!! initialisatin of the following streams:
+!!   - vphysc : containing physical ECHAM variables that are not part of the standard 
+!!              ECHAM output
+!!   - wetdep : containing variable pointers for the wetdep calculation and additional
+!!              diagnostic output
+!!   - drydep : containing variable pointers for the drydep calculation and additional
+!!              diagnostic output
+!!   - sedi:    containing variable pointers for the sedimentation calculation and
+!!              additional diagnostic output
+!!
+!! @author
+!! Martin Schultz, FZ Juelich     (1009-10-02)
+!!
+!!
+
+
+MODULE mo_submodel_streams
+
+  USE mo_memory_base,      ONLY: default_output
+  USE mo_time_event,       ONLY: io_time_event
+  USE mo_tracdef,          ONLY: jptrac, ln
+
+  IMPLICIT NONE
+
+  PRIVATE
+
+  PUBLIC :: init_submodel_streams
+
+  PUBLIC :: nmaxstreamvars
+  PUBLIC :: vphysc_lpost, vphysc_tinterval, vphyscnam
+  PUBLIC :: wetdep_lpost, wetdep_tinterval, wetdepnam, wetdep_gastrac, wetdep_keytype
+  PUBLIC :: drydep_lpost, drydep_tinterval, drydepnam, drydep_gastrac, drydep_keytype
+  PUBLIC :: sedi_lpost, sedi_tinterval, sedinam, sedi_keytype
+  PUBLIC :: emi_lpost, emi_lpost_detail, emi_tinterval, eminam, emi_gastrac, emi_keytype
+
+  ! Module variables
+  INTEGER, PARAMETER   :: nmaxstreamvars = 50   ! maximum number of different diagnostics in stream
+
+  ! Note: the variables below are declared in this module rather than in the mo_<process>_interface
+  ! routines to de-couple generic ECHAM code from submodel code. The mo_<process>_interface
+  ! modules contain references to specific submodels while mo_submodel_streams is supposed
+  ! to be generic.
+  ! vphysc
+  LOGICAL,             SAVE    :: vphysc_lpost
+  TYPE(io_time_event), SAVE    :: vphysc_tinterval
+  CHARACTER(LEN=32),   SAVE    :: vphyscnam(nmaxstreamvars)
+  ! wetdep
+  LOGICAL,             SAVE    :: wetdep_lpost
+  TYPE(io_time_event), SAVE    :: wetdep_tinterval
+  CHARACTER(LEN=32),   SAVE    :: wetdepnam(nmaxstreamvars)
+  CHARACTER(LEN=ln),   SAVE    :: wetdep_gastrac(jptrac)
+  INTEGER,             SAVE    :: wetdep_keytype
+  ! drydep
+  LOGICAL,             SAVE    :: drydep_lpost
+  TYPE(io_time_event), SAVE    :: drydep_tinterval
+  CHARACTER(LEN=32),   SAVE    :: drydepnam(nmaxstreamvars)
+  CHARACTER(LEN=ln),   SAVE    :: drydep_gastrac(jptrac)
+  INTEGER,             SAVE    :: drydep_keytype
+  ! sedimentation
+  LOGICAL,             SAVE    :: sedi_lpost
+  TYPE(io_time_event), SAVE    :: sedi_tinterval
+  CHARACTER(LEN=32),   SAVE    :: sedinam(nmaxstreamvars)
+  INTEGER,             SAVE    :: sedi_keytype
+  ! emissions
+  LOGICAL,             SAVE    :: emi_lpost
+  LOGICAL,             SAVE    :: emi_lpost_detail
+  TYPE(io_time_event), SAVE    :: emi_tinterval
+  CHARACTER(LEN=32),   SAVE    :: eminam(nmaxstreamvars)    ! probably obsolete
+  CHARACTER(LEN=ln),   SAVE    :: emi_gastrac(jptrac)
+  INTEGER,             SAVE    :: emi_keytype
+
+
+
+  CONTAINS
+
+  SUBROUTINE init_submodel_streams
+
+  !! reads submdiagctl namelist and initializes various generic submodel diagnostics
+
+    USE mo_namelist,            ONLY: open_nml, position_nml, &
+                                      POSITIONED, MISSING,    &
+                                      LENGTH_ERROR, READ_ERROR
+    USE mo_mpi,                 ONLY: p_parallel_io, p_io, p_bcast
+    USE mo_time_control,        ONLY: p_bcast_event, putdata
+    USE mo_exception,           ONLY: finish, message, em_warn
+    USE mo_submodel,            ONLY: ldrydep, lemissions, lwetdep
+    USE mo_submodel_diag,       ONLY: BYSPECIES
+
+    ! local variables
+    INTEGER :: inml, iunit, ierr
+
+    include 'submdiagctl.inc'
+
+    ! 1) -- set default values
+
+    !--- vphysc
+    vphysc_lpost = default_output
+    vphyscnam(:) = ''
+    vphyscnam(1) = 'default'
+    vphysc_tinterval = putdata
+
+    !--- wetdep
+    wetdep_lpost = default_output
+    wetdepnam(:) = ''
+    wetdepnam(1) = 'default'
+    wetdep_tinterval = putdata
+    wetdep_gastrac(:) = ''
+    wetdep_gastrac(1) = 'default'
+    wetdep_keytype = BYSPECIES
+
+    !--- drydep
+    drydep_lpost = default_output
+    drydepnam(:) = ''
+    drydepnam(1) = 'default'
+    drydep_tinterval = putdata
+    drydep_gastrac(:) = ''
+    drydep_gastrac(1) = 'default'
+    drydep_keytype = BYSPECIES
+
+    !--- sedimentation
+    sedi_lpost = default_output
+    sedinam(:) = ''
+    sedinam(1) = 'default'
+    sedi_tinterval = putdata
+    sedi_keytype = BYSPECIES
+
+    !--- emissions
+    emi_lpost = default_output
+    emi_lpost_detail = .false.
+    eminam(:) = ''
+    eminam(1) = 'default'
+    emi_tinterval = putdata
+    emi_gastrac(:) = ''
+    emi_gastrac(1) = 'default'
+    emi_keytype = BYSPECIES
+
+    ! 2) -- read namelist
+    IF (p_parallel_io) THEN
+      inml = open_nml ('namelist.echam')
+      iunit = position_nml('submdiagctl', inml, status=ierr)
+      SELECT CASE (ierr)
+      CASE (POSITIONED)
+        read(iunit, submdiagctl)
+      CASE (MISSING)
+        CALL message ('init_submodel_streams','namelist submdiagctl not found in namelist.echam.'// &
+                      ' Using default values.')
+      CASE (LENGTH_ERROR)
+        CALL finish ('init_submodel_streams','namelist submdiagctl has wrong length!')
+      CASE (READ_ERROR)
+        CALL finish ('init_submodel_streams','cannot read namelist submdiagctl!')
+      END SELECT
+    END IF
+
+    !--- vphysc
+    CALL p_bcast(vphysc_lpost, p_io)
+    CALL p_bcast(vphyscnam, p_io)
+    CALL p_bcast_event(vphysc_tinterval, p_io)
+
+    !--- wetdep
+    CALL p_bcast(wetdep_lpost, p_io)
+    CALL p_bcast(wetdepnam, p_io)
+    CALL p_bcast_event(wetdep_tinterval, p_io)
+    CALL p_bcast(wetdep_gastrac, p_io)
+    CALL p_bcast(wetdep_keytype, p_io)
+
+    !--- drydep
+    CALL p_bcast(drydep_lpost, p_io)
+    CALL p_bcast(drydepnam, p_io)
+    CALL p_bcast_event(drydep_tinterval, p_io)
+    CALL p_bcast(drydep_gastrac, p_io)
+    CALL p_bcast(drydep_keytype, p_io)
+
+    !--- sedimentation
+    CALL p_bcast(sedi_lpost, p_io)
+    CALL p_bcast(sedinam, p_io)
+    CALL p_bcast_event(sedi_tinterval, p_io)
+    CALL p_bcast(sedi_keytype, p_io)
+
+    !--- emissions
+    CALL p_bcast(emi_lpost, p_io)
+    CALL p_bcast(emi_lpost_detail, p_io)
+    CALL p_bcast(eminam, p_io)
+    CALL p_bcast_event(emi_tinterval, p_io)
+    CALL p_bcast(emi_gastrac, p_io)
+    CALL p_bcast(emi_keytype, p_io)
+
+    !--- turn off lpost flags if submodel process flags are FALSE
+    IF (drydep_lpost .AND. .NOT. ldrydep) THEN
+      drydep_lpost = .FALSE.
+      CALL message('init_submodel_streams', 'drydep_lpost turned FALSE because ldrydep=FALSE!', &
+                   level=em_warn)
+    END IF
+    IF (emi_lpost .AND. .NOT. lemissions) THEN
+      emi_lpost = .FALSE.
+      CALL message('init_submodel_streams', 'emi_lpost turned FALSE because lemissions=FALSE!', &
+                   level=em_warn)
+    END IF
+    IF (emi_lpost_detail .AND. .NOT. lemissions) THEN
+      emi_lpost_detail = .FALSE.
+      CALL message('init_submodel_streams', 'emi_lpost_detail turned FALSE because lemissions=FALSE!', &
+                   level=em_warn)
+    END IF
+    IF (wetdep_lpost .AND. .NOT. lwetdep) THEN
+      wetdep_lpost = .FALSE.
+      CALL message('init_submodel_streams', 'wetdep_lpost turned FALSE because lwetdep=FALSE!', &
+                   level=em_warn)
+    END IF
+
+    ! Initialisation of streams has to be called from mo_submodel_interface to avoid
+    ! dependencies on individual submodels in this module.
+
+  END SUBROUTINE init_submodel_streams
+
+END MODULE mo_submodel_streams

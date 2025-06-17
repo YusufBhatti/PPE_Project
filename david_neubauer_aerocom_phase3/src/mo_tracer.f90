@@ -1,0 +1,1076 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Definition of tracer meta information and structure for burden diagnostics. Also contains
+!! generic routines to define tracers, get tracer ids or retrieve flag values.
+!! 
+!!
+!!
+!! @author 
+!! <ol>
+!! <li>ECHAM5 developers 
+!! <li>M. Schultz (FZ-Juelich)
+!! </ol>
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! <ol>
+!! <li>ECHAM5 developers - original code - (before 2009) 
+!! <li>M. Schultz   (FZ-Juelich) -  new tracer definition scheme - (2009-05-xx) 
+!!                                  
+!! </ol>
+!!
+!! @par This module is used by
+!! a lot of subroutines
+!! 
+!! @par Responsible coder
+!! m.schultz@fz-juelich.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+MODULE mo_tracer
+
+  USE mo_kind,             ONLY: dp 
+  USE mo_util_string,      ONLY: separator          ! format string (----)
+  USE mo_time_conversion,  ONLY: tc_set             ! routine to set 'time_days'
+  USE mo_tracdef,          ONLY: trlist,         &  ! tracer info variable
+!!mgs!!                          t_trlist,       &  ! tracer info data type
+                                 t_trinfo,       &  ! data type, component of t_trlist
+                                 t_flag,         &  ! data type, component of t_trlist
+                                 ln, nf             ! len of char components of trlist 
+  USE mo_tracdef,          ONLY: jptrac,         &  ! maximum number of prog. tracers
+                                 ntrac,          &  ! number of tracers defined
+                                 RESTART,        & 
+                                 CONSTANT,       &  ! 
+                                 GAS,            &  ! 
+                                 AEROSOLMASS,    &  ! 
+                                 AEROSOLNUMBER      ! 
+  USE mo_memory_gl,        ONLY: xt                 ! tracer field array
+  USE mo_memory_g1a,       ONLY: xtm1               ! tracer field array (t-1)
+  USE mo_exception,        ONLY: finish,         &       
+                                 message,        &       
+                                 message_text
+  USE mo_advection,        ONLY: iadvec             ! selected advection scheme
+
+  IMPLICIT NONE
+
+  
+  PRIVATE
+  
+ 
+  !! Tracer info list
+  
+!!mgs!!  PUBLIC :: t_trinfo                               !
+!!mgs!!  PUBLIC :: t_flag                                 !    type definition
+
+  PUBLIC :: nburden, diag_burden, d_burden           ! burden diagnostics 
+  
+  !! Interface routines  ! purpose                   ! called by
+                                                      
+  PUBLIC :: new_tracer   ! request tracer            ! chemical modules
+  PUBLIC :: get_tracer   ! get reference to tracer   ! chemical modules
+  PUBLIC :: get_ntrac    ! get number of tracers optionally keyed to submodel name
+  PUBLIC :: validate_traclist ! evaluate a list of tracer names for certain properties
+  PUBLIC :: flag         ! get value of userdef.flag ! chemical modules 
+  PUBLIC :: init_trlist 
+  PUBLIC :: finish_tracer_definition
+  PUBLIC :: new_diag_burden  ! get_diag_burden(?)
+
+  ! type declaration
+  TYPE diag_burden
+    CHARACTER(len=ln)        :: name
+    INTEGER                  :: itype     ! type of burden calculation (see below)
+                                          ! additive binary values
+                                          ! ### also add 64 = global totals (old trastat function)?
+    REAL(dp), POINTER       :: ptr1(:,:)  ! pointer for type= 1 : total column mass
+    REAL(dp), POINTER       :: ptr2(:,:)  ! pointer for type= 2 : tropospheric column mass
+    REAL(dp), POINTER       :: ptr4(:,:)  ! pointer for type= 4 : stratospheric column mass
+    REAL(dp), POINTER       :: ptr8(:,:)  ! pointer for type= 8 : column density
+    REAL(dp), POINTER       :: ptr16(:,:) ! pointer for type=16 : tropospheric column density
+    REAL(dp), POINTER       :: ptr32(:,:) ! pointer for type=32 : stratospheric column density
+  END TYPE diag_burden           
+                                 
+  ! Parameters                   
+  INTEGER, PARAMETER     :: nmaxburden = jptrac ! maximum number of burden diagnostics allowed
+                                 
+  ! module variables             
+  INTEGER                :: nburden = 0    ! number of burden diagnostics currently defined
+  
+!!mgs!! --- for trastat ----------------------   
+!!mgs!!  INTEGER                :: icount = 0 ! counter for time steps
+!!mgs!! --------------------------------------
+  
+                                 
+  TYPE (diag_burden)          :: d_burden(nmaxburden)
+                                 
+                                 
+!!mgs!! --- for trastat ----------------------
+!!mgs!!  REAL(dp), ALLOCATABLE :: tropm (:,:) ! zonal mass budgets of tracers, troposphere
+!!mgs!!  REAL(dp), ALLOCATABLE :: stratm(:,:) ! zonal mass budgets of tracers, stratosphere
+!!mgs!! --------------------------------------
+  
+
+  !! error return values
+ 
+  INTEGER, PARAMETER :: OK         = 0
+  INTEGER, PARAMETER :: NAME_USED  = 2
+  INTEGER, PARAMETER :: NAME_MISS  = 3
+  INTEGER, PARAMETER :: TABLE_FULL = 4
+  INTEGER, PARAMETER :: UNDEFINED  = 5 !mgs
+  INTEGER, PARAMETER :: INVALID_ID = 6 !mgs
+ 
+  INTEGER  ,PARAMETER :: IUNDEF = -999
+  REAL(dp) ,PARAMETER :: RUNDEF = -999.0_dp
+
+   
+  !! interfaces
+ 
+  INTERFACE flag
+    MODULE PROCEDURE flag_by_name
+    MODULE PROCEDURE flag_by_index
+  END INTERFACE ! flag
+
+  
+  CONTAINS
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Set defaults of the tracer info data type. 
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! initialize
+!!
+!! @par Externals:
+!! <ol>
+!! <li>None
+!! </ol>
+!!
+!! @par Notes
+!! combination of the original code and mgs02  
+!!
+!! @par Responsible coder
+!! kai.zhang@zmaw.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  SUBROUTINE init_trlist
+ 
+  INTEGER :: i
+  
+  trlist% ti(:)% code       = 0
+  trlist% ti(:)% table      = 131 ! MPI-Meteorology, Hamburg
+  trlist% ti(:)% gribbits   = 16
+  trlist% ti(:)% basename   = ''
+  trlist% ti(:)% subname    = ''
+  trlist% ti(:)% fullname   = ''
+  trlist% ti(:)% modulename = ''
+  trlist% ti(:)% units      = ''
+  trlist% ti(:)% longname   = ''
+  trlist% ti(:)% moleweight = 0._dp! molecular mass (copied from species upon initialisation)
+  
+  trlist% ti(:)% nbudget    = 0
+  trlist% ti(:)% ntran      = iadvec
+  trlist% ti(:)% nfixtyp    = 1
+  trlist% ti(:)% nvdiff     = 1
+  trlist% ti(:)% nconv      = 1
+  
+  trlist% ti(:)% nwrite     = 1
+  trlist% ti(:)% ninit      = RESTART+CONSTANT
+  trlist% ti(:)% vini       = 0._dp
+  trlist% ti(:)% ndrydep    = 0
+  trlist% ti(:)% nwetdep    = 0
+  trlist% ti(:)% nsedi      = 0
+  trlist% ti(:)% nemis      = 0
+  trlist% ti(:)% nint       = 1    ! default: accumulate (average) tracer concentrations
+  
+  trlist% ti(:)% nsoluble   = 0
+  trlist% ti(:)% nphase     = 0    ! phase undefined
+  trlist% ti(:)% mode       = 0    ! aerosol mode or bin (0 is ok for gas-phase tracers)
+  trlist% ti(:)% init       = 0
+  trlist% ti(:)% nrerun     = 1    ! save in rerun file
+  
+  !ori but not msg02
+!!mgs!!  trlist% ti(:)% henry      = 1.e-10_dp
+!!mgs!!  trlist% ti(:)% dryreac    = 0._dp
+  trlist% ti(:)% tdecay     = 0._dp
+  
+  !msg02 but not ori 
+  trlist% ti(:)% standardname  = ''
+  trlist% ti(:)% trtype     = 0    ! tracer undefined
+  trlist% ti(:)% spid       = 0    ! no species index attached
+  trlist% ti(:)% burdenid   = -1
+
+  
+  DO i = 1, UBOUND(trlist% ti,1)
+    trlist% ti(i)    % myflag     = t_flag ('',0._dp)
+    CALL tc_set (0,0,trlist% ti(i)% tupdatel)
+    CALL tc_set (0,0,trlist% ti(i)% tupdaten)
+  END DO
+
+  END SUBROUTINE init_trlist
+ 
+  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Print tracer information as set by namelist and modules. 
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! finish_tracer_definition
+!!
+!! @par Externals:
+!! <ol>
+!! <li>None
+!! </ol>
+!!
+!! @par Notes
+!! original version 
+!!
+!!
+!! @par Responsible coder
+!! kai.zhang@zmaw.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  SUBROUTINE printtrac !! please keep this subroutine for testing use
+ 
+  USE mo_mpi,    ONLY: p_parallel_io
+
+  INTEGER                     :: i
+  CHARACTER(len=*) ,PARAMETER :: form      = '(2x,i4,1x,2a16,2i5,3i2,g11.3,6i2)'
+
+
+  IF (ntrac > 0 .AND. p_parallel_io) THEN
+    CALL message('',separator)
+    CALL message('','')
+    WRITE(message_text,'(a,i4)') '  Number of tracers:', trlist% ntrac
+    CALL message('',message_text)
+    CALL message('','')
+    IF (ntrac > 0) THEN
+      CALL message('','                                                  p r n            w d s s p m')
+      CALL message('','                                                  r e i            e r e o h o')
+      CALL message('','                                          grib    i s n            t y d l a d')
+      CALL message('','       name            module          code table n t i   vini     d d i u s e')
+      CALL message('','                                                  t a t            e e   b e  ')
+      CALL message('','                                                    r              p p   l    ')
+    ENDIF
+    CALL message('','')
+    DO i=1,ntrac
+      WRITE(message_text,form) i,                         & 
+                               trlist% ti(i)% fullname,   &
+                               trlist% ti(i)% modulename, &
+                               trlist% ti(i)% code,       & 
+                               trlist% ti(i)% table,      &
+                               trlist% ti(i)% nwrite,     &
+                               trlist% ti(i)% nrerun,     &
+                               trlist% ti(i)% ninit,      &
+                               trlist% ti(i)% vini,       &
+                               trlist% ti(i)% nwetdep,    &
+                               trlist% ti(i)% ndrydep,    &
+                               trlist% ti(i)% nsedi,      &
+                               trlist% ti(i)% nsoluble,   &
+                               trlist% ti(i)% nphase,     &
+                               trlist% ti(i)% mode
+      CALL message('',message_text)
+    END DO
+    CALL message('','')
+    CALL message('',separator)
+  ENDIF
+      
+  END SUBROUTINE printtrac
+  
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Print tracer information as set by namelist and modules. 
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! finish_tracer_definition
+!!
+!! @par Externals:
+!! <ol>
+!! <li>None
+!! </ol>
+!!
+!! @par Notes
+!! new version by Martin
+!!
+!!
+!! @par Responsible coder
+!! kai.zhang@zmaw.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  SUBROUTINE printtrac2
+  
+  
+  USE mo_mpi,            ONLY: p_parallel_io
+  USE mo_tracdef,        ONLY: trlist,       &! tracer info variable 
+                               ITRPRESC,     &! tracer type
+                               ITRDIAG,      &! ... 
+                               ITRPROG        ! ... 
+  USE mo_exception,      ONLY: message,      &
+                               message_text, &
+                               em_param
+
+                               
+  INTEGER                     :: i
+  CHARACTER(len=*) ,PARAMETER :: form1     = '(2x,2a16,6i6,g11.3)'
+  CHARACTER(len=*) ,PARAMETER :: form2     = '(2x,2a16,6i6,g11.3)'
+  CHARACTER(len=6)            :: ctype, cphase
+
+  
+  IF (p_parallel_io) THEN
+    CALL message('',separator)
+    CALL message('','', level=em_param)
+    WRITE(message_text,'(a,i4)') '  Number of tracers:', trlist% ntrac
+    CALL message('',message_text, level=em_param)
+    CALL message('','', level=em_param)
+    IF (ntrac > 0) THEN
+      CALL message('','  Tracer properties and processes:', level=em_param)
+      CALL message('','  name            module           type  phase  mode  species  ndryd nwetd nsedi nsol', &
+                   level=em_param)
+      CALL message('','', level=em_param)
+      DO i=1,ntrac
+        ctype = ' undef'
+        SELECT CASE (trlist% ti(i)% trtype)
+          CASE (ITRPRESC) ;       ctype = ' presc'
+          CASE (ITRDIAG)  ;       ctype = '  diag'
+          CASE (ITRPROG)  ;       ctype = ' progn'
+        END SELECT
+        cphase = ' undef'
+        SELECT CASE (trlist% ti(i)% nphase)
+          CASE (GAS)  ;           cphase = '   gas'
+          CASE (AEROSOLMASS)  ;   cphase = ' aerom'
+          CASE (AEROSOLNUMBER)  ; cphase = ' aeron'
+        END SELECT
+        WRITE(message_text,form1) trlist% ti(i)% fullname,   &
+                                 trlist% ti(i)% modulename, &
+                                 ctype,                     &
+                                 cphase,                    &
+                                 trlist% ti(i)% mode,       &
+                                 trlist% ti(i)% spid,       &
+                                 trlist% ti(i)% ndrydep,    &
+                                 trlist% ti(i)% nwetdep,    &
+                                 trlist% ti(i)% nsedi,      &
+                                 trlist% ti(i)% nsoluble
+        CALL message('',message_text, level=em_param)
+        CALL message('','', level=em_param)
+      END DO
+      CALL message('','', level=em_param)
+      CALL message('','  Tracer initialisation and output:', level=em_param)
+      CALL message('','  name            module          nwrite  nint  grbc  grbt ninit nrerun vini', &
+                   level=em_param)
+      CALL message('','', level=em_param)
+      DO i=1,ntrac
+        WRITE(message_text,form2) trlist% ti(i)% fullname,   &
+                                 trlist% ti(i)% modulename, &
+                                 trlist% ti(i)% nwrite,     &
+                                 trlist% ti(i)% nint,       &
+                                 trlist% ti(i)% code,       & 
+                                 trlist% ti(i)% table,      &
+                                 trlist% ti(i)% ninit,      &
+                                 trlist% ti(i)% nrerun,     &
+                                 trlist% ti(i)% vini
+        CALL message('',message_text, level=em_param)
+      END DO
+      CALL message('','', level=em_param)
+    ENDIF
+    CALL message('',separator)
+  ENDIF
+      
+  END SUBROUTINE printtrac2
+  
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!>
+!! Call this routine from modules to define new tracers
+!!
+!! Normally, before defining a tracer, the corresponding species metadata should be 
+!! defined by calling the new_species subroutine. New_tracer will then store 
+!! the species index in the spid field. 
+!! If spid and nphase are valid, name can be left empty. In this case, the species
+!! shortname will be used as tracer name.
+!! For backward-compatibility new_tracer can also be called if the corresponding species
+!! has not been defined. In this case, a new species will be created based on the 
+!! parameters provided (at a minimum, name and moleweight must be given). Note,
+!! however, that new_tracer allows to control fewer parameters than new_species.
+!! It is therefore recommended to adapt existing code to use new_species first and 
+!! new_tracer with the species id.
+!!
+!! @author see above
+!!
+!! $Id: 1423$
+!!
+!! @par Revision History
+!! see above
+!!
+!! @par This subroutine is called by
+!! initrac
+!!
+!! @par Externals:
+!! <ol>
+!! <li>None
+!! </ol>
+!!
+!! @par Notes
+!! original version 
+!!
+!!
+!! @par Responsible coder
+!! kai.zhang@zmaw.de
+!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  SUBROUTINE new_tracer (name, modulename, spid, subname, longname,           & ! names...
+                         units, trtype, nphase, mode,                         &
+                         ninit,  nrerun, vini,                                & ! initialisation
+                         nwrite, nint, code, table, bits,                     & ! output
+                         burdenid, nbudget,                                   & ! diagnostics
+                         ntran, nfixtyp, nvdiff, nconv,                       & ! processes
+                         ndrydep, nwetdep, nsedi, nemis, nsoluble,            &
+                         moleweight,                 tdecay,                  & ! species properties
+ !!mgs!!                 moleweight, henry, dryreac, tdecay,                  & ! species properties
+                         idx, myflag, ierr)                                     ! return info
+
+  USE mo_exception,  ONLY: message, message_text, em_warn, em_error
+  
+  CHARACTER(len=*) ,INTENT(in)            :: name      ! name of tracer
+  CHARACTER(len=*) ,INTENT(in)            :: modulename! name of routine/module
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: spid      ! species index
+  CHARACTER(len=*) ,INTENT(in)  ,OPTIONAL :: subname   ! optional for 'colored'
+  CHARACTER(len=*) ,INTENT(in)  ,OPTIONAL :: longname  ! long name
+  CHARACTER(len=*) ,INTENT(in)  ,OPTIONAL :: units     ! units
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: trtype    ! tracer type
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nphase    ! phase indicator
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: mode      ! mode indicator or bin number
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: ninit     ! initialisation flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nrerun    ! restart flag
+  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: vini      ! initialisation value
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nwrite    ! flag to print tracer
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nint      ! integration flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: code      ! grib code
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: table     ! grib table
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: bits      ! grib encoding bits
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: burdenid  ! burden diagnostics number
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nbudget   ! budget diagnostics
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: ntran     ! transport switch
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nfixtyp   ! type of mass fixer
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nvdiff    ! vertical diffusion fl.
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nconv     ! convection flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: ndrydep   ! dry deposition flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nwetdep   ! wet deposition flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nsedi     ! sedimentation flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nemis     ! surface emission flag
+  INTEGER          ,INTENT(in)  ,OPTIONAL :: nsoluble  ! soluble flag
+  
+  !! species properties (to be removed in future versions (ICON?))
+  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: moleweight! molecular weight
+!!mgs!!  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: henry     ! Henry coefficient
+!!mgs!!  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: dryreac   ! reactivity coefficient
+  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: tdecay    ! tracer exp-decay-time
+  TYPE(t_flag)     ,INTENT(in)  ,OPTIONAL :: myflag(:) ! user defined flags
+  
+  !! return values
+  INTEGER          ,INTENT(out) ,OPTIONAL :: idx       ! position in tracerinfo
+  INTEGER          ,INTENT(out) ,OPTIONAL :: ierr      ! error return value
+
+  INTEGER                 :: i
+  CHARACTER(len=ln)       :: fullname
+  TYPE(t_trinfo) ,POINTER :: ti
+  LOGICAL                 :: lspec     ! species id provided as input?
+  !INTEGER                 :: iphase    ! local copy -- needed for species definition
+  !  Variable IPHASE set but never referenced
+  CHARACTER(len=ln)       :: cname     ! local copy
+  INTEGER                 :: ispid     ! local copy of species index
+  INTEGER                 :: ierrlevel ! local error level (em_error if ierr not present, em_warn otherwise)
+  ! "module settings": ### these default values should be re-defined in the wetdep and drydep modules
+  ! ### in analogy to iadvec in mo_transport. Then one would find a USE mo_drydep, ONLY: idrydep  here.
+  !INTEGER, PARAMETER      :: iwetdep = 1
+  !INTEGER, PARAMETER      :: idrydep= 2    ! interactive Ganzeveld scheme
+  !INTEGER, PARAMETER      :: isoluble= 1
+  ! 
+  ! note: nconvmassfix is set automatically (ON for aerosol tracers, OFF for others)
+  !
+  ! set default values for optional INTENT(out) parameters
+  !
+  IF (PRESENT(ierr))  ierr = UNDEFINED    ! fail safe
+  IF (PRESENT(idx))   idx = 0
+
+  ! set error level for message output
+  IF (PRESENT(ierr)) THEN
+    ierrlevel = em_warn
+  ELSE
+    ierrlevel = em_error
+  END IF
+
+  ! test for presence of valid spid
+  lspec = PRESENT(spid)
+  ispid = 0
+  
+  IF (lspec) THEN
+    ! ### WARNING: no error check for validity of species index value !
+    ispid = spid    
+  END IF
+
+  ! make sure that nphase is defined if spid is given
+  IF (lspec) THEN
+  !   IF (PRESENT(nphase)) THEN
+  !      iphase = nphase
+  !   ELSE
+  !      iphase = 0
+  !      CALL message('new_tracer', 'Undefined phase for tracer ' // TRIM(name), level=em_error)
+  !   END IF
+  !  Variable IPHASE set but never referenced !!
+     IF (.NOT. PRESENT(nphase))  &
+       CALL message('new_tracer', 'Undefined phase for tracer ' // TRIM(name), level=em_error)
+  END IF
+  
+  !
+  ! derive full name
+  !
+  ! error if name is empty
+  cname = name
+  IF (LEN_TRIM(name) == 0) THEN
+    WRITE(message_text,*) 'Empty species name, ntrac=', ntrac
+    CALL message('new_tracer', message_text, level=em_error)
+  END IF
+!++mgs: fix for empty subnames (mo_ham_m7_trac)
+  IF(PRESENT(subname)) THEN
+    IF(TRIM(subname) /= '') THEN
+      fullname = TRIM(cname)//'_'//subname
+    ELSE
+      fullname = cname
+    END IF
+!--mgs
+  ELSE
+    fullname = cname
+  END IF
+  !
+  ! check for table full and name used errors
+  !
+  IF (ntrac >= jptrac) THEN
+    WRITE (message_text, *) 'Tracer table full. jptrac =',jptrac
+    CALL finish('new_tracer', message_text)
+    IF (PRESENT(ierr))  ierr = TABLE_FULL
+    RETURN
+  END IF
+  IF (ANY(trlist% ti(1:ntrac)% fullname==fullname)) THEN
+    CALL message('new_tracer', 'Tracer name already used: ' // TRIM(fullname), level=ierrlevel)
+    IF (PRESENT(ierr))  ierr = NAME_USED
+    RETURN
+  ENDIF
+    
+
+    ! complete warnings 
+!!mgs!!  IF (PRESENT(henry)) CALL message('new_tracer', 'Henry value definition obsolete - now done in new_species.'  &
+!!mgs!!                                     // ' Value will be ignored.', level=em_warn)
+  !
+  ! set tracer info for the new tracer
+  !
+  ntrac = ntrac + 1
+  trlist% ntrac = ntrac
+  ti => trlist% ti (ntrac)
+  IF (PRESENT(idx))   idx  = ntrac
+  IF (PRESENT(ierr))  ierr = OK     ! now we have a valid new entry even if it may contain rubbish
+  !
+  ! special handling for colored tracers:
+  !   take over properties of previous tracer 
+  !   use same attributes
+  !
+  IF (PRESENT(subname) .AND. ntrac > 1) THEN
+    DO i=1,ntrac-1
+      IF ( trlist% ti (i)% basename == name &
+      .AND.trlist% ti (i)% subname  == ''   ) THEN
+        ti = trlist% ti (i)
+        IF (trlist% ti (i)% code > 0) ti% code = 0
+      ENDIF
+    END DO
+  ENDIF
+  !
+  ! define tracer properties
+  !
+  ti% basename   = name
+  ti% fullname   = fullname
+  ti% modulename = modulename
+  ti% longname   = fullname
+  ti% spid       = ispid
+  
+  IF (PRESENT(subname))    ti% subname    = subname
+  IF (PRESENT(longname))   ti% longname   = longname
+  IF (PRESENT(units))      ti% units      = units
+  IF (PRESENT(trtype))     ti% trtype     = trtype
+  IF (PRESENT(nphase))     ti% nphase     = nphase
+  IF (PRESENT(mode))       ti% mode       = mode
+  IF (PRESENT(ninit))      ti% ninit      = ninit
+  IF (PRESENT(nrerun))     ti% nrerun     = nrerun
+  IF (PRESENT(vini))       ti% vini       = vini
+  IF (PRESENT(nwrite))     ti% nwrite     = nwrite
+  IF (PRESENT(nint))       ti% nint       = nint
+  IF (PRESENT(code))       ti% code       = code
+  IF (PRESENT(table))      ti% table      = table
+  IF (PRESENT(bits))       ti% gribbits   = bits
+  IF (PRESENT(burdenid))   ti% burdenid   = burdenid
+  IF (PRESENT(nbudget))    ti% nbudget    = nbudget
+  IF (PRESENT(ntran))      ti% ntran      = ntran
+  IF (PRESENT(nfixtyp))    ti% nfixtyp    = nfixtyp
+  IF (PRESENT(nvdiff))     ti% nvdiff     = nvdiff
+  IF (PRESENT(nconv))      ti% nconv      = nconv
+  IF (PRESENT(ndrydep))    ti% ndrydep    = ndrydep
+  IF (PRESENT(nwetdep))    ti% nwetdep    = nwetdep
+  IF (PRESENT(nsedi))      ti% nsedi      = nsedi
+  IF (PRESENT(nemis))      ti% nemis      = nemis
+  IF (PRESENT(nsoluble))   ti% nsoluble   = nsoluble
+  IF (PRESENT(moleweight)) ti% moleweight = moleweight
+!!mgs!!  IF (PRESENT(henry))      ti% henry      = henry
+!!mgs!!  IF (PRESENT(dryreac))    ti% dryreac    = dryreac
+  IF (PRESENT(tdecay))     ti% tdecay     = tdecay
+
+  ! set nconvmassfix
+  ti% nconvmassfix = 0
+  IF (ti% nphase == AEROSOLMASS .OR. ti% nphase == AEROSOLNUMBER) ti% nconvmassfix = 1
+
+  IF (PRESENT(myflag)) THEN
+  IF (SIZE(myflag) > nf) CALL finish ('new_tracer','size(myflag) > nf')
+    ti% myflag (:SIZE(myflag)) = myflag
+  ENDIF
+  
+  IF (PRESENT(myflag)) THEN
+    IF (SIZE(myflag) > nf) CALL finish ('new_tracer','size(myflag) > nf')
+    ti% myflag (:SIZE(myflag)) = myflag
+  ENDIF
+
+  !
+  ! Add tracer index to species structure
+  !
+  
+  END SUBROUTINE new_tracer
+   
+  
+  
+  FUNCTION flag_by_name (string, name, subname, undefined) RESULT (value)
+  REAL(dp)                                :: value     ! value of flag
+  CHARACTER(len=*) ,INTENT(in)            :: string    ! name of flag
+  CHARACTER(len=*) ,INTENT(in)            :: name      ! name of tracer
+  CHARACTER(len=*) ,INTENT(in)  ,OPTIONAL :: subname   ! subname of tracer
+  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: undefined ! return value on error
+    INTEGER           :: i
+    CHARACTER(len=ln) :: fullname
+
+    IF(PRESENT(subname)) THEN
+      fullname = name//'_'//subname
+    ELSE
+      fullname = name
+    ENDIF
+
+    DO i=1,trlist% ntrac
+      IF (trlist% ti(i)% fullname == fullname) THEN
+        value = flag (string, i, undefined)
+        RETURN
+      ENDIF
+    END DO
+
+    CALL finish ('function flag','tracer not found: '//fullname)
+
+  END FUNCTION flag_by_name
+
+  
+  
+  FUNCTION flag_by_index (string, idx, undefined) RESULT (value)
+  REAL(dp)                                :: value     ! value of flag
+  CHARACTER(len=*) ,INTENT(in)            :: string    ! name of flag
+  INTEGER          ,INTENT(in)            :: idx       ! index of tracer
+  REAL(dp)         ,INTENT(in)  ,OPTIONAL :: undefined ! return value on error
+
+    INTEGER           :: j
+
+    DO j=1,nf
+      IF (trlist% ti(idx)% myflag(j)% c == string) THEN
+        value = trlist% ti(idx)% myflag(j)% v
+        RETURN
+      ENDIF
+    END DO
+
+    IF (PRESENT (undefined)) THEN
+      value = undefined
+      RETURN
+    ELSE
+      CALL finish ('function flag','flag not found: '//string)
+    ENDIF
+
+  END FUNCTION flag_by_index
+
+  
+  
+  SUBROUTINE get_tracer (name, subname, modulename, idx, pxt, pxtm1, ierr)
+  !
+  ! get pointer or index of tracer
+  !  
+  CHARACTER(len=*) ,INTENT(in)            :: name         ! name of tracer
+  CHARACTER(len=*) ,INTENT(in)  ,OPTIONAL :: subname      ! subname of tracer
+  CHARACTER(len=*) ,INTENT(out) ,OPTIONAL :: modulename   ! name of module
+  INTEGER          ,INTENT(out) ,OPTIONAL :: idx          ! index of tracer
+  REAL(dp)         ,POINTER     ,OPTIONAL :: pxt  (:,:,:) ! pointer to tracer
+  REAL(dp)         ,POINTER     ,OPTIONAL :: pxtm1(:,:,:) ! ptr to tr. at t-1
+  INTEGER          ,INTENT(out) ,OPTIONAL :: ierr         ! error return value
+
+  CHARACTER(len=ln) :: fullname
+  INTEGER           :: i
+
+  
+  IF(PRESENT(subname)) THEN
+    fullname = name//'_'//subname
+  ELSE
+    fullname = name
+  ENDIF
+
+  IF (PRESENT(modulename)) modulename=''
+  IF (PRESENT(idx)) idx=0
+  IF (PRESENT(pxt)) NULLIFY(pxt)
+  IF (PRESENT(pxtm1)) NULLIFY(pxtm1)
+
+  DO i=1, trlist% ntrac
+    IF (trlist% ti(i)% fullname == fullname) THEN
+      IF (PRESENT(modulename)) modulename =  trlist% ti(i)% modulename
+      IF (PRESENT(idx))        idx        =  i
+      IF (PRESENT(pxt))        pxt        => xt   (:,:,i,:)
+      IF (PRESENT(pxtm1))      pxtm1      => xtm1 (:,:,i,:)
+      IF (PRESENT(ierr))       ierr       =  0
+      RETURN
+    ENDIF
+  END DO
+
+  IF (PRESENT(ierr)) THEN
+    ierr = 1
+  ELSE
+    CALL finish ('get_tracer','tracer not found: '//fullname)
+  ENDIF
+
+  END SUBROUTINE get_tracer
+
+  
+!! get_ntrac: return number of tracers defined, optionally keyed by submodel name
+
+  FUNCTION get_ntrac (tsubmname)  RESULT (itrac)
+
+    INTEGER                                  :: itrac
+    CHARACTER(len=*), INTENT(in), OPTIONAL   :: tsubmname
+
+    INTEGER       :: jt
+
+    itrac = 0
+
+    IF (PRESENT(tsubmname)) THEN
+      DO jt = 1,ntrac
+        IF (trlist%ti(jt)%modulename == tsubmname) itrac = itrac + 1
+      END DO
+    ELSE
+      itrac = ntrac       ! return number of all tracers
+    END IF
+
+  END FUNCTION
+
+  !@brief: evaluate a list of tracer names for certain properties
+  !!
+  !! the tracnam array will contain only valid tracer names after this routine.
+  !! invalid names will be set to empty strings (there may thus be "holes" in the array)
+
+  SUBROUTINE validate_traclist(tracnam, defaultnam, nphase,                     &
+                               ltran, ldrydep, lwetdep, lsedi, lemis)
+
+  USE mo_tracdef,             ONLY: ln, jptrac, ntrac, trlist
+  USE mo_string_utls,         ONLY: st1_in_st2_idx
+  USE mo_util_string,         ONLY: tolower
+  USE mo_exception,           ONLY: finish, message, message_text, em_error, em_warn
+  USE mo_mpi,                 ONLY: p_parallel_io
+
+  CHARACTER(len=*),           INTENT(inout) :: tracnam(:)       ! tracer names to be tested
+  CHARACTER(len=*), OPTIONAL, INTENT(in)    :: defaultnam(:)    ! default names in list
+                                                                ! expanded when first entry is 'default'
+  INTEGER,          OPTIONAL, INTENT(in)    :: nphase           ! phase value to be tested
+  LOGICAL,          OPTIONAL, INTENT(in)    :: ltran            ! test for ntran>0
+  LOGICAL,          OPTIONAL, INTENT(in)    :: ldrydep          ! test for ndrydep>0
+  LOGICAL,          OPTIONAL, INTENT(in)    :: lwetdep          ! test for nwetdep>0
+  LOGICAL,          OPTIONAL, INTENT(in)    :: lsedi            ! test for nsedi>0
+  LOGICAL,          OPTIONAL, INTENT(in)    :: lemis            ! test for nemis>0
+
+  CHARACTER(len=ln)      :: allnam(jptrac)   ! complete array of tracer names defined
+  INTEGER                :: tridx(jptrac)    ! map tracnam to trlist indices
+  INTEGER                :: listsize, ndef, jt, ind
+  LOGICAL                :: ltest(jptrac)    ! result of tracer property test
+  LOGICAL                :: lspecial         ! default or all option was used
+
+  !-- initialize
+  listsize = SIZE(tracnam)
+  IF (p_parallel_io) write(0,*) 'tracnam list size = ',listsize, ' string length = ',LEN(tracnam(1))
+  ltest(:) = .true.             ! default: accept all tracers as valid
+  lspecial = .false.
+  ndef = 0                      ! number of tracers copied from default list
+  DO jt = 1,ntrac 
+    allnam(jt) = trlist%ti(jt)%fullname
+  END DO
+  tridx(:) = 0
+
+  !-- establish list of valid tracer names
+  !-- handle special keyword "all"
+  IF (tolower(tracnam(1)) == 'all') THEN
+    DO jt = 1,ntrac
+      tracnam(jt) = TRIM(allnam(jt))
+    END DO
+    lspecial = .true.
+  END IF
+
+  !-- handle special keyword "default"
+  IF (tolower(tracnam(1)) == 'default') THEN
+    IF (PRESENT(defaultnam)) THEN
+      ndef = SIZE(defaultnam)
+      !-- copy extra entries after "default" to make room for default tracers
+      ! (in extreme cases some tracers could get lost, but this would mean a bizarre tracnam list)
+      DO jt = listsize-ndef,2,-1
+        tracnam(jt+ndef) = tracnam(jt)
+      END DO
+      !-- fill in the default tracer names
+      DO jt=1,ndef
+        tracnam(jt) = TRIM(defaultnam(jt))
+      END DO
+      lspecial = .true.
+    ELSE
+      CALL message('validate_traclist', 'Found string "default" in tracnam, '//    &
+                   'but there is no defaultnam argument!', level=em_error)
+      tracnam(1) = ''
+    END IF
+  END IF
+
+  !-- validity check: make sure that all tracers in tracnam are valid tracer names
+  DO jt = 1, listsize
+    ind = st1_in_st2_idx(tracnam(jt), allnam)
+    IF (ind <= 0) THEN
+      !-- report error and remove invalid tracer name
+      IF (TRIM(tracnam(jt)) /= '' .AND. (.NOT. lspecial .OR. (lspecial .AND. jt > ndef))) THEN
+        WRITE (message_text,'(a,a,a,i0,a)') 'Invalid tracer name in tracnam list : ', &
+               '>'//TRIM(tracnam(jt))//'<', ', ind = ',jt,' (simply discarded)'
+        CALL message('validate_traclist', message_text, level=em_warn)
+
+      END IF
+      !-- defuse invalid tracnam
+      tracnam(jt) = ''
+    ELSE
+      tridx(jt) = ind
+    END IF
+  END DO
+
+  !-- tracer property tests
+  IF (PRESENT(nphase)) THEN
+    DO jt = 1,listsize
+      IF (tridx(jt) > 0) THEN
+        ! test if tracer nphase is not equal to argument. If so, set ltest(jt) to false
+        IF (trlist%ti(tridx(jt))%nphase /= nphase) ltest(jt) = .false.
+!! IF (trlist%ti(tridx(jt))%nphase /= nphase) write(0,*) '##DEBUG## ltest(',jt,')=false because nphase/=',nphase
+      END IF
+    END DO
+  END IF
+  IF (PRESENT(ltran)) THEN
+    DO jt = 1,listsize
+      IF (tridx(jt) > 0) THEN
+        ! test if tracer is not transported. If so, remove from list
+        IF (trlist%ti(tridx(jt))%ntran == 0) ltest(jt) = .false.
+!! IF (trlist%ti(tridx(jt))%ntran == 0) write(0,*) '##DEBUG## ltest(',jt,')=false because ntran = 0'
+      END IF
+    END DO
+  END IF
+  IF (PRESENT(ldrydep)) THEN
+    DO jt = 1,listsize
+      IF (tridx(jt) > 0) THEN
+        ! test if tracer is attached to dry deposition scheme
+        IF (trlist%ti(tridx(jt))%ndrydep == 0) ltest(jt) = .false.
+!! IF (trlist%ti(tridx(jt))%ndrydep == 0) write(0,*) '##DEBUG## ltest(',jt,')=false because ndrydep==0'
+      END IF
+    END DO
+  END IF
+  IF (PRESENT(lwetdep)) THEN
+    DO jt = 1,listsize
+      IF (tridx(jt) > 0) THEN
+        ! test if tracer is attached to wet deposition scheme
+        IF (trlist%ti(tridx(jt))%nwetdep == 0) ltest(jt) = .false.
+!! IF (trlist%ti(tridx(jt))%nwetdep == 0) write(0,*) '##DEBUG## ltest(',jt,')=false because nwetdep==0'
+      END IF
+    END DO
+  END IF
+  IF (PRESENT(lsedi)) THEN
+    DO jt = 1,listsize
+      IF (tridx(jt) > 0) THEN
+        ! test if tracer is attached to sedimentation scheme
+        IF (trlist%ti(tridx(jt))%nsedi == 0) ltest(jt) = .false.
+!! IF (trlist%ti(tridx(jt))%nsedi == 0) write(0,*) '##DEBUG## ltest(',jt,')=false because nsedi==0'
+      END IF
+    END DO
+  END IF
+  IF (PRESENT(lemis)) THEN
+    DO jt = 1,listsize
+      IF (tridx(jt) > 0) THEN
+        ! test if tracer is attached to emissions scheme
+        IF (trlist%ti(tridx(jt))%nemis == 0) ltest(jt) = .false.
+!! IF (trlist%ti(tridx(jt))%nemis == 0) write(0,*) '##DEBUG## ltest(',jt,')=false because nemis==0'
+      END IF
+    END DO
+  END IF
+     
+  !-- remove "false" tracers from tracnam list
+  DO jt = 1,listsize 
+    IF (.NOT. ltest(jt)) tracnam(jt) = ''
+  END DO
+
+!###DEBUG###
+IF (p_parallel_io) THEN
+write(0,*) '---------------------------------------------------------'
+write(0,*) 'validate_traclist: final tracnam list'
+DO jt=1,listsize
+IF (TRIM(tracnam(jt)) /= '') write(0,*) jt,': ',tracnam(jt)
+END DO
+write(0,*) '---------------------------------------------------------'
+END IF
+  END SUBROUTINE validate_traclist
+
+
+  
+  SUBROUTINE finish_tracer_definition
+
+    ! Description:
+    !
+    ! Set global flags for trlist and print tracer definitions.
+    !
+    ! *finish_tracer_definition* is called from *initialise*.
+    !
+    !  Local scalars: 
+    
+    INTEGER :: jt
+
+
+!   trlist% ntrac        = ntrac     ! not needed because these fields are synchronized in new_tracer
+    trlist% anyfixtyp    = 0
+    trlist% anydrydep    = 0
+    trlist% anywetdep    = 0
+    trlist% anysedi      = 0
+    trlist% anysemis     = 0
+    trlist% anyvdiff     = 0
+    trlist% anyconv      = 0
+    trlist% anyconvmassfix = 0
+    trlist% nadvec       = COUNT (trlist% ti(1:ntrac)% ntran /= 0)
+    DO jt=1,ntrac
+      trlist% anyfixtyp = IOR (trlist% anyfixtyp, trlist% ti(jt)% nfixtyp)
+      trlist% anydrydep = IOR (trlist% anydrydep, trlist% ti(jt)% ndrydep)
+      trlist% anywetdep = IOR (trlist% anywetdep, trlist% ti(jt)% nwetdep)
+      trlist% anysedi   = IOR (trlist% anysedi,   trlist% ti(jt)% nsedi)
+      trlist% anysemis  = IOR (trlist% anysemis,  trlist% ti(jt)% nemis)
+      trlist% anyvdiff  = IOR (trlist% anyvdiff,  trlist% ti(jt)% nvdiff)
+      trlist% anyconv   = IOR (trlist% anyconv,   trlist% ti(jt)% nconv)
+      trlist% anyconvmassfix = IOR (trlist% anyconvmassfix,   trlist% ti(jt)% nconvmassfix)
+    END DO
+
+    trlist% oldrestart = .FALSE.
+
+    !
+    ! printout
+    !
+
+    CALL printtrac
+
+  END SUBROUTINE finish_tracer_definition
+  
+
+!--- initialize burden diagnostics ---------------------------------------
+
+  ! Description:
+  !
+  ! Preparations for diagnostics of tracer burdens (column integrals)
+  !
+  ! Authors:
+  ! 
+  ! P. Stier, MPI, 2001, original source
+  ! M. Schultz, FZ Juelich - adaptation to ECHAM6 (2009-09-25)
+  ! 
+  ! for more details see file AUTHORS
+  ! 
+  
+  INTEGER FUNCTION new_diag_burden (name, itype, lclobber)
+  
+  USE mo_exception,           ONLY : message, em_error, em_info
+  
+  ! Arguments
+  CHARACTER(len=*), INTENT(in)        :: name
+  INTEGER, INTENT(in), OPTIONAL       :: itype
+  LOGICAL, INTENT(in), OPTIONAL       :: lclobber   ! return existing index if true, error if false
+  
+  ! Local variables
+  INTEGER         :: jtype, jn
+  LOGICAL         :: loclob
+
+  ! Set defaults and check arguments
+  new_diag_burden = -1
+  jtype = 1       ! total column mass
+  IF (PRESENT(itype)) jtype = itype
+  IF (jtype > 7) CALL message('new_diag_burden', 'ITYPE > 7 presently not implemented!', level=em_error)
+  loclob = .false.    ! return error if burden name already defined
+  IF (PRESENT(lclobber)) loclob = lclobber
+  
+  ! look for existing burden diag of the same name
+  DO jn = 1,nburden
+    IF (TRIM(d_burden(jn)%name) == TRIM(name)) THEN
+      IF (loclob) THEN
+        new_diag_burden = jn
+      ELSE
+        CALL message('new_diag_burden', 'Burden diagnostics with name '//name//' already defined!', &
+                     level=em_error)
+      END IF
+      RETURN     ! nothing else to be done
+    END IF
+  END DO
+
+  ! Add new entry to the list
+  nburden = nburden + 1
+  IF (nburden > nmaxburden) THEN
+    CALL message('new_diag_burden', 'Maximum number of burden diagnostics exceeded!', level=em_error)
+    CALL message('new_diag_burden', 'Error occured while trying to add burden diag for '//name, &
+                 level=em_info)
+    RETURN
+  END IF
+  d_burden(nburden)%name = TRIM(name)
+  d_burden(nburden)%itype = jtype
+  new_diag_burden = nburden
+  CALL message('new_diag_burden', 'Defined burden diag for '//name, level=em_info)
+
+  END FUNCTION new_diag_burden
+  
+END MODULE mo_tracer

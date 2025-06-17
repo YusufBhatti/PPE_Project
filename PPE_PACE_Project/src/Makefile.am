@@ -93,12 +93,12 @@ echam6_SOURCES = auxhyb.f90 baresoildiff.f90 clsst.f90 clveg.f90 collect.f90 \
 	mo_hammoz_emi_fire.f90 mo_hammoz_emi_ocean.f90 \
 	mo_hammoz_emi_volcano.f90 mo_hammoz_emissions.f90 \
 	mo_hammoz_global_diag.f90 mo_hammoz_het_tropo_rates.f90 \
-	mo_hammoz_sedimentation.f90 mo_hammoz_timer.f90 \
-	mo_hammoz_vegetation.f90 mo_hammoz_wetdep.f90 mo_hd_highres_io.f90 \
-	mo_hdiff.f90 mo_heatingrates.f90 mo_helper.f90 mo_hyb.f90 \
-	mo_hydrology.f90 mo_input.f90 mo_input_arrays.f90 mo_input_base.f90 \
-	mo_input_calendar.f90 mo_input_data.f90 mo_input_debug.f90 \
-	mo_input_dimension.f90 mo_input_dimension_base.f90 \
+	mo_hammoz_perturbations.f90 mo_hammoz_sedimentation.f90 \
+	mo_hammoz_timer.f90 mo_hammoz_vegetation.f90 mo_hammoz_wetdep.f90 \
+	mo_hd_highres_io.f90 mo_hdiff.f90 mo_heatingrates.f90 mo_helper.f90 \
+	mo_hyb.f90 mo_hydrology.f90 mo_input.f90 mo_input_arrays.f90 \
+	mo_input_base.f90 mo_input_calendar.f90 mo_input_data.f90 \
+	mo_input_debug.f90 mo_input_dimension.f90 mo_input_dimension_base.f90 \
 	mo_input_fileobj.f90 mo_input_interface.f90 mo_input_mask.f90 \
 	mo_input_misc.f90 mo_input_netcdf.f90 mo_input_opt.f90 \
 	mo_input_proc.f90 mo_input_strings.f90 mo_input_types.f90 \
@@ -255,9 +255,10 @@ ml_flux.o: mo_decomposition.o mo_interpo.o mo_kind.o mo_memory_g3b.o mo_sst.o
 ml_ocean.o: mo_control.o mo_kind.o mo_physc2.o mo_physical_constants.o \
 	mo_time_control.o
 mo_activ.o: mo_cloud_utils.o mo_control.o mo_conv.o mo_echam_cloud_params.o \
-	mo_exception.o mo_filename.o mo_kind.o mo_linked_list.o \
-	mo_math_constants.o mo_memory_base.o mo_param_switches.o \
-	mo_physical_constants.o mo_submodel.o mo_submodel_diag.o mo_tracer.o
+	mo_exception.o mo_filename.o mo_hammoz_perturbations.o mo_kind.o \
+	mo_linked_list.o mo_math_constants.o mo_memory_base.o \
+	mo_param_switches.o mo_physical_constants.o mo_submodel.o \
+	mo_submodel_diag.o mo_tracer.o
 mo_aero_kinne.o: mo_decomposition.o mo_exception.o mo_interpo.o mo_kind.o \
 	mo_memory_g3b.o mo_mpi.o mo_physical_constants.o mo_read_netcdf77.o \
 	mo_rrtm_params.o mo_time_control.o mo_time_conversion.o \
@@ -494,9 +495,9 @@ mo_ham_ccn.o: mo_ham.o mo_ham_ccnctl.o mo_ham_streams.o mo_ham_tools.o \
 mo_ham_ccnctl.o: mo_kind.o
 mo_ham_chemistry.o: mo_boundary_condition.o mo_exception.o mo_geoloc.o \
 	mo_ham.o mo_ham_m7_trac.o mo_ham_salsa_trac.o mo_ham_salsactl.o \
-	mo_ham_species.o mo_ham_streams.o mo_kind.o mo_math_constants.o \
-	mo_physical_constants.o mo_species.o mo_time_control.o \
-	mo_time_conversion.o mo_tracdef.o
+	mo_ham_species.o mo_ham_streams.o mo_hammoz_perturbations.o mo_kind.o \
+	mo_math_constants.o mo_physical_constants.o mo_species.o \
+	mo_time_control.o mo_time_conversion.o mo_tracdef.o
 mo_ham_drydep.o: mo_control.o mo_ham.o mo_ham_m7ctl.o mo_ham_streams.o \
 	mo_kind.o mo_math_constants.o mo_physc2.o mo_physical_constants.o \
 	mo_time_control.o mo_tracdef.o mo_vphysc.o
@@ -526,26 +527,29 @@ mo_ham_kappa.o: mo_exception.o mo_kind.o mo_mpi.o mo_netcdf.o \
 	mo_read_netcdf77.o mo_submodel.o
 mo_ham_m7.o: mo_control.o mo_ham.o mo_ham_kappa.o mo_ham_m7_nucl.o \
 	mo_ham_m7_nucl_diag.o mo_ham_m7ctl.o mo_ham_soa.o mo_ham_species.o \
-	mo_ham_streams.o mo_ham_subm_species.o mo_hammoz_timer.o mo_kind.o \
-	mo_math_constants.o mo_memory_g3b.o mo_physical_constants.o \
-	mo_species.o mo_time_control.o
-mo_ham_m7_emi_seasalt.o: mo_exception.o mo_ham.o mo_ham_species.o mo_kind.o \
-	mo_math_constants.o mo_memory_g3b.o mo_species.o mo_util_string.o \
-	mo_vphysc.o
+	mo_ham_streams.o mo_ham_subm_species.o mo_hammoz_perturbations.o \
+	mo_hammoz_timer.o mo_kind.o mo_math_constants.o mo_memory_g3b.o \
+	mo_physical_constants.o mo_species.o mo_time_control.o
+mo_ham_m7_emi_seasalt.o: mo_exception.o mo_ham.o mo_ham_species.o \
+	mo_hammoz_perturbations.o mo_kind.o mo_math_constants.o \
+	mo_memory_g3b.o mo_species.o mo_util_string.o mo_vphysc.o
 mo_ham_m7_emissions.o: mo_boundary_condition.o mo_emi_matrix.o mo_exception.o \
 	mo_external_field_processor.o mo_ham.o mo_ham_dust.o \
 	mo_ham_m7_emi_seasalt.o mo_ham_m7_trac.o mo_ham_m7ctl.o mo_ham_soa.o \
-	mo_ham_species.o mo_kind.o mo_linked_list.o mo_math_constants.o \
-	mo_memory_base.o mo_memory_g3b.o mo_species.o mo_submodel_diag.o \
-	mo_submodel_streams.o mo_time_control.o mo_util_string.o
-mo_ham_m7_nucl.o: mo_ham_m7ctl.o mo_kind.o mo_mpi.o mo_netcdf.o
+	mo_ham_species.o mo_hammoz_perturbations.o mo_kind.o mo_linked_list.o \
+	mo_math_constants.o mo_memory_base.o mo_memory_g3b.o mo_species.o \
+	mo_submodel_diag.o mo_submodel_streams.o mo_time_control.o \
+	mo_util_string.o
+mo_ham_m7_nucl.o: mo_ham_m7ctl.o mo_hammoz_perturbations.o mo_kind.o mo_mpi.o \
+	mo_netcdf.o
 mo_ham_m7_nucl_diag.o: mo_exception.o mo_filename.o mo_io_units.o mo_kind.o \
 	mo_mpi.o mo_netcdf.o mo_time_control.o mo_time_conversion.o
 mo_ham_m7_trac.o: mo_exception.o mo_ham.o mo_ham_m7ctl.o mo_ham_species.o \
 	mo_kind.o mo_physical_constants.o mo_species.o mo_tracdef.o
-mo_ham_m7ctl.o: mo_exception.o mo_ham.o mo_ham_wetdep_data.o mo_kind.o \
-	mo_math_constants.o mo_mpi.o mo_namelist.o mo_physical_constants.o \
-	mo_species.o mo_submodel.o mo_util_string.o $(INCLUDE)/ham_m7ctl.inc
+mo_ham_m7ctl.o: mo_exception.o mo_ham.o mo_ham_wetdep_data.o \
+	mo_hammoz_perturbations.o mo_kind.o mo_math_constants.o mo_mpi.o \
+	mo_namelist.o mo_physical_constants.o mo_species.o mo_submodel.o \
+	mo_util_string.o $(INCLUDE)/ham_m7ctl.inc
 mo_ham_rad.o: mo_control.o mo_exception.o mo_ham.o mo_ham_m7ctl.o \
 	mo_ham_rad_data.o mo_ham_salsactl.o mo_ham_species.o mo_ham_streams.o \
 	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_diags.o mo_hammoz_timer.o \
@@ -553,7 +557,7 @@ mo_ham_rad.o: mo_control.o mo_exception.o mo_ham.o mo_ham_m7ctl.o \
 	mo_param_switches.o mo_physical_constants.o mo_read_netcdf77.o \
 	mo_rrtm_params.o mo_species.o mo_srtm_setup.o mo_tracdef.o \
 	mo_util_string.o
-mo_ham_rad_data.o: mo_ham.o mo_kind.o
+mo_ham_rad_data.o: mo_ham.o mo_hammoz_perturbations.o mo_kind.o
 mo_ham_salsa.o: mo_ham.o mo_ham_salsa_dynamics.o mo_ham_salsa_init.o \
 	mo_ham_salsa_nucleation.o mo_ham_salsa_properties.o \
 	mo_ham_salsa_trac.o mo_ham_salsa_update.o mo_ham_salsactl.o \
@@ -599,8 +603,8 @@ mo_ham_soa_processes.o: mo_boundary_condition.o mo_external_field_processor.o \
 	mo_geoloc.o mo_ham.o mo_ham_m7ctl.o mo_ham_soa.o mo_ham_species.o \
 	mo_ham_streams.o mo_kind.o mo_physical_constants.o mo_species.o \
 	mo_time_control.o
-mo_ham_species.o: mo_ham.o mo_ham_rad_data.o mo_kind.o mo_species.o \
-	mo_submodel.o mo_tracdef.o
+mo_ham_species.o: mo_ham.o mo_ham_rad_data.o mo_hammoz_perturbations.o \
+	mo_kind.o mo_species.o mo_submodel.o mo_tracdef.o
 mo_ham_stream_hifreq.o: mo_linked_list.o mo_memory_base.o mo_time_event.o
 mo_ham_streams.o: mo_activ.o mo_exception.o mo_filename.o mo_ham.o \
 	mo_ham_ccnctl.o mo_ham_rad_data.o mo_kind.o mo_linked_list.o \
@@ -629,9 +633,9 @@ mo_ham_vbsctl.o: mo_exception.o mo_kind.o mo_mpi.o mo_namelist.o \
 mo_ham_wetdep.o: mo_activ.o mo_echam_cloud_params.o mo_exception.o mo_ham.o \
 	mo_ham_m7_trac.o mo_ham_m7ctl.o mo_ham_salsa_trac.o mo_ham_salsactl.o \
 	mo_ham_species.o mo_ham_streams.o mo_ham_tools.o mo_ham_wetdep_data.o \
-	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_diags.o mo_kind.o \
-	mo_param_switches.o mo_physical_constants.o mo_species.o \
-	mo_time_control.o mo_tracdef.o
+	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_diags.o \
+	mo_hammoz_perturbations.o mo_kind.o mo_param_switches.o \
+	mo_physical_constants.o mo_species.o mo_time_control.o mo_tracdef.o
 mo_ham_wetdep_data.o: mo_kind.o
 mo_hammoz.o: mo_boundary_condition.o mo_exception.o \
 	mo_external_field_processor.o mo_ham.o mo_ham_streams.o \
@@ -677,10 +681,11 @@ mo_hammoz_aerocom_Traj.o: mo_activ.o mo_ham.o mo_ham_streams.o \
 	mo_time_control.o mo_time_event.o mo_vphysc.o
 mo_hammoz_drydep.o: mo_exception.o mo_ham.o mo_ham_drydep.o mo_ham_m7_trac.o \
 	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_diags.o \
-	mo_hammoz_drydep_lg.o mo_kind.o mo_memory_base.o mo_memory_g3b.o \
-	mo_physical_constants.o mo_species.o mo_string_utls.o mo_submodel.o \
-	mo_submodel_diag.o mo_submodel_streams.o mo_time_control.o \
-	mo_tracdef.o mo_tracer.o mo_util_string.o
+	mo_hammoz_drydep_lg.o mo_hammoz_perturbations.o mo_kind.o \
+	mo_memory_base.o mo_memory_g3b.o mo_physical_constants.o mo_species.o \
+	mo_string_utls.o mo_submodel.o mo_submodel_diag.o \
+	mo_submodel_streams.o mo_time_control.o mo_tracdef.o mo_tracer.o \
+	mo_util_string.o
 mo_hammoz_drydep_lg.o: mo_boundary_condition.o mo_decomposition.o \
 	mo_exception.o mo_external_field_processor.o mo_ham.o \
 	mo_hammoz_vegetation.o mo_kind.o mo_memory_base.o \
@@ -696,8 +701,9 @@ mo_hammoz_emi_biogenic.o: mo_boundary_condition.o mo_control.o mo_debugs.o \
 	mo_transpose.o mo_vphysc.o $(INCLUDE)/biogenic_emissionsctl.inc
 mo_hammoz_emi_fire.o: mo_control.o mo_kind.o mo_time_control.o mo_vphysc.o
 mo_hammoz_emi_ocean.o: mo_boundary_condition.o mo_exception.o \
-	mo_external_field_processor.o mo_ham.o mo_kind.o mo_linked_list.o \
-	mo_memory_base.o mo_memory_g3b.o mo_physical_constants.o mo_vphysc.o
+	mo_external_field_processor.o mo_ham.o mo_hammoz_perturbations.o \
+	mo_kind.o mo_linked_list.o mo_memory_base.o mo_memory_g3b.o \
+	mo_physical_constants.o mo_vphysc.o
 mo_hammoz_emi_volcano.o: mo_boundary_condition.o mo_control.o \
 	mo_decomposition.o mo_exception.o mo_filename.o mo_gaussgrid.o \
 	mo_kind.o mo_memory_g3b.o mo_mpi.o mo_physical_constants.o \
@@ -720,6 +726,9 @@ mo_hammoz_het_tropo_rates.o: mo_boundary_condition.o mo_exception.o \
 	mo_ham_species.o mo_kind.o mo_math_constants.o mo_memory_g3b.o \
 	mo_moz_diag.o mo_moz_mods.o mo_parameters.o mo_physical_constants.o \
 	mo_species.o mo_time_control.o mo_tracdef.o mo_tracer.o mo_vphysc.o
+mo_hammoz_perturbations.o: mo_emi_matrix.o mo_exception.o mo_kind.o mo_mpi.o \
+	mo_namelist.o mo_srtm_setup.o mo_submodel.o mo_util_string.o \
+	$(INCLUDE)/hammoz_perturbations.inc
 mo_hammoz_sedimentation.o: mo_exception.o mo_ham.o mo_ham_m7_trac.o \
 	mo_ham_sedimentation.o mo_hammoz_aerocom_HEaci.o \
 	mo_hammoz_aerocom_diags.o mo_kind.o mo_memory_base.o mo_species.o \
@@ -1128,15 +1137,15 @@ mo_submodel_interface.o: mo_activ.o mo_aoa.o mo_ccnclim.o mo_cloud_utils.o \
 	mo_ham_subm.o mo_ham_tools.o mo_ham_vbs_partition.o mo_ham_wetdep.o \
 	mo_hammoz.o mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_MMPPE.o \
 	mo_hammoz_aerocom_diags.o mo_hammoz_drydep.o mo_hammoz_emi_biogenic.o \
-	mo_hammoz_emissions.o mo_hammoz_sedimentation.o mo_hammoz_timer.o \
-	mo_hammoz_wetdep.o mo_hyb.o mo_kind.o mo_memory_g3b.o mo_methox.o \
-	mo_moz_chemistry.o mo_moz_dailyetf.o mo_moz_diag.o mo_moz_init.o \
-	mo_moz_lightning.o mo_mpi.o mo_param_switches.o \
-	mo_physical_constants.o mo_radiation_parameters.o mo_species.o \
-	mo_sub_echam.o mo_sub_nml.o mo_submodel.o mo_submodel_streams.o \
-	mo_time_control.o mo_time_conversion.o mo_timer.o mo_tracdef.o \
-	mo_tracer.o mo_tracer_processes.o mo_transdiag.o mo_util_string.o \
-	mo_vphysc.o
+	mo_hammoz_emissions.o mo_hammoz_perturbations.o \
+	mo_hammoz_sedimentation.o mo_hammoz_timer.o mo_hammoz_wetdep.o \
+	mo_hyb.o mo_kind.o mo_memory_g3b.o mo_methox.o mo_moz_chemistry.o \
+	mo_moz_dailyetf.o mo_moz_diag.o mo_moz_init.o mo_moz_lightning.o \
+	mo_mpi.o mo_param_switches.o mo_physical_constants.o \
+	mo_radiation_parameters.o mo_species.o mo_sub_echam.o mo_sub_nml.o \
+	mo_submodel.o mo_submodel_streams.o mo_time_control.o \
+	mo_time_conversion.o mo_timer.o mo_tracdef.o mo_tracer.o \
+	mo_tracer_processes.o mo_transdiag.o mo_util_string.o mo_vphysc.o
 mo_submodel_streams.o: mo_exception.o mo_memory_base.o mo_mpi.o mo_namelist.o \
 	mo_submodel.o mo_submodel_diag.o mo_time_control.o mo_time_event.o \
 	mo_tracdef.o $(INCLUDE)/submdiagctl.inc

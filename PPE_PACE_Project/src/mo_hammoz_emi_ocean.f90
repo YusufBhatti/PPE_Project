@@ -208,9 +208,12 @@ MODULE mo_hammoz_emi_ocean
   !--- Local Variables:
   INTEGER                :: jl
   REAL(dp)               :: zsst, zzspeed
-  REAL(dp)               :: zschmidt_dms, zschmidt_co2, zschmidt_nh3, ratio, ratio1
+  REAL(dp)               :: zschmidt_dms, zschmidt_co2, zschmidt_nh3
   REAL(dp)               :: zkw
   REAL(dp)               :: zvp_dms(kbdim), zvp_nh3(kbdim)
+  ! < YAB 
+  REAL(dp)               :: ratio, ratio1
+  ! > YAB
   LOGICAL                :: loocean(kbdim)
 
   loocean(1:kproma)  = ( slm(1:kproma,krow) < 1.e-2_dp )

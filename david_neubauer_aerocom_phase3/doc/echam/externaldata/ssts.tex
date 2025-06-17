@@ -1,0 +1,58 @@
+\section{Sea surface temperature and ice cover}
+
+\subsection{Historic}
+
+The historical sea surface temperature (SST) and sea ice cover (SIC) data
+are taken from  PCMDI's Atmospheric Model Intercomparison Project
+(status: Nov. 2009): 
+\newline
+{\tt http://www-pcmdi.llnl.gov/projects/amip/}
+
+The basic observational data set was made available by NCAR and was constructed 
+following the procedure described by \cite{hurrel2008}. More information can be
+found on the given web site.
+
+The data were downloaded as Grib files from
+\newline
+{\tt
+  http://www-pcmdi.llnl.gov/projects/amip/AMIP2EXPDSN/BCS/amipobs\_dwnld.php}\newline 
+and bilinearly remapped to the needed model grid. SST and SIC boundary
+conditions 
+for 1979 to 2008 are used for the AMIP experiment of CMIP5.
+
+\subsection{Climatologies}
+
+Sea surface temperature and sea ice cover climatologies for \echam{}
+are based on our coupled pre--industrial
+control simulations over 500~years 
+for CMIP5, the so--called piControl experiments. These climatologies
+have been used for the 
+so-called "sstClim" experiment of CMIP5. Climatologies are derived from
+three different piControl simulations resulting from different model
+configurations:
+\begin{itemize}
+\item MPI-ESM-LR
+\item MPI-ESM-MR
+\item MPI-ESM-P
+\end{itemize}
+
+\subsection{Aqua planet}
+
+For CMIP5 aqua planet simulations the climatological input files have been modified
+following the requirements at
+\newline
+%{\tt http://www.atmos.ucla.edu/}$\tilde${\tt brianpm/cfmip2\_aqua.html}
+{\tt http://www.atmos.ucla.edu/\textasciitilde brianpm/cfmip2\_aqua.html}
+
+Sea ice cover has been set to zero. Sea surface temperature is constant,
+symmetric about equator and zonally uniform, following the APE "Qobs" functional form:
+\begin{eqnarray}
+T(\phi) = 
+\begin{cases}
+T_0 + \Delta T_{max} \cdot (2 - \sin^{2} ( \frac{3 \phi}{2} ) - \sin^4 ( \frac{3 \phi}{2}))/2. & , |\phi| < \pi/3  \\
+T_0 & \text{, otherwise (high latitudes)}
+\end{cases}
+\label{7.5.1}
+\end{eqnarray}
+
+where $\Delta T_{max} = 27 K$, $T_0 = 273.15 K$.
