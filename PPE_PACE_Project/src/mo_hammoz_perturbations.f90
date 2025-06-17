@@ -56,8 +56,8 @@ MODULE mo_hammoz_perturbations
             scale_so4_coating, &
 	    scale_so2_reactions, &
             kappa_so4, kappa_oc, kappa_ss, &
-	    scale_vertical_velocity, scale_emi_dms
-!	    scale_dms_sc,  scale_seasalt_expo 
+	    scale_vertical_velocity, scale_emi_dms, &
+	    scale_dms_sc,  scale_seasalt_expo 
 
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -97,9 +97,9 @@ MODULE mo_hammoz_perturbations
                  scale_emi_ssa = 1.0_dp,     &! Scale factor for SSA emissions
                  scale_emi_du = 1.0_dp,    &! Scale factor for dust emissions
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
-                 scale_so2_reactions = 1.0_dp ! Scale factor for all SO2 reactions
-!                 scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
-!                 scale_seasalt_expo = 1.0_dp    ! Scale factor schmidt number ratio of DMS
+                 scale_so2_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
+                 scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
+                 scale_seasalt_expo = 1.0_dp    ! Scale factor schmidt number ratio of DMS
 
   REAL(dp)    :: scale_drydep_acc = 1.0_dp ! Scale factor for dry deposition of accumulation modes
 
@@ -249,8 +249,8 @@ CONTAINS
        CALL p_bcast (kappa_oc, p_io)
        ! SO2 chemistry
        CALL p_bcast (scale_so2_reactions,        p_io)
-     !  CALL p_bcast (scale_dms_sc,        p_io)
-     !  CALL p_bcast (scale_seasalt_expo,        p_io)
+       CALL p_bcast (scale_dms_sc,        p_io)
+       CALL p_bcast (scale_seasalt_expo,        p_io)
 
 
     END IF
