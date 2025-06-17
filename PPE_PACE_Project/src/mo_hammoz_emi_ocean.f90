@@ -70,7 +70,7 @@ MODULE mo_hammoz_emi_ocean
   USE mo_exception,            ONLY: message, message_text, em_info
   USE mo_boundary_condition,   ONLY: bc_find, bc_define, bc_nml, BC_REPLACE, BC_BOTTOM
   USE mo_external_field_processor, ONLY: EF_FILE, EF_LONLAT, EF_IGNOREYEAR
-  
+
   IMPLICIT NONE
 
   CHARACTER(LEN=64)            :: bc_name
@@ -194,10 +194,10 @@ MODULE mo_hammoz_emi_ocean
   USE mo_memory_g3b,         ONLY: slm
   USE mo_vphysc,             ONLY: vphysc
   USE mo_physical_constants, ONLY: tmelt
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, &
-                                     scale_emi_dms
-! YAB
-
+  
+  ! << YAB 
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_dms_sc
+  ! >> YAB
   IMPLICIT NONE
 
   INTEGER,  INTENT(in) :: kproma               ! geographic block number of locations
@@ -211,6 +211,9 @@ MODULE mo_hammoz_emi_ocean
   REAL(dp)               :: zschmidt_dms, zschmidt_co2, zschmidt_nh3
   REAL(dp)               :: zkw
   REAL(dp)               :: zvp_dms(kbdim), zvp_nh3(kbdim)
+  ! < YAB 
+  REAL(dp)               :: ratio, ratio1
+  ! > YAB
   LOGICAL                :: loocean(kbdim)
 
   loocean(1:kproma)  = ( slm(1:kproma,krow) < 1.e-2_dp )
@@ -246,33 +249,45 @@ MODULE mo_hammoz_emi_ocean
     IF (loocean(jl)) THEN   ! ocean
       zzspeed=vphysc%velo10m(jl,krow)
 
+      ratio = zschmidt_dms/600._dp
+      ratio1 = zschmidt_dms/600._dp
       IF (npist == 1) THEN ! Calculate piston velocity (Liss&Merlivat, 1986)
         IF (zzspeed.GT.3.6_dp.AND.zzspeed.LE.13._dp) THEN
           zkw=2.85_dp*zzspeed-9.65_dp
-          zvp_dms(jl)=zkw*(zschmidt_dms/600._dp)**(-0.5_dp)
+          IF (lo_hammoz_perturbations) THEN
+            zvp_dms(jl)=zkw*(ratio * scale_dms_sc)**(-0.5_dp)
+          ENDIF
 !         zvp_co2(jl)=zkw*(zschmidt_co2/600.)**(-0.5)
           zvp_nh3(jl)=zkw*(zschmidt_nh3/600.)**(-0.5)
         ELSE IF(zzspeed.LE.3.6_dp) THEN
           zkw=0.17_dp*zzspeed
-          zvp_dms(jl)=zkw*(zschmidt_dms/600._dp)**(-2._dp/3._dp)
+          IF (lo_hammoz_perturbations) THEN
+            zvp_dms(jl)=zkw*(ratio * scale_dms_sc)**(-2._dp/3._dp)
+          ENDIF
 !         zvp_co2(jl)=zkw*(zschmidt_co2/600.)**(-2./3.)
           zvp_nh3(jl)=zkw*(zschmidt_nh3/600.)**(-2./3.)
         ELSE
           zkw=5.9_dp*zzspeed-49.3_dp
-          zvp_dms(jl)=zkw*(zschmidt_dms/600._dp)**(-0.5_dp)
+          IF (lo_hammoz_perturbations) THEN
+            zvp_dms(jl)=zkw*(ratio * scale_dms_sc)**(-0.5_dp)
+          ENDIF
 !         zvp_co2(jl)=zkw*(zschmidt_co2/600.)**(-0.5)
           zvp_nh3(jl)=zkw*(zschmidt_nh3/600.)**(-0.5)
         END IF
 
       ELSE IF (npist == 2) THEN ! Calculate piston velocity (Wanninkhof, 1992)
         zkw=0.31_dp*zzspeed*zzspeed
-        zvp_dms(jl)=zkw*(zschmidt_dms/660._dp)**(-0.5_dp)
+        IF (lo_hammoz_perturbations) THEN
+          zvp_dms(jl)=zkw*(ratio1 * scale_dms_sc)**(-0.5_dp)
+        ENDIF
 !       zvp_co2(jl)=zkw*(zschmidt_co2/660.)**(-0.5)
         zvp_nh3(jl)=zkw*(zschmidt_nh3/660.)**(-0.5)
 
       ELSE IF (npist == 3) THEN  ! Calculate piston velocity (Nightingale, 2000)
         zkw=(0.222_dp*zzspeed*zzspeed+0.333_dp*zzspeed)
-        zvp_dms(jl)=zkw*(zschmidt_dms/660._dp)**(-0.5_dp)
+        IF (lo_hammoz_perturbations) THEN
+          zvp_dms(jl)=zkw*(ratio1 * scale_dms_sc)**(-0.5_dp)
+        ENDIF
 !       zvp_co2(jl)=zkw*(zschmidt_co2/660.)**(-0.5)
         zvp_nh3(jl)=zkw*(zschmidt_nh3/660.)**(-0.5)
       END IF
@@ -282,16 +297,10 @@ MODULE mo_hammoz_emi_ocean
   END DO
 
   !-- store piston velocity as diagnostics
-  !  IF (ibc_emi_dms > 0)  vp_dms(1:kproma, krow) = zvp_dms(1:kproma) 
+  IF (ibc_emi_dms > 0)  vp_dms(1:kproma, krow) = zvp_dms(1:kproma)
   IF (ibc_emi_nh3 > 0)  vp_nh3(1:kproma, krow) = zvp_nh3(1:kproma)
 
-    !YAB Adding perturbed DMS scaling for emissions:
-
-  IF (lo_hammoz_perturbations) THEN
-	IF (ibc_emi_dms > 0)  vp_dms(1:kproma, krow) = zvp_dms(1:kproma) * scale_emi_dms
-  ENDIF
-
-END SUBROUTINE piston_velocity
+  END SUBROUTINE piston_velocity
 
 
   SUBROUTINE dms_emissions(kproma, kbdim, krow, pmassf)

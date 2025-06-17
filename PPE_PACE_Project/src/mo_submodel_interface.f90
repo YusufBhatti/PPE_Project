@@ -247,8 +247,6 @@ MODULE mo_submodel_interface
   USE mo_cloud_utils, ONLY: init_cloud_micro_2m
 !<<SF
 
-  INTEGER:: ierr
-
 !!mgs!!   USE mo_xt,               ONLY: idm_xt, setxt, xt_define_tracers, xt_init    ! to be completed
 
 
@@ -703,7 +701,15 @@ MODULE mo_submodel_interface
      lnewyear=iyear/=inextyear
      lnewday=iday/=inextday
 
-     IF (lnewyear .OR. lresume .OR. lstart) CALL read_dailyetf(iyear)
+     IF (lresume .OR. lstart) THEN
+        IF (lnewyear) THEN
+           CALL read_dailyetf(inextyear)
+        ELSE
+           CALL read_dailyetf(iyear)
+        END IF
+     ELSE IF (lnewyear) THEN
+        CALL read_dailyetf(inextyear)
+     END IF
      IF (lnewday .OR. lresume .OR. lstart) CALL set_dailyetf
 
    ENDIF

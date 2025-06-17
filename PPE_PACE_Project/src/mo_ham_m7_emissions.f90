@@ -87,7 +87,9 @@ MODULE mo_ham_m7_emissions
 
   ! Module parameters to distribute emission mass flux across modes and to convert
   ! mass flux in number flux
-  REAL(dp), PARAMETER:: zbb_wsoc_perc  = 0.65_dp,       &! Biom. Burn. Percentage of Water Soluble OC (WS
+!>>YAB Removed PARAMETER for perturbed physics setup:
+  REAL(dp)           :: zbb_wsoc_perc  = 0.65_dp,       &! Biom. Burn. Percentage of Water Soluble OC (WS
+!<<YAB
                                                          ! (M.O. Andreae; Talk: Smoke and Climate)
                         zbg_wsoc_perc  = 0.65_dp,       &! Assume same Percentage of WSOC for biogenic OC
                         zom2oc         = 1.4_dp,        &! Mass ratio organic species to organic carbon
@@ -111,6 +113,9 @@ MODULE mo_ham_m7_emissions
                         zm2n_s4ks_bb, zm2n_s4as_bb, &
                         zm2n_s4cs_bb,               &
                         zm2n_duai, zm2n_duci
+!>>ps Added for perturbed physics setup:
+  REAL(dp)           :: zm2n_s4ks, zm2n_s4as, zm2n_s4cs
+!<<ps
 
   CONTAINS
 
@@ -150,7 +155,9 @@ MODULE mo_ham_m7_emissions
   ! ### Note: these parameters should be further cleaned up -- there are some ad-hoc 
   ! assumptions in the code below (50% mode split) which are not entirely style-conform
   ! with the cmr_ parameters
-  REAL(dp), PARAMETER:: cmr_ff         = 0.03E-6_dp,    &! Fossil fuel emissions:
+!>>ps Removed PARAMETER for perturbed physics setup:
+  REAL(dp) ::           cmr_ff         = 0.03E-6_dp,    &! Fossil fuel emissions:
+!<<ps
                                                          ! assumed number median radius of the emitted
                                                          ! particles with the standard deviation given
                                                          ! in mo_ham_m7ctl [m]. Has to lie within the
@@ -477,6 +484,7 @@ MODULE mo_ham_m7_emissions
   USE mo_boundary_condition,       ONLY: bc_set, bc_query
   USE mo_external_field_processor, ONLY: EF_MODULE
 !>>ps Added for perturbed physics setup:
+  USE mo_exception,              ONLY: finish
   USE mo_hammoz_perturbations,   ONLY: lo_hammoz_perturbations, scale_emi_cmr_ff, &
                                        scale_emi_cmr_bb
 !<<ps
