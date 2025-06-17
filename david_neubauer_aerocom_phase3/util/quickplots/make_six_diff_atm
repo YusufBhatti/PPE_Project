@@ -1,0 +1,47 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+AEXP=$2
+#
+BEXP=$3
+#
+PRINTERC=$4
+
+echo QUELLE path $QUELLE
+
+##---------------ATM-------------------------
+
+#
+prefix=atm_${TYP}_${AEXP}_${BEXP}_
+afiles=$(ls  ${prefix}*.eps )
+${QUELLE}/sixplot_latex.sh ATM_${TYP}_${AEXP}_${BEXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv ATM_${TYP}_${AEXP}_${BEXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname ATM_${TYP}_${AEXP}_${BEXP}.ps
+else
+lpr -P${PRINTERC} -o sides=one-sided ATM_${TYP}_${AEXP}_${BEXP}.ps 
+fi
+set +e
+rm ATM_${TYP}_${AEXP}_${BEXP}.dvi ATM_${AEXP}_${BEXP}.aux ATM_${TYP}_${AEXP}_${BEXP}.log  
+
+prefix=atmlola_${TYP}_${AEXP}_${BEXP}_
+afiles=$(ls  ${prefix}*.eps )
+${QUELLE}/sixplot_latex.sh ATMlola_${TYP}_${AEXP}_${BEXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv ATMlola_${TYP}_${AEXP}_${BEXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname ATMlola_${TYP}_${AEXP}_${BEXP}.ps
+else
+lpr -P${PRINTERC} -o sides=one-sided ATMlola_${TYP}_${AEXP}_${BEXP}.ps 
+fi
+rm ATMlola_${TYP}_${AEXP}_${BEXP}.dvi ATMlola_${TYP}_${AEXP}_${BEXP}.aux ATMlola_${TYP}_${AEXP}_${BEXP}.log 
+exit

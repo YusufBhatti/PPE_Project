@@ -1,0 +1,138 @@
+streamOpenWrite     stream
+streamOpenRead      stream
+streamClose         stream
+streamInqFiletype   stream
+streamDefByteorder  stream
+streamInqByteorder  stream
+streamDefVlist      stream
+streamInqVlist      stream
+streamDefTimestep   stream
+streamInqTimestep   stream
+streamWriteVar      stream
+streamWriteVarF     stream
+streamReadVar       stream
+streamWriteVarSlice stream
+streamWriteVarSliceF stream
+streamReadVarSlice  stream
+ streamDefRecord     stream_record
+ streamInqRecord     stream_record
+ streamWriteRecord   stream_record
+ streamReadRecord    stream_record
+ streamCopyRecord    stream_record
+vlistCreate         vlist
+vlistDestroy        vlist
+vlistCopy           vlist
+vlistDuplicate      vlist
+vlistCat            vlist
+vlistCopyFlag       vlist
+vlistNvars          vlist
+vlistNgrids         vlist
+vlistNzaxis         vlist
+vlistDefTaxis       vlist
+vlistInqTaxis       vlist
+vlistDefVar         vlist_var
+vlistInqVarGrid     vlist_var
+vlistInqVarZaxis    vlist_var
+ vlistInqVarTime     vlist_var
+vlistDefVarCode     vlist_var
+vlistInqVarCode     vlist_var
+vlistDefVarName     vlist_var
+vlistInqVarName     vlist_var
+vlistDefVarLongname vlist_var
+vlistInqVarLongname vlist_var
+vlistDefVarStdname  vlist_var
+vlistInqVarStdname  vlist_var
+vlistDefVarUnits    vlist_var
+vlistInqVarUnits    vlist_var
+vlistDefVarDatatype vlist_var
+vlistInqVarDatatype vlist_var
+vlistDefVarMissval  vlist_var
+vlistInqVarMissval  vlist_var
+vlistInqNatts       vlist_att
+vlistInqAtt         vlist_att
+vlistDelAtt         vlist_att
+vlistDefAttInt      vlist_att
+vlistInqAttInt      vlist_att
+vlistDefAttFlt      vlist_att
+vlistInqAttFlt      vlist_att
+vlistDefAttTxt      vlist_att
+vlistInqAttTxt      vlist_att
+gridCreate          grid
+gridDestroy         grid
+gridDuplicate       grid
+ gridIsCyclic        grid
+ gridIsRotated       grid
+gridInqType         grid
+gridInqSize         grid
+gridDefXsize        grid
+gridInqXsize        grid
+gridDefYsize        grid
+gridInqYsize        grid
+gridDefNP           grid
+gridInqNP           grid
+gridDefXvals        grid
+gridInqXvals        grid
+gridDefYvals        grid
+gridInqYvals        grid
+gridDefXbounds      grid
+gridInqXbounds      grid
+gridDefYbounds      grid
+gridInqYbounds      grid
+ gridDefXpole        grid
+ gridInqXpole        grid
+gridDefXname        grid
+gridInqXname        grid
+gridDefXlongname    grid
+gridInqXlongname    grid
+gridDefXunits       grid
+gridInqXunits       grid
+gridDefYname        grid
+gridInqYname        grid
+gridDefYlongname    grid
+gridInqYlongname    grid
+gridDefYunits       grid
+gridInqYunits       grid
+gridDefLambert      grid
+gridInqLambert      grid
+gridDefNumber       grid
+gridInqNumber       grid
+gridDefPosition     grid
+gridInqPosition     grid
+gridDefReference    grid
+gridInqReference    grid
+gridDefUUID         grid
+gridInqUUID         grid
+zaxisCreate         zaxis
+zaxisDestroy        zaxis
+ zaxisDuplicate      zaxis
+zaxisInqType        zaxis
+zaxisInqSize        zaxis
+zaxisDefLevels      zaxis
+zaxisInqLevels      zaxis
+zaxisInqLevel       zaxis
+ zaxisDefLbounds     zaxis
+ zaxisDefUbounds     zaxis
+ zaxisInqLbounds     zaxis
+ zaxisInqUbounds     zaxis
+ zaxisDefVct         zaxis
+ zaxisInqVctSize     zaxis
+ zaxisInqVct         zaxis
+zaxisDefName        zaxis
+zaxisInqName        zaxis
+zaxisDefLongname    zaxis
+zaxisInqLongname    zaxis
+zaxisDefUnits       zaxis
+zaxisInqUnits       zaxis
+taxisCreate         taxis
+taxisDestroy        taxis
+ taxisDuplicate      taxis
+taxisDefRdate       taxis
+taxisInqRdate       taxis
+taxisDefRtime       taxis
+taxisInqRtime       taxis
+taxisDefVdate       taxis
+taxisInqVdate       taxis
+taxisDefVtime       taxis
+taxisInqVtime       taxis
+taxisDefCalendar    taxis
+taxisInqCalendar    taxis

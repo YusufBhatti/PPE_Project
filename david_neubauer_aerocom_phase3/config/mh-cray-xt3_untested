@@ -1,0 +1,24 @@
+# CRAY XT3 cross compiling for catamount micro kernel
+#
+F90      = ftn -target=catamount -D__XT3__ -Kieee -Mpreprocess -tp=amd64
+FFLAGS   =  -fastsse  
+F90FLAGS =  -fastsse  -DHAMMOZ
+LIBS     = -L../lib -lsupport -llapack -lblas
+SRCDIRS  =  blas lapack 
+MPIROOT    =
+
+ARCH       = CRAY_XT3
+
+MPI_LIB    =
+
+NETCDFROOT = /users/lkornblu
+
+CC       = cc
+CFLAGS   = -target=catamount -fastsse -DpgiFortran -D__XT3__
+
+DEFOPT   = -D
+MODOPT   = -module 
+ 
+
+
+

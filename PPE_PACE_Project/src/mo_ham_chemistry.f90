@@ -99,7 +99,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
                                    d_prod_ms4cs
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactionst
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
   
   IMPLICIT NONE
 

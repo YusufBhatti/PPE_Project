@@ -1,0 +1,204 @@
+#!/bin/sh 
+set -ex
+#
+TYP=$1
+echo $TYP
+#
+ANAME=$2
+#
+BNAME=$3
+#
+WORKDIR=$4
+#
+#
+# 
+   echo QUELLE path $QUELLE
+   
+   FIXCODE=/pool/data/ECHAM6/post/FixCodes
+
+#
+
+   cdo=/client/bin/cdo
+
+#
+ATMa="${WORKDIR}/ATM_${ANAME}"
+ATMb="${WORKDIR}/ATM_${BNAME}"
+#
+###########################################################################
+# var.txt wird in ATM.gs BOT.gs einglesen
+# number of latitudes
+
+nlat=`cdo griddes $ATMa| grep ysize | cut -d"=" -f2`
+echo $nlat >>var.txt
+
+FORMAT="-f nc -t ${QUELLE}/echam6.varCode"
+LEVELS="100000,92500,85000,77500,70000,60000,50000,40000,30000,25000,20000,15000,10000,7000,5000,3000,1000"
+#
+cp var.txt var1.txt
+
+head  var1.txt >var.txt
+date >var1.txt
+cut -c5-11,25-32 var1.txt >datum
+cat datum >>var.txt
+#
+###########################################################################
+# 
+
+#
+set -ex
+#
+#----code130--Temperature-850 hPa----
+#
+CODE=130
+
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -sellevel,85000 -selcode,${CODE} $ATMa \
+         -sellevel,85000 -selcode,${CODE} $ATMb Ubusy_d${CODE}lola.nc
+   fi
+fi
+#
+#
+#------------code156--Geopotential-----500 hPa-----------
+#
+CODE=156
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,0.1 -sellevel,50000 -selcode,${CODE} $ATMa \
+        -mulc,0.1 -sellevel,50000 -selcode,${CODE} $ATMb Ubusy_d${CODE}lola.nc
+   fi
+fi
+#
+#----code149---Velocity potential----
+#
+CODE=149
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -divc,1000000 -sellevel,20000 -selcode,${CODE} $ATMa \
+        -divc,1000000 -sellevel,20000 -selcode,${CODE} $ATMb Ubusy_d${CODE}lola.nc
+   fi
+fi
+#
+#
+#----code130--- Temperature---ZONAL-
+#
+CODE=130
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+         -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#
+#-----code131---U----zonal-
+#
+CODE=131
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+         -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi 
+#
+#-----code132---V----zonal-
+#
+CODE=132
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+         -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#
+#----code133---Specific humidity---
+#
+CODE=133
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,1000 -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+        -mulc,1000  -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#
+#----code157---Relative humidity-----
+#
+CODE=157
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,100 -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+        -mulc,100  -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#-----code153---Cloud water---ZONAL---
+#
+CODE=153
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+        -mulc,1000000  -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#-----code154---Cloud ice---ZONAL---
+#
+CODE=154
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+        -mulc,1000000  -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+#
+#-----code153 + code154---Cloud ice + Cloud water --ZONAL----
+#
+CODE=153_154
+if  cdo -s showcode -selcode,153  $ATMa > /dev/null 
+then
+ if  cdo -s showcode -selcode,153  $ATMb > /dev/null ;then
+  if  cdo -s showcode -selcode,154  $ATMa > /dev/null 
+  then
+   if  cdo -s showcode -selcode,154  $ATMb > /dev/null ;then
+    cdo add -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,153 $ATMa \
+        -mulc,1000000  -zonavg -sellevel,${LEVELS} -selcode,154 $ATMa busy_a.nc
+    cdo add -mulc,1000000 -zonavg -sellevel,${LEVELS} -selcode,153 $ATMb \
+        -mulc,1000000  -zonavg -sellevel,${LEVELS} -selcode,154 $ATMb busy_b.nc
+    cdo ${FORMAT} sub busy_a.nc busy_b.nc Ubusy_d${CODE}.nc
+   fi
+  fi
+ fi
+fi
+#
+#-----code223---Cloud cover----
+#
+CODE=223
+if  cdo -s showcode -selcode,${CODE}  $ATMa > /dev/null 
+then
+   if  cdo -s showcode -selcode,${CODE}  $ATMb > /dev/null ;then
+     cdo ${FORMAT} sub -mulc,100 -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMa \
+        -mulc,100  -zonavg -sellevel,${LEVELS} -selcode,${CODE} $ATMb Ubusy_d${CODE}.nc
+   fi
+fi
+rm -f  busy* 
+
+exit
+
+
+
+
+
+
+

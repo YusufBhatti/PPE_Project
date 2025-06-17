@@ -256,13 +256,15 @@ MODULE mo_ham_m7ctl
   !--- 9) Assumed parameters: ------------------------------------------------------
 
 !++mgs: renamed! was cLayerThickness
-  REAL(dp), PARAMETER :: so4_coating_threshold = 1.0_dp   ! Assumed required layer thickness of
-                                                    ! sulfate to transfer an insoluble 
-                                                    ! particle to a soluble mode. It is 
-                                                    ! given in units of layers of 
-                                                    ! monomolecular sulfate. Determines the
-                                                    ! transfer rate from insoluble to 
-                                                    ! soluble modes. 
+  !>> YAB remove PARAMETER to allow perturbation
+  REAL(dp) :: so4_coating_threshold = 1.0_dp   ! Assumed required layer thickness of
+                                               ! sulfate to transfer an insoluble 
+                                               ! particle to a soluble mode. It is 
+                                               ! given in units of layers of 
+                                               ! monomolecular sulfate. Determines the
+                                               ! transfer rate from insoluble to 
+                                               ! soluble modes. 
+  !<< YAB
   
   !--- 10) Nucleation constants: ---------------------------------------------------
   
@@ -300,6 +302,15 @@ MODULE mo_ham_m7ctl
 
   TYPE(t_coag), PUBLIC :: coag_modes(ncoag)
   !<<dod
+
+  !>>dwp add vectors representing the diagonal and (non-zero) off-diagonal elements
+  !      of the coagulation matrix
+  INTEGER, PARAMETER, PUBLIC :: coag_diagonal(4) = (/ 1, 8, 14, 16 /)
+  INTEGER, PARAMETER, PUBLIC :: coag_off_diagonal(12) = (/ 2, 3, 4, 5, &
+                                                          6, 7, 9, 10, &
+                                                          11, 12, 13, &
+                                                          15 /)
+  !<< dwp
 
   !--- 12) Service routines for initialization and auxiliary computations ----------
 

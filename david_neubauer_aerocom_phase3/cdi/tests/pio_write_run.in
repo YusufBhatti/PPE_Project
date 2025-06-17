@@ -1,0 +1,31 @@
+#! @SHELL@
+set -e
+LOG="${LOG-pio_write.log}"
+if [ @ENABLE_GRIB@ != yes ]; then
+  # skip tests for unsupported formats
+  exit 77
+fi
+mpi_task_num="${mpi_task_num-4}"
+suffix="${suffix-grb}"
+if [ "@USE_MPI@" = yes ]; then
+  variations="-qcache-redists"
+else
+  unset variations
+fi
+for variation in "" $variations ; do
+  exec 5>&1 6>&2 >"$LOG" 2>&1
+  ../libtool --mode=execute \
+    @MPI_LAUNCH@ \
+    -n ${mpi_task_num} ${tool_wrap} ./pio_write ${pio_write_args} ${variation}
+  exec 2>&6 1>&5 5>&- 6>&-
+  ../libtool --mode=execute \
+    ${tool_wrap} ./cksum_read example_0.${suffix} example_0.cksum
+  ../libtool --mode=execute \
+    ${tool_wrap} ./cksum_read example_1.${suffix} example_1.cksum
+  \rm "$LOG"
+done
+#
+# Local Variables:
+# mode: sh
+# End:
+#

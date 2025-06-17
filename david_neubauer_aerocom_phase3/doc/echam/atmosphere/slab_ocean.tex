@@ -1,0 +1,72 @@
+
+\section{Slab ocean}
+
+As an option, the sea surface temperatures, $SSTs$, and sea-ice
+thickness, $h_{i}$, can be calculated using a slab ocean model. 
+The $SSTs$ are computed from the ocean surface heat balance. The slab ocean model 
+represents the surface ocean as a slab of specified depth $h$. 
+In the model the mixed layer depth $h$ is set to $50m$.
+The slab ocean model is a thermodynamical model that does not contain any 
+explicit computation of ocean dynamics. The ocean dynamics are represented 
+by a prescribed ocean heat transport divergence which may also be interpreted as a heat-flux correction.
+The prognostic variable in the ocean is the mixed layer temperature $T_m$.
+The heat budget of a constant-depth mixed layer $h$ can be written as:
+\begin{equation}
+C_{m}\frac{\partial T_{m}}{\partial t}=H-F_O
+\label{eqn:energy_equation_so}
+\end{equation}
+where $T_{m}$ is the sea surface temperature $SST$, $H$ = net surface heat flux (including all radiative and
+turbulent fluxes), $F_O$ = the divergence of ocean heat transport and $C_{m}=\rho_{sea} h c_{sea}$ is the heat 
+capacity of the slab. The sea water density $\rho_{sea}$ is set to $1025\,kg\,m^{-3}$ and the heat capacity of sea water $c_{sea}$
+to $3994\,J\,kg^{-1}\,K^{-1}$. 
+While $F_O$ is unknown, its monthly climatology, $F_{clim}$, can be
+derived from equation \ref{eqn:energy_equation_so} by replacing $T_{m}$ by the observed $SST$ 
+climatology, $T_{clim}$,
+and $H$ by its climatology, $H_{clim}$. For consistency, $H_{clim}$ 
+has to be computed
+from the uncoupled AGCM with $T_{clim}$ used as lower boundary forcing,
+resulting in
+\begin{equation}
+F_{clim}=H_{clim}-C_{m}\frac{\partial T_{clim}}{\partial t}.
+\label{eqn:energy_equation_clim_so}
+\end{equation}
+This simple approach of approximating $F_O$ in equation \ref{eqn:energy_equation_so} by its
+monthly climatology has the main advantage that systematic errors in
+simulated $SSTs$ are practically avoided while $SST$ variability is captured
+through the variability of $H$. The main limitation is that variability of
+ocean heat transport is neglected. 
+The heat flux divergence $F_{clim}$ is applied also, with
+appropriate area weighting, in those regions where sea-ice is observed,
+according to climatology, except when the observed ice fraction is larger than 0.9.
+Then the heat flux divergence $F_{clim}$ is set to zero.
+To compute the net climatological surface heat flux $H_{clim}$ 
+a 'long' (10-20 years) standalone ECHAM6 simulation has to be performed forced by
+prescribed climatological SSTs. Please note that if changes are made to ECHAM6 physical or dynamical parameters, a new heat-flux climatology
+has to be computed.\\  
+Equations \ref{eqn:energy_equation_so} and \ref{eqn:energy_equation_clim_so} give:
+\begin{equation}
+C_{m}\frac{\partial T_{m}}{\partial t}=H-F_O\approx H-F_{clim}=H-H_{clim}+C_{m}\frac{\partial T_{clim}}{\partial t}.
+\end{equation}
+This may be written as:
+\begin{equation}
+C_{m}\frac{\partial (T_{m}-T_{clim})}{\partial t}=H-H_{clim}.
+\end{equation}
+Thus, the model predicts only the deviations from the observed seasonal cycle of SST, forced by
+anomalies in the net surface heat fluxes. Therefore, the mean (long-term averaged) climatological
+seasonal cycle of SST as simulated by the slab ocean model is similar to the observed one. 
+\\
+The term $F_{clim}$ in equation  \ref{eqn:energy_equation_clim_so} may also be interpreted as a "heat-flux correction" $Q$ of the slab ocean model, i.\,e.\,
+\begin{equation}
+C_{m}\frac{\partial T_{m}}{\partial t}=H-Q
+\end{equation}
+with 
+\begin{equation}
+Q=F_{clim}=H_{clim}-C_{m}\frac{\partial T_{clim}}{\partial t}.
+\end{equation}
+The heat-flux correction $Q$ has to be provided to the slab ocean model in every month (each year the same)
+and is then interpolated in time onto the respective time step (in the same way as for all other surface
+variables that are prescribed as monthly means).\vspace{2cm}
+
+\noindent For more details see subroutines {\em ml\_ocean.f90} and {\em ml\_flux.f90}.
+
+

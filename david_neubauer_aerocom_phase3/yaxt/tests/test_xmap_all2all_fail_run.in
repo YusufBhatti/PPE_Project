@@ -1,0 +1,16 @@
+#! @SHELL@
+[ x"@MPI_LAUNCH@" != xtrue ] || exit 77
+@abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 1 @abs_builddir@/test_xmap_all2all_fail -s small \
+  >/dev/null 2>&1 \
+  || @abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 1 @abs_builddir@/test_xmap_all2all_fail -s big \
+  >/dev/null 2>&1 \
+  || @abs_top_builddir@/libtool --mode=execute \
+  @MPI_LAUNCH@ -n 1 @abs_builddir@/test_xmap_all2all_fail_f \
+  >/dev/null 2>&1
+#
+# Local Variables:
+# mode: sh
+# End:
+#

@@ -1,0 +1,28 @@
+\subsection{Trigger of cumulus convection}
+
+The aim is to relate the parcel buoyancy to the standard deviation of virtual potential temperature at the lifting level. To this end, the balance equation for the variance of the virtual potential temperature is solved within the vertical diffusion scheme:
+
+\begin{equation}
+\frac {\partial \ovl{\Theta'^2_{\mathrm{v}}}} {\partial t}= -2\ovl{\omega'\Theta'_{\mathrm{v}}} \frac {\partial \ovl{\Theta_{\mathrm{v}}}} {\partial z}-\frac {\partial \ovl{\omega'{\Theta'^2_{\mathrm{v}}}}} {\partial z}
+-\varepsilon (\ovl{\Theta'^2_{\mathrm{v}}})
+%\label{cons}
+\end{equation}
+%\Large{\textbf{This equation is not correctly written ...}}
+
+\begin{equation}
+\frac {\partial \overline{\Theta'^2_{\mathrm{v}}}} {\partial t}= -2\overline{\omega'\Theta'_{\mathrm{v}}} \frac {\partial \overline{\Theta_{\mathrm{v}}}} {\partial z}-\frac {\partial \overline{\omega'{\Theta'^2_{\mathrm{v}}}}} {\partial z}
+-\varepsilon (\overline{\Theta'^2_{\mathrm{v}}})
+%\label{cons}
+\end{equation}
+
+representing the sum of the production, turbulent transfer and dissipation terms.
+The buoyancy flux is parameterized in analogy to the fluxes of heat, moisture etc. 
+ $\overline{\omega'\Theta'_{\mathrm{v}}}=-K_{\mathrm{h}}\frac {\partial \ovl{\Theta_{\mathrm{v}}}} {\partial z}  $   with $K_{\mathrm{h}}=S_{\mathrm{h}}(Ri)l_{\mathrm{mix}}\sqrt{TKE}$, where $S_{\mathrm{h}}$ is a non-dimensional stability function depending on the Richardson number $Ri$, TKE is the turbulence kinetic energy, and the mixing length is defined as $l_{\mathrm{mix}}=kz/(1+kz/\lambda)$ with $k=0.4$ and $l=150m$ (asymptotic mixing length).
+Thus, the production term can be written as $2 K_{\mathrm{h}}(\frac  {\partial \ovl{\Theta_{\mathrm{v}}}} {\partial z})^2$   (defined at ‘half levels‘).
+The turbulent transport is calculated analogously to TKE (at ‘half levels‘).
+The dissipation term is parameterized in terms of TKE and a dissipation length scale
+$\varepsilon(\ovl{{\Theta'_{\mathrm{v}}}^2})=\ovl{{\Theta'_{\mathrm{v}}}^2}\sqrt{TKE}/(6*l_{\mathrm{mix}})$
+ (\cite{deardorff74}; see also the dissipation of total water variance in \cite{roeckner2003a}, equations 10.19 and 10.20).
+The balance equation is solved implicitly by using the ‘fractional steps‘ method.
+
+The result is used to parameterize the buoyancy of air parcels lifted dry adiabatically upward within the convection scheme. In previous versions of ECHAM, the buoyancy depends on the difference of virtual temperature between the air parcel and the environment. A constant of 0.5K is added as trigger of cumulus convection, thereby taking into account some degree of subgrid-scale variability in virtual temperature. In ECHAM6, the trigger constant is replaced by $b\sqrt{{\Theta'_{\mathrm{v}}}^2}$, where b is a tuning parameter (currently set to 1). This term is calculated at the lifting level (corresponding to the half level klev-1 in ‘cubase‘ and ‘cuasc‘), and then applied identically at all sub-cloud levels and at cloud base as well. Thus, the buoyancy of the air parcel is determined by its properties (mean and variance) at the lifting level and on the vertical profile of virtual temperature in the large-scale environment (as before). Note that lower and upper thresholds for the standard deviation of virtual potential are applied (0.1 and 1.0 degree, respectively).

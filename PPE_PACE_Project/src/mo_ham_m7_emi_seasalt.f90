@@ -47,6 +47,9 @@ MODULE mo_ham_m7_emi_seasalt
 
   !---inherited types, data and functions
   USE mo_kind,           ONLY: dp
+  ! << YAB 
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_seasalt_expo
+  ! >> YAB
 
   IMPLICIT NONE
 
@@ -62,8 +65,10 @@ MODULE mo_ham_m7_emi_seasalt
   PUBLIC :: seasalt_emissions_gong_SST    !nseasalt=8
 
   !---module data
-  REAL(dp), PARAMETER, PRIVATE :: ppww = 3.41_dp      ! exponent of wind speed |u| (|u|**ppww) 
-
+  REAL(dp), PRIVATE :: ppww = 3.41_dp      ! exponent of wind speed |u| (|u|**ppww) 
+  ! < YAB for scaling ssa u exponent
+  REAL(dp)                     :: ppww_scaled      ! exponent of wind speed |u| (|u|**ppww)
+  ! > YAB  
   INTEGER,  PARAMETER, PRIVATE :: nbin = 300          ! number of bins for the bin schemes
                                                       ! (Monahan (nseasalt=4), Guelle or Gong, Long)
   REAL(dp), PARAMETER, PRIVATE :: dmta = 0.100E-06_dp ! lower diameter [m], bin schemes 
@@ -85,8 +90,13 @@ MODULE mo_ham_m7_emi_seasalt
 
   REAL(dp), PRIVATE  :: ss1_mon                   ! sea salt flux factor 1, Monahan (nseasalt=1) scheme    
   REAL(dp), PRIVATE  :: ss2_mon                   ! sea salt flux factor 2, Monahan (nseasalt=1) scheme    
-
-
+  ! < YAB scaling the exponent of wind 
+  IF (lo_hammoz_perturbations) THEN
+    ppww_scaled = ppww * scale_seasalt_expo
+  ELSE
+    ppww_scaled = ppww
+  ENDIF
+  ! > YAB
 CONTAINS
 
   SUBROUTINE start_emi_seasalt
@@ -526,7 +536,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2)) 
  
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
 
        END IF
 
@@ -673,7 +683,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2)) 
 
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
 
        ELSEIF (dmt(m).GT.dmtb_guelle .and. dmt(m).le.dmtd) THEN 
 
@@ -826,7 +836,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**3.45_dp
          p3 = 10**(1.607_dp*EXP(-bmn(m)**2)) 
  
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
 
        ELSEIF (dmt(m).GT.dmtb_gong .and. dmt(m).le.dmtd) THEN 
 
@@ -834,7 +844,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2))  
 
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
 
        END IF
 
@@ -901,6 +911,9 @@ CONTAINS
     USE mo_memory_g3b,   ONLY: slf, alake, seaice
     USE mo_vphysc,       ONLY: vphysc
     USE mo_exception,     ONLY: message, message_text, finish
+   ! << YAB 
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_seasalt_expo
+   ! >> YAB
 
     IMPLICIT NONE
 
@@ -908,8 +921,10 @@ CONTAINS
     !    -
     REAL(dp), PARAMETER :: dmtb_long = 0.551E-06_dp ! as dry diameter(m), limit wet diameter 1um at 80% RH, 
                                                     ! according to Long et al 2011 (1./1.814)
-    REAL(dp), PARAMETER :: ppww_long=3.74_dp        !
-
+    REAL(dp) :: ppww_long=3.74_dp         !
+    ! <YAB 
+    REAL(dp) :: ppww_long_scaled=1.00_dp         !
+    ! >YAB
     !--- I/O:
 
     INTEGER, INTENT(in)    :: kproma               ! kproma
@@ -935,6 +950,14 @@ CONTAINS
                SST_mask3(1:kproma,krow),SST_corr_all(1:kproma,krow)
 
     INTEGER :: m
+
+    ! << YAB Scale wind exponent for Sea salt aerosol 
+    IF (lo_hammoz_perturbations) THEN
+      ppww_long_scaled = ppww_long * scale_seasalt_expo
+    ELSE
+      ppww_long_scaled = ppww_long
+    ENDIF
+    ! >> YAB 
 
     ! initialize number flux for each bin (#/m2/s) 
 
@@ -984,12 +1007,12 @@ CONTAINS
        IF (dmt(m).GT.dmta .and. dmt(m).le.dmtb_long) THEN
          
          p1=p11*(Log10(2*rm(m)))**3+p12*(Log10(2*rm(m)))**2+p13*(Log10(2*rm(m)))+p14 
-         fi(1:kproma,m) = 10.**p1*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long)*logdp
+         fi(1:kproma,m) = 10.**p1*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long_scaled)*logdp
 
        ELSEIF (dmt(m).GT.dmtb_long .and. dmt(m).le.dmtd) THEN
            
          p2=p21*(Log10(2*rm(m)))**3+p22*(Log10(2*rm(m)))**2+p23*(Log10(2*rm(m)))+p24 
-         fi(1:kproma,m) = 10.**p2*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long)*logdp
+         fi(1:kproma,m) = 10.**p2*(p0*vphysc%velo10m(1:kproma,krow)**ppww_long_scaled)*logdp
 
        END IF
 
@@ -1194,7 +1217,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**3.45_dp
          p3 = 10**(1.607_dp*EXP(-bmn(m)**2)) 
  
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
 
        ELSEIF (dmt(m).GT.dmtb_gong .and. dmt(m).le.dmtd) THEN 
 
@@ -1202,7 +1225,7 @@ CONTAINS
          p2 = 1._dp + 0.057_dp*rm(m)**1.05_dp
          p3 = 10**(1.19_dp*EXP(-bmn(m)**2))  
 
-         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww
+         fi(1:kproma,m) = p1*p2*p3*dr*vphysc%velo10m(1:kproma,krow)**ppww_scaled
 
        END IF
 

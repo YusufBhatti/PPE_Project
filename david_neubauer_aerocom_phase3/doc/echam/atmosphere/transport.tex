@@ -1,0 +1,148 @@
+\section{Transport}
+
+The flux form semi-Lagrangian scheme employed in ECHAM6 for passive
+tracer transport has been introduced by \cite{lin96}.  This
+type of advection scheme combines typical features of Eulerian, flux
+form schemes (i.e., exact mass conservation to machine precision) with
+the unconditional stability for all Courant numbers typical of
+standard (non conservative) semi-Lagrangian schemes. For Courant
+numbers smaller than one, the Lin-Rood schemes reverts to a
+multidimensional flux form scheme which takes properly into account
+transverse fluxes, such as those developed by Colella, LeVeque,
+Leonard and others (see references in \cite{lin96}).  In the constant
+velocity case at Courant number smaller than one, it is in fact
+identical with the Colella {\it Corner Transport Upwind} scheme.  The
+scheme is described here for application to incompressible flows, its
+generalization to compressible fluids is described in \cite{lin96}.
+
+Consider the conservative formulation of passive  advection 
+in an incompressible fluid
+
+\begin{equation}
+\frac {\partial Q}{\partial t} + \nabla \cdot ( {\bf v}Q) =0, 
+\label{cons}
+\end{equation}
+
+where $Q$ is the tracer concentration and the continuity equation is
+given by
+
+\begin{equation}
+\nabla \cdot  {\bf v} =0.
+\label{cont}
+\end{equation}
+
+It is to be remarked that there is an inherent coupling of
+(\ref{cons}) to the continuity equation, since in the case of constant
+tracer concentration (\ref{cons}) reduces to (\ref{cont}). This
+property should be also guaranteed by the discretization of
+(\ref{cons}).
+
+
+Assuming a C-type grid staggering in which normal velocity components
+are defined at the grid sides and scalar quantities (to be interpreted
+as cell averages) are defined at the cell center, a flux form
+discretization of (\ref{cons}) is given by
+
+
+\begin{equation}
+Q_{i,j}^{n+1} = Q_{i,j}^{n} 
+- \Big ( {\cal X}_{i+\frac 12,j} -{\cal X}_{i-\frac 12,j} \Big ) 
+-\Big (  {\cal Y}_{i,j+\frac 12} -{\cal Y}_{i,j-\frac 12} \Big )
+\label{disc1}
+\end{equation}
+
+where ${\cal X}_{i+\frac 12,j} {\cal Y}_{i,j+\frac 12}$ and ${\cal
+X}_{i-\frac 12,j} {\cal Y}_{i,j-\frac 12}$ are approximations of the
+$Q$ fluxes in the E-W and N-S directions, respectively, integrated in
+time over the time step $\Delta t .$ In order to achieve unconditional
+stability, in the Lin-Rood scheme the fluxes are computed as the sum
+of an {\it integer } and a {\it fractional} flux $$ {\cal X}_{i-\frac
+12,j}={\cal X}^{int}_{i-\frac 12,j}+{\cal X}^{fr}_{i-\frac 12,j} .$$
+The integer fluxes represent the contribution to the flux that arises
+in case of Courant numbers larger than one at the cell side $i-\frac
+12.$ More specifically, defining $$ C^x_{i-\frac 12,j}=\frac{\Delta t
+u^{n+\frac 12}_{i-\frac 12,j}}{\Delta x}= K^x_{i-\frac
+12,j}+c^x_{i-\frac 12,j}
+$$
+
+$$ 
+K^x_{i-\frac 12,j}=INT(C^x_{i-\frac 12,j})  \ \ \ \ \ \ \ \ \
+I=INT(i - C^x_{i-\frac 12,j})
+$$
+(where $INT$ has the same meaning as the corresponding
+{\it Fortran95} intrinsic function) 
+and assuming e.g. a positive velocity, the integer flux is defined 
+as $${\cal X}^{int}_{i-\frac 12,j}=\sum_{k=1}^{K^x_{i-\frac 12,j}}Q^n_{i-k,j}. $$
+
+Thus, the integer flux represents the mass transport through all the
+cells crossed completely by a Lagrangian trajectory ending at
+$(i-\frac 12,j)$ at timestep $n+1$ during a time interval $\Delta t.$
+
+The fractional flux is defined as the Van Leer flux  
+
+\begin{equation}
+{\cal X}^{fr}_{i-\frac 12,j}= 
+c^x_{i-\frac 12,j}\Bigg [Q^g_{I,j} 
++\frac{ Q^g_{I+1,j}-Q^g_{I-1,j} }4    
+\Big ( SIGN(1,c^x_{i-\frac 12,j}) -c^x_{i-\frac 12,j} \Big ) \Bigg ]
+\label{disc2}
+\end{equation}
+
+where $SIGN$ has the same meaning as the corresponding {\it Fortran95}
+intrinsic function.
+
+The intermediate value $Q^g_{i,j}$ used in the computation of the Van
+Leer flux can be interpreted as a first order finite difference
+approximation of
+ 
+$$
+\frac{\partial Q}{\partial t} +v\frac{\partial Q}{\partial y}=0,
+$$
+
+advanced in time $\Delta t / 2$ from timestep $ n $ along the
+Lagrangian trajectory ending at $(i-\frac 12,j)$ at timestep $ n+1.$
+
+More precisely,
+
+$$
+Q^g_{i,j} = \frac{ \Big (  Q^n_{i,J} +Q^n_{i,j}  \Big )}2
++\frac{\vert c^y_{i,j}\vert}2  \Big ( Q^n_{i,J^*} -Q^n_{i,J} \Big )
+$$
+
+where
+
+$$
+C^y_{i,j}=\frac{\Delta t}{2\Delta y}\Big ( v^{n+\frac 12}_{i,j-\frac 12}+v^{n+\frac 12}_{i,j+\frac 12}
+\Big )
+$$
+
+$$
+c^y_{i,j}= C^y_{i,j} - INT(C^y_{i,j}) \ \ \ \ \  J=j-INT(C^y_{i,j}) \ \ \ \ \ 
+J^*=J-SIGN(1,C^y_{i,j}).
+$$
+
+The Lin and Rood scheme satisfies some fundamental requirements
+for a tracer advection algorithm:
+
+\begin{itemize}
+
+\item mass conservation: by construction, since it is formulated in
+flux form;
+
+\item consistency with the discretization of the continuity equation:
+setting $q=1$ yields a discretization  of (\ref{cont}) by the same scheme,
+
+\item monotonicity of the 1D advection schemes: if a flux limiter is
+applied to the centered difference $ Q^g_{I+1,j}-Q^g_{I-1,j} $ in
+(\ref{disc2}) (see references in \cite{lin96}), the one dimensional flux
+operators are guaranteed to be monotonic, although this in general
+does not ensure that the full multidimensional scheme is monotonic as
+well;
+
+\item preservation of linear tracer correlations: if $q_1, q_2$ are
+the concentrations of two different tracers such that $q^n_2=\alpha
+q^n_1 + \beta, $ with $\alpha, \beta $ two constants, then the values
+$q^{n+1}_1, q^{n+1}_2$ obtained by time update with the Lin and Rood
+scheme still satisfy $q^{n+1}_2=\alpha q^{n+1}_1 + \beta. $
+
+\end{itemize}
