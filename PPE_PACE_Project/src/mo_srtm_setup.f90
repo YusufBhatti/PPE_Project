@@ -118,7 +118,7 @@ MODULE mo_srtm_setup
     & 3.0799387010047838_wp    , 12.8893773299999985_wp  /)
     ! sum of 14 bands is: 1.3682223735968237E+03
 
-  REAL(wp), PARAMETER :: ssi_amip(14) =  (/ & !< solar flux (W/m2) in 14 SW bands for
+  REAL(wp)            :: ssi_amip(14) =  (/ & !< solar flux (W/m2) in 14 SW bands for
                            ! AMIP-type CMIP5 simulation (average from 1979-1988)
     & 11.95053_wp, 20.14766_wp, 23.40394_wp, 22.09458_wp, 55.41401_wp,  &
     & 102.5134_wp, 24.69814_wp, 347.5362_wp, 217.2925_wp, 343.4221_wp,  &
