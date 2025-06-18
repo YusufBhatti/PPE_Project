@@ -1,1 +1,0 @@
-../HIST/emi_spec_HIST.txt
