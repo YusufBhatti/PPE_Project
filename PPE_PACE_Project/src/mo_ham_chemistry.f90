@@ -99,7 +99,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
                                    d_prod_ms4cs
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions
   
   IMPLICIT NONE
 
@@ -320,9 +320,9 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
            zf_h2o2=zp_h2o2/(1._dp+zp_h2o2)
            !
            zrkh2o2(jl,jk)=zrke*zf_so2*zf_h2o2 ! YAB
-           IF (lo_hammoz_perturbations) THEN
-               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_reactions !scale_so2_reactions_AQ ! YAB
-	   ENDIF
+!           IF (lo_hammoz_perturbations) THEN
+!               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_reactions !scale_so2_reactions_AQ ! YAB
+!	   ENDIF
 
            ELSE
            zrkh2o2(jl,jk)=0._dp
@@ -367,8 +367,8 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
 
            zza=ze2*zrkfac
 
-           za21=4.39e+11_dp*EXP(-4131._dp/ptm1(jl,jk))    ! k51 in Feichter et al.
-           za22=2.56e+03_dp*EXP(-926._dp/ptm1(jl,jk))     ! k52 in Feichter et al.
+           za21=4.39e+11_dp*EXP(-4131._dp/ptm1(jl,jk))    ! k51 in Feichter et al. ! YAB SO2 + O3 (trimolecular)
+           za22=2.56e+03_dp*EXP(-926._dp/ptm1(jl,jk))     ! k52 in Feichter et al. ! YAB SO2 + O3
            zph_o3=ze1*zrkfac
            zf_o3=zph_o3/(1._dp+zph_o3)
            !
@@ -399,7 +399,15 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
               !
               !--- Calculate the reaction rate for SO2-O3:
               !
-              za2=(za21+za22*zqhp)*zfac1
+              !! YAB Perturbing SO2 + O3 trimolecular reaction. <<
+             IF (lo_hammoz_perturbations) THEN
+               za2=(za21+za22*zqhp)*zfac1 * scale_so2_reactions !
+             ELSE
+               za2=(za21+za22*zqhp)*zfac1
+             ENDIF
+  ! 		>> YAB
+
+!	      za2=(za21+za22*zqhp)*zfac1
 
               !--- Calculate effective Henry coefficient neglecting SO3-- :
 
@@ -611,7 +619,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
                                     d_prod_so4_so2_oh,  & 
                                     d_prod_h2so4
   USE mo_exception,          ONLY: finish
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions
 
   IMPLICIT NONE
 
@@ -824,30 +832,33 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
            zhil=ztk2*zmair(jl,jk)/zk2i                            ! see Appendix A in Feichter et al.
            zexp=LOG10(zhil)
            zexp=1._dp/(1._dp+zexp*zexp)
-           ztk23b=ztk2*zmair(jl,jk)/(1._dp+zhil)*zk2f**zexp       ! reaction rate SO2+OH+M 
+           ztk23b=ztk2*zmair(jl,jk)/(1._dp+zhil)*zk2f**zexp       ! reaction rate SO2+OH+M  ! YAB CAN PERTURB HERE> --> H2SO4 ?
 
            zdso2=zso20(jl,jk)*zzoh(jl,jk)*ztk23b*zdayfac(jl)      ! change in SO2
            zdso2=MIN(zdso2,zso20(jl,jk)*zqtmst)                   ! limit change to available SO2
            zdso2=MAX(zdso2,0._dp)                                 ! probably unnecessary
 
            pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)-zdso2        ! update tendencies for SO2
-           !>>dod bugfix(#49)
+! YAB <<
+	   !>>dod bugfix(#49)
            zso4so2oh = zdso2*zconv_so2_so4
 	  ! YAB SO4 production from SO2 PERTURBATIONS 
-           IF (lo_hammoz_perturbations) THEN
+           IF (lo_hammoz_perturbations) THEN ! SO2 + OH -> SO4
                zso4so2oh = zso4so2oh  *  scale_so2_reactions !scale_so2_reactions
+	   ELSE
+               zso4so2oh = zso4so2oh
            ENDIF
            pxtte(jl,jk,idt_so4)=pxtte(jl,jk,idt_so4)+zso4so2oh    ! update tendencies for SO4
            !<<dod
-
+! YAB >>
            zt=pt(jl,jk)
            !   zo2 = 21% of air density [molec cm-3]
            zo2=0.21_dp*zmair(jl,jk)
            !   H abstraction
-           ztk1=9.6e-12_dp*EXP(-234._dp/zt)
+           ztk1=9.6e-12_dp*EXP(-234._dp/zt) ! YAB: DMS + OH -> SO2 (Reaction rate) MAYBE PERTURB HERE? 
            !   OH addition
-           ztk2=1.7e-42_dp*EXP(7810._dp/zt)*zo2/(1._dp+5.5e-31_dp*EXP(7460._dp/zt)*zo2)
-           ztk12=ztk1+ztk2
+           ztk2=1.7e-42_dp*EXP(7810._dp/zt)*zo2/(1._dp+5.5e-31_dp*EXP(7460._dp/zt)*zo2) ! YAB: DMS + OH -> SO2 + MSA ((Reaction rate)) MAYBE PERTURB HERE?
+           ztk12=ztk1+ztk2 ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
 
            zdms=zdms0(jl,jk)*zzoh(jl,jk)*zdayfac(jl)*ztk12       !>>dod deleted double conversion of DMS <<dod
            zdms=MIN(zdms,zdms0(jl,jk)*zqtmst)
@@ -856,16 +867,25 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               !
               !--- ztoso2 is the fraction of DMS oxidized to SO2:
               !
-           ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2)
-
-           zdms2so2oh = zdms*ztoso2*zconv_dms_so2       !>>dod bugfix(#49) <<dod
-
-           pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2oh
+           ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2) ! YAB possibility to perturb fraction of DMS oxidized to SO2
+! YAB <
+!           zdms2so2oh = zdms*ztoso2*zconv_dms_so2       !>>dod bugfix(#49) <<dod
+!	   
+           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + OH -> SO2 reaction rate.
+             zdms2so2oh = zdms*ztoso2*zconv_dms_so2 * scale_dms_reactions ! species mmr * fraction of DMS oxidized to SO2 * mass conversation of DMS -> SO2 * SCALE
+           ELSE
+             zdms2so2oh = zdms*ztoso2*zconv_dms_so2
+           ENDIF
+! YAB 
+           pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2oh ! tracer concentration tendencies.
 
            !--- (1-ztoso2) is converted to MSA and assumed to occur as sulfate:
-
-           zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4
-
+           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS ( + OH) ->  MSA + SO4 reaction rate.
+             zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4 * scale_dms_reactions 
+	   ELSE
+             zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4
+	   ENDIF
+! YAB > DMS CHEM
            pxtte(jl,jk,idt_so4)=pxtte(jl,jk,idt_so4)+zdms2so4
 
            !--- Store production of sulfate and SO2 for diagnostics:
@@ -891,13 +911,16 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               zdms=zdms0(jl,jk)*zno3*ztk3
               zdms=MIN(zdms,zdms0(jl,jk)*zqtmst)
               pxtte(jl,jk,idt_dms)=pxtte(jl,jk,idt_dms)-zdms
-              zdms2so2no3=zdms*zconv_dms_so2                                    !>>dod bugfix(#49) <<dod
-              IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB
+              zdms2so2no3=zdms*zconv_dms_so2                                    !>>dod bugfix(#49) <<dood
+! YAB <<
+              IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + NO3 -> SO2
 
-                    zdms2so2no3 = zdms2so2no3 * scale_so2_reactions                                    !>>dod bugfix(#49) <<dod
+                zdms2so2no3 = zdms2so2no3 * scale_dms_reactions                           
+              ELSE
+                zdms2so2no3=zdms*zconv_dms_so2                                   
 
               ENDIF
-
+! YAB >>
               pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2no3  
 
    !--- Store producion of sulfate and SO2 for diagnostics:

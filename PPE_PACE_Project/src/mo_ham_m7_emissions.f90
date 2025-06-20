@@ -142,10 +142,10 @@ MODULE mo_ham_m7_emissions
   USE mo_ham_dust,               ONLY: bgc_dust_initialize
   USE mo_boundary_condition,       ONLY: bc_query
   USE mo_external_field_processor, ONLY: EF_MODULE
-!>>ps Added for perturbed physics setup:
+!>>YAB Added for perturbed physics setup:
   USE mo_hammoz_perturbations,   ONLY: lo_hammoz_perturbations, scale_emi_cmr_ff, &
                                        scale_emi_cmr_bb
-!<<ps
+!<<YAB
   INTEGER, INTENT(in)      :: nsectors    ! number of sectors defined in emi matrix
 
   INTEGER           :: i, nvars, jt, ieftype
@@ -155,7 +155,7 @@ MODULE mo_ham_m7_emissions
   ! ### Note: these parameters should be further cleaned up -- there are some ad-hoc 
   ! assumptions in the code below (50% mode split) which are not entirely style-conform
   ! with the cmr_ parameters
-!>>ps Removed PARAMETER for perturbed physics setup:
+!>>YAB Removed PARAMETER for perturbed physics setup:
   REAL(dp) ::           cmr_ff         = 0.03E-6_dp,    &! Fossil fuel emissions:
 !<<ps
                                                          ! assumed number median radius of the emitted
@@ -191,14 +191,14 @@ MODULE mo_ham_m7_emissions
                         mmr_dust_ci = 1.75E-6_dp
   REAL(dp) :: densdust
 
-!>>ps Added for perturbed physics setup:
+!>>YAB and ps Added for perturbed physics setup:
   IF (lo_hammoz_perturbations) THEN 
     cmr_ff=cmr_ff*scale_emi_cmr_ff
     cmr_bb=cmr_bb*scale_emi_cmr_bb
 !    cmr_bg=cmr_bg*scale_emi_cmr_bf
 !    zfacso2=(1.0_dp-emi_prim_so4_frac)
   ENDIF
-!<<ps
+!<<ps and YAB
 
   !-- initialize
   idsec_dust      = -1
