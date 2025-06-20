@@ -54,10 +54,11 @@ MODULE mo_hammoz_perturbations
             scale_wetdep_ic, scale_wetdep_bc, & 
             bc_rad_ni, du_rad_ni, oc_rad_ni, &
             scale_so4_coating, &
-	    scale_so2_reactions, &
+	    scale_so2_reactions, scale_dms_reactions, &
             kappa_so4, kappa_oc, kappa_ss, &
 	    scale_vertical_velocity, scale_emi_dms, &
-	    scale_dms_sc,  scale_seasalt_expo, &
+	    scale_dms_sc,  scale_seasalt_expo, scale_emi_ss_acc, &
+	    scale_emi_ss_coarse, &
 	    scale_emi_ant_so2, scale_emi_ant_bc, scale_emi_ant_oc, &
             scale_emi_bb_so2, scale_emi_bb_bc, scale_emi_bb_oc
 
@@ -96,9 +97,12 @@ MODULE mo_hammoz_perturbations
                  scale_emi_bc = 1.0_dp,    & ! Scale factor for BC emissions (all sectors)
                  scale_emi_dms = 1.0_dp,    &   ! Scale factor for dms emissions (terrestrial + oceanic)
                  scale_emi_ssa = 1.0_dp,     &! Scale factor for SSA emissions
+                 scale_emi_ss_acc = 1.0_dp,     &! Scale factor for SSA emissions
+                 scale_emi_ss_coarse = 1.0_dp,     &! Scale factor for SSA emissions
                  scale_emi_du = 1.0_dp,    &! Scale factor for dust emissions
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
                  scale_so2_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
+                 scale_dms_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
                  scale_seasalt_expo = 1.0_dp,  &  ! Scale factor for sea salt exponent
                  scale_emi_ant_so2 = 1.0_dp, &! Scale factor for so2 emissions (ant sectors) 
@@ -223,6 +227,8 @@ CONTAINS
        CALL p_bcast (scale_emi_bc,        p_io)
        CALL p_bcast (scale_emi_dms,        p_io)
        CALL p_bcast (scale_emi_ssa,        p_io)
+       CALL p_bcast (scale_emi_ss_coarse,        p_io)
+       CALL p_bcast (scale_emi_ss_acc,        p_io)
        CALL p_bcast (scale_emi_du,        p_io)
        CALL p_bcast (scale_emi_so2,        p_io)
        CALL p_bcast (scale_emi_so2,        p_io)
@@ -262,6 +268,7 @@ CONTAINS
        CALL p_bcast (kappa_oc, p_io)
        ! SO2 chemistry
        CALL p_bcast (scale_so2_reactions,        p_io)
+       CALL p_bcast (scale_dms_reactions,        p_io)
        CALL p_bcast (scale_dms_sc,        p_io)
        CALL p_bcast (scale_seasalt_expo,        p_io)
 
@@ -307,6 +314,8 @@ CONTAINS
     CALL print_value('Emission scaling factor (scale_emi_bc)', scale_emi_bc)
     CALL print_value('Emission scaling factor (scale_emi_dms)', scale_emi_dms)
     CALL print_value('Emission scaling factor (scale_emi_ssa)', scale_emi_ssa)
+    CALL print_value('Emission scaling factor (scale_emi_ss_coarse)', scale_emi_ss_coarse)
+    CALL print_value('Emission scaling factor (scale_emi_ss_acc)', scale_emi_ss_acc)
     CALL print_value('Emission scaling factor (scale_emi_du)', scale_emi_du)
     CALL print_value('Emission scaling factor (scale_emi_so2)', scale_emi_so2)
 
@@ -319,6 +328,7 @@ CONTAINS
     !dwp NOTE that the scale_emi_bc happens *before* the other scalings to avoid circular dependencies. 
     !         I strongly suggest to set emi_matrix values to 1. and only use either the sector 
     !         scalings OR the species scalings above.
+    CALL print_value('Emission scaling factor (scale_dms_reactions)', scale_dms_reactions)
 
     CALL message('','---')
     CALL print_value('Dry deposition velocity scaling factor (scale_drydep_acc)', scale_drydep_acc)
@@ -461,7 +471,7 @@ CONTAINS
 !
     !--- Fossil fuel:
 
-    insec=SIZE(sectors_ff)
+    nsec=SIZE(sectors_ff)
     DO isec=1, nsec
       ind=em_get_SectorIndex(TRIM(sectors_ff(isec)))
       nvars=ematrix%em_sectors(ind)%es_nvars

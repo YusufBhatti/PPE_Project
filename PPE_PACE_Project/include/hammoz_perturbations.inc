@@ -49,6 +49,8 @@ NAMELIST /hammoz_perturbations/ &
   scale_emi_bc,             & ! Scale factor for BC emissions (all sectors)
   scale_emi_dms,            & ! Scale factor for dms emissions (terrestrial)
   scale_emi_ssa,            & ! Scale factor for SSA emissions (all sectors) 
+  scale_emi_ss_coarse,            & ! Scale factor for SSA emissions (all sectors) 
+  scale_emi_ss_acc,            & ! Scale factor for SSA emissions (all sectors) 
   scale_emi_du,             & ! Scale factor for DUST emissions (all sectors)
   scale_emi_so2,             & ! Scale factor for ANTH SO2 emissions (all sectors)
 !  emi_prim_so4_frac,        & ! Absolute fraction of SO2 emitted as primary SO4
@@ -85,11 +87,12 @@ NAMELIST /hammoz_perturbations/ &
 !  scale_accretion,          & ! Scale the accretion
 !  scale_solar_const,        & ! scale the solar constant (equally across all bands)
   scale_so2_reactions, &
+  scale_dms_reactions, &
 !  scale_water, &
 !  scale_RH,    &
 !  pH_pert,     & ! Scale the cloud-water pH
   kappa_ss, &
   kappa_so4, &
-  kappa_oc
+  kappa_oc, &
   !scale_dms_sc, &           ! Scale the imaginary part of the refractive index (for DUST)
-  !scale_seasalt_expo
+  scale_seasalt_expo

@@ -47,9 +47,6 @@ MODULE mo_ham_m7_emi_seasalt
 
   !---inherited types, data and functions
   USE mo_kind,           ONLY: dp
-  ! << YAB 
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_seasalt_expo
-  ! >> YAB
 
   IMPLICIT NONE
 
@@ -65,10 +62,8 @@ MODULE mo_ham_m7_emi_seasalt
   PUBLIC :: seasalt_emissions_gong_SST    !nseasalt=8
 
   !---module data
-  REAL(dp), PRIVATE :: ppww = 3.41_dp      ! exponent of wind speed |u| (|u|**ppww) 
-  ! < YAB for scaling ssa u exponent
-  REAL(dp)                     :: ppww_scaled      ! exponent of wind speed |u| (|u|**ppww)
-  ! > YAB  
+  REAL(dp), PARAMETER, PRIVATE :: ppww = 3.41_dp      ! exponent of wind speed |u| (|u|**ppww) 
+
   INTEGER,  PARAMETER, PRIVATE :: nbin = 300          ! number of bins for the bin schemes
                                                       ! (Monahan (nseasalt=4), Guelle or Gong, Long)
   REAL(dp), PARAMETER, PRIVATE :: dmta = 0.100E-06_dp ! lower diameter [m], bin schemes 
@@ -90,13 +85,8 @@ MODULE mo_ham_m7_emi_seasalt
 
   REAL(dp), PRIVATE  :: ss1_mon                   ! sea salt flux factor 1, Monahan (nseasalt=1) scheme    
   REAL(dp), PRIVATE  :: ss2_mon                   ! sea salt flux factor 2, Monahan (nseasalt=1) scheme    
-  ! < YAB scaling the exponent of wind 
-!  IF (lo_hammoz_perturbations) THEN
-!    ppww_scaled = ppww * scale_seasalt_expo
-!  ELSE
-!    ppww_scaled = ppww
-!  ENDIF
-  ! > YAB
+
+
 CONTAINS
 
   SUBROUTINE start_emi_seasalt
@@ -912,7 +902,7 @@ CONTAINS
     USE mo_vphysc,       ONLY: vphysc
     USE mo_exception,     ONLY: message, message_text, finish
    ! << YAB 
-    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_seasalt_expo
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_seasalt_expo, scale_emi_ss_coarse, scale_emi_ss_acc
    ! >> YAB
 
     IMPLICIT NONE
@@ -1086,18 +1076,32 @@ CONTAINS
           znumf_ks(1:kproma) = znumf_ks(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)
           zmassf_ks(1:kproma) = zmassf_ks(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav 
        END IF
-
+! YAB << Perturbing mass and number flux of sea salt accumulation (as) and coarse (cs) modes
        IF (dmt(m).GT.dbeg(2) .AND. dmt(m).LE.dend(2) ) THEN
-          pnumf_as(1:kproma) = pnumf_as(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)
-          pmassf_as(1:kproma) = pmassf_as(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav
+         IF (lo_hammoz_perturbations) THEN
+           pnumf_as(1:kproma) = pnumf_as(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)* scale_emi_ss_acc
+           pmassf_as(1:kproma) = pmassf_as(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav * scale_emi_ss_acc
+         ELSE 
+           pnumf_as(1:kproma) = pnumf_as(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)
+           pmassf_as(1:kproma) = pmassf_as(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav
+	 END IF
        END IF
 
        IF (dmt(m).GT.dbeg(3) .AND. dmt(m).LE.dend(3) ) THEN
-          pnumf_cs(1:kproma) = pnumf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)
-          pmassf_cs(1:kproma) = pmassf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav
-       END IF
- 
+         IF (lo_hammoz_perturbations) THEN
+           pnumf_cs(1:kproma) = pnumf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma) * scale_emi_ss_coarse 
+           pmassf_cs(1:kproma) = pmassf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav * scale_emi_ss_coarse
+         ELSE 
+           pnumf_cs(1:kproma) = pnumf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)
+           pmassf_cs(1:kproma) = pmassf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav
+
+         END IF
+!       IF (lo_hammoz_perturbations) THEN
+!	       pnumf_cs(1:kproma)  = pnumf_cs(1:kproma) * scale_emi_ss_coarse
+!	       pmassf_cs(1:kproma) = pmassf_cs(1:kproma) * scale_emi_ss_coarse
+       ENDIF
     END DO
+! YAB >>
 
   END SUBROUTINE seasalt_emissions_long
 
