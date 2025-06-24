@@ -1294,10 +1294,11 @@ mo_cloud.o: mo_cosp_offline.o mo_echam_cloud_params.o \
 	mo_submodel_interface.o mo_vphysc.o
 mo_cloud_micro_2m.o: mo_activ.o mo_boundary_condition.o mo_cirrus.o \
 	mo_cloud_utils.o mo_conv.o mo_echam_cloud_params.o \
-	mo_echam_convect_tables.o mo_hammoz_aerocom_diags.o mo_kind.o \
-	mo_math_constants.o mo_memory_g2a.o mo_memory_g3b.o mo_orocirrus.o \
-	mo_param_switches.o mo_physical_constants.o mo_submodel_interface.o \
-	mo_time_control.o mo_vphysc.o
+	mo_echam_convect_tables.o mo_hammoz_aerocom_diags.o \
+	mo_hammoz_perturbations.o mo_kind.o mo_math_constants.o \
+	mo_memory_g2a.o mo_memory_g3b.o mo_orocirrus.o mo_param_switches.o \
+	mo_physical_constants.o mo_submodel_interface.o mo_time_control.o \
+	mo_vphysc.o
 mo_cloud_optics.o: mo_cloud_micro_2m.o mo_control.o mo_echam_cloud_params.o \
 	mo_exception.o mo_io.o mo_kind.o mo_math_constants.o mo_mpi.o \
 	mo_netcdf.o mo_param_switches.o mo_physical_constants.o
@@ -1447,8 +1448,9 @@ mo_ham.o: mo_boundary_condition.o mo_control.o mo_exception.o \
 	mo_util_string.o $(INCLUDE)/hamctl.inc
 mo_ham_activ.o: mo_activ.o mo_conv.o mo_echam_cloud_params.o mo_ham.o \
 	mo_ham_m7ctl.o mo_ham_streams.o mo_ham_tools.o \
-	mo_hammoz_aerocom_diags.o mo_kind.o mo_math_constants.o \
-	mo_param_switches.o mo_physical_constants.o mo_tracdef.o
+	mo_hammoz_aerocom_diags.o mo_hammoz_perturbations.o mo_kind.o \
+	mo_math_constants.o mo_param_switches.o mo_physical_constants.o \
+	mo_tracdef.o
 mo_ham_ccn.o: mo_ham.o mo_ham_ccnctl.o mo_ham_streams.o mo_ham_tools.o \
 	mo_kind.o mo_linked_list.o mo_physical_constants.o mo_submodel_diag.o
 mo_ham_ccnctl.o: mo_kind.o

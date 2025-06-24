@@ -54,13 +54,14 @@ MODULE mo_hammoz_perturbations
             scale_wetdep_ic, scale_wetdep_bc, & 
             bc_rad_ni, du_rad_ni, oc_rad_ni, &
             scale_so4_coating, &
-	    scale_so2_reactions, scale_dms_reactions, &
+	    scale_so2_reactions, scale_dms_reactions, scale_so2_aq_reactions, &
             kappa_so4, kappa_oc, kappa_ss, &
 	    scale_vertical_velocity, scale_emi_dms, &
 	    scale_dms_sc,  scale_seasalt_expo, scale_emi_ss_acc, &
 	    scale_emi_ss_coarse, &
 	    scale_emi_ant_so2, scale_emi_ant_bc, scale_emi_ant_oc, &
-            scale_emi_bb_so2, scale_emi_bb_bc, scale_emi_bb_oc
+            scale_emi_bb_so2, scale_emi_bb_bc, scale_emi_bb_oc, &
+	    scale_fi, scale_gi, scale_activation
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
 
@@ -102,6 +103,7 @@ MODULE mo_hammoz_perturbations
                  scale_emi_du = 1.0_dp,    &! Scale factor for dust emissions
                  scale_emi_so2 = 1.0_dp,   & ! Scale factor for ANTH SO2 emissions
                  scale_so2_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
+                 scale_so2_aq_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_dms_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
                  scale_seasalt_expo = 1.0_dp,  &  ! Scale factor for sea salt exponent
@@ -131,6 +133,9 @@ MODULE mo_hammoz_perturbations
   REAL(dp)    :: scale_so4_coating = 1.0_dp  ! Scale the coating thickness of SO4 required to 'age' particles (move them
                                              !  from insoluble to soluble modes)
 
+  REAL(dp)    :: scale_fi  = 1.0_dp, & ! Scale fi in activation scheme
+                 scale_gi   = 0.6_dp, & ! Scale gi in activation scheme
+                 scale_activation  = 1.0_dp   ! Scale the activation of particles
 
 CONTAINS
 
@@ -268,10 +273,13 @@ CONTAINS
        CALL p_bcast (kappa_oc, p_io)
        ! SO2 chemistry
        CALL p_bcast (scale_so2_reactions,        p_io)
+       CALL p_bcast (scale_so2_aq_reactions,        p_io)
        CALL p_bcast (scale_dms_reactions,        p_io)
        CALL p_bcast (scale_dms_sc,        p_io)
        CALL p_bcast (scale_seasalt_expo,        p_io)
-
+       CALL p_bcast (scale_fi,        p_io)
+       CALL p_bcast (scale_gi,        p_io)
+       CALL p_bcast (scale_activation,        p_io)
 
     END IF
 
@@ -348,11 +356,9 @@ CONTAINS
     CALL print_value('BC imaginary refractive index (oc_rad_ni)', oc_rad_ni)
     CALL print_value('BC imaginary refractive index (du_rad_ni)', du_rad_ni)
 
-!    CALL message('', '---')
-!    CALL print_value('The proportion of (G/F)FIRE tracer emitted into the layer &
- !   &imediately above the PBL (PBL+1) (prop_fire_in_pbl_p1)', prop_fire_in_pbl_p1)
- !   CALL print_value('The proportion of (G/F)FIRE tracer emitted into PBL+2 (prop_fire_in_pbl_p2)', prop_fire_in_pbl_p2)
-  !  CALL print_value('The proportion of (G/F)FIRE tracer emitted into the PBL (prop_fire_in_pbl)', prop_fire_in_pbl)
+    CALL print_value('FI Scale in the activation scheme', scale_fi)
+    CALL print_value('GI Scale in the activation scheme', scale_gi)
+    CALL print_value('Scale in the activation scheme', scale_activation)
 
     CALL message('', '---')
     CALL print_value('The scaling of SO4 layer thickness cutoff (scale_so4_coating)', scale_so4_coating)
@@ -361,7 +367,6 @@ CONTAINS
  
 !CALL print_value('The scaling of inter-mode coagulation (scale_inter_mode_coagulation)', scale_inter_mode_coagulation)
 
-    CALL message('', '---')
  !   CALL print_value('The scaling of ARG activation', scale_activation)
  !   CALL message('hammoz_perturbations', 'Be careful - the below perturbations are only applied &
  !   &for the KK scheme (nauto=2)')

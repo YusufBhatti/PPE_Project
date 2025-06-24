@@ -17,7 +17,7 @@
 !!   -# P. Stier (MPI-Met)  - original code 
 !!   -# S. Ferrachat (ETHZ) - new code structure (separate HAM-dependent pieces 
 !!                            from the general activation schemes) - (2010-03)
-!!
+!!   -# D. Partridge (UOE), H. Jia (SRON)i, Y. Bhatti (SRON)  -  updated ARG to modified ARG from Ghosh et al. (2024) 
 !! \limitations
 !! None
 !!
@@ -103,7 +103,7 @@ CONTAINS
     ! Pruppbacher and Klett, Kluewer Ac. Pub., 1997.
 
     !>>dod soa
-    USE mo_ham_m7ctl,   ONLY: sigmaln
+    USE mo_ham_m7ctl,          ONLY: sigma, sigmaln ! YAB added sigma
     !<<dod
     USE mo_ham_tools,   ONLY: ham_m7_logtail
     USE mo_tracdef,     ONLY: trlist, ntrac, AEROSOLMASS
@@ -123,6 +123,10 @@ CONTAINS
    USE mo_activ,         ONLY: swat
 !<<DN
 
+!<hjia YAB
+!    USE mo_set_subm_phys,        ONLY: lghoshARG
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_fi, scale_gi 
+!hjia YAB >
     IMPLICIT NONE
 
     !--- Arguments:
@@ -159,7 +163,8 @@ CONTAINS
                zgamma,                     &
                zgrowth,                    &
                zdif,      zxv,             &
-               zk,        zka
+               zk,        zka,             & ! YAB Added p_factor
+               p_factor
 
     REAL(dp):: zamw,                       & ! molecular weight of water [kg mol-1]
                zamd                          ! molecular weight of dry air [kg mol-1]
@@ -175,8 +180,10 @@ CONTAINS
                zsm(kbdim,klev,nclass)        ! critical supersaturation for activating particles
                                              !    with the mode number median radius
 
-    REAL(dp) :: zeta(nw), zxi(nw), zsum(nw)
-
+!    REAL(dp) :: zeta(nw), zxi(nw), zsum(nw)
+! YAB <
+    REAL(dp) :: zeta(kbdim,klev,nw), zxi(kbdim,klev,nw), zsum(kbdim,klev,nw) ! YAB >
+    
     REAL(dp), PARAMETER :: zsten = 75.0E-3_dp ! surface tension of H2O [J m-2] 
                                               !   neglecting salts and temperature
                                                !   (also tried P&K 5.12 - erroneous!)
@@ -193,6 +200,9 @@ CONTAINS
     pnact(1:kproma,:,:)      = 0._dp
     pfracn(1:kproma,:,:)     = 0._dp
     pcdncact(1:kproma,:)     = 0._dp
+    zeta(1:kproma,:,:)     = 0._dp
+    zxi(1:kproma,:,:)     = 0._dp
+    zsum(1:kproma,:,:)     = 0._dp
 
     zeps=EPSILON(1._dp)
 
@@ -211,11 +221,38 @@ CONTAINS
        !<<dod
     END DO
 
-    ! (7):
-    zf(:)=0.5_dp*EXP(2.5_dp*sigmaln(:)**2._dp)
+    !! (7):
+   ! zf(:)=0.5_dp*EXP(2.5_dp*sigmaln(:)**2._dp)
+    !$ACC PARALLEL DEFAULT(NONE) ASYNC(1)
+    !$ACC LOOP SEQ
+    DO jclass=1, nclass
+      !>>hjia & DP & YAB
+      !
+      ! (7) & (8)
+      !--- Add a revised ARG scheme (Ghosh et al.,2024), and a switch for it 'lghoshARG'
+      !
+!      IF (lghoshARG) THEN ! lhamperturb scaling to be added
+         zf(jclass)=0.0135_dp*EXP(2.367_dp*sigma(3)) ! Dependent only on accumulation mode gsd (index=3).
+         zg(jclass)=1.1058_dp-0.315_dp*sigma(3)
+!      ELSE
+!         IF (lhamperturb) THEN
+!            zf(jclass)=activ_kinetic*EXP(2.5_dp*sigmaln(jclass)**2._dp)
+!         ELSE
+!            zf(jclass)=0.5_dp*EXP(2.5_dp*sigmaln(jclass)**2._dp)
+!         ENDIF
+!         zf(jclass)=0.5_dp*EXP(2.5_dp*sigmaln(jclass)**2._dp)
+!         zg(jclass)=1._dp+0.25_dp*sigmaln(jclass)
+!      ENDIF
+      IF (lo_hammoz_perturbations) THEN
+         zf(jclass) = scale_fi * zf(jclass)
+         zg(jclass) = scale_gi * zg(jclass)
+      ENDIF
+      !<<hjia & YAB
 
     ! (8):
-    zg(:)=1._dp+0.25_dp*sigmaln(:)
+    !zg(:)=1._dp+0.25_dp*sigmaln(:)
+    END DO
+    !$ACC END PARALLEL
 
     !--- 1) Calculation of Koehler A/B coefficients: 
     !       Now done in ham_activ_koehler_ab once so that they can be used in
@@ -269,7 +306,7 @@ CONTAINS
 
              !--- Summation for equation (6):
 
-             zsum(:)=0._dp
+             !zsum(:)=0._dp
 
              DO jclass=1, nclass
                 !>>dod #377
@@ -285,36 +322,78 @@ CONTAINS
                                    (pa(jl,jk,jclass)/(3._dp*prdry(jl,jk,jclass)))**1.5_dp
 
                       ! (10):
+! YAB <
 
-                      zxi(:)=2._dp*pa(jl,jk,jclass)/3._dp * SQRT(zalpha*pw(jl,jk,:)/zgrowth)
+                      DO jw=1, nw
+!                      zxi(:)=2._dp*pa(jl,jk,jclass)/3._dp * SQRT(zalpha*pw(jl,jk,:)/zgrowth)
+
+                        zxi(jl,jk,jw)=2._dp*pa(jl,jk,jclass)/3._dp * SQRT(zalpha*pw(jl,jk,jw)/zgrowth)
 
                       ! (11):
                       
-                      zeta(:)=((zalpha*pw(jl,jk,:)/zgrowth)**1.5_dp) / &
-                             (2._dp*pi*rhoh2o*zgamma*zn(jl,jk,jclass))
+!                      zeta(:)=((zalpha*pw(jl,jk,:)/zgrowth)**1.5_dp) / &
+!                             (2._dp*pi*rhoh2o*zgamma*zn(jl,jk,jclass))
+
+                        zeta(jl,jk,jw)=((zalpha*pw(jl,jk,jw)/zgrowth)**1.5_dp) / &
+                              (2._dp*pi*rhoh2o*zgamma*zn(jl,jk,jclass))
                       
                       ! (6):
 
-                      WHERE (pw(jl,jk,:)>zeps)
-                         zsum(:)=zsum(:) + ( 1._dp/zsm(jl,jk,jclass)**2                  &
-                                          * ( zf(jclass)*(zxi(:)/zeta(:))**1.5_dp     &
-                                              + zg(jclass)*( zsm(jl,jk,jclass)**2._dp &
-                                                             / (zeta(:)+3._dp*zxi(:)) )**0.75_dp ) )
-                      END WHERE
-
+!                      WHERE (pw(jl,jk,:)>zeps)
+!                         zsum(:)=zsum(:) + ( 1._dp/zsm(jl,jk,jclass)**2                  &
+!                                          * ( zf(jclass)*(zxi(:)/zeta(:))**1.5_dp     &
+!                                              + zg(jclass)*( zsm(jl,jk,jclass)**2._dp &
+!                                                             / (zeta(:)+3._dp*zxi(:)) )**0.75_dp ) )
+!                      END WHERE
+                        !>>hjia & DP & YAB
+                        ! --- New p factor calc. based on Ghosh et al. (2024)
+                        IF ((zxi(jl,jk,jw)/zeta(jl,jk,jw)) .gt. 1.0_dp) THEN
+                          ! --- New p factor calc. based on Ghosh et al. (2024). Dependent only on accumulation mode (index=3) gsd.
+                          p_factor = -0.5073_dp+1.5088_dp*sigma(3)-(0.3699_dp*(sigma(3))**2.0_dp)
+                        ELSE
+                          p_factor = 1.5_dp
+                        ENDIF
+                        
+                        IF (pw(jl,jk,jw)>zeps) THEN
+!                           IF (lghoshARG) THEN ! New calculation of zsum using p factor.
+                              zsum(jl,jk,jw)=zsum(jl,jk,jw) + ( 1._dp/zsm(jl,jk,jclass)**2                  &
+                                                * ( zf(jclass)*(zxi(jl,jk,jw)/zeta(jl,jk,jw))**p_factor     &
+                                                + zg(jclass)*( zsm(jl,jk,jclass)**2._dp                     &
+                                                               / (zeta(jl,jk,jw)+3._dp*zxi(jl,jk,jw)) )**0.75_dp ) )
+!                           ELSE
+!                              zsum(jl,jk,jw)=zsum(jl,jk,jw) + ( 1._dp/zsm(jl,jk,jclass)**2                  &
+!                                             * ( zf(jclass)*(zxi(jl,jk,jw)/zeta(jl,jk,jw))**1.5_dp     &
+!                                                + zg(jclass)*( zsm(jl,jk,jclass)**2._dp &
+!                                                               / (zeta(jl,jk,jw)+3._dp*zxi(jl,jk,jw)) )**0.75_dp ) )
+!                           ENDIF
+                        END IF
+			!<<hjia & DP ! YAB removed ELSE and added the END do
+                      END DO
                    ENDIF
                 END IF
                 !<<dod
              END DO ! jclass
 
-             WHERE (zsum(:) > zeps)
-                psmax(jl,jk,:)=1._dp/SQRT(zsum(:))
-             ELSEWHERE
-                psmax(jl,jk,:)=0._dp
-             END WHERE
+!             WHERE (zsum(:) > zeps)
+!                psmax(jl,jk,:)=1._dp/SQRT(zsum(:))
+!             ELSEWHERE
+!                psmax(jl,jk,:)=0._dp
+!             END WHERE
 
+             !$ACC LOOP SEQ
+             DO jw=1, nw
+               IF (zsum(jl,jk,jw) > zeps) THEN
+                  psmax(jl,jk,jw)=1._dp/SQRT(zsum(jl,jk,jw))
+               ELSE
+                  psmax(jl,jk,jw)=0._dp
+               END IF
+             END DO
           ELSE
-             psmax(jl,jk,:)=0._dp
+            ! psmax(jl,jk,:)=0._dp
+             !$ACC LOOP SEQ
+             DO jw=1, nw
+               psmax(jl,jk,jw)=0._dp
+             END DO
           END IF
 
        END DO ! jl

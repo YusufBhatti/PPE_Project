@@ -183,6 +183,9 @@ USE mo_memory_g3b,         ONLY: orostd,oromea,orogam,orothe, &
                                  oropic,oroval,orosig
 #ifdef HAMMOZ
 USE mo_orocirrus,          ONLY: orocirrus_w, orocirrus_cc
+!<YAB
+USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_activation
+!YAB>
 #endif
 
 USE mo_boundary_condition, ONLY: bc_find, bc_apply
@@ -743,6 +746,12 @@ USE mo_time_control,       ONLY: lstart, lresume
 !DN --> SF ToDo: add a subroutine for ice crystal nucleation
 !DN --> SF ToDo: handling of detrained condensate should be in 2 subroutines:(CDNC/ICNC) here and (LWC/IWC) in loop 831
 
+!<YAB
+      !>DWP & YAB add direct perturbation to activated CDNC
+  if (lo_hammoz_perturbations) &
+        zcdncact(1:kproma, :) = zcdncact(1:kproma, :) * scale_activation
+      !<DWP
+!YAB>
 !--- Convert the aerosol activation into the number of newly formed cloud droplets
 
   ll1_2d(1:kproma,:) = ( ibas(1:kproma,:) > 0 )                               .AND. & !cloud base lev

@@ -99,7 +99,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
                                    d_prod_ms4cs
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions, scale_so2_aq_reactions
   
   IMPLICIT NONE
 
@@ -320,11 +320,11 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
            zf_h2o2=zp_h2o2/(1._dp+zp_h2o2)
            !
            zrkh2o2(jl,jk)=zrke*zf_so2*zf_h2o2 ! YAB
-!           IF (lo_hammoz_perturbations) THEN
-!               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_reactions !scale_so2_reactions_AQ ! YAB
-!	   ENDIF
+           IF (lo_hammoz_perturbations) THEN
+               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_aq_reactions !scale_so2_reactions_AQ ! YAB
+	   ENDIF
 
-           ELSE
+        ELSE
            zrkh2o2(jl,jk)=0._dp
         END IF
      END DO

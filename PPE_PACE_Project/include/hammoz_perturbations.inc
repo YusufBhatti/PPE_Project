@@ -83,10 +83,13 @@ NAMELIST /hammoz_perturbations/ &
 !--- Cloud scheme (ONLY for naut == 2):
 !  KK_exponent,              & ! The exponent to use in the KK autoconversion scheme
 !  KK_LWP_exponent,            & ! The LWP exponent in the KK autoconversion scheme.
-!  scale_activation,         & ! Scale the number of ARG activated particles
+  scale_activation,         & ! Scale the number of ARG activated particles
+  scale_fi,  &
+  scale_gi, &
 !  scale_accretion,          & ! Scale the accretion
 !  scale_solar_const,        & ! scale the solar constant (equally across all bands)
   scale_so2_reactions, &
+  scale_so2_aq_reactions, &
   scale_dms_reactions, &
 !  scale_water, &
 !  scale_RH,    &
