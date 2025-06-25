@@ -56,6 +56,7 @@ MODULE mo_activ
   REAL(dp),        PUBLIC, POINTER :: reffl_ct(:,:)
   REAL(dp),        PUBLIC, POINTER :: reffl_time(:,:)
   REAL(dp),        PUBLIC, POINTER :: cdnc_ct(:,:)
+  REAL(dp),        PUBLIC, POINTER :: cdnc_incl_ct(:,:)! YAB Added for CDNC in cloud for satellite
   REAL(dp),        PUBLIC, POINTER :: reffi_tovs(:,:)
   REAL(dp),        PUBLIC, POINTER :: reffi_time(:,:)
   REAL(dp),        PUBLIC, POINTER :: iwp_tovs(:,:)
@@ -614,6 +615,11 @@ CONTAINS
 
   CALL add_stream_element (activ,   'CDNC_CT',  cdnc_ct,                                  &
                            longname='cloud top cloud droplet number conc.',units='cm-3'   )
+
+! YAB in cloud CT
+  CALL add_stream_element (activ,   'CDNC_INCL_CT',  cdnc_incl_ct,                        &
+                           longname='cloud top (inc cloud) cloud droplet number conc.',units='cm-3'   )
+! YAB in cloud CT
 
   CALL add_stream_element (activ,   'IWC_ACC',    iwc_acc,                                &
                            longname='ice wat cont acc.+ cloud weighted',  units='kg m-3'  )

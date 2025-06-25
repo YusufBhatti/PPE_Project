@@ -619,7 +619,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
                                     d_prod_so4_so2_oh,  & 
                                     d_prod_h2so4
   USE mo_exception,          ONLY: finish
-  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions, scale_dms_so2_fraction
 
   IMPLICIT NONE
 
@@ -858,8 +858,12 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
            ztk1=9.6e-12_dp*EXP(-234._dp/zt) ! YAB: DMS + OH -> SO2 (Reaction rate) MAYBE PERTURB HERE? 
            !   OH addition
            ztk2=1.7e-42_dp*EXP(7810._dp/zt)*zo2/(1._dp+5.5e-31_dp*EXP(7460._dp/zt)*zo2) ! YAB: DMS + OH -> SO2 + MSA ((Reaction rate)) MAYBE PERTURB HERE?
-           ztk12=ztk1+ztk2 ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
-
+           !ztk12=ztk1+ztk2 ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
+           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + OH -> SO2 reaction rate.
+             ztk12=ztk1+ztk2 * scale_dms_reactions ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
+	   ELSE
+	     ztk12=ztk1+ztk2
+	   ENDIF
            zdms=zdms0(jl,jk)*zzoh(jl,jk)*zdayfac(jl)*ztk12       !>>dod deleted double conversion of DMS <<dod
            zdms=MIN(zdms,zdms0(jl,jk)*zqtmst)
 
@@ -867,24 +871,24 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               !
               !--- ztoso2 is the fraction of DMS oxidized to SO2:
               !
-           ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2) ! YAB possibility to perturb fraction of DMS oxidized to SO2
+           ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2) * scale_dms_so2_fraction ! YAB possibility to perturb fraction of DMS oxidized to SO2
 ! YAB <
-!           zdms2so2oh = zdms*ztoso2*zconv_dms_so2       !>>dod bugfix(#49) <<dod
+           zdms2so2oh = zdms*ztoso2*zconv_dms_so2       !>>dod bugfix(#49) <<dod
 !	   
-           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + OH -> SO2 reaction rate.
-             zdms2so2oh = zdms*ztoso2*zconv_dms_so2 * scale_dms_reactions ! species mmr * fraction of DMS oxidized to SO2 * mass conversation of DMS -> SO2 * SCALE
-           ELSE
-             zdms2so2oh = zdms*ztoso2*zconv_dms_so2
-           ENDIF
+!           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + OH -> SO2 reaction rate.
+!             zdms2so2oh = zdms*ztoso2*zconv_dms_so2 * scale_dms_reactions ! species mmr * fraction of DMS oxidized to SO2 * mass conversation of DMS -> SO2 * SCALE
+!           ELSE
+!             zdms2so2oh = zdms*ztoso2*zconv_dms_so2
+!           ENDIF
 ! YAB 
            pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2oh ! tracer concentration tendencies.
 
            !--- (1-ztoso2) is converted to MSA and assumed to occur as sulfate:
-           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS ( + OH) ->  MSA + SO4 reaction rate.
-             zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4 * scale_dms_reactions 
-	   ELSE
-             zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4
-	   ENDIF
+!           IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS ( + OH) ->  MSA + SO4 reaction rate.
+!             zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4 * scale_dms_reactions 
+!	   ELSE
+           zdms2so4 = zdms*(1._dp-ztoso2)*zconv_dms_so4
+!	   ENDIF
 ! YAB > DMS CHEM
            pxtte(jl,jk,idt_so4)=pxtte(jl,jk,idt_so4)+zdms2so4
 
@@ -903,7 +907,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
 
         ELSE   !--- 4.2) Night-time chemistry 
 
-              ztk3=zk3*EXP(520._dp/pt(jl,jk))
+              ztk3=zk3*EXP(520._dp/pt(jl,jk) * scale_dms_reactions)
 
 !gf see #146 - Values from input file
               zno3=zzno3(jl,jk)
@@ -913,13 +917,13 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               pxtte(jl,jk,idt_dms)=pxtte(jl,jk,idt_dms)-zdms
               zdms2so2no3=zdms*zconv_dms_so2                                    !>>dod bugfix(#49) <<dood
 ! YAB <<
-              IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + NO3 -> SO2
+!              IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + NO3 -> SO2
 
-                zdms2so2no3 = zdms2so2no3 * scale_dms_reactions                           
-              ELSE
-                zdms2so2no3=zdms*zconv_dms_so2                                   
-
-              ENDIF
+!                zdms2so2no3 = zdms2so2no3 * scale_dms_reactions                           
+!              ELSE
+!                zdms2so2no3=zdms*zconv_dms_so2                                   
+!
+!              ENDIF
 ! YAB >>
               pxtte(jl,jk,idt_so2)=pxtte(jl,jk,idt_so2)+zdms2so2no3  
 

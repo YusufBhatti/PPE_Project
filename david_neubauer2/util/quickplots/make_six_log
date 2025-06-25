@@ -1,0 +1,31 @@
+#!/bin/sh
+set -ex
+#
+TYP=$1
+#
+EXP=$2
+#
+PRINTERC=$3
+
+echo QUELLE path $QUELLE
+
+##---------------ATM-------------------------
+
+#
+prefix=atmlog_${TYP}_${EXP}
+afiles=$(ls ${prefix}_* )
+${QUELLE}/sixplot_latex.sh ATMlog_${TYP}_${EXP} ${afiles}
+
+if [ "$PRINTERC" = "0" ]
+then
+gv ATMlog_${TYP}_${EXP}.ps &
+elif [ "$PRINTERC" = "-1" ]
+then
+echo Plotname ATMlog_${TYP}_${EXP}.ps 
+else
+lpr -P${PRINTERC} -o sides=one-sided ATMlog_${TYP}_${EXP}.ps 
+fi
+rm ATMlog_${TYP}_${EXP}.dvi ATMlog_${TYP}_${EXP}.aux ATMlog_${TYP}_${EXP}.log 
+
+
+exit

@@ -1,0 +1,248 @@
+#! /bin/bash
+
+#
+# Setup for thunder (SLURM)
+#
+#SBATCH --job-name=mbe0584_run
+#SBATCH --partition=mpi-compute
+#SBATCH --exclusive
+#SBATCH --nodes=8
+#SBATCH --tasks-per-node=16
+# Memory config broken #SBATCH --mem=768
+#SBATCH --cpus-per-task=1
+#SBATCH --time=02:30:00
+#SBATCH --output=mbe0584_run_%j.log
+#SBATCH --error=mbe0584_run_%j.log
+#SBATCH --mail-type=FAIL
+
+MV2_DEFAULT_PUT_GET_LIST_SIZE=600
+export MV2_DEFAULT_PUT_GET_LIST_SIZE
+#-----------------------------------------------------------------------------
+#
+#  Job file to run ECHAM 6 - RCE on thunder
+#  Remark: to run this script on different machines simply replace the parts
+#  framed in ##RCE with the according lines in the standard runscripts.
+#  There are no standard subjob-scripts available for RCE.
+#
+#-----------------------------------------------------------------------------
+#
+# If a command has a non-zero exit status, execute ERR trap and exit
+set -ex
+#
+# Suppress core dumps
+#
+ulimit -c 0
+#
+#-----------------------------------------------------------------------------
+#
+# experiment identifier: your given experimenter-id according to
+# http://svn.zmaw.de/dokuwiki/doku.php?id=listofids:list_of_experimenter_ids
+# followed by a number for the current experiment
+#
+EXP="mbe0584"      # experiment identifier
+#
+NTHREADS=1
+export ECHAM6_THREADS=$NTHREADS
+#
+RES=63
+LEVELS=47
+OCERES=GR15
+#
+#-----------------------------------------------------------------------------
+#
+# absolute path to directory with job scripts:
+#SCRIPTDIR=/scratch/mpi/CC/mh0287/users/m214002/echam-dev_rev3625/experiments/mbe0584/scripts
+SCRIPTDIR=/scratch/mpi/CC/mh0287/users/m214002/echam-dev_rev3625/run
+#
+# absolute path to directory with plenty of space:
+EXPDIR=/scratch/mpi/CC/mh0287/users/m214002/echam-dev_rev3625/experiments/mbe0584/
+#
+# absolute path to directory with initial data:
+INI_DATA=/pool/data/ECHAM6/input/r0002
+INIECH=$INI_DATA/T${RES}
+## RCE
+INI_RCE=/pool/data/ECHAM6/T${RES}/rce
+## RCE
+#
+# absolute path to directory with initial data for JSBACH:
+LIBJSB=/pool/data/ECHAM6/jsbach
+#
+# absolute path to model binary, including the executable
+MODEL=/scratch/mpi/CC/mh0287/users/m214002/echam-dev_rev3625/bin/echam6
+#
+#-----------------------------------------------------------------------------
+#
+# the directory for the experiment will be created, if not already there
+if [ ! -d $EXPDIR ]; then
+    mkdir -p $EXPDIR
+fi
+
+cd $EXPDIR           #  output and rerun files are written into $EXPDIR
+#-----------------------------------------------------------------------------
+#
+# specification of files for ECHAM
+#
+#-----------------------------------------------------------------------------
+#
+## RCE
+rm -f unit.?? sst* ice* lctlib.def jsbach.nc rrtmg_[ls]w.nc
+rm -f ECHAM6_CldOptProps.nc ozon*
+#
+ln -s  ${INI_RCE}/T63L47_rce_jan_spec.nc                  unit.23
+ln -s  ${INI_RCE}/T63GR15_rce_jan_surf.nc                 unit.24
+#
+ln -s  ${INI_RCE}/T63GR15_rce_VLTCLIM.nc                  unit.90
+ln -s  ${INI_RCE}/T63GR15_rce_VGRATCLIM.nc                unit.91
+ln -s  ${INI_RCE}/T63_rce_TSLCLIM2.nc                     unit.92
+#
+year=1975
+while [[ $year -lt 1979 ]]
+do
+ln -s  ${INI_RCE}/T63_rce_ozone_CMIP5.nc                  ozon${year}
+(( year = year+1 ))
+done
+#
+ln -s  ${INI_RCE}/T63_rce_amip2sst.nc                     unit.20
+ln -s  ${INI_RCE}/T63_rce_amip2sic.nc                     unit.96
+## RCE
+#
+ln -s  ${INI_DATA}/rrtmg_lw.nc                            rrtmg_lw.nc
+ln -s  ${INI_DATA}/rrtmg_sw.nc                            rrtmg_sw.nc
+ln -s  ${INI_DATA}/ECHAM6_CldOptProps.nc                  ECHAM6_CldOptProps.nc
+#
+#-----------------------------------------------------------------------------
+#
+# specification of files for JSBACH
+# jsbach.nc has to fit the first year of transitions (e.g. 1976)
+#
+#-----------------------------------------------------------------------------
+ln -s  ${LIBJSB}/lctlib_nlct21.def_rev6597                           lctlib.def
+## RCE
+ln -s /pool/data/ECHAM6/T63/aqua/jsbach_T63GR15_11tiles_1976_aqua.nc jsbach.nc
+## RCE
+#-----------------------------------------------------------------------------
+#
+# ECHAM6 namelist
+#
+## RCE
+cat > namelist.echam << EOF
+&parctl
+    nproca = 16
+    nprocb = 8
+/
+&runctl
+    default_output = .true.
+    putdata = 6, 'hours', 'first', 0
+    ! Do not change dt_start when performing a restart
+    dt_start = 1976, 1, 1, 0, 0, 0
+    putrerun = 1, 'years', 'last', 0
+    ltimer = .false.
+    lresume = .false.
+    out_datapath = './'
+    out_expname = 'mbe0583'
+    out_filetype = 1
+    out_ztype = 0
+    rerun_filetype = 4
+    lamip = .false.
+    dt_stop = 1978, 1, 1, 0, 0, 0
+    nproma = 72
+    no_cycles = 1
+    ldebugev = .false.
+    lcouple_co2 = .false.
+    ldebugs = .false.
+    lrce = .true.
+    l_orbvsop87 = .false.
+    ly360 = .true.
+    earth_angular_velocity = 0.0
+/
+&submdiagctl
+    vphysc_lpost = .false.
+/
+&submodelctl
+    lco2 = .false.
+    lmethox = .true.
+/
+&radctl
+    io3 = 4
+    iaero = 0
+    isolrad = 5
+    icfc = 0
+    ldiur = .false.
+    cecc = 0.0
+    cobld = 0.0
+    ich4 = 2
+    in2o = 2
+    ico2 = 2
+    co2vmr = 278.e-6
+    n2ovmr = 0.0
+    ch4vmr = 0.0
+/
+&physctl
+    lgwdrag = .false.
+/
+&dynctl
+    apsurf = 101325.0
+/
+EOF
+## RCE
+echo "* ----------------------------------------------------------------------"
+echo "* Namelist of ECHAM6: namelist.echam"
+echo "* ----------------------------------------------------------------------"
+cat namelist.echam
+echo "* ----------------------------------------------------------------------"
+echo "*    end of namelist.echam"
+echo "* ----------------------------------------------------------------------"
+echo ""
+#------------------------------------------------------------------------------
+#-- Namelist JSBACH
+#
+## RCE
+cat > namelist.jsbach << EOF
+&jsbach_ctl
+    standalone = .false.
+    ntiles = 11
+/
+EOF
+## RCE
+echo "* ----------------------------------------------------------------------"
+echo "* Namelist of JSBACH: namelist.jsbach"
+echo "* ----------------------------------------------------------------------"
+cat namelist.jsbach
+echo "* ----------------------------------------------------------------------"
+echo "*    end of namelist.jsbach"
+echo "* ----------------------------------------------------------------------"
+echo ""
+#-----------------------------------------------------------------------------
+# Start the run:
+#
+# startup
+#
+set +e
+mpiexec -n 128 $MODEL
+model_status=$?
+set -e
+#
+case $model_status in
+0|127)
+    #-- submit next production job
+    case $model_status in
+    0)
+        echo "Model experiment checkpointed."
+        cd $SCRIPTDIR
+    #    sbatch $EXP.run
+        sbatch ham6run_rce.thunder
+        ;;
+    *)
+        echo "Model finished experiment."
+        ;;
+    esac
+    ;;
+*)
+    echo "ERROR: model run stopped with return value ${model_status}."
+    exit 1
+    ;;
+esac
+#
+exit
+#
+#-----------------------------------------------------------------------------

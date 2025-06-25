@@ -47,6 +47,9 @@ MODULE mo_ham_m7_emi_seasalt
 
   !---inherited types, data and functions
   USE mo_kind,           ONLY: dp
+  ! << YAB 
+!  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_seasalt_expo
+  ! >> YAB
 
   IMPLICIT NONE
 
@@ -62,8 +65,10 @@ MODULE mo_ham_m7_emi_seasalt
   PUBLIC :: seasalt_emissions_gong_SST    !nseasalt=8
 
   !---module data
-  REAL(dp), PARAMETER, PRIVATE :: ppww = 3.41_dp      ! exponent of wind speed |u| (|u|**ppww) 
-
+  REAL(dp), PRIVATE :: ppww = 3.41_dp      ! exponent of wind speed |u| (|u|**ppww) 
+  ! < YAB for scaling ssa u exponent
+!  REAL(dp)                     :: ppww_scaled      ! exponent of wind speed |u| (|u|**ppww)
+  ! > YAB  
   INTEGER,  PARAMETER, PRIVATE :: nbin = 300          ! number of bins for the bin schemes
                                                       ! (Monahan (nseasalt=4), Guelle or Gong, Long)
   REAL(dp), PARAMETER, PRIVATE :: dmta = 0.100E-06_dp ! lower diameter [m], bin schemes 
@@ -85,8 +90,13 @@ MODULE mo_ham_m7_emi_seasalt
 
   REAL(dp), PRIVATE  :: ss1_mon                   ! sea salt flux factor 1, Monahan (nseasalt=1) scheme    
   REAL(dp), PRIVATE  :: ss2_mon                   ! sea salt flux factor 2, Monahan (nseasalt=1) scheme    
-
-
+  ! < YAB scaling the exponent of wind 
+!  IF (lo_hammoz_perturbations) THEN
+!    ppww = ppww * scale_seasalt_expo
+!  ELSE
+!    ppww = ppww
+!  ENDIF
+  ! > YAB
 CONTAINS
 
   SUBROUTINE start_emi_seasalt
@@ -1096,9 +1106,6 @@ CONTAINS
            pmassf_cs(1:kproma) = pmassf_cs(1:kproma) + fi(1:kproma,m)*zseafrac(1:kproma)*zav
 
          END IF
-!       IF (lo_hammoz_perturbations) THEN
-!	       pnumf_cs(1:kproma)  = pnumf_cs(1:kproma) * scale_emi_ss_coarse
-!	       pmassf_cs(1:kproma) = pmassf_cs(1:kproma) * scale_emi_ss_coarse
        ENDIF
     END DO
 ! YAB >>

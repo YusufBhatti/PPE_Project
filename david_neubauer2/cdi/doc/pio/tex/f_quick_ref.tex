@@ -1,0 +1,165 @@
+\chapter*{Quick Reference}
+\addcontentsline{toc}{chapter}{Quick Reference}
+
+This appendix provide a brief listing of the Fortran language bindings of the
+CDI library routines:
+
+\section*{\tt \htmlref{cdiPioCSRBalanced}{cdiPioCSRBalanced}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioCSRBalanced (INTEGER commSuper, INTEGER IOMode,
+                                        INTEGER nProcsIO)
+\end{verbatim}
+
+return role codes appropriate to use \textit{nProcsIO}
+tasks distributed on evenly spaced ranks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioCSRFirstN}{cdiPioCSRFirstN}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioCSRFirstN (INTEGER commSuper, INTEGER IOMode,
+                                      INTEGER nProcsIO)
+\end{verbatim}
+
+return role codes appropriate to use the first
+\textit{nProcsIO} tasks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioCSRLastN}{cdiPioCSRLastN}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioCSRLastN (INTEGER commSuper, INTEGER IOMode,
+                                     INTEGER nProcsIO)
+\end{verbatim}
+
+return role codes appropriate to use the last
+\textit{nProcsIO} tasks as I/O servers.
+
+
+\section*{\tt \htmlref{cdiPioConfCreate}{cdiPioConfCreate}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfCreate
+\end{verbatim}
+
+create new configuration object and return its handle.
+
+
+\section*{\tt \htmlref{cdiPioConfDestroy}{cdiPioConfDestroy}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfDestroy (INTEGER confResH)
+\end{verbatim}
+
+delete configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfGetCSRole}{cdiPioConfGetCSRole}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetCSRole (INTEGER confResH)
+\end{verbatim}
+
+query role attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfGetIOMode}{cdiPioConfGetIOMode}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioConfGetIOMode (INTEGER confResH)
+\end{verbatim}
+
+query IOMode attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfGetPartInflate}{cdiPioConfGetPartInflate}}
+
+\begin{verbatim}
+    REAL FUNCTION cdiPioConfGetPartInflate (INTEGER confResH)
+\end{verbatim}
+
+query partition imbalance attribute of
+configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetCSRole}{cdiPioConfSetCSRole}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetCSRole (INTEGER confResH, INTEGER CSRole)
+\end{verbatim}
+
+set role attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetIOMode}{cdiPioConfSetIOMode}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetIOMode (INTEGER confResH, INTEGER IOMode)
+\end{verbatim}
+
+set IOMode attribute of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetPartInflate}{cdiPioConfSetPartInflate}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetPartInflate (INTEGER confResH, REAL partInflate)
+\end{verbatim}
+
+set partition imbalance attribute of
+configuration object.
+
+
+\section*{\tt \htmlref{cdiPioConfSetPostCommSetupActions}{cdiPioConfSetPostCommSetupActions}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioConfSetPostCommSetupActions (INTEGER confResH,
+                                                  PROCEDURE postCommSetupActions)
+\end{verbatim}
+
+set function to be called after
+setup of client/server communications of configuration object.
+
+
+\section*{\tt \htmlref{cdiPioInit}{cdiPioInit}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioInit (INTEGER commSuper, INTEGER confResH,
+                                 INTEGER pioNamespace)
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+
+\section*{\tt \htmlref{cdiPioNoPostCommSetup}{cdiPioNoPostCommSetup}}
+
+\begin{verbatim}
+    SUBROUTINE cdiPioNoPostCommSetup
+\end{verbatim}
+
+Dummy function to use as argument to pioInit
+if no actions are necessary after I/O servers initialize communication.
+
+
+\section*{\tt \htmlref{cdiPioStr2IOMode}{cdiPioStr2IOMode}}
+
+\begin{verbatim}
+    INTEGER FUNCTION cdiPioStr2IOMode (CHARACTER*(*) modeStr)
+\end{verbatim}
+
+return integer code corresponding to string
+representation of mode or -1 if no match was found.
+
+
+\section*{\tt \htmlref{pioInit}{pioInit}}
+
+\begin{verbatim}
+    INTEGER FUNCTION pioInit (INTEGER commSuper, INTEGER nProcsIO, INTEGER IOMode,
+                              INTEGER pioNamespace, REAL partInflate,
+                              PROCEDURE postCommSetupActions)
+\end{verbatim}
+
+initialize I/O server processes and communication.
+
+

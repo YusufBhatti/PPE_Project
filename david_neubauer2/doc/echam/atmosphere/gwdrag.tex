@@ -1,0 +1,574 @@
+\section{Parameterization of the momentum flux deposition due to a gravity
+         wave spectrum}\label{c7}
+
+
+The parameterization of the effects of a gravity wave spectrum is
+based on the Doppler spread theory of propagation and dissipation of a
+gravity wave spectrum as formulated by
+\cite{hines91a,hines91b,hines91c,hines93}. The simplifications to the
+Doppler spread theory necessary for developing the parameterization
+are discussed in \cite{hines97a,hines97b}. Here the version of the
+parameterization formulated following \cite{hines97a,hines97b} that
+has been implemented in the middle atmosphere (MA) version of
+ECHAM5 (\cite{manzini2006,giorgetta2006}) is presented. 
+The impact of the Doppler spread parameterization in the
+middle atmosphere of the previous model cycle (MAECHAM4) has been
+discussed by \cite{manzini97} and \cite{manzini98}.
+
+\subsection{Hines Doppler spread theory}\label{s7.2}
+
+During the last decades, an increasing number of observations by a
+variety of techniques has contributed to the current characterization
+of atmospheric gravity waves (among others,
+\cite{allen95,eckermann94,hamilton91,smith87,dewan86,hirota84}). 
+The forcing mechanisms generating the gravity waves are most likely
+located in the troposphere, and may include convective activity, shear
+instabilities, frontal systems, transient flow over topography. In the
+middle atmosphere, the gravity waves appear to propagate predominantly
+upward from their tropospheric source regions and they appear to form
+a broad background spectrum of waves.
+
+
+On the basis of these observations, the Hines Doppler spread theory
+(henceforth, HDST) assumes an interacting and upward propagating
+gravity wave spectrum with tropospheric sources. The HDST does not
+directly deal with the forcing mechanisms of the gravity waves.  The
+HDST considered in the current parameterization only assumes that the
+variety of the forcing mechanisms gives rise to a broad band and
+continuous spectrum. Within this framework, quasi monochromatic waves
+cannot be take into account, although extensions are possible \citep{hines97b}.
+
+
+Evidence that the vertically propagating gravity waves are dissipating
+and therefore interacting with the large scale flow has been derived
+form the observations that the amplitude of the spectrum at high
+vertical wavenumbers tends not to change with height, in spite of the
+growth expected in response to the decrease in atmospheric density, a
+behavior usually termed saturation \citep{smith87,dewan86}. A variety
+of processes can be responsible for saturation (see
+\cite{fritts84,fritts89} for reviews). According to the HDST, as the
+gravity waves propagate upwards from the troposphere to the
+mesosphere, an essential role in the saturation process is played be
+the nonlinear advective interaction exerted on each wave component of
+the spectrum by the gravity wave wind field induced by the other
+waves.
+
+
+The HDST builds upon gravity wave theory for small amplitude waves
+propagating in a mean flow that is uniform horizontally and temporally
+and slowly varying in altitude (for a review of gravity wave theory see
+\cite{andrews87}). The core aspects of the Hines Doppler spread
+theory \citep{hines91a,hines91b,hines91c,hines93} are here briefly
+summarized:
+
+
+\begin{enumerate}
+\item The effects of the wind field induced by the other waves on each
+      wave component of the spectrum at a given height are assumed to
+      be approximately determined by treating the wave induced wind
+      field as a background horizontal wind field, slowly varying in
+      altitude while horizontally and temporally uniform. As the waves
+      propagate upward, their vertical wavenumber spectrum is
+      therefore modified, and in turn the spectral characteristics of
+      the wave induced wind field are also modified. In a statistical
+      sense, the modification induced by the advective nonlinear
+      interaction is found to be a Doppler spreading of the vertical
+      wavenumber spectrum towards high wavenumbers.\label{i7.1}
+
+\item In conformity with wave theory, wave action density is conserved
+      as the waves propagate upwards, until the gravity wave spectrum
+      as a whole becomes unstable and the waves at high vertical
+      wavenumbers break down into turbulence. For parameterization
+      purposes the transition to turbulence is taken to occur at a
+      specific vertical wavenumber, the \emph{maximum permissible
+      vertical wavenumber $m_{M}$}, and the breaking waves (with $m >
+      m_{M}$) are removed from the spectrum. Within the HDST it is
+      possible to assume a more complex and smooth transition to
+      turbulence. The momentum carried by the waves that have been
+      removed is deposited into the large scale background
+      flow.\label{i7.2}
+
+
+\item In agreement with wave-mean flow interaction theory \citep{andrews87},
+      within the HDST formulation the background large
+      scale flow has the effect of producing Doppler shifts of the
+      vertical wavenumber. In the presence of a background large scale
+      flow, differential momentum flux deposition (hence forcing of
+      the large scale flow) can therefore occur also for an isotropic
+      gravity wave spectrum. Consequently, it becomes necessary to
+      take into account the variations in the azimuth of wave
+      propagation. Note that in the absence of a background large
+      scale flow and for an isotropic gravity wave spectrum, the
+      momentum flux would be deposited isotropically and no \emph{net}
+      deposition of momentum flux would occur.\label{i7.3}
+
+
+\item An aspect of the Hines formulation crucial to the practical
+      development of a parameterization is that at any given height,
+      the spectral characteristics of the gravity waves are determined
+      by a modification of the gravity wave spectrum at a specified
+      low altitude. The calculation of the spectral evolution with
+      altitude is therefore by-passed in the parameterization, by
+      keeping track of the portion of the gravity wave spectrum at the
+      specified low altitude which continue to propagate upward. The
+      largest vertical wavenumber of the spectrum at the specified low
+      altitude that continues to propagate upward at the current
+      height of interest is called the \emph{cutoff vertical
+      wavenumber $m_{C}$}.  The vertical evolution of $m_{C}$ is the
+      key computation of the parameterization. A drastic reduction of
+      the gravity wave quantities describing the vertical evolution of
+      the gravity wave spectrum is therefore achieved, a requirement
+      for any parameterization of practical use in a general
+      circulation model.\label{i7.4}
+\end{enumerate}
+
+
+\subsection{The Hines Doppler Spread Parameterization (HDSP)}\label{s7.3}
+
+The quantity that has to be evaluated is the deposition of the
+horizontal momentum transferred by the vertically propagating gravity
+waves (what is referred to as momentum flux deposition).  As commonly
+done in a general circulation model, only vertical propagation is
+considered, assuming that a gridbox is large enough that oblique
+propagation (outside the vertical column) can be neglected. For each
+gridbox, the dependence in the azimuth of wave propagation must be
+discretized: the total number of azimuths considered is defined to be
+$J$. It is assumed (although not necessary) that the $J$ azimuths are
+equally spaced around the azimuth circle.
+
+
+Within this framework, the HDSP requires the specification of the
+input gravity wave spectrum at some low altitude (within the forcing
+region). Thereafter, the momentum flux deposition is determined in
+function of the large scale flow and buoyancy frequency, the input
+gravity wave spectrum at a specified low altitude, and a limited
+number of height varying gravity wave related quantities, the most
+important being the horizontal wind variance and the cutoff vertical
+wavenumber. These quantities are defined and derived below.
+
+At any given height, the broad band gravity wave spectrum is
+characterized by the power spectral density $H_{j}^2$ of the
+horizontal winds associated with the gravity waves at that height in
+the $j$-th azimuth. The power spectral density is a function of
+horizontal wavenumber $k$ (a directional wavenumber in the
+$j$-azimuth) and vertical wavenumber $m$. The spectrum is assumed to
+be separable in $k$ and $m$. For convenience, $k$ and $m$ are made
+positive for upward propagating waves.
+
+
+The \emph{horizontal wind variance} at the height of interest that is
+contributed by the waves propagating in the $j$-th azimuth is the
+integral over all positive horizontal and vertical wavenumbers of the
+power spectral density:
+
+\begin{equation}
+s_j^2=\int_{0}^{m_{M}}\int_{0}^{\infty}H_{j}^{2}
+dkdm\label{7.1}
+\end{equation}
+
+The integral in the vertical wavenumber is limited by the maximum
+permissible vertical wavenumber $m_{M}$ (see point \ref{i7.2} in
+section \ref{s7.2}). The $s^2_{j}$ are derived in section
+\ref{s7.3.2}.
+
+
+At any given height, the \emph{total rms horizontal wind speed}
+$\sigma_{T}$ is contributed by gravity waves propagating in all
+azimuths:
+
+\begin{equation}
+\sigma_{T}=\left(\sum_{j=1}^J s_{j}^2\right)^{1/2}
+\label{7.2}
+\end{equation}
+
+At any given height, the \emph{total rms horizontal wind speed
+$\sigma_{j}$ in the $j$-th azimuth} depends on the variance from waves
+in the $j$-th azimuth and in all other azimuths, non-orthogonal to the
+$j$-th direction. These contributions must be added up, and they are
+found by projecting the $s^2_{j}$ wind variances on the azimuth of
+interest. The total rms horizontal wind speed $\sigma_{j}$ in the
+$j$-th azimuth is:
+
+\begin{equation}
+\sigma_{j}=\left(\sum_{p=1}^J s_{p}^2\cos 
+(\alpha_{p}-\alpha_{j})^{2}\right)^{1/2}
+\label{7.3}
+\end{equation}
+
+where $\alpha_{p}$ and $\alpha_{j}$ are respectively the $p$- and
+$j$-th azimuth.
+
+The height where the gravity wave spectrum is specified is defined to
+be the \emph{initial (or launching) height}, and any gravity wave
+quantity at the initial height is given the subscript $I$.
+
+
+\subsubsection{Cutoff vertical wavenumber}\label{su7.3.1}
+
+At any given height, the dispersion relation for an individual gravity
+wave with azimuth $j$ in a background flow that is horizontally and
+temporally uniform, is:
+
+\begin{equation}
+\omega/k=N/m+V_{j}+v_{j}
+\label{7.4}
+\end{equation}
+
+
+where $k$ is the horizontal wavenumber, $ m $ the vertical wavenumber,
+$\omega$ the ground based frequency, $N$ the buoyancy frequency, and
+$V_{j}$ and $ v_{j}$ are respectively the large scale background flow
+and the wave induced wind field in the $j$-th azimuth. For
+convenience, $ k$, $\omega$ and $ m $ are made positive for upward
+propagating waves. Given that $\omega$ and $k$ are height independent,
+from the combination of equation \eref{7.4} as written for the initial
+height and for some overlying height of interest, it is obtained:
+
+\begin{equation}
+N/m= N_{I}/m_{I}+ V_{jI}- V_{j} - v_{j}
+\label{7.5}
+\end{equation}
+
+
+assuming that the induced wave field at the initial height is
+negligible.  Equation \eref{7.5} expresses the mapping between the
+vertical wavenumber $m$ at the height of interest and the
+corresponding vertical wavenumber $m_{I}$ at the initial height. In
+equation \eref{7.5}, $N_{I}$ and $V_{jI}$ are respectively the
+buoyancy frequency and the $j$-directed large scale background flow at
+the initial height.
+
+
+Equation \eref{7.5} shows that as $V_{j}+v_{j}$ increases, the
+vertical wavenumber $m$ is Doppler shifted to infinity and into
+negative values. Before reaching negative values, at sufficiently
+large vertical wavenumbers, the spectrum is likely to become unstable
+and dissipative processes are likely to take place (the vertical
+wavelength is reduced, critical level conditions are approached). In
+practice, it is assumed that this transition occurs at a specific
+vertical wavenumber $m_{M}$ (large, positive and less than infinity),
+the maximum permissible vertical wavenumber of the spectrum at the
+height of interest (already introduced, see point \ref{i7.2} in
+section \ref{7.2}). The waves with wavenumbers equal or larger than
+$m_{M}$ are supposed to be dissipated and are removed from the
+spectrum. The vertical wavenumber $m_{M}$ may be reached by a wave
+when the wave induced wind field $ v_{j} $ increases to the value:
+
+\begin{equation}
+  v_{jM}=N_{I}/m_{I}-N/m_{M}+ V_{jI}- V_{j}
+\label{7.6}
+\end{equation}
+
+The probability for the induced wind field to meet condition
+\eref{7.6} was first derived in \cite{hines93} for the case of no large
+scale background flow and $m_M$ equal to infinity, in order to
+determine the cutoff vertical wavenumber $m_{C}$ (see point \ref{i7.4}
+in section \ref{s7.2}). In \cite{hines93} it was found that the
+probability for a wave to survive to some height decreases rapidly as
+$m_I$ enters a particular critical range. On the basis of this rapid
+transition and further approximations \citep{hines97a}, an expression
+for $v_{jM}$ is found in order to evaluate a provisional (i.e.,
+subject to two conditions expressed below) cutoff vertical wavenumber
+in the $j$-th azimuth for the general case of a positive and finite
+$m_M$ and a nonzero background flow:
+
+\begin{equation}
+\{m_{j}\}_{TRIAL} = N_{I} (N/m_{M} + V_{j} - V_{jI} +
+\Phi_{1}\sigma_{j})^{-1}
+\label{7.7}
+\end{equation}
+
+
+with $ v_{jM}$ expressed in terms of the total rms wind speed in the
+$j$-th azimuth $\sigma_{i}$. The coefficient $\Phi_{1}$ that appears
+in \eref{7.7} is a nondimensional factor that lays in the range: $ 1.2
+< \Phi_{1} < 1.9$, deduced in \cite{hines93,hines97a}. In \eref{7.7}
+the cutoff vertical wavenumber $m_{C}$ is a function of azimuth and is
+denoted $m_{j}$.
+
+The maximum permissible wavenumber $m_{M}$ was determined in
+\cite{hines91b} by the condition of marginal instability of the total
+wave system. In \cite{hines97a} the derivation is extended by
+approximation to the case of a nonzero background flow, so that:
+
+\begin{equation}
+N/m_{M}=\Phi_{2}\sigma_{T}
+\label{7.8}
+\end{equation}
+
+
+where $\Phi_{2}$ is a second nondimensional factor that lays in the
+range: $0.1 < \Phi_{2} < 0.4$ deduced in \cite{hines91b,hines97a}. The
+limits of $\Phi_{2}$ are intended to roughly correspond to 17\% or 8\%
+of space time being convectively unstable, with and additional 10\% or
+4 \% being dynamically unstable. Inserting \eref{7.8} in \eref{7.7},
+the provisorial cutoff wavenumber in the $j$-th azimuth becomes:
+
+\begin{equation}
+\{m_{j}\}_{TRIAL} = N_{I}
+(\Phi_{2}\sigma_{T}+V_{j}-V_{jI}+\Phi_{1}\sigma_{j})^{-1}
+\label{7.9}
+\end{equation}
+
+Equation \eref{7.9} is the fundamental equation of the HDSP. The first
+term on the right-hand side of equation \eref{7.9} represents the
+effect of instability of the spectrum as a whole at the height of
+interest. The $V_{j}-V_{jI}$ term represents the effect of Doppler
+shifting by the background winds, common for instance also to
+parameterizations based on \cite{lindzen81a}. The $\Phi_{1}\sigma_{j}$
+term (unique to this theory) represents the nonlinear effect of
+localized Doppler shifting on individual waves by all the other waves.
+
+The two above mentioned conditions to be imposed on
+$\{m_{j}\}_{TRIAL}$ are: (1) the cutoff wavenumber must be
+monotonically non increasing with height, (2) the cutoff wavenumber
+must be positive.  Equation \eref{7.9} shows that these conditions can
+be achieved, because there always exists a positive $m_{j}$ at the
+initial height, where $V_{j}- V_{jI}$ is zero.
+
+\subsubsection{Horizontal wind variance}\label{s7.3.2}
+
+At the height of interest and in the $j$-th azimuth, an elementary
+contribution of the power spectral density $H^2_{j}$ of the horizontal
+winds associated with the gravity waves to the horizontal wind
+variance is written:
+
+\begin{equation}
+H^2_{j} dk dm = \rho^{-1} \rho_{I} s^{2}_{jI} K_{j}(k) M_{j}(m) dk dm
+\label{7.10}
+\end{equation}
+
+
+where $\rho$ is the atmospheric density and $\rho_{I}$ is its value at
+the initial height. $K_{j}$ and $M_{j}$ are respectively the
+horizontal and vertical wavenumber spectra in the $j$-th azimuth (the
+spectrum is assumed to be separable in $ k $ and $ m)$. The integrals
+of $K_{j}dk $ and $M_{j}dm$ over all positive values are taken to be
+normalized to $1$ at the initial height. As required by the definition
+of spectral density, the integral of the horizontal wind power
+spectral density at the initial height is therefore equal to $
+s^2_{jI}$, the horizontal wind variance at the initial height.
+
+
+The theory and the parameterization as developed to date consider that
+the $K_{j}$ spectrum is unchanging with height, while the $M_{j}$
+spectrum evolves in response to the background large scale flow,
+buoyancy frequency, and nonlinear interactions.
+
+Thereafter, the conservation of the vertical flux of the horizontal
+momentum (or equivalently wave action, see point \ref{i7.2} in section
+\ref{s7.2}) is used to compute the horizontal wind variance. Given
+that the vertical flux of the horizontal momentum transported by the
+waves that are not yet removed from the spectrum is conserved, the
+portion of the spectra not removed at the height of interest and that
+at the initial height are related by:
+
+\begin{equation}
+(HW)_{j} dm =\rho^{-1} \rho_{I} (HW)_{jI} dm_{I}
+\label{7.11}
+\end{equation}
+
+where an elemental range $dm_{I}$ of the initial spectrum is mapped
+into the range $dm$ at the height of interest. $(HW)_{j}$ represents
+the covariance spectrum of the horizontal and vertical velocity
+fluctuations associated with the gravity waves, the vertical flux of
+horizontal momentum transferred by the waves, at the height of
+interest. $(HW)_{jI}$ is the covariance at the initial height.
+
+
+Following gravity wave theory, the vertical velocity perturbation is
+in phase with the horizontal velocity perturbation and is given by $
+k/m $ times the horizontal velocity, hence:
+
+  \begin{equation}
+H^2_{j} dm = \rho^{-1} \rho_{I} H^2_{jI} (m/m_{I})dm_{I}
+\label{7.12}
+\end{equation}
+
+
+the horizontal wavenumber $k$ being constant with height.
+
+The determination of the horizontal wind variance in the $j$-th
+azimuth at the height of interest can therefore be achieved by
+integration of the right-hand side of equation \eref{7.12} over all
+positive $m _{I}$ up to the cut off vertical wavenumber $m_{j}$. For
+this purpose, $ m $ on the right must be written as a function of
+$m_{I}$. This can be done by means of \eref{7.5}, with the induced
+wind field contribution $v_{j}$ ignored, under the approximation that
+the spreading effect is significant only for waves at large vertical
+wavenumber, and that the contribution of those waves to the total wind
+variance is small \cite{hines91a}:
+
+
+\begin{equation}
+m/m_{I}=N/N_{I}(1-(V_{j}-V_{jI})m_{I}/N_{I})^{-1}
+\label{7.13}
+\end{equation}
+
+Substituting \eref{7.13} into \eref{7.12} and integrating over all
+positive $ k $ and $ m$, the horizontal wind variance at any height is
+obtained:
+
+\begin{equation}
+s^2_{j} = \rho^{-1} \rho_{I}NN_{I}^{-1}s^2_{jI}
+\int_{0}^{m_{j}}M_{jI}(m_{I})(1-
+N_{I}^{-1}(V_{j}-V_{Ji})m_{I})^{-1}dm_{I}
+\label{7.14}
+\end{equation}
+
+
+The determination of the evoluted $M_{j}$ spectrum is therefore
+by-passed by the mapping between the spectrum at the current height
+and the initial spectrum. The initial spectrum $M_{jI}$ and the cutoff
+vertical wavenumber $m_{j}$ are all what is needed to compute the
+horizontal wind variance.
+
+
+
+\subsubsection{Momentum flux deposition}\label{su7.3.3}
+
+At any given height, the vertical flux density of the $j$-directed
+horizontal momentum that is transferred upward by the $j$-directed
+waves is:
+
+\begin{equation}
+F_{j} = \rho\int_{0}^{m_{M}}\int_{0}^{\infty}(HW)_{j}dk dm
+\label{7.15}
+\end{equation}
+
+
+where $(HW)$ is the covariance spectrum of the horizontal and vertical
+velocity fluctuations associated with the gravity waves already
+introduced. Using again the conservation of horizontal momentum for
+the portion of the spectra not removed, the $j$-directed flux density
+at the height of interest can be written in terms of the spectrum at
+the initial height:
+
+
+\begin{equation}
+F_{j} = \rho_{1}s_{jI}^2K^*\int_{0}^{m_{j}}M_{jI}(m_{I})m_{I}^{-1}dm_{I}
+\label{7.16}
+\end{equation}
+
+Where $K^*$ is obtained by the integration of $kK_{j}dk $ over all
+positive $k$, and by neglecting the dependence on azimuth for
+simplicity (although not necessary). $K^*$ can be considered a
+weighted average of the directional horizontal wavenumber, and is
+called the \emph{characteristic horizontal wavenumber}. In \eref{7.16}
+the integral in vertical wavenumber $m_{I}$ is limited by the $m_{j}$
+cutoff vertical wavenumber. Height variations in $ F_{j}$ are
+therefore expressed by the dependence in height of the $m_{j}$ cutoff
+vertical wavenumber.
+
+In order to compute the rate of horizontal momentum flux deposition at
+each gridpoint of the general circulation model, the momentum flux
+must be expressed in the cardinal eastward and northward azimuths,
+respectively. The rate of horizontal momentum flux deposition is
+thereafter given by the vertical convergence of the momentum flux in
+the cardinal directions.
+
+
+
+\subsection{Summary}\label{s7.4}
+
+
+The parameters that must be specified at the initial (launching)
+height are the total rms gravity wave wind speed $\sigma_{TI}$, the
+initial vertical wavenumber spectrum $M_{jI}$, and the $s_{jI}^2$
+variances, which sum over the azimuths must be $\sigma_{TI}^2$, as
+defined in \eref{7.2}. In addition, the location of the initial
+height, the characteristic horizontal wavenumber $K^*$, and the
+nondimensional factors $\Phi_{1}$ and $\Phi_{2}$ must be specified.
+
+Given that the current knowledge about the global and seasonal
+distributions of these gravity wave parameters is very limited, simple
+choices have been made so far, based on the generalization of
+observations of gravity wave variances and spectra, for instance 
+\cite{allen95,fritts92,vincent97}.
+
+The vertical wavenumber spectrum at the initial height is assumed to
+follow a power law form in the initial vertical wavenumber, extending
+from $ m_{I} = 0$ to the cutoff vertical wavenumber $m_{jI}$ at the
+initial height. Its integral must be normalized to 1 at the initial
+height, therefore:
+
+\begin{equation}
+M_{jI}(m_{I}) = (s+1)m_{jI}^{-s-1}m_{I}^s
+\label{7.17}
+\end{equation}
+
+
+where $ s $ is the slope. The cutoff vertical wavenumber $ m_{jI}$ at
+the initial height is computed from \eref{7.9} with $V_{j} = V_{jI}$:
+
+\begin{equation}
+m_{jI} = N_{I}(\Phi_{2}\sigma_{TI}+\Phi_{1}\sigma_{jI})^{-1}
+\label{7.18}
+\end{equation}
+
+
+The computation of the cutoff vertical wavenumber $m_{j}$ thereafter
+proceeds upward. At the first step upward and above the $m_{j}$ is
+obtained by \eref{7.9}, subjected to the conditions of being
+monotonically non increasing with height and positive. In principle,
+above the initial height the horizontal wind variance at that vertical
+level should be used in \eref{7.9}. However, the horizontal wind
+variance at that vertical level depends in turn on the cutoff vertical
+wavenumber that has to be evaluated. An iteration procedure would
+therefore be required. As \cite{hines97a} has suggested, in case the
+vertical resolution of the general circulation model is sufficiently
+high, the iteration can be avoided by using in the computation of the
+$m_{j}$ at any vertical level above the initial height the horizontal
+wind variance at the level immediately below. This approach is used in
+the parameterization implemented in the ECHAM model.
+
+
+\subsection{Implementation Details}\label{s7.5}
+
+The Hines gravity wave drag parameterization is by default activated in ECHAM6
+at the standard resolutions T63L47 and T63L95, which both resolve the atmosphere 
+up to 0.01 hPa. The setup generally depends on the model resolution, and is 
+described below for the standard resolutions T63L47 and T63L95. However, the setup can
+be modified through the control parameters of the \textit{gwsctl} Fortran namelist. 
+
+The launching height $H_{I}$ of the parameterized gravity 
+waves source spectrum is set to the model level, which above sea is at 680 hPa. 
+For the L47 as well as the L95 vertical grid this is the 10th level above the surface.
+
+The total root-mean-square gravity wave wind speed 
+$\sigma_{TI}$ is prescribed as a global constant, if \textit{lrmscon\_lat} = .FALSE.
+This is the default setting for ECHAM6 T63 L47.
+
+Alternatively, if \textit{lrmscon\_lat} = .TRUE., $\sigma_{TI}$ can be prescribed by a simple 
+function of latitude allowing to distinguish the source strength near the equator 
+from that in other latitudes. 
+$\sigma_{TI}(\phi)$ is set to $\sigma_{TI,hi}$ for $|\phi| >= \phi_{hi}$ and $\sigma_{TI,lo}$ for $|\phi| <= \phi_{lo}$
+Between latitudes $\phi_{hi}$ and $\phi_{lo}$ $\sigma_{TI}$ is 
+linearly interpolated between $\sigma_{TI,hi}$ and $\sigma_{TI,lo}$. This degree of freedom to 
+specify an equatorial source strengths different from that in mid and high latitudes 
+has been introduced to allow the tuning of the period of the QBO simulated in ECHAM6 
+configurations with high vertical resolution. For ECHAM6 T63 L95 the following parameters 
+are used: $\phi_{lo} = 5 deg$, $\phi_{hi} = 10 deg$, $\sigma_{TI,lo} = 1.2 m/s$, 
+and $\sigma_{TI,hi} = 1.0 m/s$.
+
+The source spectrum is assumed to be isotropic with respect 
+to the wind at the launch level. The  $s^{2}_{jI}$ variances are 
+distributed equally over 8 azimuth angles. 
+Further the characteristic horizontal wavenumber $K^{*}$ is set to 126 km.
+
+\begin{table}[htdp]
+\caption{Parameters, symbols and control parameters of namelist GWSCTL}
+\begin{center}
+\begin{tabular}{|l|l|l|}\hline
+Parameter                                & Symbol           & Namelist parameters                                            \\ \hline
+Initial height                           & $H_{I}$          & \textit{emiss\_lev}                                            \\
+Global rms wind at $H_{I}$               & $\sigma_{TI}$    & \textit{rmscon}, used if \textit{lrmscon\_lat=.FALSE.}         \\
+Low latitude rms wind at $H_{I}$         & $\sigma_{TI,lo}$ & \textit{rmscon\_lo}, used if \textit{lrmscon\_lat=.TRUE.}      \\
+High latitude rms wind at $H_{I}$        & $\sigma_{TI,hi}$ & \textit{rmscon\_hi}, used if \textit{lrmscon\_lat=.TRUE.}      \\
+Low latitude limit for $\sigma_{TI,lo}$  & $\phi_{lo}$      & \textit{lat\_rmscon\_lo}, used if \textit{lrmscon\_lat=.TRUE.} \\
+High latitude limit for $\sigma_{TI,hi}$ & $\phi_{hi}$      & \textit{lat\_rmscon\_hi}, used if \textit{lrmscon\_lat=.TRUE.} \\
+Typical horizontal wavenumber            & $K^{*}$          & \textit{kstar}                                                 \\ \hline
+\end{tabular}
+\end{center}
+\label{default}
+\end{table}%

@@ -1,0 +1,46 @@
+\subsection{Input namelists in other files}
+
+\subsubsection{Namelist {\tt mvctl}}\label{secmvctl}
+
+For each stream in the {\tt mvstreamctl} namelist, a {\tt mvctl}
+namelist has to be created. The {\tt mvctl} namelist has to be written
+to a file {\tt \{namelist\}.nml} where {\tt \{namelist\}} is the name
+of the respective stream. For tracers, the namelist has to be written
+to {\tt tracer.nml}. See section~\ref{secmvstreamctl} also.
+Additional documentation can be found in cr2010\_07\_28 provided by
+S.~Rast (sebastian.rast@zmaw.de).
+
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+
+\begin{longtable}{l@{\extracolsep\fill}lp{5.5cm}p{3.5cm}}\hline\hline
+\caption[Namelist {\tt mvctl}]{Namelist
+  {\tt mvctl}}\\\hline\label{tabmvctl}
+\endfirsthead
+\caption[]{{\tt mvctl} --- continued}\\\hline
+\endhead
+\hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+\endfoot
+\hline %\multicolumn{4}{r}{end of table}
+\endlastfoot
+Variable & type & Explanation & default \\\hline
+{\tt putmean}\index{namelist variables!putmean}
+& special & frequency at which the respective mean value
+stream shall be written & 1,'months','first',0\\
+{\tt meannam(32,1:500)}\index{namelist variables!meannam}
+& character & list of variables
+(e.g.~meteorological variables, chemical species) for which mean
+values are calculated & empty strings \\
+{\tt stddev(1:500)}\index{namelist variables!stddev}
+ & integer & This variable controls the calculation
+of the mean of the square of each variable in the list {\tt
+  meannam}.\newline
+${\tt stddev(1)} = -1$: calculate the mean square of all variables
+present in {\tt meannam}\newline
+${\tt stddev(i)} = 0$: Do not calculate the mean of the square of
+variable ${\tt i}$ except if ${\tt stddev(1)=-1}$\newline
+${\tt stddev(i)}= 1$: Calculate the mean of the square of variable
+${\tt i}$ in list ${\tt meannam}$. & {\tt 0,0,...,0}\\\hline
+
+\end{longtable}

@@ -91,6 +91,7 @@ NAMELIST /hammoz_perturbations/ &
   scale_so2_reactions, &
   scale_so2_aq_reactions, &
   scale_dms_reactions, &
+  scale_dms_so2_fraction, &
 !  scale_water, &
 !  scale_RH,    &
 !  pH_pert,     & ! Scale the cloud-water pH

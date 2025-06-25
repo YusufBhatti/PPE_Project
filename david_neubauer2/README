@@ -1,0 +1,18 @@
+#-----------------------------------------------------------------------------------
+Copyright by the ECHAM-HAMMOZ
+
+Copyright and licencing conditions are defined in the ECHAM-HAMMOZ
+licencing agreement to be found at:
+https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/1_Licencing_conditions
+The ECHAM-HAMMOZ software is provided "as is" and without warranty of any kind.
+#-----------------------------------------------------------------------------------
+
+All informations on how to install / configure the model, get the input files, prepare experiments and run are to be found in:
+https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/1_Getting_started
+
+It is also strongly recommended to read the wiki page that describes the release (or release candidate) corresponding to this version, for which you'll find a link in:
+https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/3_Releases
+
+Namely, for this version you should read:
+
+https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/Echam630-ham23-moz10

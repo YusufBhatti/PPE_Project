@@ -1,0 +1,372 @@
+\documentclass[DIV14,BCOR1cm,11pt,a4paper,twoside]{scrreprt}
+%-----------------------------------------------------------------------------
+\usepackage{ifpdf}
+\ifpdf
+\usepackage[pdftex,
+            pdfstartview=FitV,
+            bookmarks=true,
+            pagebackref=true,
+            colorlinks=true,
+            linkcolor=blue,
+            citecolor=blue,
+            unicode
+           ]{hyperref}
+\hypersetup{
+  pdftitle={The atmospheric general circulation model ECHAM6: Model description},
+  pdfauthor={M. A. Giorgetta et al.}
+}
+\fi
+%-----------------------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[bf]{caption}
+\usepackage{xcolor}
+%++S.Rast
+%\usepackage{epsfig,colordvi}
+%--S.Rast
+% Thorsten Mauritsen
+%\usepackage{times,amsmath,graphicx,longtable,multicol,natbib}
+% Thorsten Mauritsen
+\usepackage{longtable}
+\usepackage{amsmath}
+\usepackage{amssymb,amsthm}
+\usepackage{listings}
+\usepackage{makeidx}
+\usepackage{fancyhdr}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{alltt}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{xtab}
+\usepackage{units}
+%\usepackage{doxygen}
+% Juergen Bader
+%\usepackage{graphicx,float,units,pictex}
+%\usepackage[large,FIGTOPCAP,nooneline]{subfigure}
+%\usepackage{amssymb,amsmath}
+%Juergen Bader
+\usepackage{slashbox}
+%-----------------------------------------------------------------------------
+\setcounter{topnumber}{10}
+\setcounter{bottomnumber}{10}
+\setcounter{totalnumber}{12}
+%-----------------------------------------------------------------------------
+\renewcommand{\topfraction}{1.0}
+\renewcommand{\bottomfraction}{1.0}
+\renewcommand{\textfraction}{0.0}
+\renewcommand{\arraystretch}{1.2}
+
+%-----------------------------------------------------------------------------
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{2ex plus 0.2ex minus 0.2ex}
+%-----------------------------------------------------------------------------
+\definecolor{mpggreen}{RGB}{0,119,112}
+\definecolor{mpggrey}{RGB}{209,206,198}
+\definecolor{darkred}{RGB}{181,31,56}
+%-----------------------------------------------------------------------------
+\lstnewenvironment{fortran}
+{\lstset{language=[95]Fortran,%
+basicstyle=\ttfamily\footnotesize\color{mpggreen},%
+commentstyle=\ttfamily\color{darkred},%
+backgroundcolor=\color{mpggrey!10},%
+frame=shadowbox,%
+rulesepcolor=\color{mpggreen}}}{}
+%
+\lstnewenvironment{ksh}
+{\lstset{language=ksh,%
+basicstyle=\ttfamily\footnotesize\color{mpggreen},%
+commentstyle=\ttfamily\color{darkred},%
+backgroundcolor=\color{mpggrey!10},%
+frame=shadowbox,%
+rulesepcolor=\color{mpggreen}}}{}
+%-----------------------------------------------------------------------------
+\newcommand{\note}[1]{
+\fbox{\begin{minipage}{15cm}{#1}\end{minipage}}\marginpar\textbf{NOTE}
+}
+%-----------------------------------------------------------------------------
+\newcommand{\echam}{\color{black}\texttt{ECHAM6}\color{black}}
+\newcommand{\icon}{\color{mpggreen}\texttt{ICON}\color{black}}
+\newcommand{\mpiom}{\color{black}\texttt{MPIOM}\color{black}}
+\newcommand{\jsbach}{\color{black}\texttt{JSBACH}\color{black}}
+\newcommand{\hamocc}{\color{black}\texttt{HAMOCC}\color{black}}
+ \newcommand{\oasis}{\color{black}\texttt{OASIS}\color{black}}          
+\newcommand{\mpiesm}{\color{black}\texttt{MPIESM}\color{black}}
+\newcommand{\directory}[1]{\color{mpggreen}\texttt{#1}\color{black}}
+\newcommand{\filename}[1]{\color{mpggreen}\texttt{#1}\color{black}}
+\newcommand{\environment}[1]{\color{mpggreen}\texttt{#1}\color{black}}
+%-----------------------------------------------------------------------------
+\newcommand{\dnd}[2]      {\frac {\partial #1} {\partial #2} }
+\newcommand{\ovl}         {\overline}
+\newcommand{\e}[1]        {\;\mbox{e}^{#1}}
+\newcommand{\grad}        {\textcelsius}
+\newcommand{\mumum}       {$[\mathrm{\mu m}]$}
+\newcommand{\eref}[1]     {(\ref{#1})}
+%++S.Rast
+\newcommand{\cw}[1]       {\textcolor{white}{#1}}
+\newcommand{\tcr}[1]      {\textcolor{red}{#1}}
+%--S.Rast
+% T. Mauristen
+\newcommand{\ddnd}[2]    {\dfrac {\partial #1} {\partial #2} }
+\newcommand{\V}[1]       {{\bf #1}}
+\newcommand{\trunc}[1]   {\mathcal{O}\left(#1\right)}
+\newcommand{\hl}         {\hat{l}}
+\newcommand{\bdd}        {_{_{D\!D}}}
+\newcommand{\bhd}        {_{_{H\!D}}}
+\newcommand{\efdt}       {\tau^*/\Delta t_{_D}}
+\newcommand{\turb}       {\mbox{\footnotesize turb}}
+\newcommand{\sfc}        {\mbox{\footnotesize sfc}}
+\newcommand{\pbl}        {\mbox{\footnotesize pbl}}
+\newcommand{\B}[1]      {{\mbox{\footnotesize #1}}}
+\newcommand{\vtmpcr}     {\underline{\epsilon}\,} 
+\newcommand{\nst}        {{\mbox{\footnotesize N}_{\mbox{\footnotesize st}}}}
+% T. Mauritsen
+
+\makeindex
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+
+\renewcommand{\footrulewidth}{0.4pt}
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+\begin{document}
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+\thispagestyle{empty}
+
+\renewcommand{\footnoterule}{\rule{0pt}{0pt}\vspace{0pt}}
+
+\begin{center}
+\ifpdf
+%\includegraphics{../images/MPI_Logo.pdf}
+\else
+%\includegraphics[width=0.8\textwidth]{logos/Part3.eps}
+\fi
+\end{center}
+
+\vspace{3cm}
+
+\begin{center}
+{\usekomafont{sectioning}\usekomafont{chapter} 
+The atmospheric general circulation model ECHAM6\\[0.5ex]
+\rule{5cm}{0.7mm}\\[2.5ex]
+Model description
+}
+\end{center}
+
+\vspace{3cm}
+
+\begin{center}
+{\usekomafont{sectioning}\usekomafont{section} 
+M.~Esch, S.~Rast\footnote{sebastian.rast@mpimet.mpg.de},
+R.~Brokopf, K.--H.~Wieners, J.~Bader, T.~Crueger, M.A.~Giorgetta, C.~Hohenegger,
+S.~Kinne, L.~Kornblueh, T.~Krismer, E.~Manzini, T.~Mauritsen,
+B.~M\"obis, R.~Pincus, E.~Roeckner, H.~Schmidt, B.~Stevens}
+\end{center}
+
+\vspace{2cm}
+
+\begin{center}
+{\usekomafont{sectioning}\usekomafont{section} 
+Max Planck Institute for Meteorology, Hamburg, Germany\\
+
+\vspace{2cm}
+
+\today}
+\end{center}
+%-----------------------------------------------------------------------------
+\newpage
+\rule{0cm}{1cm}
+\thispagestyle{empty}
+\newpage
+
+%\cleardoublepage
+
+\tableofcontents
+
+\listoftables
+
+\listoffigures
+
+\cleardoublepage
+
+\chapter{Introduction}
+
+The new MPI Earth System Model (\mpiesm{}) consists of the atmospheric general circulation model (GCM) \echam{}, the land vegetation model \jsbach{}, the ocean GCM \mpiom{} and the ocean biogeochemistry model \hamocc{}. The \oasis{} coupler is used to exchange state information and fluxes between the atmosphere and the ocean. This document describes the formulation of \echam{} and the data sets providing initial and boundary conditions.
+
+\echam{} is a new major version of the ECHAM series of atmospheric general circulation models, which has been developed on the basis of ECHAM5 (\cite{roeckner2003a} and \cite{roeckner06}). Significant differences between ECHAM5 and \echam{} concern the land processes, the radiation schemes, the computation of the surface albedo, and the triggering condition for convection. The technical infrastructure has been significantly modified to optimize the computational performance on the current DKRZ high performance computer. 
+
+For land processes the \jsbach{} land vegetation model has been integrated in \echam{}. \jsbach{} includes parameterizations for the physical aspects, i.e. the heat and water storage and exchange with the atmosphere, as in ECHAM5, and in addition parameterizations describing the photosynthetic activity of plants, carbon allocation and storage in plants and soils, and soil respiration. \jsbach{} also includes a hydrological discharge model providing river runoff to the oceans. These features were already developed in the JSBACH version coupled to ECHAM5 (\cite{raddatz2007}), as used for example in \cite{roeckner2011}). New extensions of JSBACH, developed for the current CMIP5 simulations, allow to compute also the dynamics of natural vegetation and to account for externally specified, anthropogenic land cover change in the carbon cycle. JSBACH thus describes the land-based processes for the carbon cycle.
+
+The radiative forcing in \echam{} is modified in several aspects compared to ECHAM5. The SW and LW schemes have been replaced and updated, respectively. The newly implemented RRTMG-SW scheme is based on the correlated-k method, like the corresponding RRTMG-LW scheme (\cite{iacono2008}), and uses 112 g-points in 14 bands. The surface albedo scheme has been improved for sea, sea ice - where melt ponds are now considered - and snow covered land. Further, external data sets describing the climatological spatial and temporal distribution of aerosol and ozone have been replaced by transient, observation-based data sets extended backward to 1850, and forward to 2100 based on the Representative Concentration Pathway scenarios developed for the 5th Assessment Report of IPCC. The new tropospheric aerosol data developed for \echam{} (Kinne, 2011, in prep.) are based on the AEROCOM median model for the year 2000 and observations from the AERONET global sun photometer network. The fine mode aerosol is scaled by anthropogenic sulfur emissions (SO$_{2}$), as described by past emissions and by RCP scenarios for the future until 2100. The scaling of the \echam{} aerosol data is based on ECHAM5-HAM simulations forced by sulfur emissions in 5 major regions differentiated in the RCP scenarios.
+
+Minor changes in \echam{} compared to ECHAM5 exist at the level of tuning parameters for moist convection, cloud optical properties, sub-grid scale orographic drag and atmospheric gravity wave drag. The spectral transform dynamical core and the flux form semi-Lagrangian transport scheme remain essentially unchanged. 
+
+\echam{} can be used with prescribed lower oceanic boundary conditions or as atmospheric and terrestrial component of the \mpiesm{}. \echam{} has been developed for the resolutions T63L47, T63L95 and T127L95. The T63 and T127 spectral representations are associated with Gaussian grids of approximately 1.9 deg and 0.95 deg resolution, respectively. Both vertical grids resolve the atmosphere up to 0.01 hPa, thus resolve the troposphere and the stratosphere. 
+
+The accompanying Users Manual for \echam{} explains the practical usage of the model concerning compiling, model configuration by Fortran namelists, input data, output data and variables, run scripts, and postprocessing. Further the manual provides technical documentation for model developers concerning parallelization, data structures and memory use, date and time variables, and the submodel interface.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%The new MPI Earth System Model (MPI-ESM) consists of the atmospheric general circulation model (GCM) \echam{}, the land vegetation model JSBACH, and the ocean GCM MPI-OM. This document describes the formulation of \echam{} and the data sets providing initial and boundary conditions.
+
+%\echam{} is a new major version of the ECHAM series of atmospheric general circulation models, which has been developed on the basis of ECHAM5 (\cite{roeckner2003a} and \cite{roeckner06}). Significant differences between ECHAM5 and \echam{} concern the land processes, the radiation schemes, the computation of the surface albedo, and the triggering condition for convection. The technical infrastructure has been significantly modified to optimize the computational performance on the current DKRZ high performance computer. 
+
+%For land processes the JSBACH land vegetation model has been integrated in \echam{}. JSBACH includes parameterizations for the physical aspects, i.e. the heat and water storage and exchange with the atmosphere similarly to ECHAM5, and in addition parameterizations describing the photosynthetic activity of plants, carbon allocation and storage in plants and soils, and soil respiration. JSBACH also includes a hydrological discharge model providing river runoff to the oceans. These features were already developed in the JSBACH version coupled to ECHAM5 (\cite{raddatz2007}), as used for example in \cite{roeckner2011}). New extensions of JSBACH, developed for the current CMIP5 simulations, allow to compute also the dynamics of natural vegetation and to account for externally specified, anthropogenic land cover change. JSBACH thus describes all land-based processes for the carbon cycle.
+
+%The radiative forcing in \echam{} is modified in several aspects compared to ECHAM5. The SW and LW schemes have been replaced and updated, respectively. The newly implemented SRTM SW scheme (REF) is based on the correlated-k method, like the LW RRTM scheme (REF), and uses 112 g-points in 14 bands. The surface albedo scheme has been improved for sea, sea ice - where melt ponds are now considered - and snow covered land. Further, external data sets describing the climatological spatial and temporal distribution of aerosol and ozone have been replaced by transient, observation-based data sets extended backward to 1850, and forward to 2100 based on the Representative Concentration Pathway scenarios developed for the 5th Assessment Report of IPCC. The new tropospheric aerosol data developed for \echam{} (Kinne, 2011, in prep.) are based on the AEROCOM median model for the year 2000 and observations from the AERONET global sun photometer network. The fine mode aerosol is scaled by anthropogenic sulfur emissions (SO$_{2}$), as described by past emissions and by RCP scenarios for the future until 2100. The scaling of the \echam{} aerosol data is based on ECHAM5-HAM simulations forced by sulfur emissions in 5 major regions differentiated in the RCP scenarios.
+
+%Minor changes in \echam{} compared to ECHAM5 exist at the level of tuning parameters for moist convection, cloud optical properties, sub-grid scale orographic drag and atmospheric gravity wave drag. The spectral transform dynamical core and the flux form semi-Lagrangian transport scheme remain essentially unchanged. 
+
+%The \echam{} can be used with prescribed lower oceanic boundary conditions or as atmospheric and terrestrial component of the MPI Earth System Model (MPI-ESM). Beside real world simulations, \echam{} may also be used for idealized aqua planet simulations. A nudging mechanism may be used to constrain the large scale dynamics by pre-processed analyses. The single column configuration allows to integrate the physical processes in a vertical column with prescribed dynamical forcing.
+
+%\echam{} has been developed for the resolutions T63L47, T63L95 and T127L95. The T63 and T127 spectral representations are associated with Gaussian grids of approximately 1.9 deg and 0.95 deg resolution, respectively. Both vertical grids resolve the atmosphere up to 0.01 hPa, thus resolve the troposphere and the stratosphere. 
+
+%The Users Guide for \echam{} provides a complement to the present documentation and consists of three parts:  A Getting Started document; a Users Guide, inculding a descripition of model control structures, scripts and input and output files; and a manual outlining provides complementary technical aspects relevant for model developers or advanced users.
+
+\chapter{Atmosphere}
+\include{atmosphere/dynamic}
+
+\include{atmosphere/transport}
+
+\include{atmosphere/hdiff}
+
+\include{atmosphere/radiation}
+
+\include{atmosphere/vdiff}
+
+\include{atmosphere/convection}
+
+\include{atmosphere/convection_trigger}
+
+\include{atmosphere/cloud}
+
+\include{atmosphere/gwdrag}
+
+\include{atmosphere/sso}
+
+\include{atmosphere/methox}
+
+\chapter{Land}
+The documentation for JSBACH is in progress. Most of the JSBACH components can be found in (\cite{raddatz2007}) and under http://www.mpimet.mpg.de/wissenschaft/land-im-erdsystem/globale-vegetationsmodellierung/jsbach-publikationen.html. For further information please contact Christian Reick (christian.reick@zmaw.de).
+
+\chapter{Slab Ocean and Sea Ice}
+% Juergen Bader
+\include{atmosphere/slab_ocean}
+
+%\section{Sea Ice}
+\include{atmosphere/seaice}
+\include{atmosphere/sea_ice_prescribed}
+% Juergen Bader
+
+
+\chapter{Atmosphere surface coupling}
+The documentation for JSBACH is in progress. Most of the JSBACH components can be found in (\cite{raddatz2007}) and under http://www.mpimet.mpg.de/wissenschaft/land-im-erdsystem/globale-vegetationsmodellierung/jsbach-publikationen.html. For further information please contact Christian Reick (christian.reick@zmaw.de).
+
+\include{atmosphere/lake_model}
+\include{atmosphere/albedo}
+
+%\section{Over land}
+
+%\section{Over sea water}
+
+%\subsection{If coupled to MPIOM}
+
+%\subsection{If prescribed}
+
+%\section{Over sea ice}
+
+%\subsection{If coupled to MPIOM}
+
+%\subsection{If prescribed}
+
+\chapter{Model resolutions and resolution dependent parameters}
+%++ T. Mauritsen
+\include{atmosphere/ECHAM6_resolutions}
+% T. Mauritsen
+
+\chapter{External data}
+
+%++S.Rast
+\include{externaldata/solar}
+%--S.Rast
+%\section{CO2, CH4, N2O, CFCs}
+
+%++M.Esch
+\include{externaldata/ghg}
+%--M.Esch
+
+%\subsection{Historic}
+%\subsection{Scenarios}
+
+%++S.Rast
+\include{externaldata/ozone}
+
+\include{externaldata/aerosols}
+%--S.Rast 
+
+
+%\section{Sea surface temperature and ice cover}
+%\subsection{Historic}
+%\subsection{Climatologies}
+%\subsection{Aqua planet}
+\include{externaldata/ssts}
+
+\section{Land data}
+\subsection{Land sea maps}
+There are a couple of land-sea masks, dependent on the horizontal resolution of ECHAM6 and MPI-OM. 
+Table \ref{tab:Masks} shows the available masks.
+
+
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|c|cccc|}\hline
+\backslashbox{ECHAM6}{MPI-OM}    &      GR30         &      GR15       &       TP04      &     TP6M     \\ \hline
+T31                                       &       x           &        -        &        -        &      -       \\
+T63L47                                    &       -           &        x        &        -        &      -       \\ 
+T63L95                                    &       -           &        -        &        x        &      -       \\
+T127                                      &       -           &        -        &        x        &      -        \\
+T255                                      &       -           &        -        &        -        &      x        \\ \hline
+\end{tabular}
+\end{center}
+\caption{Available land sea masks dependent on ECHAM6 and MPI-OM resolution.\label{tab:Masks}}
+\end{table}
+
+
+
+\subsection{Orography}
+%\subsubsection{Resolved Orography}
+\subsubsection{Subgrid scale orography}
+See. \ref{suboro}.
+\subsection{Vegetation maps}
+The documentation for JSBACH is in progress. Most of the JSBACH components can be found in (\cite{raddatz2007}) and under http://www.mpimet.mpg.de/wissenschaft/land-im-erdsystem/globale-vegetationsmodellierung/jsbach-publikationen.html. For further information please contact Christian Reick (christian.reick@zmaw.de).
+
+\chapter{Errata}
+\include{atmosphere/erratum}
+
+\begin{appendix}
+\chapter{The unparameterized equations}\label{sec:diabat}
+\include{atmosphere/baseqn} 
+\include{atmosphere/orbit}
+\parskip 1ex minus 0.2ex
+\include{atmosphere/orbtab}
+%\section{Physical Constants}
+
+\end{appendix}
+
+\bibliographystyle{echam}
+\addcontentsline{toc}{chapter}{References}
+\bibliography{echam6}
+
+%-----------------------------------------------------------------------------
+% End of text
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------
+\end{document}
+%-----------------------------------------------------------------------------
+%-----------------------------------------------------------------------------

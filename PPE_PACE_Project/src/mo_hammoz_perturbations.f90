@@ -54,7 +54,7 @@ MODULE mo_hammoz_perturbations
             scale_wetdep_ic, scale_wetdep_bc, & 
             bc_rad_ni, du_rad_ni, oc_rad_ni, &
             scale_so4_coating, &
-	    scale_so2_reactions, scale_dms_reactions, scale_so2_aq_reactions, &
+	    scale_so2_reactions, scale_dms_reactions, scale_so2_aq_reactions, scale_dms_so2_fraction, &
             kappa_so4, kappa_oc, kappa_ss, &
 	    scale_vertical_velocity, scale_emi_dms, &
 	    scale_dms_sc,  scale_seasalt_expo, scale_emi_ss_acc, &
@@ -105,6 +105,7 @@ MODULE mo_hammoz_perturbations
                  scale_so2_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_so2_aq_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_dms_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
+                 scale_dms_so2_fraction= 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
                  scale_seasalt_expo = 1.0_dp,  &  ! Scale factor for sea salt exponent
                  scale_emi_ant_so2 = 1.0_dp, &! Scale factor for so2 emissions (ant sectors) 
@@ -275,6 +276,7 @@ CONTAINS
        CALL p_bcast (scale_so2_reactions,        p_io)
        CALL p_bcast (scale_so2_aq_reactions,        p_io)
        CALL p_bcast (scale_dms_reactions,        p_io)
+       CALL p_bcast (scale_dms_so2_fraction,        p_io)
        CALL p_bcast (scale_dms_sc,        p_io)
        CALL p_bcast (scale_seasalt_expo,        p_io)
        CALL p_bcast (scale_fi,        p_io)
@@ -337,6 +339,7 @@ CONTAINS
     !         I strongly suggest to set emi_matrix values to 1. and only use either the sector 
     !         scalings OR the species scalings above.
     CALL print_value('Emission scaling factor (scale_dms_reactions)', scale_dms_reactions)
+    CALL print_value('Emission scaling factor (scale_dms_so2_fraction)', scale_dms_so2_fraction)
 
     CALL message('','---')
     CALL print_value('Dry deposition velocity scaling factor (scale_drydep_acc)', scale_drydep_acc)

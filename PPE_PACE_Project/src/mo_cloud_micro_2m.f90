@@ -168,7 +168,10 @@ USE mo_activ,              ONLY : swat,            &
                                   icnc_burden_acc, reffi_acc, icnc_acc,    &
                                   cliwc_time, burdic_time, iwc_acc,        &
                                   cdnc_burden, icnc_burden, cdnc, icnc,    &
-                                  sice, reffl_ct, reffl_time, cdnc_ct,     &
+! < YAB
+!                                  sice, reffl_ct, reffl_time, cdnc_ct,     &
+                                  sice, reffl_ct, reffl_time, cdnc_ct, cdnc_incl_ct,&
+! > YAB 
                                   reffi_tovs, reffi_time, iwp_tovs,        &
                                   idt_cdnc, idt_icnc, nfrzmod, reffl, reffi              
 USE mo_conv,               ONLY : cdncact_cv,     &
@@ -1871,7 +1874,10 @@ END DO column_processes
                    ll_liqcl(:,jk), ll_icecl(:,jk), &
                    !-- INOUT
                    cdnc(:,jk,krow), cdnc_acc(:,jk,krow), cdnc_burden(:,krow), &
-                   cdnc_ct(:,krow), cliwc_time(:,jk,krow), cloud_time(:,jk,krow), &
+! < YAB CDNC in cloud CT
+!                   cdnc_ct(:,krow), cliwc_time(:,jk,krow), cloud_time(:,jk,krow), &
+                   cdnc_ct(:,krow), cdnc_incl_ct(:,krow), cliwc_time(:,jk,krow), cloud_time(:,jk,krow), &
+! > YAB CDNC In cloud CT
                    icnc(:,jk,krow), icnc_acc(:,jk,krow), icnc_burden(:,krow), &
                    iwc_acc(:,jk,krow), iwp_tovs(:,krow), lwc_acc(:,jk,krow), &
                    qacc(:,jk,krow), qaut(:,jk,krow), qfre(:,jk,krow), &
@@ -3768,7 +3774,10 @@ SUBROUTINE diagnostics( &
               pcdnc, picnc, paclc, pdpg, pdz, pfrln, prho, prprn, psacln, pxib, pxlb, ptp1tmp, &
               preffl, preffi, ld_liqcl, ld_icecl, &
               !-- INOUT
-              pcdnc_ave, pcdnc_ave_acc, pcdnc_ave_burd, pcdnc_ct, pcliwc_time, pcloud_time, &
+! < YAB CT cloud
+!              pcdnc_ave, pcdnc_ave_acc, pcdnc_ave_burd, pcdnc_ct, pcliwc_time, pcloud_time, &
+              pcdnc_ave, pcdnc_ave_acc, pcdnc_ave_burd, pcdnc_ct, pcdnc_incl_ct, pcliwc_time, pcloud_time, &
+! > YAB CT in cloud
               picnc_ave, picnc_ave_acc, picnc_ave_burd, piwc_acc, piwp_tovs, plwc_acc, pqacc, pqaut, &
               pqfre, preffi_acc, preffi_time, preffi_tovs, preffl_acc, preffl_ct, preffl_time, &
               pcdnc_burden, picnc_burden, ptau1i, preffct, paclcac )
@@ -3800,6 +3809,9 @@ SUBROUTINE diagnostics( &
   REAL(dp), INTENT(inout) :: pcdnc_ave_acc(kbdim)  !< as pcdnc_ave_acc, but accumulated [1/m3]
   REAL(dp), INTENT(inout) :: pcdnc_ave_burd(kbdim) !< CDNC burden [1/m2]
   REAL(dp), INTENT(inout) :: pcdnc_ct(kbdim)       !< cloud top cloud droplet number conc. [1/cm3]
+! < YAB 
+  REAL(dp), INTENT(inout) :: pcdnc_incl_ct(kbdim)       !< cloud top cloud droplet number conc. [1/cm3]
+! > YAB
   REAL(dp), INTENT(inout) :: pcliwc_time(kbdim)    !< ice cloud occurence time fraction (accumulated) [1]
   REAL(dp), INTENT(inout) :: pcloud_time(kbdim)    !< liquid cloud occurence time fraction (accumulated) [1]
   REAL(dp), INTENT(inout) :: picnc_ave(kbdim)      !< ICNC averaged over cloudy and cloud-free periods [1/m3]
@@ -3865,6 +3877,11 @@ SUBROUTINE diagnostics( &
 
   ztmp1(1:kproma)     = pcdnc_ct(1:kproma) + zdtime*pcdnc(1:kproma)*paclc(1:kproma)
   pcdnc_ct(1:kproma)  = MERGE(ztmp1(1:kproma), pcdnc_ct(1:kproma), ll1(1:kproma))
+
+! << YAB in cloud CT
+  ztmp1(1:kproma)     = pcdnc_incl_ct(1:kproma) + zdtime*pcdnc(1:kproma)
+  pcdnc_incl_ct(1:kproma)  = MERGE(ztmp1(1:kproma), pcdnc_incl_ct(1:kproma), ll1(1:kproma))
+! >> YAB in cloud CT
 
   ztmp1(1:kproma)       = preffl_time(1:kproma) + zdtime
   preffl_time(1:kproma) = MERGE(ztmp1(1:kproma), preffl_time(1:kproma), ll1(1:kproma))

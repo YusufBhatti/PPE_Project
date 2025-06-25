@@ -1,0 +1,270 @@
+
+
+\subsection{Create a variable list: {\tt vlistCreate}}
+\index{vlistCreate}
+\label{vlistCreate}
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistCreate()
+\end{verbatim}
+
+\subsubsection*{Example}
+
+Here is an example using {\tt vlistCreate} to create a variable list
+and add a variable with {\tt vlistDefVar}.
+
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    INCLUDE 'cdi.h'
+       ...
+    INTEGER vlistID, varID
+       ...
+    vlistID = vlistCreate()
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TSTEP_INSTANT)
+       ...
+    streamDefVlist(streamID, vlistID)
+       ...
+    vlistDestroy(vlistID)
+       ...
+\end{lstlisting}
+
+
+\subsection{Destroy a variable list: {\tt vlistDestroy}}
+\index{vlistDestroy}
+\label{vlistDestroy}
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDestroy(INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Copy a variable list: {\tt vlistCopy}}
+\index{vlistCopy}
+\label{vlistCopy}
+
+The function {\tt vlistCopy} copies all entries from vlistID1 to vlistID2.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistCopy(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID2\ }
+\item[{\tt vlistID2}]
+Target variable list ID.
+\item[{\tt vlistID1}]
+Source variable list ID.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Duplicate a variable list: {\tt vlistDuplicate}}
+\index{vlistDuplicate}
+\label{vlistDuplicate}
+
+The function {\tt vlistDuplicate} duplicates the variable list from vlistID1.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDuplicate(INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistDuplicate} returns an identifier to the duplicated variable list.
+
+
+
+\subsection{Concatenate two variable lists: {\tt vlistCat}}
+\index{vlistCat}
+\label{vlistCat}
+
+Concatenate the variable list vlistID1 at the end of vlistID2.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistCat(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID2\ }
+\item[{\tt vlistID2}]
+Target variable list ID.
+\item[{\tt vlistID1}]
+Source variable list ID.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Copy some entries of a variable list: {\tt vlistCopyFlag}}
+\index{vlistCopyFlag}
+\label{vlistCopyFlag}
+
+The function {\tt vlistCopyFlag} copies all entries with a flag from vlistID1 to vlistID2.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistCopyFlag(INTEGER vlistID2, INTEGER vlistID1)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID2\ }
+\item[{\tt vlistID2}]
+Target variable list ID.
+\item[{\tt vlistID1}]
+Source variable list ID.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Number of variables in a variable list: {\tt vlistNvars}}
+\index{vlistNvars}
+\label{vlistNvars}
+
+The function {\tt vlistNvars} returns the number of variables in the variable list vlistID.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNvars(INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistNvars} returns the number of variables in a variable list.
+
+
+
+\subsection{Number of grids in a variable list: {\tt vlistNgrids}}
+\index{vlistNgrids}
+\label{vlistNgrids}
+
+The function {\tt vlistNgrids} returns the number of grids in the variable list vlistID.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNgrids(INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistNgrids} returns the number of grids in a variable list.
+
+
+
+\subsection{Number of zaxis in a variable list: {\tt vlistNzaxis}}
+\index{vlistNzaxis}
+\label{vlistNzaxis}
+
+The function {\tt vlistNzaxis} returns the number of zaxis in the variable list vlistID.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistNzaxis(INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistNzaxis} returns the number of zaxis in a variable list.
+
+
+
+\subsection{Define the time axis: {\tt vlistDefTaxis}}
+\index{vlistDefTaxis}
+\label{vlistDefTaxis}
+
+The function {\tt vlistDefTaxis} defines the time axis of a variable list.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefTaxis(INTEGER vlistID, INTEGER taxisID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt taxisID}]
+Time axis ID, from a previous call to {\htmlref{\tt taxisCreate}{taxisCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the time axis: {\tt vlistInqTaxis}}
+\index{vlistInqTaxis}
+\label{vlistInqTaxis}
+
+The function {\tt vlistInqTaxis} returns the time axis of a variable list.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqTaxis(INTEGER vlistID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqTaxis} returns an identifier to the time axis.
+

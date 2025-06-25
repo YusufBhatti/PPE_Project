@@ -1,0 +1,14 @@
+# Sylvaine Ferrachat, 2016-04-19
+
+Echam requires some specific versions of the GNU autotools (m4, autoconf, automake, libtool), which may not be available on your system. The script setup.sh allows to easily install them.
+
+--> Read the header of setup.sh before running.
+
+List of potentially installed SW (if necessary, ie if your local version is older than the corresponding version below):
+
+* m4 v1.4.17
+* autoconf v2.69
+* automake 1.14.1
+* libtool 2.4.2
+
+[* svn 1.6.11 <-- additional SW installed. Note that 1.6.11 is already quite old, so it is unlikely that this will be installed at all on your system.]
