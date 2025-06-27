@@ -294,7 +294,7 @@ case $ac_sitename in
           MPI_LIB        = -lmpichf90 -lmpich -lopa $IB_LIBS $SYS_LIBS
           MPI_LAUNCH     = ${MPIROOT}/bin/mpiexec
 
-                                        dir_tools      = /home/ybhatti/yusufb/ECHAM/tools/general/installed/mpich-4
+                                        dir_tools      = /home/ybhatti/prjs1076/yusufb/ECHAM/tools/general/installed/mpich-4
           FC             = ${MPIROOT}/bin/mpif90
           CC             = ${MPIROOT}/bin/mpicc
           FC7            = ${MPIROOT}/bin/mpif77

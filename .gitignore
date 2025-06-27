@@ -12,7 +12,9 @@ blas/.libs
 libtool
 # /config/
 *stamp-h*
-
+*/config/config.inc
+*/util/quickplots/table.x
+*/util/quickplots/table_diff.x
 .libs
 #table*
 # /contrib/
