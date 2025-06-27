@@ -1,3 +1,14 @@
+"""
+
+Code owner: Yusuf Bhatti (y.bhatti@sron.nl)
+
+Description: 
+This script will write into your PPE_values.txt and fill in your parameter values with the values from your LHC. 
+
+Before running the script, you need to run the Latin_Hypercube_Sampling.py script.
+
+The next step is to go into the Present-day directory and work within the PPE_install.sh script
+"""
 import shutil
 from subprocess import run
 from os import rename

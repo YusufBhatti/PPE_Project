@@ -860,8 +860,8 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
            ztk2=1.7e-42_dp*EXP(7810._dp/zt)*zo2/(1._dp+5.5e-31_dp*EXP(7460._dp/zt)*zo2) ! YAB: DMS + OH -> SO2 + MSA ((Reaction rate)) MAYBE PERTURB HERE?
            !ztk12=ztk1+ztk2 ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
            IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + OH -> SO2 reaction rate.
-             ztk12=ztk1+ztk2 * scale_dms_reactions ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
-	   ELSE
+             ztk12=ztk1+ztk2 * scale_dms_reactions ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner) 
+	   ELSE  ! NOTE: this is the Arrhenius 
 	     ztk12=ztk1+ztk2
 	   ENDIF
            zdms=zdms0(jl,jk)*zzoh(jl,jk)*zdayfac(jl)*ztk12       !>>dod deleted double conversion of DMS <<dod

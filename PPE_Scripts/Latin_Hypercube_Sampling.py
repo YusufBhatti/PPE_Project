@@ -16,6 +16,9 @@ os.chdir(cwd)
 
 
 '''
+
+Code Owner: Yusuf Bhatti (y.bhatti@sron.nl)
+
 This file first edits your PPE_values_template.txt to ensure the headers match your parameters list.
 
 We then read your parameter list, establish what each parameter is called, and its minimum value (left) and maximum value (right) as a list.
