@@ -62,4 +62,5 @@ RUNDIR/
 compile_and_generate.sh
 echam6.3-ham2.3-moz1.0/
 PPE_Aerosol/
+PPE_2010/
 __pycache__/

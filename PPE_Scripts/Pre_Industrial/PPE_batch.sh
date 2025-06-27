@@ -55,8 +55,8 @@
 # nexp_maxran=8                       # Maximum number of experiments run by this batch job
 # rundir=".."                         # directory where you store your experimental setup
 #
-# N.A.J. Schutgens (schutgens@physics.ox.ac.uk)
-# 2015/07/07
+# Yusuf Bhatti (y.bhatti@sron.nl)
+# 2024/08
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
