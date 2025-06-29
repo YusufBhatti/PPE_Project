@@ -174,7 +174,10 @@ SUBROUTINE init_aerocom_streams
     IF (lTraj)         CALL construct_Trajg_stream
     IF (lTraj)         CALL construct_Traj_stream
     IF (lHEmon)        CALL construct_HEmon_stream
-    IF (lHEaci)        CALL construct_HEaci_stream
+    IF (lHEaci) THEN
+       CALL construct_HEaci_stream
+       !CALL init_HEaci
+    END IF
 
     IF (lHEpro)        CALL construct_HEpro_stream
     IF (lMMPPE)        CALL construct_MMPPE_stream

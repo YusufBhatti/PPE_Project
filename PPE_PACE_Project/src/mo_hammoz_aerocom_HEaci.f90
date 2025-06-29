@@ -560,7 +560,7 @@ MODULE mo_hammoz_aerocom_HEaci
 
     INTEGER, INTENT(in) :: kproma, kbdim, klev, krow
     REAL(dp), INTENT(IN )  :: pi0(kbdim)
-    INTEGER :: jl,jk
+    INTEGER :: jl,jk,jt
     INTEGER :: icld_top(kbdim) !< highest cloud top index (strat or conv)
     INTEGER :: itmp(kbdim), zindarr(kbdim)
     REAL(dp) :: zeps
@@ -625,11 +625,11 @@ MODULE mo_hammoz_aerocom_HEaci
     END DO
 
     !-- cod
-    cod3d(1:kproma,:,krow)=cisccp_cldtau3d(1:kproma,:,krow)*f3d(1:kproma,:,krow)
-    cod_inst(1:kproma,krow)     = 0._dp
-    DO jk=1,klev
-       cod_inst(1:kproma,krow) = cod_inst(1:kproma,krow) + cod3d(1:kproma,jk,krow)
-    END DO
+    !cod3d(1:kproma,:,krow)=cisccp_cldtau3d(1:kproma,:,krow)*f3d(1:kproma,:,krow)
+    !cod_inst(1:kproma,krow)     = 0._dp
+    !DO jk=1,klev
+    !   cod_inst(1:kproma,krow) = cod_inst(1:kproma,krow) + cod3d(1:kproma,jk,krow)
+    !END DO
 
     !-- phase3d
     phase3d(1:kproma,:,krow) = xlm1(1:kproma,:,krow) / &

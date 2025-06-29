@@ -39,10 +39,11 @@ CONTAINS
 
     CALL add_stream_reference (hifreq, 'TAU_2D_550nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ABS_2D_550nm','rad',lpost=.TRUE.)
-    CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
+!    CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'TAU_DRY_2D_550nm','rad',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'ABS_DRY_2D_550nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'TAU_2D_865nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'ANG_440nm_670nm' ,'rad',lpost=.TRUE.)
 
     CALL add_stream_reference (hifreq, 'REFFL_CT','activ',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'CDNC_BURDEN','activ',lpost=.TRUE.)
