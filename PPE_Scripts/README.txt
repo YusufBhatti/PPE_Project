@@ -1,4 +1,4 @@
-Author: Yusuf Bhatti, (based on Duncan Watson-Paris PPE Scripts), y.bhatti@sron.nl
+Author: Yusuf Bhatti, (Significantly modified from Duncan Watson-Paris PPE Scripts), y.bhatti@sron.nl
 
 Information on how to install and run an ECHAM-HAM PPE
 
@@ -26,18 +26,18 @@ bash_script.py : python script to execute. This writes your LHC into the PPE_val
 Steps:
 1.
 $ python Latin_Hypercube_Sampling.py
-you will then be prompt to enter how many ensemble members you want to use. Enter the number
+you will then be prompt to enter how many ensemble members you want to use. First you will need to enter the parameters which need to be provided a log-normal distribution (really only necessary where the gap in values is very large, e.g. 0.1 to 10). This is for optimising the emulator. Next you will enter the number of simulations you need. If you are doing a Pre-industrial AND PRESENT-DAY PPE, you need to use identical LHC sampling values. Therefore once you run this script and happy with it, you should use the values this script creates for both PPE experiments.
 2.
 $ python bash_script.py
-Will write into your PPE_values.txt and fill in your parameter values with the values from your LHC.
+Will write into your PPE_values.txt and fill in your parameter values with the values from your LHC. To test the distributions, you can simply do a plt.hist in python to check the distribution of the parameters chosen.
 3.
 Enter either the Present Day or Pre_Industrial directories. Depending on which one your wanting to run.
 4.
 Sort out directories within the PPE_install.sh and PPE_batch.sh
 5.
-qsub PPE_install.sh
+qsub PPE_install.sh - README is located there. 
 6.
-qsub PPE_batch.sh
+qsub PPE_batch.sh - README is located there.
 
 
 NOTES: The Initialisation files rely on the parameters_for_script.txt file. The hypercube sampling script uses the parameters_for_script.txt to take in how many columns there will be (how many parameters will be perturbed in your PPE). You specify in the script (n_samples) to the amount of simulations you want. Typically Nu. parameters * 5-7. This will output an array (n_samples, number of parameters) called LHC_Parameters.txt. 
