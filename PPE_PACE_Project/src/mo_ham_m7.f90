@@ -2383,7 +2383,7 @@ SUBROUTINE m7_nuck(kproma,  kbdim,  klev,   krow,          &
 
   IF (lo_hammoz_perturbations) THEN
 
-    zsns(1:kproma,:)=zsns(1:kproma,:)*scale_nuc_ft
+!    zsns(1:kproma,:)=zsns(1:kproma,:)*scale_nuc_ft
     zsnrate(1:kproma,:)=zsnrate(1:kproma,:)*scale_nuc_ft
 
 !    zons(1:kproma,:)=zons(1:kproma,:)*scale_nuc_bl

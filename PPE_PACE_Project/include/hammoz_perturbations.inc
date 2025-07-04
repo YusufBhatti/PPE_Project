@@ -99,4 +99,5 @@ NAMELIST /hammoz_perturbations/ &
   kappa_so4, &
   kappa_oc, &
   !scale_dms_sc, &           ! Scale the imaginary part of the refractive index (for DUST)
-  scale_seasalt_expo
+  scale_seasalt_expo, &
+  scale_fricv

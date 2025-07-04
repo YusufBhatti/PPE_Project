@@ -472,9 +472,11 @@ MODULE mo_ham_dust
     ! assigning the appropriate nduscale for each location
     !
        USE mo_boundary_condition,  ONLY: bc_apply
+       ! << YAB Added Dust perturbation to parameterization       
+       USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_fricv
+       ! >> YAB
        
        INTEGER, INTENT(in)          :: kproma, krow
-       
        INTEGER        ::  jreg     
        INTEGER        ::  nreg     = 8   ! number of regions
        
@@ -485,8 +487,17 @@ MODULE mo_ham_dust
        CALL bc_apply(ibc_regint,   kproma, krow, zregint)
        
        ! assign the right tuning factor for each location depending on in which region it is lying
+!! << YAB Adding perturbation to dust param 
        DO jreg=1,nreg
-          nduscale_2d(1:kproma,krow)=MERGE(nduscale_reg(jreg), nduscale_2d(1:kproma,krow), INT(zregint) .EQ. jreg)
+!          nduscale_2d(1:kproma,krow)=MERGE(nduscale_reg(jreg), nduscale_2d(1:kproma,krow), INT(zregint) .EQ. jreg)
+            !>> hjia Added for PPE & YAB
+          IF (lo_hammoz_perturbations) THEN
+            nduscale_2d(1:kproma,krow)=MERGE(scale_fricv * nduscale_reg(jreg), nduscale_2d(1:kproma,krow), INT(zregint) .EQ. jreg)
+          ELSE   
+  !          nduscale_2d(jc,jb)=MERGE(nduscale_reg(jreg), nduscale_2d(jc,jb), INT(zregint(jc)) .EQ. jreg)
+            nduscale_2d(1:kproma,krow)=MERGE(nduscale_reg(jreg), nduscale_2d(1:kproma,krow), INT(zregint) .EQ. jreg)
+          ENDIF
+            !<< hjia & YAB
        END DO
 
   END SUBROUTINE comp_nduscale_reg

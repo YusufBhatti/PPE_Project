@@ -31,7 +31,7 @@
 !!
 !! \copyright
 !! Copyright and licencing conditions are defined in the ECHAM-HAMMOZ
-!! licencing agreement to be found at:
+!! licencingzpfac agreement to be found at:
 !! https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/1_Licencing_conditions
 !! The ECHAM-HAMMOZ software is provided "as is" and without warranty of any kind.
 !!
@@ -321,7 +321,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
            !
            zrkh2o2(jl,jk)=zrke*zf_so2*zf_h2o2 ! YAB
            IF (lo_hammoz_perturbations) THEN
-               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_aq_reactions !scale_so2_reactions_AQ ! YAB
+               zrkh2o2(jl,jk) = zrkh2o2(jl,jk)  * scale_so2_reactions !scale_so2_reactions_AQ ! YAB
 	   ENDIF
 
         ELSE
@@ -401,7 +401,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
               !
               !! YAB Perturbing SO2 + O3 trimolecular reaction. <<
              IF (lo_hammoz_perturbations) THEN
-               za2=(za21+za22*zqhp)*zfac1 * scale_so2_reactions !
+               za2=((za21+za22*zqhp)*zfac1) * scale_so2_reactions !
              ELSE
                za2=(za21+za22*zqhp)*zfac1
              ENDIF
@@ -832,8 +832,16 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
            zhil=ztk2*zmair(jl,jk)/zk2i                            ! see Appendix A in Feichter et al.
            zexp=LOG10(zhil)
            zexp=1._dp/(1._dp+zexp*zexp)
-           ztk23b=ztk2*zmair(jl,jk)/(1._dp+zhil)*zk2f**zexp       ! reaction rate SO2+OH+M  ! YAB CAN PERTURB HERE> --> H2SO4 ?
+!! < YAB
+	   !           ztk23b=ztk2*zmair(jl,jk)/(1._dp+zhil)*zk2f**zexp       ! reaction rate SO2+OH+M  ! YAB CAN PERTURB HERE> --> H2SO4 ?
+           IF (lo_hammoz_perturbations) THEN ! SO2 + OH -> SO4
+	     ztk23b=(ztk2*zmair(jl,jk)/(1._dp+zhil)*zk2f**zexp)*scale_so2_reactions       ! reaction rate SO2+OH+M  ! YAB CAN PERTURB HERE> --> H2SO4 ?
+	   ELSE
+             ztk23b=ztk2*zmair(jl,jk)/(1._dp+zhil)*zk2f**zexp       ! reaction rate SO2+OH+M  ! YAB CAN PERTURB HERE> --> H2SO4 ?
+	   ENDIF
 
+
+! > YAB
            zdso2=zso20(jl,jk)*zzoh(jl,jk)*ztk23b*zdayfac(jl)      ! change in SO2
            zdso2=MIN(zdso2,zso20(jl,jk)*zqtmst)                   ! limit change to available SO2
            zdso2=MAX(zdso2,0._dp)                                 ! probably unnecessary
@@ -843,11 +851,11 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
 	   !>>dod bugfix(#49)
            zso4so2oh = zdso2*zconv_so2_so4
 	  ! YAB SO4 production from SO2 PERTURBATIONS 
-           IF (lo_hammoz_perturbations) THEN ! SO2 + OH -> SO4
-               zso4so2oh = zso4so2oh  *  scale_so2_reactions !scale_so2_reactions
-	   ELSE
-               zso4so2oh = zso4so2oh
-           ENDIF
+!           IF (lo_hammoz_perturbations) THEN ! SO2 + OH -> SO4
+!               zso4so2oh = zso4so2oh  *  scale_so2_reactions !scale_so2_reactions
+!	   ELSE
+!               zso4so2oh = zso4so2oh
+!           ENDIF
            pxtte(jl,jk,idt_so4)=pxtte(jl,jk,idt_so4)+zso4so2oh    ! update tendencies for SO4
            !<<dod
 ! YAB >>
@@ -860,7 +868,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
            ztk2=1.7e-42_dp*EXP(7810._dp/zt)*zo2/(1._dp+5.5e-31_dp*EXP(7460._dp/zt)*zo2) ! YAB: DMS + OH -> SO2 + MSA ((Reaction rate)) MAYBE PERTURB HERE?
            !ztk12=ztk1+ztk2 ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner)
            IF (lo_hammoz_perturbations) THEN ! YAB DMS REACTION PERTURB DMS + OH -> SO2 reaction rate.
-             ztk12=ztk1+ztk2 * scale_dms_reactions ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner) 
+             ztk12=(ztk1+ztk2) * scale_dms_reactions ! YAB Or scale here for the two daytime DMS reaction rates (Cleaner) 
 	   ELSE  ! NOTE: this is the Arrhenius 
 	     ztk12=ztk1+ztk2
 	   ENDIF
@@ -871,7 +879,9 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
               !
               !--- ztoso2 is the fraction of DMS oxidized to SO2:
               !
-           ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2) * scale_dms_so2_fraction ! YAB possibility to perturb fraction of DMS oxidized to SO2
+!           ztoso2=(ztk1+0.75_dp*ztk2)/(ztk1+ztk2) * scale_dms_so2_fraction ! YAB possibility to perturb fraction of DMS oxidized to SO2
+! < YAB 
+	   ztoso2=(ztk1+scale_dms_so2_fraction*ztk2)/(ztk1+ztk2)! * scale_dms_so2_fraction ! YAB possibility to perturb fraction of DMS oxidized to SO2
 ! YAB <
            zdms2so2oh = zdms*ztoso2*zconv_dms_so2       !>>dod bugfix(#49) <<dod
 !	   
@@ -906,9 +916,14 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
                                     (zso4so2oh+zdms2so4)*zdpg(jl,jk)*delta_time
 
         ELSE   !--- 4.2) Night-time chemistry 
-
-              ztk3=zk3*EXP(520._dp/pt(jl,jk) * scale_dms_reactions)
-
+!! << YAB DMS + NO3 -> 
+        !      ztk3=(zk3*EXP(520._dp/pt(jl,jk)))
+              IF (lo_hammoz_perturbations) THEN
+                ztk3=(zk3*EXP(520._dp/pt(jl,jk))) * scale_dms_reactions
+              ELSE
+                ztk3=(zk3*EXP(520._dp/pt(jl,jk)))
+              ENDIF
+!! >> YAB
 !gf see #146 - Values from input file
               zno3=zzno3(jl,jk)
 !gf

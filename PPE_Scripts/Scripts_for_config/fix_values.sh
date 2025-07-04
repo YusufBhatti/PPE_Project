@@ -6,8 +6,8 @@
 
 
 # Define the input file and the output file
-input_file="/home/ybhatti/yusufb/Branches/PPE_Scripts/PPE_values.txt"
-output_file="/home/ybhatti/yusufb/Branches/PPE_Scripts/PPE_values_new.txt"
+input_file="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_Scripts/PPE_values.txt"
+output_file="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_Scripts/PPE_values_new.txt"
 
 # Use awk to process the file
 awk 'NR==1 { print; next } { $(NF-2) = 0; $(NF-1) = 0; $NF = 0; print }' $input_file > $output_file

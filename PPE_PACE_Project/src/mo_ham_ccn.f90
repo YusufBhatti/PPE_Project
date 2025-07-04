@@ -128,9 +128,9 @@ CONTAINS
                                               !                           ilev=1 for full 3D diagnostics
 
     !--- 0) Initializations:
-
-    zrmin(1:kproma,:,:)=1.0E-7_dp             ! 3nm cut-off radius for CN calculation
-
+! << YAB Changed CN Calculation comparable to the CCN proxy from PACE
+    zrmin(1:kproma,:,:)=1.0E-7_dp             ! nm cut-off radius for CN calculation
+! >> YAB
     zeps=EPSILON(1._dp)
 
 
@@ -138,14 +138,14 @@ CONTAINS
        itoplev=klev
     ELSE
        itoplev=1
-
+!! << YAB Added a new option of 7
        IF (nccndiag==5 .OR. nccndiag==6 .OR. nccndiag==7) THEN
           !--- Calculate zdpg:
           zdpg(1:kproma,1)=2._dp*(paphm1(1:kproma,2)-papm1(1:kproma,1))/grav
           zdpg(1:kproma,2:klev)=(paphm1(1:kproma,3:klev+1)-paphm1(1:kproma,2:klev))/grav
        END IF
     END IF
-
+!! >> YAB
     !--- Number per unit volume for each mode:
 
     zrho(1:kproma,itoplev:klev) = papm1(1:kproma,itoplev:klev)/(rd*ptvm1(1:kproma,itoplev:klev))
@@ -202,9 +202,9 @@ CONTAINS
        END DO ! jclass
 
        !--- Store diagnostics in aero stream:
-
+! << YAB 7 ccndiag added
        IF (nccndiag==1 .OR. nccndiag==3 .OR. nccndiag==5 .OR. nccndiag==7) THEN
-
+! >> YAB
           ccn_2d(jsat)%ptr(1:kproma,krow)=zccn(1:kproma,klev)
 
        ELSE IF (nccndiag==2 .OR. nccndiag==4 .OR. nccndiag==6) THEN
@@ -254,9 +254,9 @@ CONTAINS
        END IF
 
        !--- 4) Sum up the CN over levels to burdens:
-
+! << YAB added 7 diag
        IF (nccndiag==5 .OR. nccndiag==6 .OR. nccndiag==7) THEN
-
+! >> YAB
           DO jk=itoplev, klev
              cn_burden(1:kproma,krow)=cn_burden(1:kproma,krow) + &
                                       zcn(1:kproma,jk)/zrho(1:kproma,jk)*zdpg(1:kproma,jk)

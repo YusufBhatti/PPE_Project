@@ -170,6 +170,7 @@ done # nexp_ran > nexp_maxran (outer loop)
 echo 'Finishing PPE_batch script' >>$PPElog
 #. $cwd/../Scripts_for_config/mv_tracking_files.sh
 cd $cwd
+echo 'Moving Data over to archive, except for restart files' >>$PPElog
 
 
 #--- run the batch job again if conditions are met ---

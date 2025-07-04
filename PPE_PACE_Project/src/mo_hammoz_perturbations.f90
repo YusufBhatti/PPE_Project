@@ -61,7 +61,7 @@ MODULE mo_hammoz_perturbations
 	    scale_emi_ss_coarse, &
 	    scale_emi_ant_so2, scale_emi_ant_bc, scale_emi_ant_oc, &
             scale_emi_bb_so2, scale_emi_bb_bc, scale_emi_bb_oc, &
-	    scale_fi, scale_gi, scale_activation
+	    scale_fi, scale_gi, scale_activation, scale_fricv
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
 
@@ -105,7 +105,7 @@ MODULE mo_hammoz_perturbations
                  scale_so2_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_so2_aq_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
                  scale_dms_reactions = 1.0_dp, &! Scale factor for all SO2 reactions
-                 scale_dms_so2_fraction= 1.0_dp, &! Scale factor for all SO2 reactions
+                 scale_dms_so2_fraction= 0.75_dp, &! Scale factor for all SO2 reactions
                  scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
                  scale_seasalt_expo = 1.0_dp,  &  ! Scale factor for sea salt exponent
                  scale_emi_ant_so2 = 1.0_dp, &! Scale factor for so2 emissions (ant sectors) 
@@ -113,7 +113,8 @@ MODULE mo_hammoz_perturbations
                  scale_emi_ant_oc = 1.0_dp, & ! Scale factor for oc emissions (ant sectors)
                  scale_emi_bb_so2 = 1.0_dp, & ! Scale factor for so2 emissions (fire/bb sectors)
                  scale_emi_bb_bc = 1.0_dp,  & ! Scale factor for bc emissions (fire/bb sectors)
-                 scale_emi_bb_oc = 1.0_dp     ! Scale factor for oc emissions (fire/bb sectors)
+                 scale_emi_bb_oc = 1.0_dp,  &   ! Scale factor for oc emissions (fire/bb sectors)
+                 scale_fricv = 1.0_dp         ! Scale facotr for threshold of freiction velocity (affecting DU emi)
 
   REAL(dp)    :: scale_drydep_acc = 1.0_dp ! Scale factor for dry deposition of accumulation modes
 
@@ -282,6 +283,7 @@ CONTAINS
        CALL p_bcast (scale_fi,        p_io)
        CALL p_bcast (scale_gi,        p_io)
        CALL p_bcast (scale_activation,        p_io)
+       CALL p_bcast (scale_fricv,        p_io)
 
     END IF
 
@@ -328,6 +330,7 @@ CONTAINS
     CALL print_value('Emission scaling factor (scale_emi_ss_acc)', scale_emi_ss_acc)
     CALL print_value('Emission scaling factor (scale_emi_du)', scale_emi_du)
     CALL print_value('Emission scaling factor (scale_emi_so2)', scale_emi_so2)
+    CALL print_value('Emission scaling factor (threshold of friction velocity for DUST)', scale_fricv)
 
     CALL print_value('Emission scaling factor (scale_emi_ant_so2)', scale_emi_ant_so2 )
     CALL print_value('Emission scaling factor (scale_emi_ant_bc)', scale_emi_ant_bc )
