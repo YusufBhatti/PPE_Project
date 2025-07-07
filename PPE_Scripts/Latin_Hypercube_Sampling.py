@@ -137,11 +137,13 @@ param_ranges = Parameters_and_ranges.values()
 # --- Step 1: Print all available parameter names ---
 param_names = list(Parameters_and_ranges.keys())
 print("Available parameters:\n" + "\n".join(param_names))
+print('--')
 
 # --- Ask user which parameters to treat with log-normal distribution ---
-custom_dist_params = input(
-    "\nEnter parameter(s) to use log-normal distribution (space-separated, e.g., 'NUC_FT EMI_DMS'): "
-).split()
+# custom_dist_params = input(
+#     "\nEnter parameter(s) to use log-normal distribution (space-separated, e.g., 'NUC_FT EMI_DMS'): "
+# ).split()
+# print('--')
 
 
 if __name__ == "__main__":
@@ -201,30 +203,40 @@ I will make the variables below input values, so you can manually identify which
 #     # Replace column in LHC matrix
 #     scale[:, idx] = transformed
 
+# Predefined trapezoidal shape settings for specific parameters:
+# Format: param_name: (vertex1, vertex2, aL, aR)
+trapezoidal_param_config = {
+    'SO4_COATING':      (0.5, 2.5, 2, 2),  # monolayers, absolute
+    'NUC_FT':           (0.1, 5, 2, 2),
+    'DRYDEP_ACC':       (0.7, 4, 2, 2),
+    'SCALE_EMI_BB_SO2': (0.5, 2, 2, 2),
+    'SCALE_EMI_BB_BC':  (0.5, 2, 2, 2),
+    'SCALE_EMI_BB_OC':  (0.5, 2, 2, 2)
+}
+
 # --- Step 4: Apply Trapezoidal transformation using inverse CDF sampling ---
 # --- Apply trapezoidal transformation ---
-for param in custom_dist_params:
+#for param in custom_dist_params:
+for param, (left, right, aL, aR) in trapezoidal_param_config.items():
     if param not in Parameters_and_ranges:
         print(f"Warning: '{param}' not found in parameter list. Skipping.")
         continue
 
+    if param not in trapezoidal_param_config:
+        print(f"Skipping trapezoidal distribution for '{param}'. Using uniform.")
+        continue
+    print('--')
+        
     idx = names.tolist().index(param)
     a, d = Parameters_and_ranges[param]  # a = min_val, d = max_val
 
+    left, right, aL, aR = trapezoidal_param_config[param]
+
+    print(f"Applying trapezoidal distribution to '{param}' with:")
+    print(f"  Vertex 1: {left}, Vertex 2: {right}, aL: {aL}, aR: {aR} | Range: ({a}, {d})")
+
     # Define inner plateau (can be customized)
     range_width = d - a
-    #left = a + 0.3 * range_width
-    left = float(input(f"For {custom_dist_params[0]} which has a min and max value of {d} and min value of {a} Enter number of Vertex 1 (First peak (number 1)): "))
-    right = float(input("Enter number of Vertex 2 (Last peak (number 2)): "))
-
-    # right = d - 0.3 * range_width
-
-    # Trapezoid shape parameters
-    aL = int(input(f"Enter aL for {custom_dist_params[0]} which has a min and max value of {d} and min value of {a} (LEFT slope (1 = straight, 2 = slopes, > 2 is more slopes)): "))
-    aR = int(input(f"Enter aR (RIGHT slope (1 = straight, 2 = slopes, > 2 is more slopes)): "))
-
-    # aL = 2  # linear sides
-    # aR = 2
     slope = 0
 
     # Generate Trapezoidal samples using inverse CDF
