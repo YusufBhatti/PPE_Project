@@ -32,8 +32,6 @@ This is then saved as a .txt. file. We also save a csv file for ease of analysis
 
 '''
 
-import numpy as np
-import matplotlib.pyplot as plt
 
 def trapezoidal_pdf(x, min_val, left, right, max_val, aL=2, aR=2, slope=0):
     """
@@ -233,7 +231,7 @@ for param, (left, right, aL, aR) in trapezoidal_param_config.items():
     left, right, aL, aR = trapezoidal_param_config[param]
 
     print(f"Applying trapezoidal distribution to '{param}' with:")
-    print(f"  Vertex 1: {left}, Vertex 2: {right}, aL: {aL}, aR: {aR} | Range: ({a}, {d})")
+    print(f" {param}: , Vertex 1: {left}, Vertex 2: {right}, aL: {aL}, aR: {aR} | Range: ({a}, {d})")
 
     # Define inner plateau (can be customized)
     range_width = d - a
