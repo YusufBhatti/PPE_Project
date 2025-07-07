@@ -95,7 +95,7 @@ def sample_from_trapezoidal(n_samples, min_val, left, right, max_val, aL=2, aR=2
     from scipy.integrate import cumulative_trapezoid
 
     # Step 1: Create fine x grid
-    x = np.linspace(min_val, max_val, 10000)
+    x = np.linspace(min_val, max_val, n_samples)
     
     # Step 2: Evaluate PDF
     pdf = trapezoidal_pdf(x, min_val, left, right, max_val, aL, aR, slope)
@@ -152,7 +152,6 @@ if __name__ == "__main__":
         print("Invalid input. Please enter an integer value.")
         exit(1)
     
-#n_simulations = 200
 
 lower = []
 upper = []
@@ -257,5 +256,5 @@ for param, (left, right, aL, aR) in trapezoidal_param_config.items():
 
 print('Your LHC has been saved as a .txt file and as a .csv file')
 print(f'the LHC has {np.shape(scale)[0]} simulations and {np.shape(scale)[1]} parameters')
-# np.savetxt(f"{cwd}/parameter_values_data/LHC_Parameters.txt", scale, delimiter=" ")
-# txt_to_csv(f"{cwd}/parameter_values_data/LHC_Parameters.txt", f"{cwd}/parameter_values_data/LHC_Parameters.csv")
+np.savetxt(f"{cwd}/parameter_values_data/LHC_Parameters.txt", scale, delimiter=" ")
+txt_to_csv(f"{cwd}/parameter_values_data/LHC_Parameters.txt", f"{cwd}/parameter_values_data/LHC_Parameters.csv")

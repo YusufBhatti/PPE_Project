@@ -1,3 +1,10 @@
+""" 
+Author Yusuf Bhatti
+
+This file contains definitions which are important for the PPE Process 
+
+"""
+
 
 def txt_to_csv(input_file_path, output_file_path):
     import pandas as pd
@@ -126,7 +133,7 @@ def check_column_duplicates(file_path, header_array):
                 pass
             else:
                 print(f"Duplicate values found in {header_array[col_index]}: {duplicates}")
-                print(f"STOP AND CHANGE LINE 55 in the bash_script.py to increased decimal points.")
+                print(f"STOP AND CHANGE LINE 45 in the bash_script.py to increased decimal points. Alternatively Rerun the LHS script to get a new batch of values.")
 
         else:
             print(f"No duplicate values found in {header_array[col_index]} columns")

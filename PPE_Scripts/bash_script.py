@@ -70,7 +70,7 @@ with open(output_file, 'w') as f_out:
 
                 # Ensure the new_param_values array has the same length as the header_array
                 if len(new_param_values) < len(header_array):
-                    print("STOP Your number of parameters does not match up TOO LITTLE with" 
+                    print("STOP Your number of parameters do not match up TOO LITTLE with" 
                           "  the ppe_values.txt file header!. I am doing a workaround" 
                           "  for you and implementing a 'NAN' to make it match"
                           "  This is not a workable copy, only a runable one!")
@@ -99,7 +99,7 @@ print(f"We will now check if any rows contain duplicates in the PPE values gener
 
 parameters_file = f"{cwd}/PPE_values_template.txt"
 check_column_duplicates(parameters_file, header_array)
-print(f"The number of decimal places defined is: {decimal}. If there are duplicated identified, increase this number on line 34.")
+print(f"The number of decimal places defined is: {decimal}. If there are duplicated identified, increase this number on line 55.")
 
 # Define the path to the input and output files
 input_file_path = f"{cwd}/PPE_values_template.txt"
