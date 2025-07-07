@@ -204,9 +204,9 @@ I will make the variables below input values, so you can manually identify which
 # Predefined trapezoidal shape settings for specific parameters:
 # Format: param_name: (vertex1, vertex2, aL, aR)
 trapezoidal_param_config = {
-    'SO4_COATING':      (0.5, 2.5, 2, 2),  # monolayers, absolute
-    'NUC_FT':           (0.1, 5, 2, 2),
-    'DRYDEP_ACC':       (0.7, 4, 2, 2),
+    'SCALE_SO4_COATING':      (0.5, 2.5, 2, 2),  # monolayers, absolute
+    'SCALE_NUC_FT':           (0.1, 5, 2, 2),
+    'SCALE_DRYDEP_ACC':       (0.7, 4, 2, 2),
     'SCALE_EMI_BB_SO2': (0.5, 2, 2, 2),
     'SCALE_EMI_BB_BC':  (0.5, 2, 2, 2),
     'SCALE_EMI_BB_OC':  (0.5, 2, 2, 2)

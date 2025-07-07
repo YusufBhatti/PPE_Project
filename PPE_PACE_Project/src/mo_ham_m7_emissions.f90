@@ -193,8 +193,8 @@ MODULE mo_ham_m7_emissions
 
 !>>YAB and ps Added for perturbed physics setup:
   IF (lo_hammoz_perturbations) THEN 
-    cmr_ff=cmr_ff*scale_emi_cmr_ff
-    cmr_bb=cmr_bb*scale_emi_cmr_bb
+    cmr_ff=scale_emi_cmr_ff
+    cmr_bb=scale_emi_cmr_bb
 !    cmr_bg=cmr_bg*scale_emi_cmr_bf
 !    zfacso2=(1.0_dp-emi_prim_so4_frac)
   ENDIF

@@ -90,8 +90,8 @@ MODULE mo_hammoz_perturbations
                  anth_soa ! ?
 
   REAL(dp)    :: scale_nuc_ft = 1.0_dp, &     ! Scale factor for free tropospheric nucleation scheme (Vehkamaeki or Kazil & Lovejoy)
-                 scale_emi_cmr_ff = 1.0_dp, & ! Scale factor for emission count median raduius for fossil fules
-                 scale_emi_cmr_bb = 1.0_dp, & ! Scale factor for emission count median raduius for wildfires
+                 scale_emi_cmr_ff = 0.03E-6_dp, & ! Scale factor for emission count median raduius for fossil fules
+                 scale_emi_cmr_bb = 0.075E-6_dp, & ! Scale factor for emission count median raduius for wildfires
                  scale_emi_ff = 1.0_dp,     & ! Scale factor for fossil fule emissions
                  scale_emi_bb = 1.0_dp,     & ! Scale factor for wildfire emissions
                  scale_emi_bf = 1.0_dp,     & ! Scale factor for biofuel emissions
