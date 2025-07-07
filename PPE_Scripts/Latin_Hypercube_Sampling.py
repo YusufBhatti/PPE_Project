@@ -32,11 +32,97 @@ This is then saved as a .txt. file. We also save a csv file for ease of analysis
 
 '''
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+def trapezoidal_pdf(x, min_val, left, right, max_val, aL=2, aR=2, slope=0):
+    """
+    Compute trapezoidal PDF for given input `x` values.
+    
+    Parameters:
+        x : np.ndarray
+            Points at which to evaluate the PDF
+        min_val : float
+            Minimum value of the support (a)
+        left : float
+            Start of the flat top (b)
+        right : float
+            End of the flat top (c)
+        max_val : float
+            Maximum value of the support (d)
+        aL : float
+            Shape of the left slope (convex/concave)
+        aR : float
+            Shape of the right slope (convex/concave)
+        slope : float
+            Optional slope between the flat top
+        
+    Returns:
+        pdf : np.ndarray
+            Probability density function evaluated at x
+    """
+    pdf = np.zeros_like(x)
+
+    # Normalize coefficients to ensure integral = 1
+    def area():
+        left_area = (left - min_val) / (aL + 1)
+        middle_area = (right - left)
+        right_area = (max_val - right) / (aR + 1)
+        return left_area + middle_area + right_area
+
+    norm = 1 / area()
+
+    for i, xi in enumerate(x):
+        if min_val <= xi < left:
+            # Left slope
+            u = (xi - min_val) / (left - min_val)
+            pdf[i] = norm * u**aL
+        elif left <= xi <= right:
+            # Flat top or sloped top
+            if slope == 0:
+                pdf[i] = norm
+            else:
+                top_len = right - left
+                pdf[i] = norm * (1 + slope * (xi - (left + right) / 2) / top_len)
+        elif right < xi <= max_val:
+            # Right slope
+            u = (max_val - xi) / (max_val - right)
+            pdf[i] = norm * u**aR
+        else:
+            pdf[i] = 0
+    return pdf
+
+def sample_from_trapezoidal(n_samples, min_val, left, right, max_val, aL=2, aR=2, slope=0):
+    from scipy.interpolate import interp1d
+    from scipy.integrate import cumulative_trapezoid
+
+    # Step 1: Create fine x grid
+    x = np.linspace(min_val, max_val, 10000)
+    
+    # Step 2: Evaluate PDF
+    pdf = trapezoidal_pdf(x, min_val, left, right, max_val, aL, aR, slope)
+    
+    # Step 3: Compute normalized CDF
+    cdf = cumulative_trapezoid(pdf, x, initial=0)
+    cdf /= cdf[-1]  # Normalize to [0,1]
+
+    # Step 4: Invert the CDF
+    inverse_cdf = interp1d(cdf, x, bounds_error=False, fill_value=(min_val, max_val))
+
+    # # Step 5: Sample uniform values and transform through inverse CDF
+    # uniform_samples = np.random.uniform(0, 1, n_samples)
+    # samples = inverse_cdf(uniform_samples)
+    # LHS sampling in 1D on [0,1]
+    lhs_samples = lhs(1, samples=n_samples, criterion='maximin').flatten()
+    
+    # Transform LHS samples through inverse CDF
+    samples = inverse_cdf(lhs_samples)
+
+    return samples
+
 
 input_file = f"{cwd}/PPE_values_template.txt"
 parameters_file = f"{cwd}/parameters_for_script.txt"
-
-
 
 
 
@@ -94,51 +180,72 @@ scale = qmc.scale(lhs_sample, l_bound, u_bound)
 I will make the variables below input values, so you can manually identify which parameters should be log-normal, vs uniform distributions, for the emulator 
 """
 
-# # Identify the index for NUC_FT
-# nuc_index = names.tolist().index('NUC_FT')
+# # --- Step 4: Apply log-normal transformation to selected parameters ---
+# for param in custom_dist_params:
+#     if param not in Parameters_and_ranges:
+#         print(f"Warning: '{param}' not found in parameter list. Skipping.")
+#         continue
 
-# # Parameters for log-normal (these are tunable):
-# # This sets the mode near 1
-# s = 2  # shape (σ)
-# scale_param = 1  # scale = exp(μ) (log-normal distribution directly related to the median)
-# dist = lognorm(s=s, scale=scale_param)
+#     idx = names.tolist().index(param)
+#     low, high = Parameters_and_ranges[param]
 
-# # Rescale uniform LHS samples for NUC_FT via inverse CDF (ppf)
-# # This transforms the uniform LHC sample to log-normal
-# uniform_samples = lhs_sample[:, nuc_index]
-# nuc_samples = dist.ppf(uniform_samples)
+#     # Choose shape and scale for log-normal (tweakable)
+#     s = 10
+#     scale_param = 2  # Median will be at 1
+#     dist = lognorm(s=s, scale=scale_param)
 
-# # Clip values to [min, max] for physical validity of the parameters which need this.
-# nuc_min, nuc_max = Parameters_and_ranges['NUC_FT']
-# nuc_samples = np.clip(nuc_samples, nuc_min, nuc_max)
+#     # Transform uniform LHC samples to log-normal
+#     transformed = dist.ppf(lhs_sample[:, idx])
+#     transformed = np.clip(transformed, low, high)
 
-# # Replace in the final scaled LHC array
-# scale[:, nuc_index] = nuc_samples
-# --- Step 4: Apply log-normal transformation to selected parameters ---
+#     # Replace column in LHC matrix
+#     scale[:, idx] = transformed
+
+# --- Step 4: Apply Trapezoidal transformation using inverse CDF sampling ---
+# --- Apply trapezoidal transformation ---
 for param in custom_dist_params:
     if param not in Parameters_and_ranges:
         print(f"Warning: '{param}' not found in parameter list. Skipping.")
         continue
 
     idx = names.tolist().index(param)
-    low, high = Parameters_and_ranges[param]
+    a, d = Parameters_and_ranges[param]  # a = min_val, d = max_val
 
-    # Choose shape and scale for log-normal (tweakable)
-    s = 1
-    scale_param = 1  # Median will be at 1
-    dist = lognorm(s=s, scale=scale_param)
+    # Define inner plateau (can be customized)
+    range_width = d - a
+    #left = a + 0.3 * range_width
+    left = float(input(f"For {custom_dist_params[0]} which has a min and max value of {d} and min value of {a} Enter number of Vertex 1 (First peak (number 1)): "))
+    right = float(input("Enter number of Vertex 2 (Last peak (number 2)): "))
 
-    # Transform uniform LHC samples to log-normal
-    transformed = dist.ppf(lhs_sample[:, idx])
-    transformed = np.clip(transformed, low, high)
+    # right = d - 0.3 * range_width
 
-    # Replace column in LHC matrix
-    scale[:, idx] = transformed
+    # Trapezoid shape parameters
+    aL = int(input(f"Enter aL for {custom_dist_params[0]} which has a min and max value of {d} and min value of {a} (LEFT slope (1 = straight, 2 = slopes, > 2 is more slopes)): "))
+    aR = int(input(f"Enter aR (RIGHT slope (1 = straight, 2 = slopes, > 2 is more slopes)): "))
+
+    # aL = 2  # linear sides
+    # aR = 2
+    slope = 0
+
+    # Generate Trapezoidal samples using inverse CDF
+    samples = sample_from_trapezoidal(
+        n_samples=n_simulations,
+        min_val=a,
+        left=left,
+        right=right,
+        max_val=d,
+        aL=aL,
+        aR=aR,
+        slope=slope
+    )
+
+    # Replace column in LHC
+    scale[:, idx] = samples
 
 
 
 
 print('Your LHC has been saved as a .txt file and as a .csv file')
 print(f'the LHC has {np.shape(scale)[0]} simulations and {np.shape(scale)[1]} parameters')
-np.savetxt(f"{cwd}/parameter_values_data/LHC_Parameters.txt", scale, delimiter=" ")
-txt_to_csv(f"{cwd}/parameter_values_data/LHC_Parameters.txt", f"{cwd}/parameter_values_data/LHC_Parameters.csv")
+# np.savetxt(f"{cwd}/parameter_values_data/LHC_Parameters.txt", scale, delimiter=" ")
+# txt_to_csv(f"{cwd}/parameter_values_data/LHC_Parameters.txt", f"{cwd}/parameter_values_data/LHC_Parameters.csv")
