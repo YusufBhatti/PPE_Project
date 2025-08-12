@@ -1843,7 +1843,7 @@ CONTAINS
 !<<DN
                                nr_mode,  ni_mode,                                        &
                                omega_2d_mode, sigma_2d_mode, asym_2d_mode,               &
-                               nr_2d_mode,    ni_2d_mode,                                &
+                               nr_2d_mode,    ni_2d_mode, tau_2d_mode,                   &
 !>>NAJS: lidar backscatter
                                attbeta_tot_space, attbeta_tot_earth, beta_tot,           &
                                alfa_aer, alfa_gas, lidar_ratio_aer
@@ -2010,6 +2010,10 @@ CONTAINS
                    ni_2d_mode(jclass,jwv)%ptr(1:kproma,krow) = &
                        MERGE(zni(1:kproma)*ztmp1(1:kproma), 0._dp, ll1(1:kproma))
 
+! YAB 2d tau mode
+                   tau_2d_mode(jclass,jwv)%ptr(1:kproma,krow) = &
+                       MERGE(ztau(1:kproma), 0._dp, ll1(1:kproma))
+	       ! YAB
                    !<<SF #458 (replacing WHERE statements)
                 END IF
              END DO

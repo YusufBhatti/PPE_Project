@@ -141,6 +141,7 @@ MODULE mo_ham_streams
   TYPE (vmem2d), PUBLIC :: asym_2d_mode(nmaxclass,Nwv_tot)
   TYPE (vmem2d), PUBLIC :: nr_2d_mode(nmaxclass,Nwv_tot)
   TYPE (vmem2d), PUBLIC :: ni_2d_mode(nmaxclass,Nwv_tot)
+  TYPE (vmem2d), PUBLIC :: tau_2d_mode(nmaxclass,Nwv_tot) ! YAB
   TYPE (vmem2d), PUBLIC :: tau_2d(Nwv_tot)
   TYPE (vmem2d), PUBLIC :: abs_2d(Nwv_tot)
   TYPE (vmem2d), PUBLIC :: ant_2d(Nwv_tot)
@@ -626,6 +627,23 @@ MODULE mo_ham_streams
                                             longname='Refractive Index - imaginary part 2D '//cwv, &
                                             contnorest=.TRUE.    )
 
+		!>>YAB hjia Add tau_2d by mode
+!		    CALL add_stream_element(rad,, 'tau_2d_mode', field%tau_2d_mode3d,            &
+!                    & GRID_UNSTRUCTURED_CELL, ZA_SURFACE,                          &
+!                    & t_cf_var('TAU_2D_MODE', '1',                             &
+!                    &          'Optical thickness by mode',         &
+!                    &          datatype_flt, 'TAU_2D_MODE'),                     &
+!                    & grib2_var(200,255,255, ibits, GRID_UNSTRUCTURED, GRID_CELL), &
+!                    & ldims = (/kproma,kblks,Nwv_diag_wv1/),                       &
+!                    & lcontainer=.TRUE., lrestart=.FALSE., loutput=.FALSE.,        &
+!                    & lopenacc=.TRUE.                                              )
+!      __acc_attach(field%tau_2d_mode3d)
+
+		      CALL add_stream_element(rad,'TAU_2D_MODE_'//TRIM(sizeclass(jclass)%shortname)//'_'//cwv, &
+                                     tau_2d_mode(jclass,jwv)%ptr, units='1',       &
+                                     longname='Optical thickness'//TRIM(sizeclass(jclass)%shortname)//' '//cwv, &
+ 	 			     contnorest=.TRUE. )
+!<< YAB
                  END IF
 
                  IF (nraddiag==2) THEN
