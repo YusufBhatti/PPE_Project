@@ -8,7 +8,7 @@ The climate models are simulated with the [PPE_Aerosol](https://github.com/Yusuf
 
 [Python_Scripts](https://github.com/YusufBhatti/PPE_Project/tree/master/Python_Scripts) is the stage where all simulations have already been cleaned and post-processed, ready for emulating and analysis.
 
-For more details on the applicants for this work, see 
+For more details on the applications for this work, see 
 [Bhatti, Y., Watson-Parris, D., Regayre, L., Jia, H., Neubauer, D., Im, U., Svenhag, C., Schutgens, N., Tsikerdekis,
 A., Nenes, A., Muhammed, I., van Diedenhoven, B., Arifi, A., Fu, G., and Hasekamp, O.: Uncertainty in aerosol
 effective radiative forcing from anthropogenic and natural aerosol parameters in ECHAM6.3-HAM2.3, EGUsphere,
