@@ -91,6 +91,7 @@ MODULE mo_ham_streams
   REAL(dp), PUBLIC, POINTER :: d_cond_so4(:,:)
 
   REAL(dp), PUBLIC, POINTER :: d_nuc_so4(:,:)
+  REAL(dp), PUBLIC, POINTER :: zlwcv(:,:)
 
 !>>SF
   !-- diagnostics for cloud activation
@@ -327,6 +328,8 @@ MODULE mo_ham_streams
     CALL add_stream_element (stream_ham, 'D_NUC_SO4',         d_nuc_so4,                                &
                              longname='nucleation of sulfate',                  units='kg(SO4) m-2 s-1' )
 
+    CALL add_stream_element (stream_ham, 'water_volume_fraction',         zlwcv,                                &
+                             longname='total water volume fraction',                  units='m-3 m-3' )
     !--- 3D fields:
 
     CALL default_stream_setting (stream_ham, leveltype = HYBRID)

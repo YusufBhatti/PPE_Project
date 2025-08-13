@@ -61,6 +61,7 @@ MODULE mo_hammoz_aerocom_HEmon
   REAL(dp), PUBLIC, POINTER :: codice(:,:)
   REAL(dp), PUBLIC, POINTER :: clt(:,:)
   REAL(dp), PUBLIC, POINTER :: lcc(:,:)
+  REAL(dp), PUBLIC, POINTER :: icc(:,:) ! YAB added for ice
   REAL(dp), PUBLIC, POINTER :: rsut(:,:)
   REAL(dp), PUBLIC, POINTER :: rsutcs(:,:)
   REAL(dp), PUBLIC, POINTER :: rsutnoa(:,:)
@@ -257,7 +258,14 @@ MODULE mo_hammoz_aerocom_HEmon
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
-    
+! << YAB Adeed
+     CALL add_stream_element (achemon, 'icc', icc, &
+        longname = 'ice_cloud_area_fraction', &
+        units = '1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+! > YAB Added
      CALL add_stream_element (achemon, 'rsut', rsut, &
         longname = 'toa_upward_shortwave_flux', &
         units = 'W m-2', &
@@ -569,7 +577,7 @@ MODULE mo_hammoz_aerocom_HEmon
     REAL(dp) :: codliq_inst(kbdim),codice_inst(kbdim), tcc(kbdim)
     REAL(dp) :: zacltot(kbdim)     ! total cloud cover seen from above down to the current
     REAL(dp) :: zdeltacc(kbdim)    ! utility var 
-    REAL(dp) :: ztmp1_1d(kbdim), ztmp2_1d(kbdim), ztmp3_1d(kbdim), lcc_tmp(kbdim)
+    REAL(dp) :: ztmp1_1d(kbdim), ztmp2_1d(kbdim), ztmp3_1d(kbdim), lcc_tmp(kbdim), icc_tmp(kbdim) ! YAB added icc for ice cloud frac
     LOGICAL :: ll_vis(kbdim,klev)
     LOGICAL :: ll_liq(kbdim,klev)
     LOGICAL :: ll_ice(kbdim,klev)
@@ -588,6 +596,7 @@ MODULE mo_hammoz_aerocom_HEmon
     clt(1:kproma,krow) = clt(1:kproma,krow) + clt_inst(1:kproma,krow)*delta_time
 
     !-- lcc
+    icc_tmp(1:kproma) = 0._dp ! YAB 
     lcc_tmp(1:kproma) = 0._dp
     tcc(1:kproma)     = 1._dp
     zacltot(1:kproma) = 0._dp
@@ -611,6 +620,7 @@ MODULE mo_hammoz_aerocom_HEmon
   
        ztmp3_1d(1:kproma) = lcc_tmp(1:kproma) + phase3d(1:kproma,jk,krow) * zdeltacc(1:kproma)
        lcc_tmp(1:kproma) = MERGE(ztmp3_1d(1:kproma), lcc_tmp(1:kproma), ll_vis(1:kproma,jk))
+!       icc_tmp(1:kproma) = MERGE(ztmp3_1d(1:kproma), icc_tmp(1:kproma), ll_vis(1:kproma,jk))
 
        !-- final:
        tcc(1:kproma) = MERGE(zacltot(1:kproma), tcc(1:kproma), ll_vis(1:kproma,jk))

@@ -96,7 +96,7 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
   USE mo_ham_species,        ONLY: id_o3, id_h2o2, id_so2
   USE mo_ham_streams,        ONLY: d_prod_so4_liq,                &
                                    d_prod_ms4as,                  &
-                                   d_prod_ms4cs
+                                   d_prod_ms4cs!, zlwcv
   USE mo_exception,          ONLY: finish
   USE mo_ham_salsactl,       ONLY: in1a, in2b, fn2b, in2a, fn2a !TB for SALSA
   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions, scale_so2_aq_reactions
@@ -150,15 +150,16 @@ SUBROUTINE ham_wet_chemistry(kproma,  kbdim,  klev,      &
 
   REAL(dp):: zmin,zmolgh2o2, zmolgair, zmolgw,                   &
           ze1k, ze1h, ze3k, ze3h, zq298, zrgas,                  &
-          zhpbase, znamair, zlwcmin, zlwcl, zlwcv,               &
+          zhpbase, znamair, zlwcmin, zlwcl,                &
           zhp, zqtp1, zrk, zrke, zh_so2, zpfac, zp_so2, zf_so2,  &
           zh_h2o2, zp_h2o2, zf_h2o2, x, zc, ze1, ze2,            &
           ze3, zfac1, zrkfac, zza, za21, za22, zph_o3, zf_o3,    &
           zdt, zh2o2m, zso2m, zso4m, zq, zso2mh, zdso2h,         &
           zso2l, zso4l, zzb, zzp, zzq, zzp2, zqhp,               &
           za2, zheneff, zrko3, zso2mo, zdso2o, zdso2tot,         &
-          ztmst, zqtmst,                                         &
+          ztmst, zqtmst, zlwcv,                                   &
           zfraction
+
 
   REAL(dp) :: zhenry_so2(2)
 
@@ -617,7 +618,7 @@ SUBROUTINE ham_gas_chemistry(kbdim, klev, kproma, krow,        &
                                     d_prod_so4_dms_oh,  &
                                     d_prod_so2_dms_no3, &
                                     d_prod_so4_so2_oh,  & 
-                                    d_prod_h2so4
+                                    d_prod_h2so4  
   USE mo_exception,          ONLY: finish
   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_so2_reactions, scale_dms_reactions, scale_dms_so2_fraction
 
