@@ -2382,13 +2382,16 @@ SUBROUTINE m7_nuck(kproma,  kbdim,  klev,   krow,          &
 !>>YAB Added for perturbed physics setup:
 
   IF (lo_hammoz_perturbations) THEN
+    DO jk = 1, klev
+      DO jl = 1, kproma
 
 !    zsns(1:kproma,:)=zsns(1:kproma,:)*scale_nuc_ft
-    zsnrate(1:kproma,:)=zsnrate(1:kproma,:)*scale_nuc_ft
+	zsnrate(jl,jk)=zsnrate(jl,jk)*scale_nuc_ft ! FT nuc
 
 !    zons(1:kproma,:)=zons(1:kproma,:)*scale_nuc_bl
-!    zonrate(1:kproma,:)=zonrate(1:kproma,:)*scale_nuc_bl
-
+	zonrate(jl,jk)=zonrate(jl,jk)*scale_nuc_ft ! BL nuc
+      ENDDO
+    ENDDO
   ENDIF
 
 !<<YAB
