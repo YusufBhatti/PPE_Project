@@ -40,7 +40,7 @@ CONTAINS
     CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ANG_440nm_670nm' ,'rad',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'TAU_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'TAU_2D_355nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_3D_355nm','rad',lpost=.TRUE.)
 
     CALL add_stream_reference (hifreq, 'REFFL_CT','activ',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'CDNC_BURDEN','activ',lpost=.TRUE.)
@@ -51,7 +51,7 @@ CONTAINS
     CALL add_stream_reference (hifreq, 'CN_BURDEN','ham',lpost=.TRUE.) ! zrmin minimum radius changed to 1.0e-7 for PACE comparison
     CALL add_stream_reference (hifreq, 'CCN_0.300','ham',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'CCN_0.500','ham',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'CCN_1.500','ham',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'CCN_1.500','ham',lpost=.TRUE.)
 
     CALL add_stream_reference (hifreq, 'TAU_2D_MODE_KS_550nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'TAU_2D_MODE_CS_550nm','rad',lpost=.TRUE.)
