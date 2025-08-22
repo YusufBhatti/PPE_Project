@@ -1829,14 +1829,14 @@ CONTAINS
 !>>NAJS: lidar backscatter
                                nradbeta
 !<<NAJS
-    USE mo_ham_rad_data, ONLY: nraddiagwv, nradang,                                      &
+    USE mo_ham_rad_data, ONLY: nraddiagwv, nradang,  nradext355,  &! YAB added 355nm                                    &
 !>>NAJS: lidar backscatter
                                iradbeta,Niwv_sw_beta
 !<<NAJS
     USE mo_ham_streams,  ONLY: tau_mode, abs_mode, omega_mode, sigma_mode, asym_mode,    &
                                tau_comp, abs_comp, tau_2d,     abs_2d,     ang,      ai, &
 !>>PS: optical properties for dry aerosol
-                               tau_dry,  ext_dry,  abs_dry,                              &
+                               tau_dry,  ext_dry,  abs_dry, tau355, ang2,                              & ! YAB ang2 and tau355
 !<<PS
 !>>DN: AeroCom
                                abs_lev_dry,                                              &
@@ -2284,7 +2284,48 @@ CONTAINS
     ENDIF
 !<<PS
 
-    !--- 5) Calculate Angstroem parameter and Aerosol Index between two wavelengths:
+!>>YAB and hija
+    !--- 6) 3D layer aod diatnostics at 355nm
+
+    IF (nradext355/=0) THEN
+!          DO jk=1, klev
+!            DO jl=1, kproma
+!              ham_rad_field(jg)%tau355%p_3d(jl,jk,krow)=0.0_dp
+!	      tau355(jl,jk,krow)%ptr = 0._dp
+
+!	      abs_2d(jwv)%ptr(1:kproma,krow)=0.0_dp
+          tau355%ptr(1:kproma,:,krow) = 0.0_dp
+!	    END DO
+!          END DO
+
+          DO jclass=1, nclass
+             IF(nrad(jclass)>0)THEN
+
+!                tau_p   => ham_rad_field(jg)%tau_mode(jclass,nradext355)%p_3d
+		tau_p => tau_mode(jclass, nradext355)%ptr
+                !--- For each mode:
+!                DO jk=1, klev
+!                  DO jl=1, kproma
+!                     ham_rad_field(jg)%tau355%p_3d(jl,jk,krow)= ham_rad_field(jg)%tau355%p_3d(jl,jk,krow) + tau_p(jl,jk,krow)
+		 tau355%ptr(1:kproma,:,krow) = tau355%ptr(1:kproma,:,krow) + tau_p(1:kproma,:,krow)
+!		     tau355%ptr(jl,jk,krow) = tau355%ptr(jl,jk,krow) + tau_p(jl,jk,krow)
+!                  END DO
+!	        END DO
+             !END DO
+ !                 tau_p    => tau_mode(jclass,jwv)%ptr
+  
+                  !--- Optical thickness per mode at optional wavelengths:
+  
+ !                 tau_p(1:kproma,:,krow) = znum(1:kproma,:,jclass)*sigma(1:kproma,:,jwv,jclass)
+
+          END IF
+       END DO
+
+                !$ACC END DATA
+!             END IF
+ !         END DO  
+    END IF
+    !--- 5) Calculate Angstroem parameter and Aerosol Index between two wavelengths (550- 865 here):
 
     IF (nradang(1)/=0 .AND. nradang(2)/=0) THEN 
 
@@ -2315,7 +2356,36 @@ CONTAINS
        ai(1:kproma,krow)=MERGE(ztmp1(1:kproma)*ang(1:kproma,krow), ai(1:kproma,krow), ll1(1:kproma))
 
     END IF
-
+! YAB added new 440 to 690 nm 
+   IF (nradang(3)/=0 .AND. nradang(4)/=0) THEN 
+!
+      !>>SF #458 (replacing WHERE statements)
+      ll1(1:kproma) = (tau_2d(nradang(3))%ptr(1:kproma,krow)>zeps) &
+                .AND. (tau_2d(nradang(4))%ptr(1:kproma,krow)>zeps)
+!
+      ztmp1(1:kproma) = MERGE(tau_2d(nradang(3))%ptr(1:kproma,krow), 1._dp, ll1(1:kproma)) !SF 1. is dummy
+      ztmp2(1:kproma) = MERGE(tau_2d(nradang(4))%ptr(1:kproma,krow), 1._dp, ll1(1:kproma)) !SF 1. is dummy
+!
+     !--- Angstroem parameter:
+!
+      ang2(1:kproma,krow) = MERGE( &
+          LOG(ztmp2(1:kproma)/ztmp1(1:kproma)) / LOG(lambda(nradang(3))/lambda(nradang(4))), &
+          ang2(1:kproma,krow), &                           
+          ll1(1:kproma))
+      
+      !<<SF #458 (replacing WHERE statements)
+      
+!!>>DN
+!      IF (lHEaci) THEN
+!         aerindex_inst(1:kproma,krow)=tau_2d(nradang(1))%ptr(1:kproma,krow)*ang(1:kproma,krow)
+!      ENDIF
+!!<<DN
+!
+!       !--- 5) Calculate Aerosol Index (AOD)
+!
+!!       ai(1:kproma,krow)=MERGE(ztmp1(1:kproma)*ang(1:kproma,krow), ai(1:kproma,krow), ll1(1:kproma))
+!
+    END IF
 !>>NAJS: lidar backscatter
     !-- 6) Calculate lidar backscatter
 ! This uses the same method as COSP to solve the LIDAR equation, however it

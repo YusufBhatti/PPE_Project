@@ -61,6 +61,7 @@ MODULE mo_hammoz_perturbations
 	    scale_emi_ss_coarse, &
 	    scale_emi_ant_so2, scale_emi_ant_bc, scale_emi_ant_oc, &
             scale_emi_bb_so2, scale_emi_bb_bc, scale_emi_bb_oc, &
+	    scale_emi_antns_so2, scale_emi_shp_so2, &
 	    scale_fi, scale_gi, scale_activation, scale_fricv
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
@@ -109,6 +110,8 @@ MODULE mo_hammoz_perturbations
                  scale_dms_sc = 1.0_dp,  &   ! Scale factor schmidt number ratio of DMS
                  scale_seasalt_expo = 1.0_dp,  &  ! Scale factor for sea salt exponent
                  scale_emi_ant_so2 = 1.0_dp, &! Scale factor for so2 emissions (ant sectors) 
+                 scale_emi_antns_so2 = 1.0_dp, & ! Scale factor for so2 emissions (ant sectors without shipping)
+                 scale_emi_shp_so2 = 1.0_dp, & ! Scale factor for so2 emissions (shipping sector)
                  scale_emi_ant_bc = 1.0_dp, & ! Scale factor for bc emissions (ant sectors)
                  scale_emi_ant_oc = 1.0_dp, & ! Scale factor for oc emissions (ant sectors)
                  scale_emi_bb_so2 = 1.0_dp, & ! Scale factor for so2 emissions (fire/bb sectors)
@@ -238,12 +241,14 @@ CONTAINS
        CALL p_bcast (scale_emi_ss_acc,        p_io)
        CALL p_bcast (scale_emi_du,        p_io)
        CALL p_bcast (scale_emi_so2,        p_io)
-       CALL p_bcast (scale_emi_so2,        p_io)
        CALL p_bcast( scale_emi_ant_bc ,    p_io)
        CALL p_bcast( scale_emi_ant_oc ,    p_io)
        CALL p_bcast( scale_emi_bb_so2 ,    p_io)
        CALL p_bcast( scale_emi_bb_bc ,     p_io)
        CALL p_bcast( scale_emi_bb_oc ,     p_io) 
+       CALL p_bcast( scale_emi_ant_so2 ,     p_io) 
+       CALL p_bcast( scale_emi_antns_so2 ,     p_io) 
+       CALL p_bcast( scale_emi_shp_so2 ,     p_io) 
        CALL p_bcast (scale_drydep_acc,     p_io)
        CALL p_bcast (scale_wetdep_ic,      p_io)
        CALL p_bcast (scale_wetdep_bc,      p_io)
@@ -333,6 +338,8 @@ CONTAINS
     CALL print_value('Emission scaling factor (threshold of friction velocity for DUST)', scale_fricv)
 
     CALL print_value('Emission scaling factor (scale_emi_ant_so2)', scale_emi_ant_so2 )
+    CALL print_value('Emission scaling factor (scale_emi_antns_so2)', scale_emi_antns_so2 )
+    CALL print_value('Emission scaling factor (scale_emi_shp_so2)', scale_emi_shp_so2 )
     CALL print_value('Emission scaling factor (scale_emi_ant_bc)', scale_emi_ant_bc )
     CALL print_value('Emission scaling factor (scale_emi_ant_oc)', scale_emi_ant_oc )
     CALL print_value('Emission scaling factor (scale_emi_bb_so2)', scale_emi_bb_so2 )
@@ -434,7 +441,9 @@ CONTAINS
     !--- Anthropogenic sectors
 !    CHARACTER(LEN=64), DIMENSION(7) :: sectors_ant=(/ 'AIRC', 'DOM', 'ENE', 'IND', 'SHIPS', 'TRA', 'WST' /)
     CHARACTER(LEN=64), DIMENSION(6) :: sectors_ff
-    CHARACTER(LEN=64), DIMENSION(7) :: sectors_ant
+    CHARACTER(LEN=64), DIMENSION(6) :: sectors_ant
+    CHARACTER(LEN=64), DIMENSION(6) :: sectors_antns
+    CHARACTER(LEN=64), DIMENSION(1) :: sectors_shp
     CHARACTER(LEN=64), DIMENSION(1) :: sectors_dms
     !--- Initialize fossil fuel sectors
     sectors_ff(1) = 'AIRC'
@@ -449,10 +458,20 @@ CONTAINS
     sectors_ant(2) = 'DOM'
     sectors_ant(3) = 'ENE'
     sectors_ant(4) = 'IND'
-    sectors_ant(5) = 'SHIPS'
-    sectors_ant(6) = 'TRA'
-    sectors_ant(7) = 'WST'
+    sectors_ant(1) = 'SHIPS'
+    sectors_ant(5) = 'TRA'
+    sectors_ant(6) = 'WST'
 
+
+    !--- Initialize anthropogenic sectors
+    sectors_antns(1) = 'AIRC'
+    sectors_antns(2) = 'DOM'
+    sectors_antns(3) = 'ENE'
+    sectors_antns(4) = 'IND'
+    sectors_antns(5) = 'TRA'
+    sectors_antns(6) = 'WST'
+
+    sectors_shp(1) = 'SHIPS'
 
     sectors_dms(1) = 'OCEANI'
     CALL message('',separator)
@@ -534,6 +553,34 @@ CONTAINS
         !oc
         IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "OC") THEN
           ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_ant_oc
+        END IF
+      ENDDO
+    ENDDO
+
+    !--- SO2 from anthropogenic production without shipping:
+
+    nsec=SIZE(sectors_antns)
+    DO isec=1, nsec
+      ind=em_get_SectorIndex(TRIM(sectors_antns(isec)))
+      nvars=ematrix%em_sectors(ind)%es_nvars
+      DO i=1, nvars
+        !so2
+        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "SO2") THEN
+          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_antns_so2
+        END IF
+      ENDDO
+    ENDDO
+
+    !--- SO2 from Shipping:
+
+    nsec=SIZE(sectors_shp)
+    DO isec=1, nsec
+      ind=em_get_SectorIndex(TRIM(sectors_shp(isec)))
+      nvars=ematrix%em_sectors(ind)%es_nvars
+      DO i=1, nvars
+        !so2
+        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "SO2") THEN
+          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_shp_so2
         END IF
       ENDDO
     ENDDO

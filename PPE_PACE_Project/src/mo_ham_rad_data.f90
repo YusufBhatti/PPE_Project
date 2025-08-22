@@ -71,7 +71,7 @@ MODULE mo_ham_rad_data
             iradbeta, Niwv_sw_beta,           &
 !<<NAJS
 !>>NAJS: optical properties for dry aerosol
-            iraddry,  Niwv_sw_dry
+            iraddry,  Niwv_sw_dry, nradext355 ! Add nradext355 YAB
 !<<NAJS
 
   !---public member functions
@@ -124,7 +124,7 @@ MODULE mo_ham_rad_data
 !                        Nwv_sw_opt = 2,  &   !--Optional SW wavebands (550nm+865nm)
 ! << YAB adding 670 nm
 !                        Nwv_sw_opt = 3,  &   !--Optional SW wavebands (550nm+870nm+440nm)
-                        Nwv_sw_opt = 4,  &   !--Optional SW wavebands (550nm+870nm+440nm+670nm)
+                        Nwv_sw_opt = 5,  &   !--Optional SW wavebands (550nm+865nm+440nm+670nm+355nm)
 !! >> YAB
                         Nwv_sw_tot = Nwv_sw+Nwv_sw_opt, &
                         Nwv_lw     = 16, &   !--RRTM-LW GCM wavebands
@@ -140,7 +140,8 @@ MODULE mo_ham_rad_data
 !  REAL(dp), PARAMETER :: lambda_sw_opt(2)=(/ 0.550E-6_dp, 0.865E-6_dp /)
 !! << YAB Adding 670nm 
 !  REAL(dp), PARAMETER :: lambda_sw_opt(3)=(/ 0.550E-6_dp, 0.865E-6_dp , 0.440E-6_dp/)
-  REAL(dp), PARAMETER :: lambda_sw_opt(4)=(/ 0.550E-6_dp, 0.865E-6_dp, 0.440E-6_dp, 0.670E-6_dp /)
+!  REAL(dp), PARAMETER :: lambda_sw_opt(4)=(/ 0.550E-6_dp, 0.865E-6_dp, 0.440E-6_dp, 0.670E-6_dp /)
+  REAL(dp), PARAMETER :: lambda_sw_opt(5)=(/ 0.550E-6_dp, 0.865E-6_dp, 0.440E-6_dp, 0.670E-6_dp, 0.355E-6_dp /)
 !! >> YAB
   !--- Define mask for output of wavelengths: 
   !
@@ -150,8 +151,13 @@ MODULE mo_ham_rad_data
   !                   =3   AOD+AAOD+...
 
   INTEGER :: nraddiagwv(Nwv_tot)
+! < YAB Add 440&670nm for ANG ! the 4 will represent 2 wavelength outputs in the streams file.
+!  INTEGER :: nradang(2)
+  INTEGER :: nradang(4)
 
-  INTEGER :: nradang(2)
+    ! Add 355nm for layer AOD diag                                                          |    !>>NAJS: lidar backscatter                                                             
+  INTEGER :: nradext355
+! > YAB
 
 !>>NAJS: lidar backscatter
   INTEGER, PARAMETER :: iradbeta(Niwv_sw_beta) = (/ 10 /) ! indices to sw wavelengths (533nm) for backscatter factor
@@ -216,11 +222,15 @@ CONTAINS
 
        !--- Define wavelengths for Angstroem diagnostics (currently first two optional wavelengths):
 ! < YAB Adding diagnostics
-       !nradang(1)=Nwv_sw+1
-       !nradang(2)=nradang(1)+1
+       nradang(1)=Nwv_sw+1 ! 550nm
+       nradang(2)=Nwv_sw+2 ! 865nm
+       nradang(3)=Nwv_sw+3 ! 440nm
+       nradang(4)=Nwv_sw+4 ! 670nm
 
-       nradang(1)=Nwv_sw+3
-       nradang(2)=Nwv_sw+4
+       !--- Define wavelength for layer AOD
+       nradext355=Nwv_sw+5 ! 355nm
+!<<hjia and YAB
+
        ! >> YAB 
     END IF
 
@@ -241,7 +251,7 @@ CONTAINS
            7.900E-06_dp,   1.300E-06_dp,  5.200E-08_dp,  1.000E-09_dp,  1.000E-09_dp,  1.000E-09_dp,  &
            1.000E-09_dp,   2.600E-01_dp                                                               /)
 
-   !--- Optional Wavelengths at 550, 865nm and 440nm:
+   !--- Optional Wavelengths at 550, 865nm, 440nm, 670nm and 355nm:
 !! << YAB Adding 670nm to SO4
 !   cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradso4) =                                                          &
 !        (/ 1.432_dp,       1.424_dp,      1.44_dp                                                     /)
@@ -250,10 +260,10 @@ CONTAINS
 !        (/ 1.000E-09_dp,   7.384E-07_dp,  1.000E-9_dp                                                 /)
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradso4) =                                                          &
-          (/ 1.432_dp,       1.424_dp,      1.44_dp, 1.428_dp                                                     /)
+        (/ 1.432_dp,       1.424_dp,      1.44_dp,        1.428_dp,       1.447_dp                    /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradso4) =                                                          &
-          (/ 1.000E-09_dp,   7.384E-07_dp,  1.000E-9_dp, 4.300E-8_dp                                                /)
+        (/ 1.000E-09_dp,   7.384E-07_dp,   1.000E-09_dp,    4.300E-08_dp,    1.000E-09_dp             /)
 
 !>> YAB
    !--- Black Carbon (Medium-absorbing values from Bond & Bergstrom, 2006):
@@ -271,20 +281,20 @@ CONTAINS
            7.274E-01_dp,  7.106E-01_dp,  6.939E-01_dp,  7.213E-01_dp,  7.294E-01_dp,  7.584E-01_dp,  &
            7.261E-01_dp,  1.088E+00_dp                                                               /)
 
-!! << YAB Adding wavelenght to BC
+!! << YAB Adding wavelength to BC
 !   cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
 !        (/ 1.85_dp,       1.85_dp,       1.843_dp                                                   /)
 !
 !   cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
 !        (/ 7.10E-01_dp,   6.99E-01_dp,   7.265E-01_dp                                                 /)
-   !--- Optional Wavelengths at 550nm, 865nm and 440nm, 670nm ! YAB added 670nm:
+   !--- Optional Wavelengths at 550nm, 865nm, 440nm, 670nm and 355nm:
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
-        (/ 1.85_dp,       1.85_dp,       1.843_dp, 1.85_dp                                                    /)
+        (/ 1.85_dp,       1.85_dp,       1.843_dp,   1.85_dp,  1.839_dp                              /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradbc) =                                                          &
-        (/ 7.10E-01_dp,   6.99E-01_dp,   7.265E-01_dp, 1.98E-01_dp                                                 /)
-! >> YAB added 670nm to BC
+        (/ 7.10E-01_dp,   6.99E-01_dp,   7.265E-01_dp,   1.98E-01_dp,  7.407E-01_dp                  /)
+! >> YAB added to BC only SW
    !>>dwp Adding perturbed physics scaling for BC imaginary refractive index (SW
    !only):
    IF (lo_hammoz_perturbations) THEN 
@@ -311,7 +321,7 @@ CONTAINS
            1.77E-02_dp,   2.01E-02_dp,   1.50E-02_dp,   7.70E-03_dp,   9.75E-03_dp,   1.63E-02_dp,    &
            5.27E-03_dp,   7.24E-02_dp                                                                 /)
 
-   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
+   !--- Optional Wavelengths at 550nm, 865nm, 440nm, and 355nm:
 !! < YAB OC 670nm
 !   cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradoc) =                                                          &
 !        (/ 1.53_dp,       1.52_dp,       1.530_dp                                                    /)
@@ -320,12 +330,12 @@ CONTAINS
 !        (/ 5.50E-03_dp,   1.10E-02_dp,   9.02E-3_dp                                                  /)
 
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradoc) =                                                          &
-          (/ 1.53_dp,       1.52_dp,       1.530_dp, 1.530_dp                                                    /)
+        (/ 1.53_dp,       1.52_dp,       1.53_dp,    1.53_dp,     1.496_dp                            /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradoc) =                                                          &
-          (/ 5.50E-03_dp,   1.10E-02_dp,   9.02E-3_dp,   1.37E-2_dp                                                  /)
+        (/ 5.50E-03_dp,   1.10E-02_dp,      9.02E-03_dp,   1.37E-02_dp,    1.23E-02_dp             /)
 
-!! >> YAB end 670nm
+!! >> YAB end
    !<<YAB Adding perturbed physics scaling for OC imaginary refractive index (SW
    !only):
 
@@ -347,6 +357,7 @@ CONTAINS
            1.000E-05_dp,  1.400E-02_dp                                                               /)
 
    !--- Optional Wavelengths at 550nm, 865nm and 440nm:
+   !--- Optional Wavelengths at 550nm, 865nm, 440nm, 670nm, and 355nm:
 ! << YAB 670nm for SS
 
 !   cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradss) =                                                          &
@@ -355,11 +366,11 @@ CONTAINS
 !   cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradss) =                                                          &
 !        (/ 1.000E-08_dp,  1.000E-8_dp,   1.643E-08_dp                                                /)
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradss) =                                                          &
-        (/ 1.450_dp,      1.470_dp,      1.496_dp, 1.48_dp                                                    /)
+        (/ 1.450_dp,      1.470_dp,       1.496_dp,      1.480_dp,      1.504_dp                     /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradss) =                                                          &
-        (/ 1.000E-08_dp,  1.000E-8_dp,   1.643E-08_dp,   8.41E-08_dp                                              /)
-
+        (/ 1.000E-08_dp,  1.000E-08_dp,      1.643E-08_dp,   8.41E-08_dp,      4.01E-07_dp               /)
+! > YAB
   !--- Dust (provided by Stefan Kinne, MPI-MET:
   !    mainly based on Sokolik & Toon, JGR, 1999)
   !    imaginary parts in the visible modified according to AERONET statistics
@@ -375,7 +386,7 @@ CONTAINS
            6.000E-04_dp,  7.500E-04_dp,  9.500E-04_dp,  1.000E-03_dp,  2.500E-03_dp,  2.000E-02_dp,  &
            2.500E-02_dp,  1.000E-01_dp                                                               /)
 
-   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
+   !--- Optional Wavelengths at 550nm, 865nm, 440nm, 670nm and 355nm:
 
 ! << YAB 670nm for DUST
 !   cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
@@ -384,10 +395,10 @@ CONTAINS
 !   cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
 !        (/ 1.000E-03_dp,  8.400E-04_dp,  1.964E-03_dp                                                /)
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
-          (/ 1.450_dp,      1.450_dp,      1.450_dp, 1.450_dp                                                     /)
+        (/ 1.450_dp,      1.450_dp,      1.450_dp,      1.450_dp,     1.450_dp                       /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iraddu) =                                                          &
-          (/ 1.000E-03_dp,  8.400E-04_dp,  1.964E-03_dp, 9.59E-04_dp                                              /)
+        (/ 1.000E-03_dp,  8.400E-04_dp,   1.964E-03_dp,   9.59E-04_dp,    9.306E-03_dp               /)
 !! >YAB
 
 !<  YAB added for aerosol ppe
@@ -410,7 +421,7 @@ CONTAINS
            1.200E-05_dp,  2.100E-06_dp,  6.800E-08_dp,  2.800E-09_dp,  3.900E-09_dp,  1.700E-08_dp,  &
            6.400E-08_dp,  4.000E-02_dp                                                               /)
 
-   !--- Optional Wavelengths at 550nm, 865nm and 440nm:
+   !--- Optional Wavelengths at 550nm, 865nm, 440nm, 670nm and 355nm:
 
 ! << YAB 670nm for WAT
 !   cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradwat) =                                                         &
@@ -419,10 +430,10 @@ CONTAINS
 !   cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradwat) =                                                         &
 !        (/ 2.800E-09_dp,  1.186E-06_dp,  3.507E-09_dp                                                /)
    cnr(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradwat) =                                                         &
-          (/ 1.335_dp,      1.329_dp,      1.339_dp, 1.332_dp                                                    /)
+        (/ 1.335_dp,      1.329_dp,     1.339_dp,     1.332_dp,    1.345_dp                          /)
 
    cni(Nwv_sw+1:Nwv_sw+Nwv_sw_opt,iradwat) =                                                         &
-          (/ 2.800E-09_dp,  1.186E-06_dp,  3.507E-09_dp, 5.649E-08_dp                                                /)
+        (/ 2.800E-09_dp,     1.186E-06_dp,    3.507E-09_dp,    5.649E-08_dp,   8.994E-09_dp          /)
 !! >> YAB
 
    !--- 2) LW refractive indices:

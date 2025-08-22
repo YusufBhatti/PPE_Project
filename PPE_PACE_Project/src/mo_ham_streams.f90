@@ -124,9 +124,11 @@ MODULE mo_ham_streams
   TYPE (vmem2d), PUBLIC :: ccn_2d(nsat)
   TYPE (vmem2d), PUBLIC :: ccn_burden(nsat)
   TYPE (vmem3d), PUBLIC :: ccn_3d(nsat)
+!  TYPE (vmem3d), PUBLIC :: tau355(nsat) ! YAB 355 AOD 3D
   REAL(dp), PUBLIC, POINTER :: cn_2d(:,:)
   REAL(dp), PUBLIC, POINTER :: cn_burden(:,:)
   REAL(dp), PUBLIC, POINTER :: cn_3d(:,:,:)
+!  REAL(dp), PUBLIC, POINTER :: tau355(:,:,:)
 
   !-- ham radiation diagnostics (former mo_aero_rad_mem)
   TYPE (vmem3d), PUBLIC :: tau_mode(nmaxclass,Nwv_tot)
@@ -153,6 +155,7 @@ MODULE mo_ham_streams
 !<<NAJS
 !>>DN: AeroCom
   TYPE (vmem3d), PUBLIC :: abs_lev_dry(Niwv_sw_dry)
+  TYPE (vmem3d), PUBLIC :: tau355
 !<<DN
 
   TYPE (vmem2d), ALLOCATABLE, PUBLIC :: tau_comp(:,:)
@@ -160,6 +163,8 @@ MODULE mo_ham_streams
 
   REAL(dp), PUBLIC, POINTER :: ang(:,:)
   REAL(dp), PUBLIC, POINTER :: ai(:,:)
+  REAL(dp), PUBLIC, POINTER :: tau_2d_mode3d(:,:,:)  !hjia YAB
+  REAL(dp), PUBLIC, POINTER :: ang2(:,:)! hjia Add 440&670nm & YAB
 
 !>>NAJS: lidar backscatter
   TYPE (vmem3d), PUBLIC :: attbeta_tot_space(Niwv_sw_beta) ! 3D attenuated aerosol and gas backscatter from space
@@ -526,7 +531,7 @@ MODULE mo_ham_streams
   USE mo_linked_list,   ONLY: t_stream, SURFACE, HYBRID
   USE mo_filename,      ONLY: trac_filetype
   USE mo_species,       ONLY: speclist
-  USE mo_ham_rad_data,  ONLY: lambda, nradang
+  USE mo_ham_rad_data,  ONLY: lambda, nradang, nradext355 ! YAB added nradext355
   USE mo_ham_rad_data,  ONLY: Nwv_tot, nraddiagwv, iradbeta, Niwv_sw_beta
   USE mo_exception,     ONLY: finish
   USE mo_ham,           ONLY: nclass, nraddiag, sizeclass, nrad, subm_naerospec, subm_aerospec, &
@@ -754,6 +759,7 @@ MODULE mo_ham_streams
 
   CALL default_stream_setting (rad, leveltype = SURFACE )
 
+
   IF (nradang(1)/=0 .AND. nradang(2)/=0) THEN
 
      IF (nraddiagwv(nradang(1))>0 .AND. nraddiagwv(nradang(2))>0 ) THEN
@@ -776,6 +782,48 @@ MODULE mo_ham_streams
      END IF
 
   END IF
+! Add AE to 440 to 660 nm
+  IF (nradang(3)/=0 .AND. nradang(4)/=0) THEN
+
+     IF (nraddiagwv(nradang(3))>0 .AND. nraddiagwv(nradang(4))>0 ) THEN
+
+        WRITE(cwv,'(I6)') INT(lambda(nradang(3))*1.E9_dp)
+        cwv=TRIM(ADJUSTL(cwv))//'nm'
+
+        WRITE(cwv2,'(I6)') INT(lambda(nradang(4))*1.E9_dp)
+        cwv2=TRIM(ADJUSTL(cwv2))//'nm'
+
+        CALL add_stream_element(rad, 'ANG_'//TRIM(ADJUSTL(cwv))//'_'//TRIM(ADJUSTL(cwv2)), ang2, units='1', &
+                               longname='Angstroem parameter between '//TRIM(ADJUSTL(cwv))//' and '//TRIM(ADJUSTL(cwv2)) )
+
+     ELSE
+        CALL finish('construct_stream_ham_rad:','Angstroem parameter between '//TRIM(ADJUSTL(cwv))  &
+                    //' and '//TRIM(ADJUSTL(cwv2))//' requested but inconsistent nraddiagwv')
+     END IF
+
+  END IF
+!<<hjia Added AOD profile @355nm YAB for ECHAM
+    IF (nradext355/=0) THEN
+
+       IF (nraddiagwv(nradext355)>0 ) THEN
+
+          WRITE(cwv,'(I6)') INT(lambda(nradext355)*1.E9_dp)
+          cwv=TRIM(ADJUSTL(cwv))//'nm'
+          CALL default_stream_setting (rad, leveltype = HYBRID )
+
+          CALL add_stream_element(rad, 'TAU_3D_'//TRIM(ADJUSTL(cwv)),     tau355%ptr,     units='1', &
+	                                longname='Optical thickness Total TAU_3D '//cwv   )
+
+
+!             CALL add_stream_element(rad, 'TAU_2D'//'_'//cwv,  tau_2d(jwv)%ptr,     units='1',  &
+!                                     longname='Optical thickness - total '//cwv    )
+
+       ELSE
+          CALL finish('construct_stream_ham_rad:','TAU355'//'_'//cwv//' requested but inconsistent nraddiagwv')
+       END IF
+
+    END IF
+    !! >> YAB end
 
 !>>NAJS: lidar backscatter
   !--- 3) Aerosol and gaseous backscatter:

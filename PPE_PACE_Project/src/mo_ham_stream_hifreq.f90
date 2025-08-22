@@ -37,7 +37,7 @@ CONTAINS
 
     CALL add_stream_reference (hifreq, 'TAU_2D_550nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ABS_2D_550nm','rad',lpost=.TRUE.)
-!   CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ANG_440nm_670nm' ,'rad',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'TAU_550nm','rad',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'TAU_2D_355nm','rad',lpost=.TRUE.)

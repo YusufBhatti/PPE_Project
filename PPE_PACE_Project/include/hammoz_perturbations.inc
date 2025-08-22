@@ -44,6 +44,9 @@ NAMELIST /hammoz_perturbations/ &
   scale_emi_cmr_bb,         & ! Scale factor for emission count median raduius for wildfires
 !  scale_emi_cmr_bf,         & ! Scale factor for emission count median raduius for biogenic emissions
   scale_emi_ff,             & ! Scale factor for fossil fule emissions
+  scale_emi_ant_so2,        & ! Scale factor for anthropogenic SO2 emissions all
+  scale_emi_antns_so2,        & ! Scale factor for anthropogenic SO2 emissions and no SHIPS
+  scale_emi_shp_so2,        & ! Scale factor for anthropogenic SO2 emissions from SHIPS
   scale_emi_bb,             & ! Scale factor for wildfire emissions
   scale_emi_bf,             & ! Scale factor for biofuel emissions
   scale_emi_bc,             & ! Scale factor for BC emissions (all sectors)
