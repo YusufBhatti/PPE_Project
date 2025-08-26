@@ -203,8 +203,8 @@ I will make the variables below input values, so you can manually identify which
 # Predefined trapezoidal shape settings for specific parameters:
 # Format: param_name: (vertex1, vertex2, aL, aR)
 trapezoidal_param_config = {
-    "SCALE_EMI_ANT_SO2":     (0.6, 1.4, 0, 1),
-    "SCALE_EMI_SHIP_SO2":    (0.25, 1.75, 0, 2),
+    "SCALE_EMI_ANTNS_SO2":   (0.6, 1.4, 0, 1),
+    "SCALE_EMI_SIP_SO2":     (0.25, 1.75, 0, 2),
     "SCALE_EMI_ANT_BC":      (0.6, 1.4, 0, 1),
     "SCALE_EMI_ANT_OC":      (0.6, 1.4, 0, 1),
     "SCALE_EMI_BB_SO2":      (0.25, 2, 0, 1),
