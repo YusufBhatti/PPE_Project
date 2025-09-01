@@ -1,12 +1,11 @@
-#!/bin/bash --login
-#PBS -N PPE_test_run
-#PBS -q genoa
-#PBS -l walltime=125:00:00
-#PBS -l select=11
-#PBS -j oe
-#PBS -A srsei9480 
-#PBS -M y.bhatti@sron.nl
-#PBS -m ae
+#!/bin/bash
+#SBATCH --job-name=PPE_test_run
+#SBATCH --partition=genoa
+#SBATCH --time=3:0:00
+#SBATCH --nodes=2
+#SBATCH --account=srsei9480
+#SBATCH --output=%x_%j.out
+#SBATCH --error=%x_%j.err
 
 #--- comments -------------------------------------------------------
 # *******
@@ -60,23 +59,22 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=10  # Maximum number of experiments run concurrently
-nexp_maxran=40      # Maximum number of experiments run by this batch job
+nexp_maxrunning=1  # Maximum number of experiments run concurrently
+nexp_maxran=1      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 #rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
-PPEdir='/home/ybhatti/yusufb/Branches/PPE_Aerosols/my_experiments/PPE_Experiments/'
+PPEdir='/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/my_experiments/PPE_Experiments/'
 PPElog=$cwd'PPE_log.txt'
 PPEtmp=$cwd'PPE_tmp.txt'
-PPEdefaults=$cwd'PPE_Default'
 PPEvalues=$cwd'PPE_values.txt'
 
 #--- set maximum number of qsub runs ---
 #max_qsub_runs=$((nexp_maxran / nexp_maxrunning - 1))
-max_qsub_runs = 3 # I will want this script to run 4 times (0-3) = 40 * 4 simulations)
+max_qsub_runs=3 # I will want this script to run 4 times (0-3) = 40 * 4 simulations)
 #--- maintain qsub run count ---
 if [ ! -f "${cwd}/current_qsub_run.txt" ]; then
   echo 0 > "${cwd}/current_qsub_run.txt"
@@ -174,12 +172,13 @@ echo 'Moving Data over to archive, except for restart files' >>$PPElog
 
 
 #--- run the batch job again if conditions are met ---
-if [[ "$current_qsub_run" -lt "$max_qsub_runs" ]]; then
-  current_qsub_run=$((current_qsub_run + 1))
-  echo $current_qsub_run > "${cwd}/current_qsub_run.txt"
-  qsub PPE_batch.sh
-  echo "Submitted PPE_batch.sh for the $current_qsub_run time out of $max_qsub_runs times" >>$PPElog
-else
-  echo "Max qsub runs of $max_qsub_runs reached. Exiting." >>$PPElog
-  rm ${cwd}/current_qsub_run.txt
-fi
+#if [[ "$current_qsub_run" -lt "$max_qsub_runs" ]]; then
+#  current_qsub_run=$((current_qsub_run + 1))
+#  echo $current_qsub_run > "${cwd}/current_qsub_run.txt"
+##  qsub PPE_batch.sh
+#  sbatch PPE_batch.sh
+#  echo "Submitted PPE_batch.sh for the $current_qsub_run time out of $max_qsub_runs times" >>$PPElog
+#else
+#  echo "Max qsub runs of $max_qsub_runs reached. Exiting." >>$PPElog
+#  rm ${cwd}/current_qsub_run.txt
+#fi

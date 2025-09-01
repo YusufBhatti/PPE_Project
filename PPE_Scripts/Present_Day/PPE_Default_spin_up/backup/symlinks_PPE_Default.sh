@@ -46,8 +46,8 @@
 # Machine-specific (customize your path here):
 #----------------------------------------------
 
-input_basepath="/projects/0/prjs1474/aarifi/INPUT/${input_files_version}" # where all input files except nudging data is to be found
-nudg_basepath="/projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/" # where all nudging data is to be found
+input_basepath="/home/ybhatti/yusufb/MODEL_INPUT/${input_files_version}" # where all input files except nudging data is to be found
+nudg_basepath="/home/ybhatti/yusufb/MODEL_INPUT/Nudging_tmp" # where all nudging data is to be found
 
 #--------------------------------------------------
 # You shouldn't need to modify the following
@@ -90,9 +90,9 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
 
       # sst_sic_dataset is set by default to 'amip', you may set an alternate value below:
       # uncomment the following line to override the automatic setting:
-      sst_sic_dataset="era5" #SF tmp
+      sst_sic_dataset="amip" #SF tmp
 
-      possible_values=( amip era5 ) # add additional values in case you want to use an alternate sst/sic dataset
+      possible_values=( amip ) # add additional values in case you want to use an alternate sst/sic dataset
       case_insensitive=true
       if [ ! -z $sst_sic_dataset ] ; then
          flag_check $case_insensitive sst_sic_dataset "${possible_values[@]}"
@@ -211,7 +211,7 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
 
       # scenario is defined in the settings file:
 
-      possible_values=( "ssp[0-9][0-9][0-9]" "historic" ) # add additional patterns in case you want to use an 
+      possible_values=( "rcp[0-9][0-9]" "historic" ) # add additional patterns in case you want to use an 
                                           # alternate scenario
       case_insensitive=true
       if [ ! -z $scenario ] ; then
@@ -441,17 +441,9 @@ cd $exp_dir
 
 #SF this should not be necessary, but is conserved for security (in case 'ln' is not GNU ln)
 #SF exclude the links to restart files
-#Restart_file = '/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control'
-#Restart_Model = 'restart_PPE_ENS_Control'
-#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
-find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" \
-               -and -not -name "flxatm*" \
-               -and -not -name "sstoce*" \
-               -and -not -name "hdrestart*" \
-     -exec \rm -f {} \;
 
-#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
-#restart_Control_Run_20060404234500
+find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
+
 #--------
 # ECHAM6  
 #--------
@@ -482,59 +474,12 @@ if $flag_hd ; then
 
 fi
 
-#-----------------------------------------------------------------
-#-- Handle the restart file management in case of a faked restart
-#
-#   (ie using a set of restart files from another experiment)
-#    with potentially editing the date to fit with current 
-#    experiment purposes...)
-
-# Note that in the case of mpiom and hamocc files, this is not a symlink operation but a
-# copy because their date must be edited to fit with current experiment purposes...
-
-if $faked_restart ; then
-
-   parent_exp="PPE_ENS_Control"
-   parent_restart_dir=$(eval "echo $parent_restart_dir")
-
-   echo "Reminder: you are using a faked restart setup, with:\n"
-
-   max_string="Faked experiment start datetime"
-   len="${#max_string}"
-   echo "Parent experiment name" "$parent_exp" $len
-   echo "Parent restart directory" $parent_restart_dir $len
-   echo "Parent current date" "$parent_current_date" $len
-   echo "Faked experiment start datetime" "`date --utc \"+%F %T\" --date \"$faked_exp_start_datetime\"`" \
-            $len
-   echo "Prefix rerun" "$prefix_rerun_file"
-   echo "restart file =" "${prefix_rerun_file}_${parent_exp}_${parent_current_date}_*$suffix_rerun_file"
-
-   #-- General case
-   list_files_to_link=( \
-     $(find -L $parent_restart_dir \
-            -name "${prefix_rerun_file}_${parent_exp}_${parent_current_date}_*$suffix_rerun_file") \
-                      )
-
-   for file in ${list_files_to_link[*]} ; do
-       link_name=$(sed -e "s|_${parent_current_date}||;s|${parent_exp}|${exp}|" <<< "$(basename $file)")
-       ln -sf $file $link_name
-    done
-fi
-   #-- Specific modifs (for modules not following the general rerun file pattern, or requiring
-   #                    in-file date edition)
-   #                   Important! When files are simply renamed, it is crucial to use `cp` and not
-   #                   `ln`, otherwise the original restart files will be overwritten at end of the
-   #                   cycle.
-
 #--------------------------
 # Climatologic SST and SIC
 #--------------------------
 
-# /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
 ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsst_1979-2008_mean.nc unit.20
 ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsic_1979-2008_mean.nc unit.96
-# ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc unit.20
-# ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc unit.96
 
 #----------------------------
 # Time-dep SST & SIC 
@@ -547,12 +492,6 @@ if $flag_time_dep_sst_sic ; then
        for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
            ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsst_${year}.nc sst${year}
            ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsic_${year}.nc ice${year}
-       done
-
-   elif [[ "$sst_sic_dataset" == "era5" ]] ; then # use amip2 data
-       for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
-           ln -sf ${input_basepath}/echam6/${hres}/era5/era5_sst_${year}_${hres}.nc sst${year}
-           ln -sf ${input_basepath}/echam6/${hres}/era5/era5_sic_${year}_${hres}.nc ice${year}
        done
 
    # uncomment the following in case of an alternate SST / SIC dataset:
@@ -593,17 +532,14 @@ if $flag_CMIP5_ozon ; then  # ie io3=4
        if $flag_time_dep_sst_sic ; then  # true year-dep input, see comment above
 
           if [[ "$year" -lt "2009" ]] ; then # no scenario
-             scenario_str="historical_"
+             scenario_str=""
           else                               # take user-defined scenario
-             scenario_str="${scenario}_"
+             scenario_str=`echo $scenario | tr '[:lower:]' '[:upper:]'`"_"
           fi
-          ln -sf ${input_basepath}/echam6/${hres}/ozone/${hres}_ozone_${scenario}_${year}.nc ozon${year}
-
-
+          ln -sf ${input_basepath}/echam6/${hres}/ozone/${hres}_ozone_CMIP5_${scenario_str}${year}.nc ozon${year}
 
        else # fake year-dep input for using the CMIP5 climatology
-         # ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc ozon${year}
-         ln -sf ${input_basepath}/echam6/${hres}/${hres}_ozone_CMIP5_1979-1988.nc ozon${year}
+          ln -sf ${input_basepath}/echam6/${hres}/${hres}_ozone_CMIP5_1979-1988.nc ozon${year}
        fi
    done
 
@@ -937,7 +873,7 @@ if $flag_nudg ; then
           previous_prefix=$prefix
        fi
 
-       nudg_name="${prefix}_${hres}${vres}_${idate}"
+       nudg_name="${prefix}${hres}${vres}_${idate}"
 
        #-- make the links:
        for ext in ${exts[*]} ; do
@@ -975,8 +911,6 @@ if $flag_nudg ; then
    done
 
 fi # end nudging
-
-
 
 #--------------------------------
 # Get back to previous directory

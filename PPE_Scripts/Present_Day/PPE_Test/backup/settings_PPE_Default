@@ -28,9 +28,9 @@ set -e
 #------------------------------------------------------------------------------------------------------
 #-- General settings:
 
-model_dir="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/"
+model_dir="/home/ybhatti/yusufb/Branches/PPE_Aerosol/"
 exp="PPE_Default"
-script_dir="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/my_experiments/PPE_Experiments/"
+script_dir="/home/ybhatti/yusufb/Branches/PPE_Aerosol/my_experiments/snellius/PPE_Default/"
 echam_jobscript=${script_dir}/echam_jobscript_${exp}.sh # echam batch job script name
 
 make_source_backup=false   # set to true if you want to keep records of the current state of your code
@@ -46,12 +46,12 @@ make_source_backup=false   # set to true if you want to keep records of the curr
 
 queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
-ncpus=128                                # total number of cpus
-walltime="10:00:00"                     # job estimated runtime
-nproma=40                               # vector length (don't modify if you don't know about it)
+ncpus=40                                # total number of cpus
+walltime="20:00:00"                     # job estimated runtime
+nproma=16                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/home/ybhatti/prjs1076/PPE_Output/Pace_PPE_Experiments/${exp}/"
+exp_dir="/projects/0/prjs0937/yusufb/ECHAM/OUTPUT//snellius/PPE_TEST/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -68,17 +68,16 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
-
-init_restart_flag=.true.     # echam restart flag at launch of this job 
+no_cycles=31                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+init_restart_flag=.false.
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="2024,04,01,0,0,0"  # 20090829234500
-date_stop="2025,08,01,1,0,0"
+date_start="2006,04,01,0,0,0"
+date_stop="2006,04,20,1,0,0"
 
-input_files_version="v0002"   # version label for input files !!do not change if you don't know about it!!
-scenario="ssp245"              # in case it is relevant for the given setup (using either variable GHG's
+input_files_version="v0002_input"
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
                               # ozone or climatologic aerosols, AND the experiment's time range 
                               # overlaps with [2009,2100]), choose here the scenario you'd like
                               # (RCP45, XXX, all case insensitive)
@@ -103,9 +102,9 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
  dt_start       = $date_start
  dt_stop        = $date_stop
- putdata        = 1,'months','last',0
- trigfiles      = 16,'months','first',0
- putrerun       = 4,'months','last',0
+ putdata        = 1,'days','last',0
+ trigfiles      = 1,'days','first',0
+ putrerun       = 4,'days','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
@@ -121,17 +120,6 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  lburden          = .true.
  emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
  emi_scenario     = "${scenario}"
- laerocom_diag    = .true.
-/
-&HAMMOZ_AEROCOMCTL
- lHEmon = .TRUE.
- lHEaci = .TRUE.
- lMMPPE = .TRUE.
- lAP3M = .TRUE.
- lAP3D = .TRUE.
-/
-&cfdiagctl
-    locfdiag = .true.
 /
 &SUBMDIAGCTL
  vphysc_lpost     = .true.
@@ -139,7 +127,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  wetdep_lpost     = .true. 
  wetdepnam        = 'default' 
  wetdep_gastrac   = 'SO2', 'H2SO4'
- wetdep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ wetdep_keytype   = 3          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
  drydep_lpost     = .true. 
  drydepnam        = 'all' 
  drydep_gastrac   = 'SO2', 'H2SO4'
@@ -159,12 +147,10 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
  isolrad = 3      
  io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
- lradforcing = .true.,.true.
 /
 &PHYSCTL
  lcdnc_progn    = .true.
  nauto          = 2
- cdnc_min_fixed = 10
 /
 &HAMCTL
  nseasalt       = 7
@@ -172,7 +158,6 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  naerorad       = 1
  nraddiag       = 1
  burden_keytype = 2          ! BYTRACER=1; BYSPECIES=2;
- nccndiag       = 7
 /
 &NDGCTL
  inudgformat     = 2
@@ -192,142 +177,30 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  nudgdsize       = 0.5
  ndg_file_nc    = "ndg%y4%m2.nc"
 /
-&set_stream
-  stream='acmmppe'
-  lpost=0 
-/
-&set_stream
-  stream='acp3d'
-  lpost=0 
-/
-&set_stream
-  stream='accw'
-  lpost=0 
-/
-&set_stream
-  stream='co2'
-  lpost=0
-/
-&set_stream
-  stream='conv'
-  lpost=0
-/
-&set_stream
-  stream='drydep'
-  lpost=0
-/
-&set_stream
-  stream='wetdep'
-  lpost=0
-/
-&set_stream
-  stream='land'
-  lpost=0
-/
-&set_stream
-  stream='nudg'
-  lpost=0
-/
-&set_stream
-  stream='sedi'
-  lpost=0
-/
-&set_stream
-  stream='echamm'
-  lpost=0 
-/
-&set_stream
-  stream='jsbash'
-  lpost=0
-/
-&set_stream
-  stream='veg'
-  lpost=0
-/
-&set_stream
-  stream='acheaci'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='activ'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='ham'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='tracer'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='burden'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='rad'
-  lpost=1
-  interval = 1,'days','last',0
-/
-&set_stream
-  stream='echam'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='emi'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='jsbash'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='surf'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
-  stream='vphysc'
-  lpost=1
-  interval = 1,'months','last',0
-/
 &HAMMOZ_PERTURBATIONS
-  scale_emi_dms            = SCALE_EMI_DMS            ! V_SCALE_EMI_DMS
-  scale_emi_antns_so2      = SCALE_EMI_ANTNS_SO2        ! V_SCALE_EMI_ANTNS_SO2
-  scale_emi_shp_so2        = SCALE_EMI_SHP_SO2        ! V_SCALE_EMI_SHP_SO2
-  scale_emi_ant_bc         = SCALE_EMI_ANT_BC         ! V_SCALE_EMI_ANT_BC
-  scale_emi_ant_oc         = SCALE_EMI_ANT_OC         ! V_SCALE_EMI_ANT_OC
-  scale_emi_bb_so2         = SCALE_EMI_BB_SO2         ! V_SCALE_EMI_BB_SO2
-  scale_emi_bb_bc          = SCALE_EMI_BB_BC          ! V_SCALE_EMI_BB_BC
-  scale_emi_bb_oc          = SCALE_EMI_BB_OC          ! V_SCALE_EMI_BB_OC
-  scale_fricv              = SCALE_FRICV              ! V_SCALE_FRICV
-  scale_emi_ss_acc         = SCALE_EMI_SS_ACC         ! V_SCALE_EMI_SS_ACC
-  scale_emi_ss_coarse      = SCALE_EMI_SS_COARSE      ! V_SCALE_EMI_SS_COARSE
-  scale_seasalt_expo       = SCALE_SEASALT_EXPO       ! V_SCALE_SEASALT_EXPO
-  scale_emi_cmr_ff         = SCALE_EMI_CMR_FF         ! V_SCALE_EMI_CMR_FF
-  scale_emi_cmr_bb         = SCALE_EMI_CMR_BB         ! V_SCALE_EMI_CMR_BB
-  bc_rad_ni                = BC_RAD_NI                ! V_SCALE_BC_RAD_NI
-  du_rad_ni                = DU_RAD_NI 	              ! V_SCALE_DU_RAD_NI
-  scale_so2_reactions      = SCALE_SO2_REACTIONS      ! V_SCALE_SO2_REACTIONS
-  scale_dms_reactions      = SCALE_DMS_REACTIONS      ! V_SCALE_DMS_REACTIONS
-  scale_wetdep_ic          = SCALE_WETDEP_IC          ! V_SCALE_WETDEP_IC
-  scale_wetdep_bc          = SCALE_WETDEP_BC          ! V_SCALE_WETDEP_BC
-  scale_drydep_acc         = SCALE_DRYDEP_ACC         ! V_SCALE_DRYDEP_ACC
-  scale_so4_coating        = SCALE_SO4_COATING        ! V_SCALE_SO4_COATING
-  kappa_so4                = KAPPA_SO4          ! V_SCALE_KAPPA_SO4
-  kappa_oc                 = KAPPA_OC           ! V_SCALE_KAPPA_OC
-  scale_activation          = SCALE_ACTIVATION          ! V_SCALE_ACTIVATON
-  scale_vertical_velocity  = SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
-  scale_nuc_ft             = SCALE_NUC_FT             ! V_SCALE_NUC_FT
-
+  scale_nuc_ft     = V_SCALE_NUC_FT   ! V_SCALE_NUC_FT
+  scale_emi_cmr_ff = V_SCALE_EMI_CMR_FF   ! V_SCALE_EMI_CMR_FF
+  scale_emi_cmr_bb = V_SCALE_EMI_CMR_BB   ! V_SCALE_EMI_CMR_BB
+  scale_emi_cmr_bf = V_SCALE_EMI_CMR_BF   ! V_SCALE_EMI_CMR_BF
+  scale_emi_ff     = V_SCALE_EMI_FF  ! V_SCALE_EMI_FF
+  scale_emi_bb     = V_SCALE_EMI_BB  ! V_SCALE_EMI_BB
+  scale_emi_bf     = V_SCALE_EMI_BF  ! V_SCALE_EMI_BF
+  scale_emi_dms    = V_SCALE_EMI_DMS  ! V_SCALE_EMI_DMS
+  scale_emi_ssa    = V_SCALE_EMI_SSA  ! V_SCALE_EMI_SSA
+  scale_emi_so2    = V_SCALE_EMI_ANTH_SO2 ! V_SCALE_EMI_ANTH_SO2
+  scale_emi_du     = V_SCALE_EMI_DUST ! V_SCALE_EMI_DUST
+  scale_drydep_ait = V_SCALE_DRYDEP_AIT   ! V_SCALE_DRYDEP_AIT
+  scale_drydep_acc = V_SCALE_DRYDEP_ACC   ! V_SCALE_DRYDEP_ACC
+  scale_drydep_coa = V_SCALE_DRYDEP_COA   ! V_SCALE_DRYDEP_COA
+  scale_wetdep_ic = V_SCALE_WETDEP_IC     ! V_SCALE_WETDEP_IC
+  scale_wetdep_bc = V_SCALE_WETDEP_BC     ! V_SCALE_WETDEP_BC
+  bc_rad_ni = V_SCALE_BC_RAD_NI  ! V_SCALE_BC_RAD_NI
+  du_rad_ni = V_SCALE_DU_RAD_NI  ! V_SCALE_DU_RAD_NI
+  scale_so4_coating = V_SCALE_SO4_COATING  ! V_SCALE_SO4_COATING
+  scale_kappa_ss = SCALE_KAPPA_SS ! SCALE_KAPPA_SS
+  scale_kappa_so4 = SCALE_KAPPA_SO4 ! SCALE_KAPPA_SO4
+  pH_pert          = V_SCALE_PH_PERT ! V_SCALE_PH_PERT
+  scale_so2_reactions = V_SCALE_SO2_REACTIONS ! V_SCALE_SO2_REACTIONS
 
 /
 EOF

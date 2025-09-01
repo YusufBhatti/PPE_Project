@@ -70,18 +70,18 @@ ntiles=11                     # number of tiles in the vegetation model
 
 no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 
-faked_restart=true
-parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_PI_18490901_Restart_Control"
-parent_current_date="18490831234500"
+faked_restart=false
+parent_restart_dir="/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control"
+parent_current_date="20090829234500"
 init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="1849,09,01,0,0,0"
-date_stop="1851,01,01,1,0,0"
+date_start="2024,04,01,0,0,0"  # 20090829234500
+date_stop="2025,08,01,1,0,0"
 
-input_files_version="v0006"
-scenario="historical"              # in case it is relevant for the given setup (using either variable GHG's
+input_files_version="v0002_input"
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
                               # ozone or climatologic aerosols, AND the experiment's time range 
                               # overlaps with [2009,2100]), choose here the scenario you'd like
                               # (RCP45, XXX, all case insensitive)
@@ -111,7 +111,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  putrerun       = 4,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
- lnudge         = .false.
+ lnudge         = .true.
  ldebugs        = .false.
  ltimer         = .false.
 /
@@ -124,6 +124,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  lburden          = .true.
  emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
  emi_scenario     = "${scenario}"
+ laerocom_diag  = .true.
 /
 &SUBMDIAGCTL
  vphysc_lpost     = .true.
@@ -151,6 +152,10 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
  isolrad = 3      
  io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
+ lradforcing = .true.,.true.
+/
+&HAMMOZ_AEROCOMCTL
+ lHEaci         = .true.
 /
 &PHYSCTL
  lcdnc_progn    = .true.
@@ -238,6 +243,21 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 /
 &set_stream
   stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='burden'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='rad'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acheaci'
   lpost=1
   interval = 1,'months','last',0
 /

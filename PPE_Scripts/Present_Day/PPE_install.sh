@@ -41,8 +41,8 @@
 # 2024/06
 #--------------------------------------------------------------------
 #--- run directory for ECHAM-HAM ------------------------------------
-SOURCE='PPE_Aerosols'
-rundir="/home/ybhatti/yusufb/Branches/${SOURCE}/my_experiments/"
+SOURCE='PPE_PACE_Project'
+rundir="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/my_experiments/"
 cwd=${PWD}/
 DIR='PPE_Experiments'
 #module purge
@@ -52,7 +52,8 @@ DIR='PPE_Experiments'
 PPEdir=$rundir${DIR}'/'
 PPElog=$cwd'PPE_log.txt'
 PPEtmp=$cwd'PPE_tmp.txt'
-PPEdefaults=$cwd'PPE_Default'
+#PPEdefaults=$cwd'PPE_Default'
+PPEdefaults=$cwd'PPE_Test'
 PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}
 sed -i "s|^PPEdir=.*|PPEdir='${PPEdir}'|" PPE_batch.sh 

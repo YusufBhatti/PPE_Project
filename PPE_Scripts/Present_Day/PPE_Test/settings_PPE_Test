@@ -68,14 +68,17 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+no_cycles=1                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 
-init_restart_flag=.true.     # echam restart flag at launch of this job 
+faked_restart=false
+parent_restart_dir="${exp_dir}"
+parent_current_date="20240731234500"
+init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
 date_start="2024,04,01,0,0,0"  # 20090829234500
-date_stop="2025,08,01,1,0,0"
+date_stop="2024,05,01,1,0,0"
 
 input_files_version="v0002"   # version label for input files !!do not change if you don't know about it!!
 scenario="ssp245"              # in case it is relevant for the given setup (using either variable GHG's
@@ -104,8 +107,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'months','last',0
- trigfiles      = 16,'months','first',0
- putrerun       = 4,'months','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
@@ -245,11 +248,6 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   lpost=0
 /
 &set_stream
-  stream='acheaci'
-  lpost=1
-  interval = 1,'months','last',0
-/
-&set_stream
   stream='activ'
   lpost=1
   interval = 1,'months','last',0
@@ -272,7 +270,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &set_stream
   stream='rad'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='echam'
