@@ -288,13 +288,13 @@ case $ac_sitename in
           compiler_version    = $(gfortran --version | awk 'NR==1{split($NF,v,"."); printf("gcc%1d%1d", v[1], v[2])}')
           echo "compiler_version: ${compiler_version}"
 
-                                        MPIROOT        = /home/${USER}/TOOLS/MPI/mpich-4.0.3
+                                        MPIROOT        = /home/ybhatti/TOOLS/MPI/mpich-4.0.3
           IB_LIBS        = -lmpl -libmad -lrdmacm -libumad -libverbs
           SYS_LIBS       = -lhwloc -lxml2 -lnuma -lrt -lutil -lpthread -lm -ldl
           MPI_LIB        = -lmpichf90 -lmpich -lopa $IB_LIBS $SYS_LIBS
           MPI_LAUNCH     = ${MPIROOT}/bin/mpiexec
 
-                                        dir_tools      = /home/ybhatti/prjs1076/yusufb/ECHAM/tools/general/installed/mpich-4
+                                        dir_tools      = /home/ybhatti2/prjs1474/Utils/general/installed/mpich-4
           FC             = ${MPIROOT}/bin/mpif90
           CC             = ${MPIROOT}/bin/mpicc
           FC7            = ${MPIROOT}/bin/mpif77
