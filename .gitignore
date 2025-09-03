@@ -24,9 +24,14 @@ contrib/generate-scripts/*thunder*
 src/*.mod
 src/*.lst
 #compile
-# /experiments/
-my_experiments/*
-#my_experiments/*/*/*
+
+# Ignore everything inside my_experiments
+PPE_PACE_Project/my_experiments/*
+
+# But allow the directory itself
+!PPE_PACE_Project/my_experiments/
+!PPE_PACE_Project/my_experiments/.gitkeep
+
 *.sh.*
 *log.txt
 log_tmp.txt
@@ -60,7 +65,7 @@ PPE_values_template.txt
 *.svn
 *.swo
 # Files to ignore
-RUNDIR/
+#RUNDIR/
 compile_and_generate.sh
 echam6.3-ham2.3-moz1.0/
 PPE_Aerosol/
