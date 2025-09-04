@@ -28,9 +28,9 @@ set -e
 #------------------------------------------------------------------------------------------------------
 #-- General settings:
 
-model_dir="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/"
+model_dir="/home/ybhatti2/prjs1474/PPE_Project/PPE_PACE_Project/"
 exp="PPE_Default"
-script_dir="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/my_experiments/PPE_Experiments/"
+script_dir="/home/ybhatti2/prjs1474/PPE_Project/PPE_PACE_Project/my_experiments/PPE_Experiments/" 
 echam_jobscript=${script_dir}/echam_jobscript_${exp}.sh # echam batch job script name
 
 make_source_backup=false   # set to true if you want to keep records of the current state of your code
@@ -47,11 +47,11 @@ make_source_backup=false   # set to true if you want to keep records of the curr
 queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
 ncpus=128                                # total number of cpus
-walltime="10:00:00"                     # job estimated runtime
+walltime="14:00:00"                     # job estimated runtime
 nproma=40                               # vector length (don't modify if you don't know about it)
 account="srsei9480"
 email="y.bhatti@sron.nl"
-exp_dir="/home/ybhatti/prjs1076/PPE_Output/Pace_PPE_Experiments/${exp}/"
+exp_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PI_PPE_Experiments/${exp}/"
 
 #-Body-begin. Do not delete this line!
 #------------------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ vres="L47"                    # vertical resolution
 oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
 ntiles=11                     # number of tiles in the vegetation model
 
-no_cycles=1                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
@@ -244,6 +244,11 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   lpost=0
 /
 &set_stream
+  stream='acheaci'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
   stream='activ'
   lpost=1
   interval = 1,'months','last',0
@@ -266,7 +271,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &set_stream
   stream='rad'
   lpost=1
-  interval = 1,'months','last',0
+  interval = 1,'days','last',0
 /
 &set_stream
   stream='echam'
