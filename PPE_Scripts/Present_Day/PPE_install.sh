@@ -1,10 +1,10 @@
-#!/bin/bash --login
-#PBS -N PPE_test_install
-#PBS -l walltime=03:00:00
-#PBS -l select=2:ncpus=80
-#PBS -j oe
-#PBS -A srsei9480 
-#PBS -M y.bhatti@sron.nl
+#!/bin/bash
+#SBATCH --job-name=PPE_install
+#SBATCH -t 2:00:00
+#SBATCH -p genoa
+#SBATCH --nodes=1
+#SBATCH --output=slurm-%j.out
+#SBATCH --account=srs25001
 
 #--- comments -------------------------------------------------------
 # This script prepares for a PPE (Perturbed Parameter Ensemble)
@@ -42,7 +42,7 @@
 #--------------------------------------------------------------------
 #--- run directory for ECHAM-HAM ------------------------------------
 SOURCE='PPE_PACE_Project'
-rundir="/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/my_experiments/"
+rundir="/home/ybhatti2/prjs1474/PPE_Project/PPE_PACE_Project/my_experiments/"
 cwd=${PWD}/
 DIR='PPE_Experiments'
 #module purge
@@ -53,7 +53,9 @@ PPEdir=$rundir${DIR}'/'
 PPElog=$cwd'PPE_log.txt'
 PPEtmp=$cwd'PPE_tmp.txt'
 #PPEdefaults=$cwd'PPE_Default'
-PPEdefaults=$cwd'PPE_Test'
+PPEdefaults=$cwd'PPE_Default_spin_up'
+#PPEdefaults=$cwd'PPE_Default'
+#PPEdefaults=$cwd'PPE_Default_EarthCARE'
 PPEvalues=$cwd'PPE_values.txt'
 echo ${PPEdir}
 sed -i "s|^PPEdir=.*|PPEdir='${PPEdir}'|" PPE_batch.sh 
@@ -91,6 +93,11 @@ do
 
   # Check if we found an experiment not yet installed
   if [ "$installed" == 0 ] && [ "$running" == 0 ]; then
+    # Prepare job using JST and modify settings-file for parameter values
+      if [ -d "$expid" ]; then
+          echo "Directory $expid already exists — removing it."
+          rm -rf "$expid"
+      fi
 
       # Prepare job using JST and modify settings-file for parameter values
       prepare_run.sh -r ${PPEdefaults} $expid

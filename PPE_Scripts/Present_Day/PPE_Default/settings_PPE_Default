@@ -46,10 +46,10 @@ make_source_backup=false   # set to true if you want to keep records of the curr
 
 queue_name="genoa"                         # queue name to use on current batch system
 jobname="$exp"                          # batch job name
-ncpus=128                                # total number of cpus
+ncpus=192                                # total number of cpus
 walltime="14:00:00"                     # job estimated runtime
 nproma=40                               # vector length (don't modify if you don't know about it)
-account="srsei9480"
+account="srs25001"
 email="y.bhatti@sron.nl"
 exp_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/${exp}/"
 

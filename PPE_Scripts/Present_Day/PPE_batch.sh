@@ -2,8 +2,8 @@
 #SBATCH --job-name=PPE_test_run
 #SBATCH --partition=genoa
 #SBATCH --time=3:0:00
-#SBATCH --nodes=2
-#SBATCH --account=srsei9480
+#SBATCH --nodes=50
+#SBATCH --account=srs25001
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 
@@ -42,7 +42,8 @@
 # experiments running concurrently times the number of nodes required for
 # an individual experiment
 #
-#
+
+
 # To execute: qsub -q "queue name" PPE_batch.sh
 #
 # Before execution, adapt:
@@ -59,15 +60,15 @@
 #--------------------------------------------------------------------
 
 #--- User definitions -----------------------------------------------
-nexp_maxrunning=1  # Maximum number of experiments run concurrently
-nexp_maxran=1      # Maximum number of experiments run by this batch job
+nexp_maxrunning=25  # Maximum number of experiments run concurrently
+nexp_maxran=250      # Maximum number of experiments run by this batch job
 
 #--- run directory for ECHAM-HAM ------------------------------------
 #rundir="/home/ybhatti/yusufb/Branches/PPE_Leeds/my_experiments/snellius/"
 cwd=${PWD}/
 
 #--- directories and files used by PPE scripts ----------------------
-PPEdir='/home/ybhatti/prjs1076/yusufb/Branches/PPE_Project/PPE_PACE_Project/my_experiments/PPE_Experiments/'
+PPEdir='/home/ybhatti2/prjs1474/PPE_Project/PPE_PACE_Project/my_experiments/PPE_Experiments/'
 PPElog=$cwd'PPE_log.txt'
 PPEtmp=$cwd'PPE_tmp.txt'
 PPEvalues=$cwd'PPE_values.txt'
@@ -154,7 +155,7 @@ while [ "$nexp_ran" -lt "$nexp_maxran" ] && [ "$batch_finished" == 0 ]; do
 
   # Some admin at the end of each sequence of job submissions 
   if [ "$nexp_running" == "$nexp_left" ]; then
-    batch_finished=0
+    batch_finished=1
   fi # nexp_running == nexp_left
   nexp_left=`expr $nexp_left - $nexp_running` 
   mv $PPEtmp $PPEvalues

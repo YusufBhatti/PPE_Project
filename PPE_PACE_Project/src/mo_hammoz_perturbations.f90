@@ -139,7 +139,7 @@ MODULE mo_hammoz_perturbations
                                              !  from insoluble to soluble modes)
 
   REAL(dp)    :: scale_fi  = 1.0_dp, & ! Scale fi in activation scheme
-                 scale_gi   = 0.6_dp, & ! Scale gi in activation scheme
+                 scale_gi  = 1.0_dp, & ! Scale gi in activation scheme
                  scale_activation  = 1.0_dp   ! Scale the activation of particles
 
 CONTAINS

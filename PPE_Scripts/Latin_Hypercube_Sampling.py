@@ -207,19 +207,20 @@ trapezoidal_param_config = {
     "SCALE_EMI_SHP_SO2":     (0.25, 1.75, 0, 2),
     "SCALE_EMI_ANT_BC":      (0.6, 1.4, 0, 1),
     "SCALE_EMI_ANT_OC":      (0.6, 1.4, 0, 1),
-    "SCALE_EMI_BB_SO2":      (0.25, 2, 0, 1),
-    "SCALE_EMI_BB_BC":       (0.25, 2, 0, 1),
-    "SCALE_EMI_BB_OC":       (0.25, 2, 0, 1),
-    "SCALE_EMI_SS_ACC":      (0.2, 2, 2, 1),
-    "SCALE_EMI_SS_COARSE":   (0.2, 2, 2, 1),
-    "SCALE_EMI_CMR_BB":      (0.05e-6, 0.125e-6, 2, 1),
+    # "SCALE_EMI_BB_SO2":      (0.25, 2, 0, 1),
+    # "SCALE_EMI_BB_BC":       (0.25, 2, 0, 1),
+    # "SCALE_EMI_BB_OC":       (0.25, 2, 0, 1),
+    "SCALE_EMI_SS_ACC":      (0.33, 2, 2, 1),
+    "SCALE_EMI_SS_COARSE":   (0.33, 2, 2, 1),
+    "SCALE_EMI_CMR_BB":      (0.025e-6, 0.125e-6, 0, 1),
     "BC_RAD_NI":             (0.55, 0.85, 1, 4),
-    "DU_RAD_NI":             (0.0002, 0.003, 0, 4),
-    "SCALE_WETDEP_BC":       (0.5, 2, 2, 2),
-    "SCALE_DRYDEP_ACC":      (0.1, 2, 0, 2),
+    "DU_RAD_NI":             (2e-4, 0.003, 1, 3),
+    "OC_RAD_NI":             (0.0001, 0.02, 1, 3),
+    "SCALE_WETDEP_BC":       (0.33, 2, 2, 2),
+    "SCALE_DRYDEP_ACC":      (0.1, 3, 0, 2),
     "SCALE_SO4_COATING":     (0.3, 2, 0, 1),
-    "KAPPA_OC":              (0.02, 0.15, 0, 3),
-    "SCALE_NUC_FT":          (0.1, 2, 0, 2)
+    "KAPPA_OC":              (0.02, 0.2, 0, 3),
+    "SCALE_NUC_FT":          (0.1, 3, 0, 2)
 }
 
 # --- Step 4: Apply Trapezoidal transformation using inverse CDF sampling ---
