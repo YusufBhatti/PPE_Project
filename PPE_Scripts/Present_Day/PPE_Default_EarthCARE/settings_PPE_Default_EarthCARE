@@ -301,7 +301,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 /
 &HAMMOZ_PERTURBATIONS
   scale_emi_dms            = SCALE_EMI_DMS            ! V_SCALE_EMI_DMS
-  scale_emi_antns_so2      = SCALE_EMI_ANTNS_SO2        ! V_SCALE_EMI_ANTNS_SO2
+  scale_emi_antns_so2      = SCALE_EMI_ANTNS_SO2      ! V_SCALE_EMI_ANTNS_SO2
   scale_emi_shp_so2        = SCALE_EMI_SHP_SO2        ! V_SCALE_EMI_SHP_SO2
   scale_emi_ant_bc         = SCALE_EMI_ANT_BC         ! V_SCALE_EMI_ANT_BC
   scale_emi_ant_oc         = SCALE_EMI_ANT_OC         ! V_SCALE_EMI_ANT_OC
@@ -316,15 +316,16 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_emi_cmr_bb         = SCALE_EMI_CMR_BB         ! V_SCALE_EMI_CMR_BB
   bc_rad_ni                = BC_RAD_NI                ! V_SCALE_BC_RAD_NI
   du_rad_ni                = DU_RAD_NI 	              ! V_SCALE_DU_RAD_NI
+  oc_rad_ni                = OC_RAD_NI 	              ! V_SCALE_OC_RAD_NI
   scale_so2_reactions      = SCALE_SO2_REACTIONS      ! V_SCALE_SO2_REACTIONS
   scale_dms_reactions      = SCALE_DMS_REACTIONS      ! V_SCALE_DMS_REACTIONS
   scale_wetdep_ic          = SCALE_WETDEP_IC          ! V_SCALE_WETDEP_IC
   scale_wetdep_bc          = SCALE_WETDEP_BC          ! V_SCALE_WETDEP_BC
   scale_drydep_acc         = SCALE_DRYDEP_ACC         ! V_SCALE_DRYDEP_ACC
   scale_so4_coating        = SCALE_SO4_COATING        ! V_SCALE_SO4_COATING
-  kappa_so4                = KAPPA_SO4          ! V_SCALE_KAPPA_SO4
-  kappa_oc                 = KAPPA_OC           ! V_SCALE_KAPPA_OC
-  scale_activation          = SCALE_ACTIVATION          ! V_SCALE_ACTIVATON
+  kappa_so4                = KAPPA_SO4                ! V_SCALE_KAPPA_SO4
+  kappa_oc                 = KAPPA_OC                 ! V_SCALE_KAPPA_OC
+  scale_activation          = SCALE_ACTIVATION        ! V_SCALE_ACTIVATON
   scale_vertical_velocity  = SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
   scale_nuc_ft             = SCALE_NUC_FT             ! V_SCALE_NUC_FT
 

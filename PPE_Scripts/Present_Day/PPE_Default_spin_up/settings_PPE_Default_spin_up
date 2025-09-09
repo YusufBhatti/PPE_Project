@@ -74,7 +74,7 @@ init_restart_flag=.false.     # echam restart flag at launch of this job
                               #  set when further jobs will be started)
 
 date_start="2024,04,01,0,0,0"  # 20090829234500
-date_stop="2024,04,03,1,0,0"
+date_stop="2024,08,01,1,0,0"
 
 input_files_version="v0002"   # version label for input files !!do not change if you don't know about it!!
 scenario="ssp245"              # in case it is relevant for the given setup (using either variable GHG's
@@ -102,9 +102,9 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
  dt_start       = $date_start
  dt_stop        = $date_stop
- putdata        = 1,'days','last',0
- trigfiles      = 1,'days','first',0
- putrerun       = 1,'days','last',0
+ putdata        = 1,'months','last',0
+ trigfiles      = 4,'months','first',0
+ putrerun       = 4,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
@@ -271,7 +271,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &set_stream
   stream='rad'
   lpost=1
-  interval = 1,'months','last',0
+  interval = 1,'days','last',0
 /
 &set_stream
   stream='echam'
@@ -300,7 +300,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 /
 &HAMMOZ_PERTURBATIONS
   scale_emi_dms            = SCALE_EMI_DMS            ! V_SCALE_EMI_DMS
-  scale_emi_antns_so2      = SCALE_EMI_ANTNS_SO2        ! V_SCALE_EMI_ANTNS_SO2
+  scale_emi_antns_so2      = SCALE_EMI_ANTNS_SO2      ! V_SCALE_EMI_ANTNS_SO2
   scale_emi_shp_so2        = SCALE_EMI_SHP_SO2        ! V_SCALE_EMI_SHP_SO2
   scale_emi_ant_bc         = SCALE_EMI_ANT_BC         ! V_SCALE_EMI_ANT_BC
   scale_emi_ant_oc         = SCALE_EMI_ANT_OC         ! V_SCALE_EMI_ANT_OC
@@ -315,15 +315,16 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   scale_emi_cmr_bb         = SCALE_EMI_CMR_BB         ! V_SCALE_EMI_CMR_BB
   bc_rad_ni                = BC_RAD_NI                ! V_SCALE_BC_RAD_NI
   du_rad_ni                = DU_RAD_NI 	              ! V_SCALE_DU_RAD_NI
+  oc_rad_ni                = OC_RAD_NI 	              ! V_SCALE_OC_RAD_NI
   scale_so2_reactions      = SCALE_SO2_REACTIONS      ! V_SCALE_SO2_REACTIONS
   scale_dms_reactions      = SCALE_DMS_REACTIONS      ! V_SCALE_DMS_REACTIONS
   scale_wetdep_ic          = SCALE_WETDEP_IC          ! V_SCALE_WETDEP_IC
   scale_wetdep_bc          = SCALE_WETDEP_BC          ! V_SCALE_WETDEP_BC
   scale_drydep_acc         = SCALE_DRYDEP_ACC         ! V_SCALE_DRYDEP_ACC
   scale_so4_coating        = SCALE_SO4_COATING        ! V_SCALE_SO4_COATING
-  kappa_so4                = KAPPA_SO4          ! V_SCALE_KAPPA_SO4
-  kappa_oc                 = KAPPA_OC           ! V_SCALE_KAPPA_OC
-  scale_activation          = SCALE_ACTIVATION          ! V_SCALE_ACTIVATON
+  kappa_so4                = KAPPA_SO4                ! V_SCALE_KAPPA_SO4
+  kappa_oc                 = KAPPA_OC                 ! V_SCALE_KAPPA_OC
+  scale_activation          = SCALE_ACTIVATION        ! V_SCALE_ACTIVATON
   scale_vertical_velocity  = SCALE_VERTICAL_VELOCITY  ! V_SCALE_VERTICAL_VELOCITY
   scale_nuc_ft             = SCALE_NUC_FT             ! V_SCALE_NUC_FT
 
