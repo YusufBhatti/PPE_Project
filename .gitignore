@@ -19,7 +19,7 @@ libtool
 #table*
 # /contrib/
 contrib/generate-scripts/*thunder*
-
+PPE_Aerosols/
 # /src/
 src/*.mod
 src/*.lst
