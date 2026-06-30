@@ -1,0 +1,387 @@
+
+%---------------------------------------------
+\subsection{Namelist  \texttt{albedo\_ctl}} \label{apdx:albedo_ctl} \hypertarget{apdx:albedo_ctl}
+%---------------------------------------------
+The namelist for the albedo scheme is read in routine {\tt config\_albedo} of module {\tt mo\_land\_surface}. It is used only if the albedo scheme is switched on, i.e.~{\tt use\_albedo=.TRUE.} in namelist {\tt jsbach\_ctl} (compare table \ref{tab:apdx.jsbach_ctl}).
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt albedo\_ctl}}\\\hline\label{tab:apdx.albedo_ctl}
+  \endfirsthead
+  \caption{{\tt albedo\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+   {\tt albedo\_age\_weight} & real & 0: ECHAM5 scheme for snow albedo; 1: snow age scheme; between 0 and 1: snow albedo linearly weighting from ECHAM5 and snow age scheme albedo & {\tt 0.5} \\
+  {\tt use\_albedocanopy} & logical & {\tt .TRUE.}: read maps of canopy albedo ({\tt albedo\_veg\_nir} and {\tt albedo\_veg\_vis} from \hyperlink{apdx:InitialDataFile}{\tt jsbach.nc}); {\tt .FALSE.}: use PFT specific albedo values from \hyperlink{apdx:lctLibFile}{\tt lctlib.def} & {\tt .FALSE.} \\
+  {\tt use\_albedosoil} & logical & {\tt .TRUE.}: calculate soil albedo denpending on soil carbon and litter. {\bf Note:} this option should not be used with the standard jsbach initiel file! & {\tt .FALSE.} \\
+  {\tt use\_albedosoilconst} & logical & {\tt .TRUE.}: base albedo of the soil (without soil carbon and leaf litter) is set to a global constant; {\tt .FALSE.}: base albedo of the soil is read from jsbach initial file. Only used with {\tt use\_albedosoil=.TRUE.}.  & {\tt .FALSE.} \\
+  {\tt use\_litter} & logical & {\tt .TRUE.}: soil albedo depends on leaf litter. Only used with {\tt use\_albedosoil=.TRUE.}. & {\tt .TRUE.} \\
+  {\tt use\_soc} & character & {\tt linear}: soil albedo linearly depends on soil carbon; {\tt log}: logarithmic dependence of soil albedo on soil carbon. Only used with {\tt use\_albedosoil=.TRUE.}. & {\tt 'linear'} \\
+
+  \end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{bethy\_ctl}} \label{apdx:bethy_ctl} \hypertarget{apdx:bethy_ctl}
+%---------------------------------------------
+The namelist {\tt bethy\_ctl} controls the BETHY module for photosynthesis. It is used only if {\tt use\_bethy=.TRUE.} in namelist {\tt jsbach\_ctl} (compare table \ref{tab:apdx.jsbach_ctl}). The namelist is read in routine {\tt config\_bethy} of {\tt mo\_bethy}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt bethy\_ctl}}\\\hline\label{tab:apdx.bethy_ctl}
+  \endfirsthead
+  \caption{{\tt bethy\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt ncanopy} & integer & number of canopy layers & 3 \\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{cbalance\_ctl}} \label{apdx:cbalance_ctl} \hypertarget{apdx:cbalance_ctl}
+%---------------------------------------------
+The cbalance module handling the carbon pools is controlled by namelist {\tt cbalance\_ctl}. The namelist is read in routine {\tt init\_cbalance\_bethy} in {\tt mo\_cbal\_bethy}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt cbalance\_ctl}}\\\hline\label{tab:apdx.cbalance_ctl}
+  \endfirsthead
+  \caption{{\tt cbalance\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt cpools\_file\_name} & character & name of the file containing initial data for
+                    the carbon pools. Only used if {\tt read\_cpools=.TRUE.} & {\tt 'Cpools.nc'}\\
+  {\tt ndepo\_file\_name} & character & name of the file containing nitrogen deposition
+                            data. Only used if {\tt with\_nitrogen= .TRUE.} in 
+                            \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} and {\tt read\_cpools=\ .TRUE.} & {\tt 'Ndepo.nc'}\\
+  {\tt npool\_file\_name} & character & name of the file containing initial data for
+                            the nitrogen pools. Only used if {\tt with\_nitrogen = .TRUE.} in 
+                            \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} and {\tt read\_npools = .TRUE.} & {\tt 'Npools.nc'}\\
+  {\tt read\_cpools} & logical & initialize carbon pools with data from an
+                               external file. & {\tt .FALSE.}\\
+  {\tt read\_ndepo} & logical & read nitrogen deposition data from an
+                               external file. Only used if {\tt with\_nitrogen= .TRUE.}
+                               in \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & {\tt .FALSE.}\\
+  {\tt read\_npools} & logical & initialize nitrogen pools with data from an
+                               external file. Only used if {\tt with\_nitrogen=.TRUE.}
+                               in \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & {\tt .FALSE.}\\
+  {\tt read\_ycpools} & logical & initialize YASSO carbon pools with data from an external file & {\tt .FALSE.} \\
+  {\tt ycpool\_file\_name} & character & name of the file containing initial data for YASSO carbon pools (only used if {\tt read\_ycpools=.TRUE.}) & {\tt 'YCpools.nc'} \\
+
+\end{longtable}
+%---------------------------------------------
+\subsection{Namelist \texttt{cbal\_parameters\_ctl}} \label{apdx:cbal_parameters_ctl} \hypertarget{apdx:cbal_parameters_ctl}
+%---------------------------------------------
+Several parameters needed for carbon cycle calculations are defined in namelist {\tt cbal\_parameters\_ctl}. The namelist is read in routine {\tt config\_cbal\_parameters} of module {\tt mo\_cbal\_parameters}.
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt cbal\_parameters\_ctl}}\\\hline\label{tab:apdx.cbal_parameters_ctl}
+  \endfirsthead
+  \caption{{\tt cbal\_parameters\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt cn\_green} & real & carbon-to-nitrogen ratio of the green pool & 35. \\
+  {\tt cn\_litter\_green} & real & carbon-to-nitrogen ratio of falling leaves and green litter & 55. \\
+  {\tt cn\_litter\_wood} & real & carbon-to-nitrogen ratio of woody litter pools & 50. \\
+  {\tt cn\_slow} & real & carbon-to-nitrogen ratio of the slow soil pool & 10. \\
+  {\tt cn\_woods} & real & carbon-to-nitrogen ratio of the wood pool & 50. \\
+  {\tt frac\_green\_2\_atmos} & real & fraction of carbon and nitrogen from the green pools
+                       released into the atmosphere with anthropogenic landcover change; only used with 
+                       {\tt lcc\_scheme=}1 in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 0.8 \\
+  {\tt frac\_harvest\_2\_atmos} & real & fraction of harvested carbon immediately released into the atmosphere; only used with 
+                       {\tt lcc\_scheme=}1 in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 0.2 \\ 
+  {\tt frac\_mobile\_2\_atmos} & real & fraction of nitrogen from the plant mobile N pool released into the 
+                       atmosphere with anthropogenic landcover change; only used with 
+                       {\tt lcc\_scheme=}1 in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl}   & 0.8 \\
+  {\tt frac\_reserve\_2\_atmos} & real & fraction of carbon from the reserve pool released 
+                       into the atmosphere with anthropogenic landcover change; only used with 
+                       {\tt lcc\_scheme=}1 in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl}  & 0.8 \\
+  {\tt frac\_wood\_2\_atmos} & real & fraction of carbon and nitrogen from the wood pools
+                       released into the atmosphere with anthropogenic landcover change; only used with 
+                       {\tt lcc\_scheme=}1 in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 0.8 \\
+  {\tt tau\_construction} & real & decay time to 10\% for the anthropogenic construction pool with centennial 
+                       time scale [days]; only used with {\tt lcc\_scheme=}2 in namelist 
+                       \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 100.*365. \\
+  {\tt tau\_onsite\_green} & real & decay time to 10\% for anthropogenic green litter, assumed to be burned in 
+                       deforestation fires [days]; only used with {\tt lcc\_scheme=}2 in namelist 
+                       \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 1.*365. \\
+  {\tt tau\_onsite\_wood} & real & decay time to 10\% for anthropogenic woody litter, assumed to be burned in 
+                       deforestation fires [days]; only used with {\tt lcc\_scheme=}2 in namelist 
+                       \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 1.*365. \\
+  {\tt tau\_paper} & real & decay time to 10\% for the anthropogenic paper pool with decadal time scale [days]; only used
+                       with {\tt lcc\_scheme=}2 in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} & 10.*365. \\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{climbuf\_ctl}} \label{apdx:climbuf_ctl} \hypertarget{apdx:climbuf_ctl}
+%---------------------------------------------
+The climate buffer provides climate variables as multi-annual running means, minimums or maximums. It is controlled by namelist {\tt climbuf\_ctl}. The namelist is read in routine {\tt config\_climbuf} ({\tt mo\_climbuf}).
+
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt climbuf\_ctl}}\\\hline\label{tab:apdx.climbuf_ctl}
+  \endfirsthead
+  \caption{{\tt climbuf\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt climbuf\_file\_name} & character & name of the climate buffer file. Only used if 
+                                        {\tt read\_climbuf=.TRUE.} & {\tt 'climbuf.nc'}\\
+  {\tt init\_running\_means} & logical & initialize the calculation of long term climate variables. 
+                                       (Should be {\tt .TRUE.} at the beginning of the second year of
+                                        an initialized experiment.)& {\tt .FALSE.}\\
+  {\tt read\_climbuf} & logical & read climate buffer data from an external file. & {\tt .FALSE.}\\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{disturbance\_ctl}} \label{apdx:disturbance_ctl} \hypertarget{apdx:disturbance_ctl}
+%---------------------------------------------
+Fire and windthrow calculations are controlled by namelist {\tt disturbance\_ctl}. The namelist is read in routine {\tt config\_disturbance} ({\tt mo\_disturbance}). It is used only, if the disturbance module is switched on by setting {\tt use\_disturbance=.TRUE.} in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} (compare table \ref{tab:apdx.jsbach_ctl}). 
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt disturbance\_ctl}}\\\hline\label{tab:apdx.disturbance_ctl}
+  \endfirsthead
+  \caption{{\tt disturbance\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt fire\_algorithm} & integer & fire scheme: 0: none, 1: jsbach & 1 \\
+  {\tt fire\_frac\_wood\_2\_atmos} & real & fraction of carbon from the wood pool emitted to the atmosphere by fire & 0.2 \\
+  {\tt fire\_name} & character & definition of the fire scheme by character string; overrules the settings of 
+                  {\tt fire\_algorithm}. Possible choices: {\tt ''}, {\tt 'none'}, {\tt 'jsbach'} & {\tt ''} \\
+  {\tt ldiag} & logical & switch on/off additional output for debugging & {\tt .FALSE.}\\
+  {\tt windbreak\_algorithm} & integer & windthrow scheme: 0: none, 1: jsbach & 1 \\
+  {\tt windbreak\_name} & character & definition of the windthrow scheme by character string; overrules the settings
+                  of {\tt windbreak\_algorithm}. Possible choices: {\tt ''}, {\tt 'none'}, {\tt 'jsbach'} & {\tt ''} \\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{dynveg\_ctl}} \label{apdx:dynveg_ctl} \hypertarget{apdx:dynveg_ctl}
+%---------------------------------------------
+The dynamic vegetation is controlled by {\tt dynveg\_ctl}. The namelist is read in {\tt config\_dynveg} ({\tt mo\_dynveg}). It is used only, if the dynamic vegetation is switched on by setting {\tt use\_dynveg=\ .TRUE.} in namelist {\tt jsbach\_ctl} (compare table \ref{tab:apdx.jsbach_ctl}). 
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt dynveg\_ctl}}\\\hline\label{tab:apdx.dynveg_ctl}
+  \endfirsthead
+  \caption{{\tt dynveg\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt accelerate\_dynveg} & real & factor to accelerate vegetation dynamics. Default: no acceleration & 1.\\
+  {\tt dynveg\_all} & logical & activate competition between woody types
+                                and grasses (not recommended) & {\tt .FALSE.}\\
+  {\tt dynveg\_feedback} & logical & switch on/off the feedback of the dynamic vegetation on the 
+                         JSBACH physics. (Cover fractions are kept constant, while fire and windthrow still
+                         influence the carbon cycle.) & {\tt .TRUE.}\\
+  {\tt fpc\_file\_name} & character & name of an external vegetation file. Only used if {\tt read\_fpc=.TRUE.} & 
+                                      {\tt 'fpc.nc'}\\
+  {\tt read\_fpc} & logical & read initial cover fractions from an
+                              external file; the file name is defined with parameter {\tt fpc\_file\_name} & {\tt .FALSE.}\\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{fire\_jsbach\_ctl}} \label{apdx:fire_jsbach_ctl} \hypertarget{apdx:fire_jsbach_ctl}
+%---------------------------------------------
+The standard JSBACH fire algorithm is controlled by namelist {\tt fire\_jsbach\_ctl}. The namelist is read in routine {\tt config\_fire\_jsbach} ({\tt mo\_disturbance\_jsbach}). It is used only, if the disturbance scheme is activated by setting {\tt use\_disturbance=.TRUE.} in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} and {\tt fire\_algorithm=} 1 or {\tt fire\_name='jsbach'} in namelist \hyperlink{apdx:disturbance_ctl}{\tt disturbance\_ctl} (compare tables \ref{tab:apdx.jsbach_ctl} and \ref{tab:apdx.fire_jsbach_ctl}). 
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt fire\_jsbach\_ctl}}\\\hline\label{tab:apdx.fire_jsbach_ctl}
+  \endfirsthead
+  \caption{{\tt fire\_jsbach\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+
+  {\tt fire\_litter\_threshold} & real & minimum amount of litter needed for fire [$mol(C)/m^2(grid box)$] & 16.67 \\
+  {\tt fire\_minimum\_grass} & real & minimum fraction of act\_fpc of grass PFTs to be burned each year & 0.006 \\
+  {\tt fire\_minimum\_woody} & real & minimum fraction of act\_fpc of woody PFTs to be burned each year & 0.002 \\
+  {\tt fire\_rel\_hum\_threshold} & real & maximum relative humidity for fire [\%] & 70. \\
+  {\tt fire\_tau\_grass} & real & return period of fire for grass PFT [year] assuming 0\% relative humidity [year] & 2. \\
+  {\tt fire\_tau\_woody} & real & return period of fire for woody PFT [year] assuming 0\% relative humidity [year] & 6. \\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{hydrology\_ctl}} \label{apdx:hydrology_ctl} \hypertarget{apdx:hydrology_ctl}
+%---------------------------------------------
+The ECHAM hydrology is controlled by namelist {\tt hydrology\_ctl}. The hydrology module is active only in runs with ECHAM if {\tt lhd=.TRUE.} in echam namelist {\tt runctl}. The hydrology namelist is read in routine {\tt config\_hydrology} ({\tt mo\_hydrology}).
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt hydrology\_ctl}}\\\hline\label{tab:apdx.hydrology_ctl}
+  \endfirsthead
+  \caption{{\tt hydrology\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+
+  {\tt diag\_water\_budget} & logical & switches on/off additional water budget diagnostics & .FALSE. \\
+  {\tt fblog1} & real & latitude of first grid cell for outflow diagnostics (with {\tt nhd\_diag=}99) & 0. \\
+  {\tt fblog2} & real & latitude of second grid cell for outflow diagnostics (with {\tt nhd\_diag=}99) & 0. \\
+  {\tt fllog1} & real & longitude of first grid cell for outflow diagnostics (with {\tt nhd\_diag=}99) & 0. \\
+  {\tt fllog2} & real & longitude of second grid cell for outflow diagnostics (with {\tt nhd\_diag=}99) & 0. \\
+  {\tt lbase} & logical &  switches on/off baseflow calculation & .TRUE. \\
+  {\tt ldebughd} & logical &  switches on/off additional output for debugging & .FALSE. \\
+  {\tt lhd\_highres} & logical & switches on/off outflow diagnostic on HD model grid (0.5 deg.) & .FALSE. \\
+  {\tt locean} & logical & closure of water budget for ocean coupling & .TRUE. \\
+  {\tt nhd\_diag} & integer & region number for outflow diagnostic (in former versions {\tt isolog}): 
+                            0: none, 1: Bothnian Bay/Sea, 2: Torneaelven, 4: St.Lawrence, 5: Paraguay, 6: Oder, 
+                            7: Elbe, 8: Oranje, 9: Amudarya, 10: Lena, 99: two user defined grid cells defined by 
+                            the longitude and latitudes of {\tt fblog1}, {\tt fllog1}, {\tt fblog2} and {\tt fllog2} & 0 \\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{jsbach\_ctl}} \label{apdx:jsbach_ctl} \hypertarget{apdx:jsbach_ctl}
+%---------------------------------------------
+The namelist {\tt jsbach\_ctl} includes the basic parameters for a JSBACH simulation. It is needed to switch on or off the different physical modules as e.g.\ the dynamic vegetation or the albedo scheme. Besides, it controls file names and other IO-options. The namelist is read in routine {\tt jsbach\_config} of module {\tt mo\_jsbach}. 
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt jsbach\_ctl}}\\\hline\label{tab:apdx.jsbach_ctl}
+  \endfirsthead
+  \caption{{\tt jsbach\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt coupling} & character & Type of coupling: {\tt implicit} & {\tt 'implicit'} \\
+  {\tt debug} & logical &           additional output for debugging & {\tt .FALSE.}\\
+  {\tt debug\_Cconservation} & logical & additional debugging output to solve problems with carbon 
+                                       conservation & {\tt .FALSE.}\\
+  {\tt file\_type} & integer &     output format: 1: grib, 2: netcdf, 4: netcdf2, 6: netcdf4 & 1 \\
+  {\tt file\_ztype} & integer &    output compression type: 0: none, 1: szip (for grib), 2: zip (for netcdf4) & 0 \\
+  {\tt grid\_file} & character &    input file containing grid information & {\tt 'jsbach.nc'}\\
+  {\tt lcc\_forcing\_type} & character & Scheme for (anthropogenic) landcover changes. 
+                                    {\tt NONE}: no landcover change;
+                                    {\tt MAPS}: read maps of landcover fractions;
+                                    {\tt TRANSITIONS}: read maps with landuse transitions & {\tt 'NONE'}\\
+  {\tt lcc\_scheme} & integer & scheme for anthropogenic carbon pools: 1: litter (standard jsbach
+                                   scheme), 2: according to Houghton (1983); only used with 
+                                   {\tt lcc\_forcing\_type = MAPS} or {\tt TRANSITIONS} & 1 \\
+  {\tt lctlib\_file} & character & name of the land cover library file & {\tt 'lctlib.def'}\\
+  {\tt lpost\_echam} & logical &    if {\tt .TRUE.}, write jsbach output variables, even if they are
+                                   part of the echam output & {\tt .FALSE.}\\
+  {\tt lss} & character & land surface sceme: {\tt ECHAM} & {\tt 'ECHAM'} \\
+  {\tt missing\_value} & real &    missing value for the output (ocean values) & {\tt NF\_FILL\_REAL}\\
+  {\tt ntiles} & integer &  number of tiles defined on each grid cell  & -1 \\
+  {\tt out\_state} & logical & write the jsbach output stream & {\tt .TRUE.}\\
+  {\tt pheno\_scheme} & character & phenology scheme: {\tt LOGROP}: JSBACH phenology scheme by C. H. Reick used e.g. in CMIP5;  {\tt KNORR}: phenology scheme by W. Knorr used in CCDAS & {\tt 'LOGROP'} \\
+  {\tt read\_cover\_fract} & logical &  read cover fractions from the JSBACH initial file rather than 
+                                    from restart file & {\tt .FALSE.}\\
+  {\tt soil\_file} &character &    file containing initial data of soil properties & {\tt 'jsbach.nc'}\\
+  {\tt standalone} & logical &      Type of model run;
+                                  {\tt .TRUE.}: stand-alone JSBACH run;
+                                  {\tt .FALSE.}: JSBACH driven by an atmosphere model   & {\tt .TRUE.}\\
+  {\tt surf\_file} & character &    file containing initial data of the land surface & {\tt 'jsbach.nc'}\\
+  {\tt test\_Cconservation} & logical & switches on/off carbon conservation test & {\tt .FALSE.}\\
+  {\tt test\_stream} & logical &    additional stream for model testing & {\tt .FALSE.}\\
+  {\tt use\_albedo} & logical &     switches on/off a dynamic albedo scheme & {\tt .FALSE.}\\
+  {\tt use\_bethy} & logical &      switches on/off the BETHY model (photosynthesis, respiration) & {\tt .FALSE.}\\
+  {\tt use\_disturbance} & logical &  switches on/off the disturbance module (independent of the dynamic vegetation) 
+                                    & {\tt .FALSE.} \\
+  {\tt use\_dynveg} & logical &     switches on/off the dynamic vegetation module & {\tt .FALSE.}\\
+  {\tt use\_phenology} & logical &  switches on/off the phenology module to calculate the LAI & {\tt .FALSE.}\\
+  {\tt use\_roughness\_lai} & logical & calculate roughness length depending on LAI & {\tt .FALSE.}\\
+  {\tt use\_roughness\_oro} & logical & calculate roughness length including subgrid-scale topographie & {\tt .TRUE.}\\
+  {\tt veg\_at\_1200} & logical &   {\tt .TRUE.}: write veg stream at 12:00 each day; {\tt .FALSE.}: write veg 
+                                    stream at the same time steps as the other streams & {\tt .TRUE.} \\
+  {\tt veg\_file} & character &     file containing initial data for the vegetation & {\tt 'jsbach.nc'}\\
+  {\tt with\_nitrogen} & logical &  calculate the nitrogen cycle (not fully implemented in the current version).
+                                    & {\tt .FALSE.}\\
+  {\tt with\_yasso} &  logical & {\tt .TRUE.}: YASSO is used for litter and soil carbon decomposition. & {\tt .FALSE.}\\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{ soil\_ctl}} \label{apdx:soil_ctl} \hypertarget{apdx:soil_ctl}
+%---------------------------------------------
+The configurable parameters to control the soil physics are defined in namelist {\tt soil\_ctl}. The namelist is read in {\tt config\_soil} in module {\tt mo\_soil}.
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt soil\_ctl}}\\\hline\label{tab:apdx.soil_ctl}
+  \endfirsthead
+  \caption{{\tt soil\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt crit\_snow\_depth} & real & critical snow depth for correction of surface
+                                    temperature for melting [m] & 
+                                    ${5.85036\times10^{-03}}$\\
+  {\tt lbsoil} & logical & separate handling of bare soil moisture for bare soil evaporation in multi-layer soil hydrology scheme (only with {\tt nsoil > 1}) & {\tt .TRUE.} \\
+  {\tt ldiag} & logical &           switch on/off extended water balance diagnostics & {\tt .FALSE.} \\
+  {\tt moist\_crit\_fract} & real & critical value of soil moisture above which
+                                    transpiration is not affected by the soil moisture
+                                    stress; expressed as fraction of the
+                                    maximum soil moisture content & 0.75 \\
+  {\tt moist\_max\_limit} & real & upper limit for maximum soil moisture content:
+                                    If positive, {\tt max\_moisture} from initial file is cut
+                                    off at this value. & -1. \\
+  {\tt moist\_wilt\_fract} & real & soil moisture content at permanent wilting point,
+                                    expressed as fraction of maximum soil moisture
+                                    content & 0.35 \\
+  {\tt nsoil} & integer &           number of soil layers (1 or 5) & 1 \\
+  {\tt skin\_res\_max} & real & maximum water content of the skin reservoir of bare soil [m] 
+                                    & ${2.\times10^{-04}}$\\
+\end{longtable}
+
+%---------------------------------------------
+\subsection{Namelist \texttt{windbreak\_jsbach\_ctl}} \label{apdx:windbreak_jsbach_ctl} \hypertarget{apdx:windbreak_jsbach_ctl}
+%---------------------------------------------
+The standard JSBACH windthrow algorithm is controlled by namelist {\tt windbreak\_jsbach\_ctl}. The namelist is read in routine {\tt config\_windbreak\_jsbach} ({\tt mo\_disturbance\_jsbach}). It is used only, if the disturbance scheme is activated by setting {\tt use\_disturbance=\ .TRUE.} in namelist \hyperlink{apdx:jsbach_ctl}{\tt jsbach\_ctl} and {\tt windbreak\_algorithm =} 1 or {\tt windbreak\_name = 'jsbach'} in namelist \hyperlink{apdx:disturbance_ctl}{\tt disturbance\_ctl} (compare tables \ref{tab:apdx.jsbach_ctl} and \ref{tab:apdx.fire_jsbach_ctl}).
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\LTleft}{0pt}\setlength{\LTright}{0pt}
+\begin{longtable}{l@{\extracolsep\fill}lp{7cm}c}\hline\hline
+  \caption{Namelist {\tt windbreak\_jsbach\_ctl}}\\\hline\label{tab:apdx.windbreak_jsbach_ctl}
+  \endfirsthead
+  \caption{{\tt indbreak\_jsbach\_ctl} --- continued}\\\hline
+  \endhead
+  \hline\multicolumn{4}{r}{\slshape table continued on next page}\\
+  \endfoot
+  \hline
+  \endlastfoot
+  Parameter & Type & Description & Default \\\hline
+  {\tt wind\_threshold} & real & factor by which the maximum wind speed must be larger than the climatological 
+                                 maximum wind speed to allow any windthrow & 2.25 \\
+  {\tt wind\_damage\_scale} & real & scaling factor for windthrow. The default value corresponds to runs with ECHAM in T63 resolution. & 0.01 \\
+\end{longtable}

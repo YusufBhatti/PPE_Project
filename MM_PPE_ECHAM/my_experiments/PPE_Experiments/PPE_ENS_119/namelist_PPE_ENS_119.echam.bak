@@ -1,0 +1,254 @@
+&PARCTL
+   nproca=24,
+   nprocb=8,
+/
+&RUNCTL 
+ lresume        = .true.,
+ lmidatm        = .true.
+ out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/PPE_ENS_119/"
+ out_expname    = "PPE_ENS_119"
+ out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
+ rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
+ dt_start       = 2024,04,01,0,0,0
+ dt_stop        = 2025,08,01,1,0,0
+ putdata        = 1,'months','last',0
+ trigfiles      = 16,'months','first',0
+ putrerun       = 16,'months','last',0
+ no_cycles      = 15, 
+ lamip          = .false.
+ lnudge         = .true.
+ ldebugs        = .false.
+ ltimer         = .false.
+/
+&SUBMODELCTL
+ lmethox          = .true.
+ lham             = .true.
+ lbioemi_stdalone = .false.
+ lmoz             = .false.
+ lhammoz          = .false.
+ lburden          = .true.
+ emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
+ emi_scenario     = "ssp245"
+ laerocom_diag    = .true.
+/
+&HAMMOZ_AEROCOMCTL
+ lHEmon = .TRUE.
+ lHEaci = .TRUE.
+ lMMPPE = .TRUE.
+ lAP3M = .TRUE.
+ lAP3D = .TRUE.
+/
+&cfdiagctl
+    locfdiag = .true.
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .true.
+ vphyscnam        = 'all'
+ wetdep_lpost     = .true. 
+ wetdepnam        = 'default' 
+ wetdep_gastrac   = 'SO2', 'H2SO4'
+ wetdep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ drydep_lpost     = .true. 
+ drydepnam        = 'all' 
+ drydep_gastrac   = 'SO2', 'H2SO4'
+ drydep_keytype   = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ sedi_lpost       = .true. 
+ sedinam          = 'all'
+ sedi_keytype     = 2          ! BYTRACER=1; BYSPECIES=2; BYMODE=3 
+ emi_lpost        = .true.
+ emi_lpost_sector = .true.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+/
+&DEBUGSCTL
+ putdebug_stream = 1, 'days', 'last', 0
+/
+&RADCTL
+ iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+ isolrad = 3      
+ io3     = 4     ! 3 --> obsolete! climatology from IPCC-NetCDF file, 4--> CMIP5 new data
+ lradforcing = .true.,.true.
+/
+&PHYSCTL
+ lcdnc_progn    = .true.
+ nauto          = 2
+ cdnc_min_fixed = 10
+/
+&HAMCTL
+ nseasalt       = 7
+ nwetdep        = 3
+ naerorad       = 1
+ nraddiag       = 1
+ burden_keytype = 2          ! BYTRACER=1; BYSPECIES=2;
+ nccndiag       = 7
+/
+&NDGCTL
+ inudgformat     = 2
+ dt_nudg_start   = 2024,04,01,0,0,0
+ dt_nudg_stop    = 2025,08,01,1,0,0
+ lnudgdbx        = .false.
+ lnudgini        = .false.
+ nudglmin        = 1
+ nudglmax        = 47
+ nudgsmin        = 0
+ nudgsmax        = 63
+ lnudgimp        = .true.
+ nudgt           = 47*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
+ ltintlin        = .false.
+ ldamplin        = .true.
+ nudgdamp        = 1.
+ nudgdsize       = 0.5
+ ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&set_stream
+  stream='acmmppe'
+  lpost=0 
+/
+&set_stream
+  stream='acp3d'
+  lpost=0 
+/
+&set_stream
+  stream='accw'
+  lpost=0 
+/
+&set_stream
+  stream='co2'
+  lpost=0
+/
+&set_stream
+  stream='conv'
+  lpost=0
+/
+&set_stream
+  stream='drydep'
+  lpost=0
+/
+&set_stream
+  stream='wetdep'
+  lpost=0
+/
+&set_stream
+  stream='land'
+  lpost=0
+/
+&set_stream
+  stream='nudg'
+  lpost=0
+/
+&set_stream
+  stream='sedi'
+  lpost=0
+/
+&set_stream
+  stream='echamm'
+  lpost=0 
+/
+&set_stream
+  stream='jsbash'
+  lpost=0
+/
+&set_stream
+  stream='veg'
+  lpost=0
+/
+&set_stream
+  stream='acheaci'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='activ'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='burden'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='rad'
+  lpost=1
+  interval = 1,'days','last',0
+/
+&set_stream
+  stream='echam'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='emi'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='jsbash'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='surf'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='vphysc'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&HAMMOZ_PERTURBATIONS
+  scale_emi_dms            = 1.9414582 ! V_SCALE_EMI_DMS
+  scale_emi_antns_so2      = 1.2408893 ! V_SCALE_EMI_ANTNS_SO2
+  scale_emi_shp_so2        = 0.9234181 ! V_SCALE_EMI_SHP_SO2
+  scale_emi_ant_bc         = 1.0993910 ! V_SCALE_EMI_ANT_BC
+  scale_emi_ant_oc         = 1.0924746 ! V_SCALE_EMI_ANT_OC
+  scale_emi_bb_so2         = 3.0238676 ! V_SCALE_EMI_BB_SO2
+  scale_emi_bb_bc          = 3.7938970 ! V_SCALE_EMI_BB_BC
+  scale_emi_bb_oc          = 1.7382189 ! V_SCALE_EMI_BB_OC
+  scale_fricv              = 1.0369209 ! V_SCALE_FRICV
+  scale_emi_ss_acc         = 1.9132450 ! V_SCALE_EMI_SS_ACC
+  scale_emi_ss_coarse      = 2.3949809 ! V_SCALE_EMI_SS_COARSE
+  scale_seasalt_expo       = 1.0686250 ! V_SCALE_SEASALT_EXPO
+  scale_emi_cmr_ff         = 4.1943162e-08 ! V_SCALE_EMI_CMR_FF
+  scale_emi_cmr_bb         = 4.1458385e-08 ! V_SCALE_EMI_CMR_BB
+  bc_rad_ni                = 0.4727259 ! V_SCALE_BC_RAD_NI
+  du_rad_ni                = 1.8871408e-03 ! V_SCALE_DU_RAD_NI
+  oc_rad_ni                = 8.3083978e-03 ! V_SCALE_OC_RAD_NI
+  scale_so2_reactions      = 0.8073726 ! V_SCALE_SO2_REACTIONS
+  scale_dms_reactions      = 1.8333593 ! V_SCALE_DMS_REACTIONS
+  scale_wetdep_ic          = 1.1926833 ! V_SCALE_WETDEP_IC
+  scale_wetdep_bc          = 1.8721517 ! V_SCALE_WETDEP_BC
+  scale_drydep_acc         = 0.7007662 ! V_SCALE_DRYDEP_ACC
+  scale_so4_coating        = 0.6550130 ! V_SCALE_SO4_COATING
+  kappa_so4                = 0.7903649 ! V_SCALE_KAPPA_SO4
+  kappa_oc                 = 0.1588406 ! V_SCALE_KAPPA_OC
+  scale_activation          = 0.9866648 ! V_SCALE_ACTIVATON
+  scale_vertical_velocity  = 1.3379730 ! V_SCALE_VERTICAL_VELOCITY
+  scale_nuc_ft             = 6.5962048 ! V_SCALE_NUC_FT
+
+
+/
+&MVSTREAMCTL
+ interval = 1,'months','last',0
+ filetag = 'echamm'
+ source  = 'sp', 'gl', 'g3b'
+/
+!SF Further example of online mean setup (simpler than for the echam stream)
+!   Uncomment / amend if needed
+!&MVSTREAMCTL
+! interval = 1,'months','last',0
+! source  = 'activ'
+! meannam = ''
+/

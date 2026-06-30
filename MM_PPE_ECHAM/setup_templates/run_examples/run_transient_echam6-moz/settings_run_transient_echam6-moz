@@ -1,0 +1,263 @@
+#!/bin/bash
+
+#-------------------------------------------------------------------------------------------------------
+# Martin Schultz, Sabine Schroeder 2016
+#
+# The following is the middle part (body) of a settings file that will be sourced
+# by jobsubm_echam.sh to setup and launch an echam job.
+#
+# The task of assembling together all the pieces of the settings file is done by prepare_run.sh.
+#
+# These pieces are:
+#
+#     - Header: general settings and compute settings:
+#               - there are mostly machine-dependent, and not echam version-dependent
+#               --> to be found in each machine_config/machine_name/
+#
+#     - Body [current file]: echam(-hammoz) settings:
+#               - these are machine-independent, and echam version-dependent
+#               --> to be found in the model distribution (distribution default templates), in
+#                   any user's already existing settings, or in run_configs/ as a rescue for model versions
+#                   older than the first inclusion of this into echam distributions
+#
+#     - Tail: settings for launching any arbitrary slave p-proc job at the end of each echam integration:
+#               - these are machine-dependent, and echam version-independent
+#               --> to be found in each machine_config/machine_name/
+#
+#-------------------------------------------------------------------------------------------------------
+
+#-Body-begin. Do not delete this line!
+#------------------------------------------------------------------------------------------------------
+#-- ECHAM6-HAMMOZ settings:
+
+   #-- General:
+
+model_type="echam6-moz"                           # model type (echam5.5-ham, echam6, echam6-hammoz, echam6-moz)
+model_bin=${model_dir}/bin/echam6                 # model bin name
+emissions_spec=${script_dir}/emi_spec_${exp}.txt  # name of your exp emi_spec file to copy to $exp_dir
+
+hres="T63"                    # horizontal spectral truncation
+vres="L47"                    # vertical resolution
+oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
+ntiles=11                     # number of tiles in the vegetation model
+
+no_cycles=5                   # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+                              # this number needs to be determined by evaluating the time it takes to calculate one month
+                              # and by matching this with the wallclock limit on your system!
+init_restart_flag=.false.     # echam restart flag at launch of this job 
+                              # false means the job will start from initial conditions
+                              # (in case of job chaining, the proper rerun flag will be automatically 
+                              # set when further jobs will be started)
+
+date_start="2003,01,01,0,0,0" # start of the experiment - Should never be modified when making a rerun
+date_stop="2004,01,01,0,0,0"  # end of the experiment - Can be freely adjusted during the whole experiment
+
+input_files_version="v0002" # version label for input files !!do not change if you don't know about it!!
+scenario="RCP85"              # in case it is relevant for the given setup (using either variable GHG's
+                              # ozone or climatologic aerosols, AND the experiment's time range 
+                              # overlaps with [2009,2100]), choose here the scenario you'd like
+                              # (RCP45, XXX, all case insensitive)
+trac_init_date="jan2003"      # date for tracer intialization (case insensitive)
+
+   #-- ECHAM6-HAMMOZ namelists:
+
+       #-- ECHAM:
+
+cat > ${script_dir}/namelist_${exp}.echam << EOF
+&PARCTL
+ nproca = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+ nprocb = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+/
+&RUNCTL 
+ nproma         = ${nproma}
+ lresume        = $init_restart_flag,
+ lmidatm        = .true.
+ out_datapath   = "$exp_dir"
+ out_expname    = "$exp"
+! as long as bug #426 (out_filetype=6 causes model to crash) isn't fixed, use NetCDF
+!out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4
+ out_filetype   = 2     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF
+ rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF4
+ dt_start       = $date_start
+ dt_stop        = $date_stop
+ putdata        = 3, 'hours',  'first',  0
+ trigfiles      = 1, 'months', 'first', 0
+ putrerun       = 1, 'months', 'last',  0
+ no_cycles      = ${no_cycles}, 
+ lamip          = .true.
+ lnudge         = .true.
+ ltimer         = .false.
+/
+&SUBMODELCTL
+ lhammoz          = .false.
+ lham             = .false.
+ lmoz             = .true.
+!uncomment one of the following lines if you want to switch off a specific coupling
+!lhmzphoto        = .false.
+!lhmzoxi          = .false.
+!lhmzhet          = .false.
+!Don't remove next lines, change only, if you know what you are doing
+ llght            = .true.
+ lburden          = .true.
+ lchemfeedback    = .true.  ! lchemfeedback combines lchemrad, and linterh2o
+!uncomment one of the following lines if you want to switch off a specific process
+!lchemistry       = .false.
+!lemissions       = .false.
+!ldrydep          = .false.
+!lwetdep          = .false.
+!lsedimentation   = .false.
+
+ lflighttrack     = .false.
+
+ emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE]"
+ emi_scenario     = "${scenario}"
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .true.
+!default(vphyscnam)=geom1, geohm1, aphm1, grmassm1, trpwmo, pbl, precipconv, precipstrat, velo10m 
+ vphyscnam        = 'all'
+ wetdep_lpost     = .true. 
+!default(wetdepnam)=wdep
+ wetdepnam        = 'default'
+!default(wetdep_gastrac)=SO2,H2SO4,HNO3
+ wetdep_gastrac   = 'all'
+ wetdep_keytype   = 1          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ drydep_lpost     = .true. 
+!default(drydepnam) = vddep, ddep
+ drydepnam        = 'default' 
+!default(drydep_gastrac) = SO2, H2SO4, HNO3, O3, NO2
+ drydep_gastrac   = 'all'
+ drydep_keytype   = 1          ! BYTRACER=1; BYSPECIES=2; BYMODE=3
+ emi_lpost        = .true.
+ emi_lpost_sector = .true.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+ sedi_lpost       = .true. 
+/
+&RADCTL
+ iaero   = 1     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+/
+&PHYSCTL
+ lcdnc_progn    = .true.
+ nauto          = 2
+/
+&MOZCTL
+!default(out_species): 'C2H6', 'C5H8', 'CH2O', 'CO', 'HNO3', 'NO', 'NO2', 'O3', 'PAN'
+ out_species    = 'default'
+!default(burden_species): O3, NO, NO2, CO
+  burden_species = 'default'
+!default(photovars)= jo3_a, jo3_b, jno2
+  photovars      = 'default'
+!uncomment one of the following lines if you want to switch off a specific process
+! lstrathet      = .false.
+  ltrophet       = .false.
+! lchemsolv      = .false.
+! lphotolysis    = .false.
+  lfastj         = .false.    ! not yet fully implemented!
+! lfastjaero     = .false.
+! lfastjcloud    = .false.
+! make sure to use interactive aerosols for ltrophet (EF_FILE = 2, EF_MODULE = 3)
+  bc_aerosol%ef_type = 3
+/
+&BIOGENIC_EMISSIONSCTL
+! control read in of emission factors not of emissions!
+  nlai_biogenic_ef_type = 3 ! EF_FILE=2; EF_MODULE = 3
+  nef_pft               = 2 ! EF_FILE=2 from MEGAN, EF_MODULE=3 from JSBACH
+  emifact_files_species = 'APIN', 'BPIN', 'CARENE3', 'C5H8', 'LIMON', 'MYRC', 'TBETAOCI', 'SABIN', 'MBO','NO'
+! ldebug_bioemi         = .TRUE.
+/
+&HAMCTL
+ lsoa          = .false.
+ nseasalt      = 5
+! potentially comment out the next line if salsa is active
+!nwetdep       = 2
+/
+&NDGCTL
+ inudgformat     = 2
+ dt_nudg_start   = $date_start
+ dt_nudg_stop    = $date_stop
+ lnudgdbx        = .false.
+ lnudgini        = .false.
+ nudglmin        = 1
+ nudglmax        = ${vres#L}
+ nudgsmin        = 0
+ nudgsmax        = ${hres#T}
+ lnudgimp        = .true.
+!nudgt           = ${vres#L}*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014)
+ ltintlin        = .false.
+ ldamplin        = .true.
+ nudgdamp        = 1.
+ nudgdsize       = 0.5
+ ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&SET_STREAM stream='bioemi', lpost=0 /
+&SET_STREAM stream='co2',    lpost=0 /
+&SET_STREAM stream='conv',   lpost=0 /
+!&SET_STREAM stream='emi',    lpost=0 /
+&SET_STREAM stream='moz',    lpost=0 /
+&SET_STREAM stream='nudg',   lpost=0 /
+&SET_STREAM stream='wetdep', lpost=0 /
+
+&SET_STREAM stream='accw',   interval=1,'months','last',0 /
+&SET_STREAM stream='activ',  interval=1,'months','last',0 /
+&SET_STREAM stream='burden', interval=1,'days','last',0 /
+&SET_STREAM stream='emi',    interval=1,'months','last',0 / !to be discussed!
+&SET_STREAM stream='ham',    interval=1,'months','last',0 /
+&SET_STREAM stream='jsbach', interval=1,'months','last',0 /
+&SET_STREAM stream='land',   interval=1,'months','last',0 /
+&SET_STREAM stream='rad',    interval=1,'months','last',0 /
+&SET_STREAM stream='sedi',   interval=1,'months','last',0 /
+&SET_STREAM stream='veg',    interval=1,'months','last',0 /
+EOF
+
+       #-- JS-BACH:
+
+cat > ${script_dir}/namelist_${exp}.jsbach <<EOF
+&JSBACH_CTL
+  standalone = .false.
+  ntiles = ${ntiles}
+
+  ! --- options to activate the different jsbach modules ---
+  use_bethy = .true.
+  use_phenology = .true.
+  use_albedo = .true.
+  use_roughness_lai = .true.
+  use_roughness_oro = .false.
+  test_cconservation = .true.
+
+  ! --- output options ---
+  file_type = 2
+  veg_at_1200 = .false.
+/
+&SOIL_CTL
+  nsoil =5
+/
+EOF
+
+       #-- Mean-values streams:
+
+#SF uncomment the following if you need to compute online monthly means:
+
+cat >> ${script_dir}/namelist_${exp}.echam << EOF
+&MVSTREAMCTL
+  interval = 1,'months','last',0
+  meannam = ''
+! source = 'tracer', 'moz', 'vphysc', 'g3b', 'gl', 'sp', 'drydep', 'wetdep','emi', 'lghtng', 'bioemi', 'co2', 'ham'
+  source = 'tracer', 'moz', 'vphysc', 'g3b', 'gl', 'sp', 'drydep', 'lghtng', 'bioemi', 'co2', 'ham' !to be discussed!
+/
+EOF
+
+cat > ${script_dir}/tracer.nml <<EOF
+&MVCTL
+  meannam = 'APIN', 'BCARY', 'BENZ', 'BIGALKANE', 'BIGENE', 'BPIN', 'BR', 'BRCL', 'BRO', 'BRONO2', 'C2H2', 'C2H4', 'C2H6',  \
+            'C3H6', 'C3H8', 'C5H8', 'CCL4', 'CF2CLBR', 'CF3BR', 'CFC11', 'CFC113', 'CFC114', 'CFC115', 'CFC12', 'CH2BR2',   \
+            'CH2O', 'CH3BR', 'CH3CCL3', 'CH3CHO', 'CH3CL', 'CH3CN', 'CH3CO3', 'CH3COCH3', 'CH3COCHO', 'CH3O2', 'CH3OH',     \
+            'CH3OOH', 'CH4', 'CHBR3', 'CL', 'CL2', 'CL2O2', 'CLO', 'CLONO2', 'CO', 'CO2', 'COF2', 'COFCL', 'DMS', 'F',      \
+            'GLYALD', 'GLYOXAL', 'H', 'H1202', 'H2', 'H2402', 'H2O', 'H2O2', 'HBR', 'HCFC141B', 'HCFC142B', 'HCFC22',       \
+            'HCL', 'HCN', 'HCOOH', 'HF', 'HNO3', 'HO2', 'HO2NO2', 'HOBR', 'HOCL', 'HONO', 'HYAC', 'LIMON', 'MACR', 'MBO',   \
+            'MEK', 'MPAN', 'MVK', 'MYRC', 'N', 'N2O', 'N2O5', 'NO', 'NO2', 'NO3', 'O', 'O1D', 'O2', 'O3', 'OCLO', 'OH',     \
+            'PAN', 'SO2', 'TOL', 'XYL', 'PHENOL', 'CRESOL', 'CATECHOL', 'XYLOL', 
+/
+EOF
+#-Body-end. Do not delete this line!

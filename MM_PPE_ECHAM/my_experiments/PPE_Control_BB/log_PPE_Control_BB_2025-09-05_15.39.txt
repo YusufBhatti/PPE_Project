@@ -1,0 +1,23 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2024-04-01 00:00:00
+Starting date for this run:        2024-04-01 00:00:00
+Ending date for this run:          2025-08-01 01:00:00
+
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 16 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...

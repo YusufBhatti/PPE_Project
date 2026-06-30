@@ -1,0 +1,668 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+MODULE mo_jsbach
+
+  ! 
+  ! Description: 
+  ! Type definitions and common functions for JSBACH
+  ! 
+  ! Current Code Owner: jsbach_admin
+  ! 
+  ! History: 
+  !  
+  ! Version   Date     Comment 
+  ! -------   ----     ------- 
+  ! 4.0.3     01/06/28 Original Fortran 90 code. Reiner Schnur
+  ! 
+  ! Code Description: 
+  !   Language:           Fortran 90. 
+  !   Software Standards: "European Standards for Writing and  
+  !     Documenting Exchangeable Fortran 90 Code". 
+  ! 
+  ! Modules used: 
+  ! 
+  USE mo_time_event,   ONLY: io_time_event,                                                &
+                             TRIG_LAST, TRIG_FIRST, TRIG_NONE,                             &
+                             TIME_INC_SECONDS, TIME_INC_MINUTES,                           &
+                             TIME_INC_HOURS , TIME_INC_DAYS,                               &
+                             TIME_INC_MONTHS, TIME_INC_YEARS
+  USE mo_time_control, ONLY: lresume, dt_start, dt_resume, dt_stop, delta_time, no_cycles, &
+                             no_days, no_steps, putdata, putrerun, trigfiles, ldebugev,    &
+                             p_bcast_event, l_orbvsop87
+  USE mo_radiation_parameters, ONLY: lyr_perp, yr_perp
+  USE mo_orbit,        ONLY: cecc, cobld, clonp
+  USE mo_control,      ONLY: ltimer, ldebugio, lhd
+  USE mo_filename,     ONLY: name_limit, path_limit, out_expname, NONE, GRIB
+  USE mo_netcdf,       ONLY: nf_fill_real, nf_max_name
+  USE mo_mpi,          ONLY: p_parallel, p_parallel_io, p_bcast, p_io
+  USE mo_kind,         ONLY: dp
+  USE mo_exception,    ONLY: finish, message, message_text
+  USE mo_io_units,     ONLY: nout
+
+  IMPLICIT NONE
+
+  ! Global (i.e. public) Declarations: 
+  ! Global Type Definitions: 
+
+  !! Structure to hold options that define the model structure and switch on/off
+  !! certain model operations. They are defined from namelist parameters. 
+  TYPE options_type
+     INTEGER      :: ntiles                 !! Number of sub-grid tiles on land surface
+                                            !!   Has to be equal to the <ntiles> dimension in jsbach initial file 
+                                            !!   and smaller than number of land cover types <nlct>
+     LOGICAL      :: Standalone             !! Type of model run (standalone or coupled)
+     CHARACTER(name_limit) :: Experiment    !! Label for experiment
+     CHARACTER(len=10) :: Coupling          !! Type of coupling between LSS and atmosphere 
+                                            !! (Choices: "explicit","semi","implicit")
+     !
+     CHARACTER(len=10) :: LSS               !! Which LSS to use?
+     CHARACTER(len=10) :: PhenoScheme       !! Which phenology: LOGROP or KNORR
+     LOGICAL      :: UseVic                 !! Use VIC model?
+     LOGICAL      :: UseEchamLand           !! Use old ECHAM land surface scheme?
+     LOGICAL      :: UseBethyLand           !! Use old BETHY land surface scheme?
+     LOGICAL      :: UseBethy               !! Use BETHY model?
+     LOGICAL      :: UsePhenology           !! Use phenology model?
+     LOGICAL      :: UseAlbedo              !! Use albedo model?
+     LOGICAL      :: UseRoughnessLAI        !! Use calculation of z0 depending on LAI?
+     LOGICAL      :: UseRoughnessOro        !! USe calculation of z0 depending on topographie?
+     LOGICAL      :: UseDynveg              !! Use dynamic vegetation DYNVEG?
+     LOGICAL      :: UseDisturbance         !! Use disturbances independent of the dynamic vegetation
+     LOGICAL      :: WithNitrogen           !! With nitrogen cycling? (in addition to carbon cycling) 
+     LOGICAL      :: WithYasso              !! With yasso soil carbon model?
+     LOGICAL      :: UseLanduseTransitions  !! Read in annual landuse transition matrices from New Hampshire Harmonized Protocol
+     LOGICAL      :: UseExternalLandcoverMaps !! Read in annual landcover maps 
+     LOGICAL      :: ReadCoverFract         !! Read cover fractions from initial file instead of restart file in restarted runs
+     LOGICAL      :: WriteInterfaceVars     !! Write all jsbach input data goning through the jsbach interface
+     LOGICAL      :: ReadInterfaceVars      !! Read stepwise interface variables instead of jsbach offline forcing data
+     LOGICAL      :: InterfaceTest          !! Needed to achieve bit-identical results of a echam/jsbach run with WriteInterfaceVars
+                                            !! and a offline jsbach run with ReadInterfaceVars
+     INTEGER      :: LCC_scheme             !! Type of pools for landcover change (maps or transitions) and harvest (transitions)
+                                            !!   ( 1 = Std. JSBACH, 2 = Anthropogenic according to Houghton 1983 )
+     LOGICAL      :: WithHD                 !! Use hydrology model?
+     INTEGER      :: FileType               !! File type for output files (1=GRIB, 2=NETCDF, 6=NETCDF4)
+     INTEGER      :: FileZtype              !! Output file compression (0=NONE, 1=GRIB SZIP, 2=NETCDF4 ZIP)
+     LOGICAL      :: OutputModelState       !! Output full model state stream?
+     CHARACTER(path_limit) :: RestartPrefix !! Prefix for construction of restart files
+     LOGICAL      :: Timer                  !! Use Timer?
+     LOGICAL      :: ResetTime              !! Allow model to overwrite start of restart files with time of first call?
+     CHARACTER(nf_max_name)  :: GridFile    !! File containing grid information
+     CHARACTER(nf_max_name)  :: LctlibFile  !! Name of the land cover library file
+     CHARACTER(nf_max_name)  :: VegFile     !! File containig initial data for the vegetation 
+     CHARACTER(nf_max_name)  :: SurfFile    !! File containig initial data for the surface
+     CHARACTER(nf_max_name)  :: SoilFile    !! File containig initial data for the soil
+     CHARACTER(128)          :: input_verbose !! Debug flags for mo_input
+     !
+     ! The following measurement heights are only used by the standalone model for the forcing data. In coupled mode, they
+     ! are not changed from their default values of 0. They are added to the geopotential height passed to the interface and
+     ! describing the height of the lowest atmospheric level where wind, temperature and humidity are taken from in the coupled 
+     ! mode. In order for this to work in standalone mode, the interface has to be passed the geopotential of the surface
+     ! elevation, i.e. elevation * Gravity. That is:
+     ! Coupled mode: Pass geopotential of lowest atmosphere level and set the following three values to zero
+     ! Standalone:   Pass geopotential of elevation to interface and set the three values to there heights above surface
+     REAL(dp)     :: HeightTemperature      !! Height above surface at which temperature measurements were taken [m]
+     REAL(dp)     :: HeightWind             !! Height above surface at which wind measurements were taken [m]
+     REAL(dp)     :: HeightHumidity         !! Height above surface at which humidity measurements were taken
+     !
+  END TYPE options_type
+
+  !! Global Scalars: 
+  LOGICAL, SAVE  :: new_day = .FALSE.           !! TRUE if start of new day; set in stepon_jsbach / cbalone_driver
+  LOGICAL, SAVE  :: new_month = .FALSE.         !! TRUE if start of new month; set in stepon_jsbach / cbalone_driver
+  LOGICAL, SAVE  :: new_year = .FALSE.          !! TRUE if start of new year; set in stepon_jsbach / cbalone_driver
+  LOGICAL, SAVE  :: debug                       !! Generate debug output in standard output?
+  LOGICAL, SAVE  :: debug_Cconservation         !! Produce additional output to debug carbon conservation
+  LOGICAL, SAVE  :: test_Cconservation          !! Activate carbon conservation test
+  LOGICAL, SAVE  :: test_stream                 !! Write test stream in mo_test module?
+  LOGICAL, SAVE  :: lpost_echam                 !! Write JSBACH output variables even if they are part of the ECHAM output stream
+  TYPE(io_time_event), SAVE    :: veg_putdata   !! Output interval for veg stream
+  REAL(dp), SAVE :: missing_value = nf_fill_real !! Missing value used in model output
+  INTEGER, SAVE  :: nml_unit                    !! Unit of the jsbach namelist
+
+  LOGICAL :: module_configured  = .FALSE.
+  LOGICAL, SAVE, PUBLIC :: interface_test   ! model setup that allows bit-identical results of an echam run with
+                                            ! write_interface_vars and a jsbach run with read_interface_vars
+
+CONTAINS 
+
+  !!+ Initialize configuration options and parameters for JSBACH
+  SUBROUTINE jsbach_config(options)
+
+    USE mo_util_string, ONLY: tolower, toupper
+    USE mo_filename,    ONLY: out_filetype, out_ztype
+    USE mo_namelist,    ONLY: POSITIONED, open_nml, position_nml
+
+    !! Description:
+    !! This subroutine reads the namelists jsbach_ctl (and jsbalone_ctl for stand alone jsbach runs)
+    !! into the global structure <options>
+
+    !! Called from the interface routine *jsbach_init*
+
+    TYPE(options_type), INTENT(inout) :: options
+
+    !! Namelist parameters
+
+    INTEGER                 :: ntiles           ! number of tiles
+    LOGICAL                 :: standalone       ! Type of model run 
+                                                !    true: stand-alone jsbach run
+                                                !    false: jsbach driven by an atmosphere model
+    CHARACTER(len=10)       :: coupling         ! Type of coupling: explicit, semi, implicit
+    CHARACTER(len=10)       :: LSS              ! Land surface sceme: ECHAM
+    LOGICAL                 :: use_bethy        ! Use BETHY model (photosynthesis, respiration)
+    LOGICAL                 :: use_phenology    ! Calculate LAI using the phenology module
+    LOGICAL                 :: use_albedo       ! Calculate albedo depending on vegetation
+    LOGICAL                 :: use_roughness_lai! Calculate roughness length depending on LAI
+    LOGICAL                 :: use_roughness_oro! Calculate roughness length including topographic elements
+    LOGICAL                 :: use_dynveg       ! Use the dynamic vegetation module
+    LOGICAL                 :: use_disturbance  ! Use the disturbance module independent of dynamic vegetation
+    LOGICAL                 :: with_nitrogen    ! For switching on nitrogen cycling
+    LOGICAL                 :: with_yasso       ! For switching on yasso model 
+    LOGICAL                 :: with_hd          ! For switching on hydrology model
+    CHARACTER(len=16)       :: lcc_forcing_type ! Type of landuse scheme: NONE, MAPS, or TRANSITIONS
+    INTEGER                 :: lcc_scheme       ! Type of pools for lcc
+    CHARACTER(len=16)       :: pheno_scheme     ! Type of phenology scheme: LOGROP or KNORR
+    INTEGER                 :: file_type        ! Output file format
+    INTEGER                 :: file_ztype       ! Output file compression
+    LOGICAL                 :: out_state        ! write the jsbach stream
+    LOGICAL                 :: veg_at_1200      ! write veg stream at 12:00 each day
+    LOGICAL                 :: read_cover_fract ! read cover fractions from initial rather than restart file
+    LOGICAL                 :: write_interface_vars ! write all input variables going through the jsbach interface
+    LOGICAL                 :: read_interface_vars  ! read stepwise interface variables (in jsbach offline runs)
+    CHARACTER(nf_max_name)  :: grid_file        ! File containing grid information
+    CHARACTER(nf_max_name)  :: lctlib_file      ! Name of the land cover library file
+    CHARACTER(nf_max_name)  :: veg_file         ! File containig initial data for the vegetation 
+    CHARACTER(nf_max_name)  :: surf_file        ! File containig initial data for the surface
+    CHARACTER(nf_max_name)  :: soil_file        ! File containig initial data for the surface
+    CHARACTER(128)          :: input_verbose    ! Debug output flags for mo_input
+
+    !! other local parameters
+    INTEGER                 :: read_status, f_unit
+    LOGICAL                 :: lopen
+    
+
+    INCLUDE 'jsbach_ctl.inc'
+    INCLUDE 'jsbalone_ctl.inc'
+
+    IF (p_parallel_io) THEN
+
+       !! Open the jsbach namelist file
+
+       INQUIRE (FILE='namelist.jsbach', OPENED=lopen)
+       IF (.NOT. lopen) THEN
+          nml_unit = open_nml ('namelist.jsbach')
+       END IF
+
+       !!  define default values
+       ntiles = -1
+       standalone = .TRUE.
+       coupling = 'implicit'
+       lss = 'ECHAM'
+       use_bethy = .FALSE.
+       use_phenology = .FALSE.
+       use_albedo = .FALSE.
+       use_roughness_lai = .FALSE.
+       use_roughness_oro = .TRUE.
+       with_nitrogen = .FALSE.
+       with_yasso = .FALSE.
+       with_hd = .FALSE.
+       use_dynveg = .FALSE.
+       use_disturbance = .FALSE.
+       lcc_forcing_type = 'NONE'
+       lcc_scheme = 1
+       pheno_scheme = 'LOGROP'
+       file_type = GRIB
+       file_ztype = NONE
+       out_state = .TRUE.
+       veg_at_1200 = .TRUE.
+       lpost_echam = .FALSE.
+       test_stream = .FALSE.
+       debug = .FALSE.
+       debug_Cconservation = .FALSE.
+       test_Cconservation = .FALSE.
+       grid_file = 'jsbach.nc'
+       lctlib_file = 'lctlib.def'
+       veg_file = 'jsbach.nc'
+       surf_file = 'jsbach.nc'
+       soil_file = 'jsbach.nc'
+       read_cover_fract = .FALSE.
+       input_verbose = ''
+       write_interface_vars = .FALSE.
+       read_interface_vars = .FALSE.
+       interface_test = .FALSE.
+       
+       !! Read namelist jsbach_ctl
+
+       f_unit = position_nml ('JSBACH_CTL', nml_unit, status=read_status)
+       SELECT CASE (read_status)
+       CASE (POSITIONED)
+          READ (f_unit, jsbach_ctl)
+          CALL message('jsbach_config', 'Namelist JSBACH_CTL: ')
+          WRITE(nout, jsbach_ctl)
+       END SELECT
+
+       options%Standalone = standalone
+       WRITE(*,*) 'Type of model run: standalone = ', options%Standalone
+       options%Coupling = TRIM(coupling)
+       WRITE(*,*) 'Type of coupling: ',options%Coupling
+          
+       options%LSS = TRIM(lss)
+       WRITE(*,*) 'Using LSS: ', options%LSS
+       options%UseVic = .FALSE.
+       options%UseEchamLand = .FALSE.
+       options%UseBethyLand = .FALSE.
+       SELECT CASE(tolower(options%LSS))
+       CASE ('vic')
+          options%UseVic = .TRUE.
+       CASE ('echam')
+          options%UseEchamLand = .TRUE.
+       CASE ('bethy')
+          options%UseBethyLand = .TRUE.
+       CASE default
+          CALL finish('jsbach_config','You have to use some land surface scheme')
+       END SELECT
+
+       options%UseBethy = use_bethy
+       WRITE (message_text,*) 'Using BETHY model: ', options%UseBethy
+       CALL message('jsbach_config', message_text)
+
+       options%UsePhenology = use_phenology
+       WRITE (message_text,*) 'Using phenology model: ', options%UsePhenology
+       CALL message('jsbach_config', message_text)
+
+       IF (options%UsePhenology .AND. .NOT. options%UseBethy) &
+            CALL finish('jsbach_config','Phenology model can only be used together with BETHY')
+
+       IF (.NOT. options%UseBethy) THEN
+         CALL message('jsbach_config', 'Bethy model is not used, therefore the following switches are set to false:')
+         CALL message('             ', 'with_nitrogen, with_yasso, test_Cconservation, debug_Cconservation')
+         with_nitrogen       = .FALSE.
+         with_yasso          = .FALSE.
+         test_Cconservation  = .FALSE.
+         debug_Cconservation = .FALSE.
+       END IF
+
+       options%UseAlbedo = use_albedo
+       WRITE (message_text,*) 'Using albedo model: ', options%UseAlbedo
+       CALL message('jsbach_config', message_text)
+
+       options%UseRoughnessLAI = use_roughness_lai
+       WRITE (message_text,*) 'Using z0 depending on LAI: ', options%UseRoughnessLAI
+       CALL message('jsbach_config', message_text)
+
+       options%UseRoughnessOro = use_roughness_oro
+       WRITE (message_text,*) 'Using z0 depending on topographie ', options%UseRoughnessOro
+       CALL message('jsbach_config', message_text)
+
+       options%withNitrogen = with_nitrogen
+       WRITE (message_text,*) 'With Nitrogen cycling: ', options%withNitrogen
+       CALL message('jsbach_config', message_text)
+
+       options%withYasso = with_yasso
+       WRITE (message_text,*) 'With Yasso model: ', options%withYasso
+       CALL message('jsbach_config', message_text)
+       IF (with_yasso) THEN
+         CALL message('    ', 'The Yasso soil carbon model has been developed by the Finnish Environment Institute (SYKE).')
+         CALL message('    ', 'It has been adapted for the MPI-M Earth System Model and is licensed')
+         CALL message('    ', 'under the same conditions as the MPI-M model.')
+       END IF
+
+       options%WithHD = with_hd 
+       WRITE (message_text,*) 'hydrological discharge (HD) model activated: ', options%WithHD
+       CALL message('jsbach_config', message_text)
+
+       options%UseDynveg = use_dynveg
+       WRITE (message_text,*) 'Using dynamic vegetation: ', options%UseDynveg
+       CALL message('jsbach_config', message_text)
+
+       IF (use_dynveg .AND. .NOT. use_disturbance) THEN
+          CALL message('jsbach_config','Dynamic vegetation does not make sense without disturbances')
+          CALL message('jsbach_config','---------')
+          CALL message('jsbach_config',' WARNING: Disturbance calculations are switched on')
+          CALL message('jsbach_config','---------')
+          options%UseDisturbance = .TRUE.
+       ELSE
+          options%UseDisturbance = use_disturbance
+       END IF
+       WRITE (message_text,*) 'Using disturbances: ', options%UseDisturbance
+       CALL message('jsbach_config', message_text)
+
+       if(options%withNitrogen .and. options%UseDynveg) then
+            CALL message('jsbach_config','Dynamical Vegetation is now also running together with Nitrogen cycling')	
+       end if    
+
+       if(options%withNitrogen .and. options%withYasso) then
+            CALL finish('jsbach_config','Nitrogen dynamics are not running with the yasso model yet!')
+       end if   
+
+       lcc_forcing_type = toupper(lcc_forcing_type)
+       WRITE (message_text,*) 'Scheme for Landuse changes: ', TRIM(lcc_forcing_type)
+       CALL message('jsbach_config', message_text)
+
+       SELECT CASE(TRIM(lcc_forcing_type))
+       CASE ('NONE')
+          options%UseExternalLandcoverMaps = .FALSE.
+          options%UseLanduseTransitions = .FALSE.
+          CALL message('jsbach_config','No landuse change')
+       CASE ('MAPS')
+          options%UseExternalLandcoverMaps = .TRUE.
+          options%UseLanduseTransitions = .FALSE.
+          CALL message('jsbach_config','Calculating landuse change from land cover maps')
+       CASE ('TRANSITIONS')
+          options%UseExternalLandcoverMaps = .FALSE.
+          options%UseLanduseTransitions = .TRUE.
+          CALL message('jsbach_config','Calculating landuse change from LU transition maps')
+       CASE default
+          CALL finish('jsbach_config','Wrong lcc_forcing_type (allowed are: NONE, MAPS, or TRANSITIONS)')
+       END SELECT
+
+       options%lcc_scheme = lcc_scheme
+       SELECT CASE (lcc_scheme)
+          CASE (1)
+             WRITE (message_text,*) 'Pool scheme for landuse changes: Std. JSBACH (litter)'
+          CASE (2)
+             WRITE (message_text,*) 'Pool scheme for landuse changes: Anthropogenic'
+          CASE (3)
+            IF (with_yasso) THEN
+               CALL finish('jsbach_config','Yasso model can not be run with anthropogenic pools')
+            END IF
+            WRITE (message_text,*) 'Pool scheme for landuse changes: Anthropogenic with climate dependent degradation'
+       END SELECT
+       CALL message('jsbach_config', message_text)
+
+       IF (options%UseDynveg .AND. .NOT. options%UseDisturbance) THEN
+         CALL message('jsbach_config','Incompatible options: Dynveg: On, Disturbance: Off')
+         CALL message('jsbach_config','Dynveg is designed to include disturbances and produces odd results otherwise.')
+         CALL message('jsbach_config','Since jsbach can run with this combination of options, you may switch off this error')
+         CALL finish ('jsbach_config','message (mo_jsbach, ~line 280) if you are really sure, that this is what you want.')
+       ENDIF
+
+       IF (options%UseExternalLandcoverMaps .AND. options%UseDynveg) &
+            CALL finish('jsbach_config', &
+            'Dynamic Vegetation is currently not allowed together with landcover change forcing from external maps')
+
+       options%PhenoScheme=toupper(pheno_scheme) 
+       WRITE (message_text,*) 'Scheme for Phenology: ', TRIM(pheno_scheme)
+       CALL message('jsbach_config', message_text)
+
+       options%ReadCoverFract = read_cover_fract
+       WRITE (message_text,*) 'Read cover fractions from initial rather than restart file: ', read_cover_fract
+       CALL message('jsbach_config', message_text)
+
+       options%ntiles = ntiles
+       WRITE (message_text,*) 'Number of tiles: ', ntiles
+       CALL message('jsbach_config', message_text)
+
+       options%FileType = file_type
+       WRITE (message_text,*) 'JSBACH output file type: ', file_type
+       CALL message('jsbach_config', message_text)
+       options%FileZtype = file_ztype
+       WRITE (message_text,*) 'JSBACH output file compression: ', file_ztype
+       CALL message('jsbach_config', message_text)
+
+       IF (options%Standalone) THEN
+          out_filetype = options%FileType
+          out_ztype = options%FileZtype
+       END IF
+
+       options%OutputModelState = out_state
+       WRITE (message_text,*) 'Output full model state', out_state
+       CALL message('jsbach_config', message_text)
+
+       IF (veg_at_1200) THEN
+          veg_putdata = io_time_event(1,'days','first',-43200)
+          WRITE(message_text,*) 'Output veg stream at 12:00'
+          CALL message('jsbach_config', message_text)
+       ELSE
+          veg_putdata = putdata
+       END IF
+
+       IF (.NOT. lpost_echam) THEN
+          CALL message('jsbach_config',' Output variables defined in ECHAM and JSBACH streams written by ECHAM only.')
+       END IF
+       
+       WRITE (message_text,*) 'Fill value for output files', missing_value
+       CALL message('jsbach_config', message_text)
+
+       WRITE (message_text,*) 'Test Stream: ', test_stream
+       CALL message('jsbach_config', message_text)
+
+       options%GridFile = grid_file
+       WRITE (message_text,'(a,a)') 'Grid information is read from file: ', TRIM(grid_file)
+       CALL message('jsbach_config', message_text)
+
+       options%VegFile = veg_file
+       WRITE (message_text,'(a,a)') 'Vegetation data is read from file: ', TRIM(veg_file)
+       CALL message('jsbach_config', message_text)
+
+       options%SurfFile = surf_file
+       WRITE (message_text,'(a,a)') 'Surface data is read from file: ', TRIM(surf_file)
+       CALL message('jsbach_config', message_text)
+
+       options%SoilFile = soil_file
+       WRITE (message_text,'(a,a)') 'Soil data is read from file: ', TRIM(soil_file)
+       CALL message('jsbach_config', message_text)
+
+       options%LctlibFile = lctlib_file
+       WRITE (message_text,'(a,a)') 'Land cover type library: ', TRIM(lctlib_file)
+       CALL message('jsbach_config', message_text)
+
+       WRITE (message_text,*) 'DEBUG:', debug
+       CALL message('jsbach_config', message_text)
+
+       WRITE (message_text,*) 'debug_Cconservation:', debug_Cconservation
+       CALL message('jsbach_config', message_text)
+
+       WRITE (message_text,*) 'test_Cconservation:', test_Cconservation
+       CALL message('jsbach_config', message_text)
+
+       options%input_verbose = input_verbose
+
+       options%InterfaceTest = interface_test
+       WRITE (message_text,*) 'interface_test:', options%InterfaceTest
+       CALL message('jsbach_config', message_text)
+
+       options%WriteInterfaceVars = write_interface_vars
+       WRITE (message_text,*) 'write_interface_vars:', options%WriteInterfaceVars
+       CALL message('jsbach_config', message_text)
+       IF (options%WriteInterfaceVars .AND. .NOT. options%InterfaceTest) THEN
+          CALL message('jsbach_config', &
+               'WARNING: For bit-identical results with the offline run INTERFACE_TEST needs to be used.')
+       END IF
+
+       options%ReadInterfaceVars = read_interface_vars
+       WRITE (message_text,*) 'read_interface_vars:', options%ReadInterfaceVars
+       CALL message('jsbach_config', message_text)
+       IF (.NOT. options%Standalone .AND. options%ReadInterfaceVars) THEN
+          CALL finish('jsbach_config', &
+               'Reading interface variables from file is only possible in offline jsbach runs')
+       END IF
+       IF (options%ReadInterfaceVars .AND. .NOT. options%InterfaceTest) THEN
+          CALL message('jsbach_config', &
+               'WARNING: For bit-identical results with the echam run INTERFACE_TEST needs to be used.')
+       END IF
+    ENDIF
+
+    ! Broadcast to processors
+    IF (p_parallel) THEN
+       CALL p_bcast(options%ntiles, p_io)
+       CALL p_bcast(options%Standalone, p_io)
+       CALL p_bcast(options%Coupling, p_io)
+       CALL p_bcast(options%LSS, p_io)
+       CALL p_bcast(options%UseVic, p_io)
+       CALL p_bcast(options%UseEchamLand, p_io)
+       CALL p_bcast(options%UseBethyLand, p_io)
+       CALL p_bcast(options%UseBethy, p_io)
+       CALL p_bcast(options%UsePhenology, p_io)
+       CALL p_bcast(options%UseAlbedo, p_io)
+       CALL p_bcast(options%UseRoughnessLAI, p_io)
+       CALL p_bcast(options%UseRoughnessOro, p_io)
+       CALL p_bcast(options%withNitrogen, p_io)
+       CALL p_bcast(options%withYasso, p_io)
+       CALL p_bcast(options%WithHD, p_io)
+       CALL p_bcast(options%UseDynveg, p_io)
+       CALL p_bcast(options%UseDisturbance, p_io)
+       CALL p_bcast(options%UseExternalLandcoverMaps, p_io)
+       CALL p_bcast(options%UseLanduseTransitions, p_io)
+       CALL p_bcast(options%ReadCoverFract, p_io)
+       CALL p_bcast(options%PhenoScheme, p_io)
+       CALL p_bcast(options%lcc_scheme, p_io)
+       CALL p_bcast(options%FileType, p_io)
+       CALL p_bcast(options%FileZtype, p_io)
+       CALL p_bcast(options%OutputModelState, p_io)
+       CALL p_bcast(lpost_echam, p_io)
+       CALL p_bcast_event(veg_putdata, p_io)
+       CALL p_bcast(missing_value, p_io)
+       CALL p_bcast(test_stream, p_io)
+       CALL p_bcast(debug, p_io)
+       CALL p_bcast(debug_Cconservation, p_io)
+       CALL p_bcast(options%WriteInterfaceVars, p_io)
+       CALL p_bcast(options%ReadInterfaceVars, p_io)
+       CALL p_bcast(options%InterfaceTest, p_io)
+       CALL p_bcast(interface_test, p_io)
+       CALL p_bcast(test_Cconservation, p_io)
+       CALL p_bcast(options%GridFile, p_io)
+       CALL p_bcast(options%VegFile, p_io)
+       CALL p_bcast(options%SurfFile, p_io)
+       CALL p_bcast(options%SoilFile, p_io)
+       CALL p_bcast(options%LctlibFile, p_io)
+       CALL p_bcast(options%input_verbose, p_io)
+    ENDIF
+    ! set lhd in echam module mo_control
+    lhd = options%WithHD
+
+    IF (options%standalone) THEN
+       IF (p_parallel_io) THEN
+
+          !! Read namelist jsbalone_ctl
+
+          !!  define default values
+          out_expname = 'xxxxxx'
+          lresume = .FALSE.
+          no_cycles = 1
+          dt_start(:) = 0
+          dt_resume(:) = 0
+          dt_stop(:) = 0
+          no_days = -1
+          no_steps = -1
+          delta_time = 0
+          ltimer = .FALSE.
+          putdata  = io_time_event(1, TIME_INC_DAYS, TRIG_FIRST, 0)
+          putrerun = io_time_event(1, TIME_INC_MONTHS, TRIG_LAST, 0)
+          trigfiles = io_time_event(1, TIME_INC_MONTHS, TRIG_FIRST, 0)
+
+          f_unit = position_nml ('JSBALONE_CTL', nml_unit, status=read_status)
+          SELECT CASE (read_status)
+          CASE (POSITIONED)
+             READ (f_unit, jsbalone_ctl)
+             CALL message('jsbach_config', 'Namelist JSBALONE_CTL: ')
+             WRITE(nout, jsbalone_ctl)
+          END SELECT
+
+          WRITE (message_text,*) 'Experiment name: ', TRIM(out_expname)
+          CALL message('jsbach_config', message_text)
+          options%Experiment = out_expname
+          options%RestartPrefix = 'restart_' // TRIM(out_expname) ! This is the echam prefix (hardcoded)
+          
+          WRITE (message_text,*) 'Initializing model from restart files', lresume
+          CALL message('jsbach_config', message_text)
+
+          WRITE (message_text,*) 'Number of restart cycles', no_cycles
+          CALL message('jsbach_config', message_text)
+
+          WRITE (message_text,*) 'dt_start:', dt_start
+          CALL message('jsbach_config', message_text)
+
+          WRITE (message_text,*) 'dt_stop:', dt_stop
+          CALL message('jsbach_config', message_text)
+
+          WRITE (message_text,*) 'restart periode:', putrerun
+          CALL message('jsbach_config', message_text)
+
+          WRITE (message_text,*) 'output periode:', putdata
+          CALL message('jsbach_config', message_text)
+          IF (.NOT. veg_at_1200) veg_putdata = putdata
+
+          IF (no_days /= -1) THEN
+             WRITE (message_text,*) 'Number of days of this run: ', no_days
+             CALL message('jsbach_config', message_text)
+          END IF
+
+          IF (no_steps /= -1) THEN
+             WRITE (message_text,*) 'Number of time steps in this run: ', no_steps
+             CALL message('jsbach_config', message_text)
+          END IF
+
+          WRITE (message_text,*) 'Time step in seconds: ', delta_time
+          CALL message('jsbach_config', message_text)
+
+          options%Timer = ltimer
+          WRITE (message_text,*) 'Check performances using Timer:', ltimer
+          CALL message('jsbach_config', message_text)
+
+          IF (l_orbvsop87) THEN
+             CALL message('init_forcing', ' Using orbit from VSOP87')
+             IF (lyr_perp) THEN
+                WRITE (message_text,*) 'Perpetual year for orbit: ', yr_perp
+                CALL message('init_forcing', message_text)
+             END IF
+          ELSE
+             CALL message('init_forcing', ' Using orbit from PCMDI')
+             WRITE (message_text,*) 'Eccentricity:', cecc
+             CALL message('init_forcing', message_text)
+             WRITE (message_text,*) 'Obliquity:', cobld
+             CALL message('init_forcing', message_text)
+             WRITE (message_text,*) 'Longitude of perihelion:', clonp
+             CALL message('init_forcing', message_text)
+          END IF
+
+          ldebugio = debug
+          ldebugev = debug
+       ENDIF
+
+       IF (p_parallel) THEN
+          CALL p_bcast(options%Experiment, p_io)
+          CALL p_bcast(options%RestartPrefix, p_io)
+          CALL p_bcast(options%Timer, p_io)
+       ! The following are used from ECHAM5 modules and are (partly) duplicated in options, but need
+       ! to be broadcast if running in standalone mode so that the modules can use them
+          CALL p_bcast(lresume, p_io)
+          CALL p_bcast(out_expname, p_io)
+          CALL p_bcast(no_cycles, p_io)
+          CALL p_bcast(dt_start, p_io)
+          CALL p_bcast(dt_resume, p_io)
+          CALL p_bcast(dt_stop, p_io)
+          CALL p_bcast(no_days, p_io)
+          CALL p_bcast(no_steps, p_io)
+          CALL p_bcast(delta_time, p_io)
+          CALL p_bcast(l_orbvsop87, p_io)
+          CALL p_bcast(lyr_perp, p_io)
+          CALL p_bcast(yr_perp, p_io)
+          CALL p_bcast(cecc, p_io)
+          CALL p_bcast(cobld, p_io)
+          CALL p_bcast(clonp, p_io)
+          CALL p_bcast(ltimer, p_io)
+          CALL p_bcast(ldebugio, p_io)
+          CALL p_bcast(ldebugev, p_io)
+          CALL p_bcast_event(putdata, p_io)
+          CALL p_bcast_event(veg_putdata, p_io) ! Needs to be broadcast again!
+          CALL p_bcast_event(trigfiles, p_io)
+          CALL p_bcast_event(putrerun, p_io)
+       ENDIF
+    END IF  ! standalone
+
+    module_configured = .TRUE.
+
+  END SUBROUTINE jsbach_config
+  !
+  !----------------------------------------------------------------------------
+  
+END MODULE mo_jsbach
+
+!Local Variables:
+!mode: f90
+!fill-column: 100
+!End:

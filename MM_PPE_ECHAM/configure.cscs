@@ -1,0 +1,544 @@
+#! /usr/bin/env bash
+#______________________________________________________________________________
+#
+# Wrapper script for calling the different configure scripts in a consistent
+# way
+#
+#                    For details, skip to 'Customization'
+#______________________________________________________________________________
+#
+set -eu
+#_______________________________________________________________________________
+#
+# Utility functions
+#_______________________________________________________________________________
+#
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+blue=$(tput setaf 4)
+bgcolor=$(tput sgr0)
+#
+redln() { printf "\n${red}ERROR: ${1}${bgcolor}\n\n"; }
+blueln() { printf "${blue}${1}${bgcolor}\n"; }
+greenln () { printf "${green}${1}${bgcolor}\n"; }
+#
+function banner {
+    typeset line
+    line=________________________________________________________________________________
+    echo
+    blueln $line
+    echo
+    greenln "$*"
+    blueln $line
+    echo
+}
+#_______________________________________________________________________________
+#
+#                     Usage
+#_______________________________________________________________________________
+#
+function usage {
+    echo "" 1>&2
+    echo "Usage: $0 [-c <compiler>]" 1>&2
+    echo "" 1>&2
+    echo "Availbale compiler setups at CSCS: " 1>&2
+    echo "" 1>&2
+    echo "- @daint: pgi, cray" 1>&2
+    echo "- @dora:  intel, gnu" 1>&2
+    echo "" 1>&2
+}
+
+# Select one from the compiler configurations, defaults to pgi ...
+
+configCompiler="pgi"
+
+while getopts ":c:" OPTFLAG
+do
+    case $OPTFLAG in
+	c)
+	    configCompiler=${OPTARG}
+	    ;;
+	*)
+	    usage
+	    exit 1
+	    ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+#_______________________________________________________________________________
+#
+#                     Define variables
+#_______________________________________________________________________________
+#
+
+CONFIG_SHELL=${CONFIG_SHELL:-""}
+
+CC=${CC:-""} 
+CXX=${CXX:-""} 
+F77=${F77:-""}
+FFLAGS=${FFLAGS:-""} 
+FC=${FC:-""} 
+MPIFC=${MPIFC:-""} 
+CFLAGS=${CFLAGS:-""} 
+FCFLAGS=${FCFLAGS:-""} 
+ARFLAGS=${ARFLAGS:-""}
+LDFLAGS=${LDFLAGS:-""}
+
+MPIROOT=${MPIROOT:-""}
+MPI_INCLUDE=${MPI_INCLUDE:-""}     
+MPI_LIB=${MPI_LIB:-""}            
+MPI_LAUNCH=${MPI_LAUNCH:-""}            
+
+NETCDFFROOT=${NETCDFFROOT:-""}    
+NETCDFF_VERSION=${NETCDFF_VERSION:-""} 
+NETCDFF_INCLUDE=${NETCDFF_INCLUDE:-""}
+NETCDFF_LIB=${NETCDFF_LIB:-""}
+
+NETCDFROOT=${NETCDFROOT:-""}      
+NETCDF_VERSION=${NETCDF_VERSION:-""} 
+NETCDF_INCLUDE=${NETCDF_INCLUDE:-""}
+NETCDF_LIB=${NETCDF_LIB:-""}
+
+HDF5ROOT=${HDF5ROOT:-""}           
+HDF5_VERSION=${HDF5_VERSION:-""} 
+HDF5_INCLUDE=${HDF5_INCLUDE:-""}    
+HDF5_LIB=${HDF5_LIB:-""}           
+
+SZIPROOT=${SZIPROOT:-""}           
+ZLIBROOT=${ZLIBROOT:-""}           
+
+SRCDIRS=${SRCDIRS:-""}
+LAPACKROOT=${LAPACKROOT:-""} 
+LAPACK_LIB=${LAPACK_LIB:-""}
+SUPPORTROOT=${SUPPORTROOT:-""}
+SUPPORT_LIB=${SUPPORT_LIB:-""}
+
+#_______________________________________________________________________________
+#
+#                               Customization
+#_______________________________________________________________________________
+#
+
+# Set installation directory (prefix) for the model components/binaries.
+# Defaults to the current working directory.
+
+configPrefix=$(pwd -P)
+
+# Select source code location or specific versions for the model components.
+# Must be given as absolute path names.
+#
+# This is relevant if you stored the source files at a different location
+# or if you got several versions of the components by repeatedly calling
+# 'get_mpiesm'. Defaults to the version that you got most recently, within the
+# current working directory.
+
+#______________________________________________________________________________
+#
+configDirectory=${0%/*}
+blueln "Configure package directory is $configDirectory"
+configHost=$(perl -l -mNet::Domain -e 'print Net::Domain::hostfqdn()')
+blueln "Configure for $configHost ..."
+blueln "Configure installation directory is $configPrefix"
+#______________________________________________________________________________
+#
+# Compiler configurations
+#
+
+CONFIG_SHELL=/bin/bash
+
+DEFINES=
+
+typeset -a site_extras=
+
+case $configHost in
+    
+    greina*)
+
+        # script is not under our control
+        set +u
+        source $MODULESHOME/init/bash
+        set -u
+	
+        compiler=$configCompiler
+	
+        SRCDIRS="support"
+        SUPPORTROOT=..
+        SUPPORT_LIB='-L$(SUPPORTROOT)/lib -lsupport'
+
+        ARFLAGS=crv
+
+        case $compiler in
+
+            intel)
+
+                greenln "selected Intel Fortran compiler"
+
+		module load intel/compiler/64/15.0/2015.3.187
+		export PATH=/users/lkornblu/bin:$PATH
+
+                CC=icc
+                CXX=icpc
+                FC=ifort
+                F77=ifort
+                MPIFC=mpif90
+
+                CFLAGS="-DgFortran -std=gnu99 -O3 -xHOST"
+                FCFLAGS="-O3 -xHOST -fast-transcendentals -fp-model source -traceback -g"
+
+                FFLAGS="$FCFLAGS"
+
+		MPIROOT=/users/lkornblu
+		MPI_INCLUDE="-I${MPIROOT}/include"
+                MPI_LIB="-Wl,--enable-new-dtags -L${MPIROOT}/lib -Wl,-rpath -Wl,${MPIROOT}/lib -lmpi_usempif08 -lmpi_usempi_ignore_tkr -lmpi_mpifh -lmpi"
+                MPI_LAUNCH="${MPIROOT}/bin/mpiexec"
+
+		PKG_CONFIG_PATH=/users/lkornblu/lib/pkgconfig
+
+		NETCDFFROOT=$(pkg-config --variable=prefix netcdf-fortran)
+		NETCDFF_VERSION=$(pkg-config --modversion netcdf-fortran)
+		NETCDFF_INCLUDE=$(pkg-config --cflags netcdf-fortran)
+		NETCDFF_LIB=$(pkg-config --libs netcdf-fortran)
+	
+		NETCDFROOT=$(pkg-config --variable=prefix netcdf)
+		NETCDF_VERSION=$(pkg-config --modversion netcdf)
+		NETCDF_INCLUDE=$(pkg-config --cflags netcdf)
+		NETCDF_LIB=$(pkg-config --libs netcdf)
+	
+		HDF5ROOT=/users/lkornblu
+		HDF5_INCLUDE="-I${HDF5ROOT}/include"
+		HDF5_LIB="-L${HDF5ROOT}/lib -lhdf5_hl -lhdf5 $($HDF5ROOT/bin/h5cc -showconfig | grep '\bExtra libraries:' | awk -F: '{print $2}')"
+		HDF5_VERSION=$($HDF5ROOT/bin/h5cc -showconfig | grep 'HDF5 Version:' | awk '{print $3}')
+
+		SZIPROOT= # not available in greina ...
+		ZLIBROOT= # not given
+
+		site_extras=(NETCDFF_VERSION="$NETCDFF_VERSION"
+		    NETCDFF_INCLUDE="$NETCDFF_INCLUDE"
+		    NETCDFF_LIB="$NETCDFF_LIB")
+		site_extras+=(NETCDF_VERSION="$NETCDF_VERSION"
+		    NETCDF_INCLUDE="$NETCDF_INCLUDE"
+		    NETCDF_LIB="$NETCDF_LIB")
+		site_extras+=(HDF5_VERSION="$HDF5_VERSION"
+		    HDF5_INCLUDE="$HDF5_INCLUDE" HDF5_LIB="$HDF5_LIB")
+
+                ;;
+
+	    *)
+
+                redln "compiler $compiler not prepared"
+		exit
+
+                ;;
+	esac
+	;;
+
+    daint*|dora*)
+	
+        # script is not under our control
+        set +u
+        source $MODULESHOME/init/bash
+        set -u
+	
+        compiler=$configCompiler
+	
+	# CSCS: need to get fft, lapack, and blas later from cufft, cublas, or
+	#       magma
+	
+        SRCDIRS="support"
+        SUPPORTROOT=..
+        SUPPORT_LIB='-L$(SUPPORTROOT)/lib -lsupport'
+
+        ARFLAGS=crv
+
+        case $compiler in
+
+            cray)
+
+                greenln "selected Cray Fortran compiler"
+
+		PE_ENV=${PE_ENV:-""}
+		if [[ $PE_ENV != "CRAY" ]]
+		then    
+		    pe_env=$(echo $PE_ENV | tr '[:upper:]' '[:lower:]')
+                    module swap PrgEnv-$pe_env PrgEnv-cray
+		    module load craype-accel-nvidia35
+		fi    
+		
+		PE_NETCDF_MODULE_NAME=${PE_NETCDF_MODULE_NAME:-""}
+                if [[ $PE_NETCDF_MODULE_NAME != "cray-netcdf" ]]
+		then    
+		    module load cray-netcdf
+		fi    
+		
+		CC=$(pwd -P)/contrib/cray_fail_wrapper/cc
+		FC=$(pwd -P)/contrib/cray_fail_wrapper/ftn
+		F77=$(pwd -P)/contrib/cray_fail_wrapper/ftn
+		MPIFC=$(pwd -P)/contrib/cray_fail_wrapper/ftn
+		
+		CFLAGS="-DgFortran -O2 -hsystem_alloc -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE"
+		FCFLAGS="-hflex_mp=conservative -hfp1 -hadd_paren -Ounroll0 -Oipa0 -eZ -em -ea -ram -D_EUROHACK_2015"
+		
+		FFLAGS="$FCFLAGS"
+
+		PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PE_CRAY_DEFAULT_FIXED_PKGCONFIG_PATH:$CRAY_MPICH2_DIR/lib/pkgconfig
+		;;
+
+            intel)
+
+                greenln "selected Intel Fortran compiler"
+
+		PE_ENV=${PE_ENV:-""}
+		if [[ $PE_ENV != "INTEL" ]]
+		then    
+		    pe_env=$(echo $PE_ENV | tr '[:upper:]' '[:lower:]')
+                    module swap PrgEnv-$pe_env PrgEnv-intel
+		fi    
+		
+		PE_NETCDF_MODULE_NAME=${PE_NETCDF_MODULE_NAME:-""}
+                if [[ $PE_NETCDF_MODULE_NAME != "cray-netcdf" ]]
+		then    
+		    module load cray-netcdf
+		fi    
+
+                CC=cc
+                FC=ftn
+                F77=ftn
+                MPIFC=ftn
+
+                CFLAGS="-DgFortran -std=gnu99 -O3 -xHOST"
+                FCFLAGS="-O3 -xHOST -fast-transcendentals -fp-model source -traceback -g -D_EUROHACK_2015"
+
+                FFLAGS="$FCFLAGS"
+
+		PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PE_INTEL_DEFAULT_FIXED_PKGCONFIG_PATH:$CRAY_MPICH2_DIR/lib/pkgconfig
+                ;;
+
+            gnu)
+
+                greenln "selected GNU Fortran compiler"
+
+		PE_ENV=${PE_ENV:-""}
+		if [[ $PE_ENV != "GNU" ]]
+		then    
+		    pe_env=$(echo $PE_ENV | tr '[:upper:]' '[:lower:]')
+                    module swap PrgEnv-$pe_env PrgEnv-gnu
+		fi    
+		
+		PE_NETCDF_MODULE_NAME=${PE_NETCDF_MODULE_NAME:-""}
+                if [[ $PE_NETCDF_MODULE_NAME != "cray-netcdf" ]]
+		then    
+		    module load cray-netcdf
+		fi    
+
+                CC=cc
+                FC=ftn
+                F77=ftn
+                MPIFC=ftn
+
+                CFLAGS="-DgFortran -std=gnu99 -O3 -march=native"
+                FCFLAGS="-Wall -march=native -O3 -g -fomit-frame-pointer -ffast-math -static-libgfortran -D_EUROHACK_2015"
+
+                FFLAGS="$FCFLAGS"
+
+		PKG_CONFIG_PATH=$PKG_CONFIG_PATH:${PE_CRAY_DEFAULT_FIXED_PKGCONFIG_PATH//CRAY\/83/GNU\/49}:$CRAY_MPICH2_DIR/lib/pkgconfig
+                ;;
+
+            pgi)
+
+                greenln "selected PGI Fortran compiler"
+
+		PE_ENV=${PE_ENV:-""}
+		if [[ $PE_ENV != "PGI" ]]
+		then    
+		    pe_env=$(echo $PE_ENV | tr '[:upper:]' '[:lower:]')
+                    module swap PrgEnv-$pe_env PrgEnv-pgi
+		    module swap pgi pgi/15.3.0   
+		    module load craype-accel-nvidia35
+		fi    
+		
+		PE_NETCDF_MODULE_NAME=${PE_NETCDF_MODULE_NAME:-""}
+                if [[ $PE_NETCDF_MODULE_NAME != "cray-netcdf" ]]
+		then    
+		    module load cray-netcdf
+		fi    
+		
+		CC=cc
+		FC=ftn
+		F77=ftn
+		MPIFC=ftn
+		
+		CFLAGS="-DgFortran -c9x -O3 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE"
+		FCFLAGS="-O3 -Kieee -Mallocatable=03  -D_EUROHACK_2015"
+		
+		FFLAGS="$FCFLAGS"
+
+		;;
+
+	    *)
+
+                redln "compiler $compiler not prepared"
+		exit
+
+                ;;
+        esac
+
+	prefix_string=$(pkg-config --print-variables mpich | awk '$1 ~/prefix/ { print }')
+	MPIROOT=$(pkg-config --variable=${prefix_string} mpich)
+	MPI_INCLUDE=$(pkg-config --cflags mpich)
+	MPI_LIB="$(pkg-config --libs mpich) $(pkg-config --libs mpichf90)"
+	
+	MPI_LAUNCH=$(which aprun)
+	
+	prefix_string=$(pkg-config --print-variables netcdff | awk '$1 ~ /prefix/ { print }')
+	NETCDFFROOT=$(pkg-config --variable=${prefix_string} netcdff)
+	NETCDFF_VERSION=$(pkg-config --modversion netcdff)
+	NETCDFF_INCLUDE=$(pkg-config --cflags netcdff)
+	NETCDFF_LIB=$(pkg-config --libs netcdff)
+	
+	prefix_string=$(pkg-config --print-variables netcdf | awk '$1 ~ /prefix/ { print }')
+	NETCDFROOT=$(pkg-config --variable=${prefix_string} netcdf)
+	NETCDF_VERSION=$(pkg-config --modversion netcdf)
+	NETCDF_INCLUDE=$(pkg-config --cflags netcdf)
+	NETCDF_LIB=$(pkg-config --libs netcdf)
+	
+	netcdf_requires=
+	netcdf_requires=$(pkg-config --print-requires-private netcdf | awk 'NR==1 {print $1}')
+	
+	prefix_string=$(pkg-config --print-variables hdf5 | awk '$1 ~ /prefix/ { print }')
+	HDF5ROOT=$(pkg-config --variable=${prefix_string} netcdf)
+	HDF5_VERSION=$(pkg-config --modversion hdf5)
+	
+	shopt -s extglob
+	if [[ "${netcdf_requires}" == *hdf5* ]]
+	then    
+	    HDF5_INCLUDE=
+	    HDF5_LIB=
+	    for required in $(pkg-config --print-requires-private netcdf | awk '{print $1}')
+	    do
+		prefix_string=$(pkg-config --print-variables ${required} | awk '$1 ~ /prefix/ { print }')
+		HDF5ROOT=$(pkg-config --variable=${prefix_string} ${required})
+		HDF5_INCLUDE="${HDF5_INCLUDE} $(pkg-config --cflags ${required})"
+		HDF5_LIB="${HDF5_LIB} $(pkg-config --libs ${required})"
+	    done
+	fi
+	shopt -u extglob
+	
+	SZIPROOT= # not available in greina ...
+	ZLIBROOT= # not given
+	
+	site_extras=(NETCDFF_VERSION="$NETCDFF_VERSION"
+	    NETCDFF_INCLUDE="$NETCDFF_INCLUDE"
+	    NETCDFF_LIB="$NETCDFF_LIB")
+	site_extras+=(NETCDF_VERSION="$NETCDF_VERSION"
+	    NETCDF_INCLUDE="$NETCDF_INCLUDE"
+	    NETCDF_LIB="$NETCDF_LIB")
+	site_extras+=(HDF5_VERSION="$HDF5_VERSION"
+	    HDF5_INCLUDE="$HDF5_INCLUDE" HDF5_LIB="$HDF5_LIB")
+
+	;;
+    
+    *)
+
+        redln "Host $configHost unknown at CSCS."
+	exit
+        
+        ;;
+esac
+
+#_______________________________________________________________________________
+#
+#                            End of Customization
+#_______________________________________________________________________________
+#
+# Main routine
+#_______________________________________________________________________________
+#
+
+blueln "CONFIG_SHELL     $CONFIG_SHELL"
+echo
+blueln "CC               $CC" 
+blueln "CXX              $CXX" 
+blueln "CFLAGS           $CFLAGS" 
+blueln "F77              $F77" 
+blueln "FFLAGS           $FFLAGS" 
+blueln "FC               $FC" 
+blueln "MPIFC            $MPIFC" 
+blueln "FCFLAGS          $FCFLAGS" 
+blueln "ARFLAGS          $ARFLAGS"
+echo
+blueln "MPIROOT          $MPIROOT"
+blueln "MPI_INCLUDE      $MPI_INCLUDE"     
+blueln "MPI_LIB          $MPI_LIB"            
+blueln "MPI_LAUNCH       $MPI_LAUNCH"            
+echo
+blueln "NETCDFFROOT      $NETCDFFROOT"    
+blueln "NETCDFF_VERSION  $NETCDFF_VERSION" 
+blueln "NETCDFF_INCLUDE  $NETCDFF_INCLUDE"
+blueln "NETCDFF_LIB      $NETCDFF_LIB"
+echo
+blueln "NETCDFROOT       $NETCDFROOT"      
+blueln "NETCDF_VERSION   $NETCDF_VERSION" 
+blueln "NETCDF_INCLUDE   $NETCDF_INCLUDE"
+blueln "NETCDF_LIB       $NETCDF_LIB"
+echo
+blueln "HDF5ROOT         $HDF5ROOT"           
+blueln "HDF5_VERSION     $HDF5_VERSION" 
+blueln "HDF5_INCLUDE     $HDF5_INCLUDE"    
+blueln "HDF5_LIB         $HDF5_LIB"           
+echo
+blueln "SZIPROOT         $SZIPROOT"           
+blueln "ZLIBROOT         $ZLIBROOT"           
+echo
+blueln "SRCDIRS          $SRCDIRS"
+blueln "LAPACKROOT       $LAPACKROOT" 
+blueln "LAPACK_LIB       $LAPACK_LIB"
+blueln "SUPPORTROOT      $SUPPORTROOT"
+blueln "SUPPORT_LIB      $SUPPORT_LIB"
+echo
+#_______________________________________________________________________________
+#
+
+banner Configuring of ECHAM @ $(pwd) started
+
+# Note that the configure of ECHAM does not work with mpif90
+# mpi libraries have to be provided in MPI_LIB. The mpi include
+# directory is deduced from MPIROOT.
+
+$CONFIG_SHELL $configDirectory/configure --prefix=$configPrefix \
+    --disable-mh-file \
+    --disable-shared \
+    CONFIG_SHELL=$CONFIG_SHELL \
+    CC="$CC" \
+    CXX="$CXX" \
+    CFLAGS="$CFLAGS" \
+    FFLAGS="$FFLAGS" \
+    FC="$FC" \
+    F77="$F77" \
+    FCFLAGS="$FCFLAGS" \
+    ARFLAGS="$ARFLAGS" \
+    LDFLAGS="$LDFLAGS" \
+    MPIROOT="$MPIROOT" \
+    NETCDFROOT="$NETCDFROOT" \
+    NETCDFFROOT="$NETCDFFROOT" \
+    HDF5ROOT="$HDF5ROOT" \
+    SZIPROOT="$SZIPROOT" \
+    MPI_LIB="$MPI_LIB" \
+    MPI_LAUNCH="$MPI_LAUNCH" \
+    SRCDIRS="$SRCDIRS" \
+    LAPACKROOT="$LAPACKROOT" \
+    LAPACK_LIB="$LAPACK_LIB" \
+    SUPPORTROOT="$SUPPORTROOT" \
+    SUPPORT_LIB="$SUPPORT_LIB" \
+    "${site_extras[@]}" \
+    ${DEFINES} \
+    "${@:-}"
+
+#_______________________________________________________________________________
+#
+
+banner Configuration finished
+
+#_______________________________________________________________________________
+#

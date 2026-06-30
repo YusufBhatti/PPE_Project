@@ -1,0 +1,143 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2024-04-01 00:00:00
+Starting date for this run:        2024-04-01 00:00:00
+Ending date for this run:          2024-05-01 00:00:00
+
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 16 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 192
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/PPE_PACE_Project/my_experiments/new_account/echam_jobscript_new_account.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: new_account
+ - number of cpus: 128
+
+----
+Creating the output directory...
+
+Output directory: /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/
+
+----
+Parsing namelist_new_account.echam to get input files-related flags...
+
+----
+Starting input files linking process into /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/...
+
+with:
+
+input_basepath: /projects/0/prjs1474/aarifi/INPUT/v0002
+nudg_basepath: /projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/
+exp_dir: /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/
+hres: T63
+vres: L47
+oceres: GR15
+start_yyyymm: 202404
+stop_yyyymm: 202405
+start_year_m1: 2023
+stop_year_p1: 2025
+start_yyyymm_m1: 202403
+stop_yyyymm_p1: 202406
+flag_time_dep_sst_sic: false
+sst_sic_dataset: era5
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: ssp245
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+
+Nudging dataset from 202404 on: era5
+
+----
+Keeping a record of all symbolic links... 
+
+lrwxrwxrwx 1 ybhatti2 prjs1474 101 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ndg202405.nc -> /projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/era5_T63L47_netcdf/era5_T63L47_202405.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 69 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.23 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63L47_jan_spec.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ozon2023 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 80 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/dust_potential_sources.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/dust_potential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 73 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/parnuc.15H2SO4.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/parnuc.15H2SO4.A0.total.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 89 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/jsbach.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/jsbach/T63/jsbach_T63GR15_11tiles_5layers_2005.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 67 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/greenhouse_gases.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/greenhouse_ssp245.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 73 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/dust_msg_pot_sources.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/msg_pot_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 85 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.20 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ozon2025 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 85 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.96 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 101 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ndg202406.nc -> /projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/era5_T63L47_netcdf/era5_T63L47_202405.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 70 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/dust_regions.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/dust_regions_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 68 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/xtsoil.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/soilpHfrac_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 69 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.90 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63GR15_VLTCLIM.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/surface_rough_12m.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/surface_rough_12m_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/megan_fraction_broadl_ev.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_fraction_broadl_ev_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 71 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/pointlocations.txt -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/CFMIP/pointlocations.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 71 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/soil_type_all.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/soil_type_all_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/lctlib.def -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/jsbach/lctlib_nlct21.def_rev7624
+lrwxrwxrwx 1 ybhatti2 prjs1474 59 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/lut_kappa.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/lut_kappa.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 95 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/explosive_volcanos.dat -> /projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/aerocom_II/explosive_volcanos.dat
+lrwxrwxrwx 1 ybhatti2 prjs1474 57 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/gcr_ipr_solmax.txt -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/solmax.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 84 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/megan_boreal_grasses_limit.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_boreal_grasses_limit_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 68 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ECHAM6_CldOptProps.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/ECHAM6_CldOptProps.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 101 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ndg202404.nc -> /projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/era5_T63L47_netcdf/era5_T63L47_202404.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/megan_boreal_trees_limit.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_boreal_trees_limit_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 78 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/lut_optical_properties_lw.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/lut_optical_properties_lw_M7.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 67 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/surface_properties.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/xtsurf_v2_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 86 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ham_oxidants_monthly.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/ham_oxidants_monthly_T63L47_macc.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 58 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/rrtmg_sw.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/rrtmg_sw.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 84 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/megan_clm_pft_map.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_mksrf_pft_cesm4_2005_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ozon2024 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 65 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.92 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_TSLCLIM.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 70 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.24 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63GR15_jan_surf.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/megan_emission_factors.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_ef_specific_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 58 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/rrtmg_lw.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/rrtmg_lw.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 101 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/ndg202403.nc -> /projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/era5_T63L47_netcdf/era5_T63L47_202404.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 96 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/continuous_volcanos.dat -> /projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/aerocom_II/continuous_volcanos.dat
+lrwxrwxrwx 1 ybhatti2 prjs1474 57 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/gcr_ipr_solmin.txt -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/solmin.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 108 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/conc_aerocom_DMS_sea.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/others/T63/emiss_fields_dms_sea_monthly_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 83 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/dust_preferential_sources.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/dust_preferential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/megan_fraction_broadl_de.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_fraction_broadl_de_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/lut_optical_properties.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/lut_optical_properties_M7.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 71 Sep  2 14:41 /home/ybhatti2/prjs1474/Pace_PPE_Output/new_account/unit.91 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63GR15_VGRATCLIM.nc
+
+----
+Checking if all symbolic links point to real files...
+
+List of non-existent input files:
+None!
+
+----
+Setting emi_basepath to:
+/projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/
+in
+./namelist_new_account.echam
+
+----
+Copying the model binary and the namelists (and emi_spec.txt if relevant) into the output directory...
+... and keeping a record of all namelists (and emi_spec.txt if relevant)...
+

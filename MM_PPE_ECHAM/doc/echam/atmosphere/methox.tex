@@ -1,0 +1,58 @@
+\newpage
+
+\section{Water Vapor in the Middle Atmosphere}
+
+In the stratosphere and mesosphere the major source of water vapor, besides transport from the troposphere, is the oxidation of methane. 
+In order not to underestimate middle atmospheric water vapor, \echam{} includes a submodel that parameterizes methane oxidation as well as the
+photolysis of water vapor. By default this submodel is however switched off. The formulation of the processes follows the respective 
+implementation in the ECMWF IFS (see IFS documentation Cy36r1, part IV, chapter 9 for details). 
+The scheme adds the two tendency terms $Q_\mathrm{methox}$ and $Q_\mathrm{photo}$ to the right hand side of the prognostic equation for the grid-cell 
+mean mass mixing ratio of water vapor  $\bar{r_{v}}$ (eq.~\ref{9.1}).
+
+$Q_\mathrm{methox}$ describes the parameterization of methane oxidation and is defined as
+\begin{equation}
+Q_\mathrm{methox} = ( r_{v,\mathrm{lim}} - \bar{r_{v}} ) / \tau_\mathrm{methox}.
+\end{equation}
+$r_{v,\mathrm{lim}}$ is set 
+to the value of 4.25 ppm and hence independent of the methane mixing ratio acting on radiation.
+The dependence of $\tau_\mathrm{methox}$ in days on atmospheric pressure $p$ in hPa is given by
+\begin{equation}
+\tau_\mathrm{methox} = \left\{ 
+\begin{array}{ll} 
+    100 & p \le 0.5\\
+    100 \left[ 1 + \alpha_1 \frac{\left\{ \ln(p/0.5) \right\}^{4}} { \ln (100/p) } \right] & 0.5 < p < 100\\
+    \infty   & p \ge 100
+\end{array} \right.
+\end{equation}
+with
+\begin{equation}
+ \alpha_1 = \frac{19 \ln 10}{(\ln 20)^4}.
+\end{equation}
+This means that water vapor production by methane is strongest in the mesosphere and not considered in the troposphere.
+
+
+$Q_\mathrm{photo}$ describes the photolysis of water vapor and is defined as
+\begin{equation}
+Q_\mathrm{photo} = - \bar{r_{v}} / \tau_\mathrm{photo}.
+\end{equation}
+The dependence of $\tau_\mathrm{photo}$ in days on pressure in hPa given by
+\begin{equation}
+\tau_\mathrm{photo} = \left\{
+\begin{array}{ll}
+    3 & p \le 0.001\\
+    \left[ \exp \left\{ \alpha_2 - 0.5 ( \ln 100 + \alpha_2 ) \left( 1 + \cos \frac{\pi \ln (p/0.2)}{\ln 0.005} \right) \right\} - 0.01 \right]^{-1} & 0.001 < p < 0.2\\
+    \infty   & p \ge 0.2
+\end{array} \right.
+\end{equation}
+with
+\begin{equation}
+ \alpha_2 = \ln \left(\frac{1}{3} +0.01 \right).
+\end{equation}
+This definition ensures that the photolysis of water vapor contributes significantly to the water vapor budget only above about 0.1 hPa
+where
+$\tau_\mathrm{photo}$ reaches values of below 100 days.
+
+The vertical profile of the photochemical lifetime of water vapor $(1/\tau_\mathrm{methox} + 1/\tau_\mathrm{photo})^{-1}$ combined 
+from the two parameterized processes above agrees reasonably to a respective profile given in Fig. 5.23 of \citet{brasseur05}.
+
+

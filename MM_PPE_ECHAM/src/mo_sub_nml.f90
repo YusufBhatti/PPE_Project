@@ -1,0 +1,511 @@
+!>
+!! @par Copyright
+!! This code is subject to the MPI-M-Software - License - Agreement in it's most recent form.
+!! Please see URL http://www.mpimet.mpg.de/en/science/models/model-distribution.html and the
+!! file COPYING in the root of the source tree for this code.
+!! Where software is supplied by third parties, it is indicated in the headers of the routines.
+!!
+!! Namelist interface to the tracer and output stream facilities.
+!!
+!! @author Andreas Rhodin MPI/DWD April 2002
+!!
+MODULE mo_sub_nml
+  !-------------
+  ! Modules used
+  !-------------
+  USE mo_kind,        ONLY: dp               ! working precition kind parameter
+  USE mo_tracer,      ONLY: n_t =>new_tracer ! tracer request routine
+  USE mo_tracdef,     ONLY: trlist,         &! tracer list
+                            ln,             &! length of name-string
+                            AUTO,           &! take arbitrary GRIB code number
+                            jptrac           ! maximum number of progn. tracers
+  USE mo_mpi,         ONLY: p_io,           &! I/O processor index
+                            p_parallel_io,  &! flag for p_pe==p_io
+                            p_parallel,     &! flag for parallel processing
+                            p_bcast          ! broadcast routine
+  USE mo_namelist,    ONLY: open_nml,       &! function: opening/retrieving handler for namelist file
+                            position_nml,   &! function: search namelist group
+                            POSITIONED       ! return value: OK
+  USE mo_exception,   ONLY: finish
+  USE mo_time_event,  ONLY: io_time_event
+  USE mo_time_control,ONLY: get_new_ev_putdata
+  USE mo_memory_base, ONLY: memory_info, t_stream, nstreams,ostreams,&
+                            set_stream_element_info, get_stream_element_info
+  IMPLICIT NONE
+
+  !----------------
+  ! Public entities
+  !----------------
+  PRIVATE
+  PUBLIC :: request_tracer_nml      ! request tracers via namelist
+  PUBLIC :: set_tracer_nml          ! set tracer meta data via namelist
+  PUBLIC :: set_stream_element_nml  ! set meta data from namelist
+  PUBLIC :: set_stream_nml          ! set stream parameters
+  
+  CONTAINS
+
+!==============================================================================
+
+  !>
+  !! Requests tracers as specified by namelist group /NEW_TRACER/.
+  !!
+  SUBROUTINE request_tracer_nml
+    !--------------------------
+    ! namelist group definition
+    !--------------------------
+    CHARACTER (len=ln) :: name   ! name of tracer
+    CHARACTER (len=ln) :: units  ! units
+    REAL(dp)           :: moleweight ! molar mass
+    INTEGER            :: ninit  ! initialisation flag
+    INTEGER            :: nrerun ! restart flag
+    REAL(dp)           :: vini   ! initialization value
+    REAL(dp)           :: tdecay ! exponential decay time
+    INTEGER            :: nwrite ! write to postprocessing file (0 or 1)
+    INTEGER            :: code   ! GRIB code  number
+    INTEGER            :: table  ! GRIB table number
+    INTEGER            :: bits   ! number of bits used for GRIB encoding
+    INTEGER            :: ntran  ! transport flag
+    INTEGER            :: nvdiff ! vertical diffusion flag
+    INTEGER            :: nconv  ! convection flag
+    INTEGER            :: nint   ! integration flag
+
+    INTEGER :: inml, iunit
+
+    NAMELIST /NEW_TRACER/ name, units, moleweight, ninit, vini, nrerun, &
+                          tdecay, nwrite, code, table, bits, ntran, &
+                          nvdiff, nconv, nint
+    !----------------
+    ! local variables
+    !----------------
+    INTEGER :: ierr   ! error return value
+
+    !----------------------------------------------------
+    ! loop over occurences of namelist group /NEW_TRACER/
+    !----------------------------------------------------
+    IF (p_parallel_io) THEN
+      inml = open_nml('namelist.echam')
+    END IF
+    DO
+      IF (p_parallel_io) THEN
+        iunit = position_nml ('NEW_TRACER', inml, rewind=.false., status=ierr)
+        !------------------------------
+        ! if namelist group is present:
+        !------------------------------
+        SELECT CASE (ierr)
+        CASE (POSITIONED)
+          !----------------------------------------------------
+          ! set default values from unused entry in tracer list
+          !----------------------------------------------------
+          name       = ''
+          units      = trlist% ti(jptrac)% units
+          moleweight = trlist% ti(jptrac)% moleweight
+          ninit      = trlist% ti(jptrac)% ninit
+          nrerun     = trlist% ti(jptrac)% nrerun
+          vini       = trlist% ti(jptrac)% vini
+          tdecay     = trlist% ti(jptrac)% tdecay
+          nwrite     = trlist% ti(jptrac)% nwrite
+          code       = AUTO
+          table      = trlist% ti(jptrac)% table
+          bits       = trlist% ti(jptrac)% gribbits
+          ntran      = trlist% ti(jptrac)% ntran
+          nvdiff     = trlist% ti(jptrac)% nvdiff
+          nconv      = trlist% ti(jptrac)% nconv
+          nint       = trlist% ti(jptrac)% nint
+          !--------------
+          ! read namelist
+          !--------------
+          READ (iunit, new_tracer)
+        END SELECT
+      ENDIF
+      !-----------------------------------------
+      ! broadcast parameters to other processors
+      !-----------------------------------------
+      IF (p_parallel) THEN
+        CALL    p_bcast (ierr,      p_io)
+        IF (ierr==POSITIONED) THEN
+          CALL p_bcast (name,       p_io)
+          CALL p_bcast (units,      p_io)
+          CALL p_bcast (moleweight, p_io)
+          CALL p_bcast (ninit,      p_io)
+          CALL p_bcast (nrerun,     p_io)
+          CALL p_bcast (vini,       p_io)
+          CALL p_bcast (tdecay,     p_io)
+          CALL p_bcast (nwrite,     p_io)
+          CALL p_bcast (code,       p_io)
+          CALL p_bcast (table,      p_io)
+          CALL p_bcast (bits,       p_io)
+          CALL p_bcast (ntran,      p_io)
+          CALL p_bcast (nvdiff,     p_io)
+          CALL p_bcast (nconv,      p_io)
+          CALL p_bcast (nint,       p_io)
+        ENDIF
+      ENDIF
+      IF (ierr/=POSITIONED) EXIT
+      !-------------------
+      ! request new tracer
+      !-------------------
+      CALL n_t (name       = name,       &
+                modulename = 'namelist', &
+                units      = units,      &
+                moleweight = moleweight, &
+                ninit      = ninit,      &
+                vini       = vini,       &
+                nrerun     = nrerun,     &
+                tdecay     = tdecay,     &
+                nwrite     = nwrite,     &
+                code       = code,       &
+                table      = table,      &
+                bits       = bits,       &
+                ntran      = ntran,      &
+                nvdiff     = nvdiff,     &
+                nconv      = nconv,      &
+                nint       = nint        )
+    END DO
+
+  END SUBROUTINE request_tracer_nml
+
+!------------------------------------------------------------------------------
+
+  !>
+  !! Requests tracers as specified by namelist group /SET_TRACER/.
+  !!
+  SUBROUTINE set_tracer_nml
+    !--------------------------
+    ! namelist group definition
+    !--------------------------
+    CHARACTER (len=ln) :: name   ! name of tracer
+    CHARACTER (len=ln) :: units  ! units
+    INTEGER            :: ninit  ! initialisation flag
+    REAL(dp)           :: moleweight ! molar mass
+    INTEGER            :: nrerun ! restart flag
+    REAL(dp)           :: vini   ! initialization value
+    REAL(dp)           :: tdecay ! exponential decay time
+    INTEGER            :: nwrite ! write to postprocessing file (0 or 1)
+    INTEGER            :: code   ! GRIB code  number
+    INTEGER            :: table  ! GRIB table number
+    INTEGER            :: bits   ! number of bits used for GRIB encoding
+    INTEGER            :: ntran  ! transport flag
+    INTEGER            :: nvdiff ! vertical diffusion flag
+    INTEGER            :: nconv  ! convection flag
+    INTEGER            :: nint   ! integration flag
+
+    NAMELIST /SET_TRACER/ name, units, moleweight, ninit, vini, nrerun, &
+                          tdecay, nwrite, code, table, bits, ntran, &
+                          nvdiff, nconv, nint
+    !----------------
+    ! local variables
+    !----------------
+    INTEGER :: ierr   ! error return value
+    INTEGER :: it     ! tracer index
+
+    INTEGER :: inml, iunit
+
+    !----------------------------------------------------
+    ! loop over occurences of namelist group /SET_TRACER/
+    !----------------------------------------------------
+    IF (p_parallel_io) THEN
+      inml = open_nml('namelist.echam')
+    END IF
+l1: DO
+      IF (p_parallel_io) THEN
+        iunit = position_nml ('SET_TRACER', inml, REWIND=.false., status=ierr)
+        !------------------------------
+        ! if namelist group is present:
+        !------------------------------
+        SELECT CASE (ierr)
+        CASE (POSITIONED)
+          !----------------------------------------------------
+          ! set default values from unused entry in tracer list
+          !----------------------------------------------------
+          name       = ''
+          units      = '999'
+          moleweight = -999._dp
+          ninit      = -999
+          nrerun     = -999
+          vini       = -999._dp
+          tdecay     = -999._dp
+          nwrite     = -999
+          code       = -999
+          table      = -999
+          bits       = -999
+          ntran      = -999
+          nvdiff     = -999
+          nconv      = -999
+          nint       = -999
+          !--------------
+          ! read namelist
+          !--------------
+          READ (iunit, set_tracer)
+        END SELECT
+      ENDIF
+      !-----------------------------------------
+      ! broadcast parameters to other processors
+      !-----------------------------------------
+      IF (p_parallel) THEN
+        CALL    p_bcast (ierr,      p_io)
+        IF (ierr==POSITIONED) THEN
+          CALL p_bcast (name,       p_io)
+          CALL p_bcast (units,      p_io)
+          CALL p_bcast (moleweight, p_io)
+          CALL p_bcast (ninit,      p_io)
+          CALL p_bcast (nrerun,     p_io)
+          CALL p_bcast (vini,       p_io)
+          CALL p_bcast (tdecay,     p_io)
+          CALL p_bcast (nwrite,     p_io)
+          CALL p_bcast (code,       p_io)
+          CALL p_bcast (table,      p_io)
+          CALL p_bcast (bits,       p_io)
+          CALL p_bcast (ntran,      p_io)
+          CALL p_bcast (nvdiff,     p_io)
+          CALL p_bcast (nconv,      p_io)
+          CALL p_bcast (nint,       p_io)
+        ENDIF
+      ENDIF
+      IF (ierr/=POSITIONED) EXIT
+      !--------------------
+      ! find tracer by name
+      !--------------------
+      do it = 1, trlist% ntrac
+        if (name == trlist% ti(it)% fullname) then
+          if (units  /= '999')    trlist% ti(jptrac)% units    = units 
+          if (moleweight/=-999._dp) trlist%ti(jptrac)%moleweight = moleweight
+          if (ninit  /= -999 )    trlist% ti(jptrac)% ninit    = ninit
+          if (nrerun /= -999 )    trlist% ti(jptrac)% nrerun   = nrerun
+          if (vini   /= -999._dp) trlist% ti(jptrac)% vini     = vini
+          if (tdecay /= -999._dp) trlist% ti(jptrac)% tdecay   = tdecay
+          if (nwrite /= -999 )    trlist% ti(jptrac)% nwrite   = nwrite
+          if (code   /= -999 )    trlist% ti(jptrac)% code     = code
+          if (table  /= -999 )    trlist% ti(jptrac)% table    = table
+          if (bits   /= -999 )    trlist% ti(jptrac)% gribbits = bits
+          if (ntran  /= -999 )    trlist% ti(jptrac)% ntran    = ntran
+          if (nvdiff /= -999 )    trlist% ti(jptrac)% nvdiff   = nvdiff
+          if (nconv  /= -999 )    trlist% ti(jptrac)% nconv    = nconv
+          if (nint   /= -999 )    trlist% ti(jptrac)% nint     = nint
+          cycle l1
+        end if
+      end do
+      call finish('set_tracer_nml','unknown tracer name: '//name)
+    END DO l1
+
+  END SUBROUTINE set_tracer_nml
+
+!==============================================================================
+
+  !>
+  !! Sets properties of stream elements using namelist group /SET_STREAM_ELEMENT/.
+  !!
+  !! Each element to be set needs its own SET_STREAM_ELEMENT group,
+  !! with the respective stream and element names.
+  !! Currently long (descriptive) name, units, the GRIB table and code number,
+  !! the data resolution in bits, and availability for rerun/post-processing
+  !! may be controlled.
+  !!
+  SUBROUTINE set_stream_element_nml(nml_name)
+
+    CHARACTER(*), INTENT(IN), OPTIONAL :: nml_name
+
+    CHARACTER(len=64)       :: filename, stream, name, longname ,units
+    INTEGER                 :: table, code, bits
+    INTEGER                 :: lpost, lrerun
+    INTEGER                 :: i
+    INTEGER                 :: ierr
+    REAL(dp)                :: reset
+    TYPE(memory_info)       :: info
+    TYPE(t_stream), POINTER :: strm
+
+    INTEGER                 :: inml, iunit
+
+    NAMELIST /set_stream_element/ stream, name, longname ,units, &
+                                  table, code, bits,             &
+                                  lpost ,lrerun, reset
+
+    IF (present(nml_name)) THEN
+      filename = nml_name
+    ELSE
+      filename = 'namelist.echam'
+    END IF
+
+    IF (p_parallel_io) THEN
+      inml = open_nml(filename)
+    ENDIF
+    DO
+      IF (p_parallel_io) THEN
+        iunit = position_nml ('set_stream_element', inml, &
+                              REWIND=.false., STATUS=ierr)
+        SELECT CASE (ierr)
+        CASE (POSITIONED)
+          stream   = ''
+          name     = ''
+          longname = ''
+          units    = ''
+          table    = -HUGE(table)
+          code     = -HUGE(code)
+          bits     = -HUGE(bits)
+          lpost    = -HUGE(lpost)
+          lrerun   = -HUGE(lrerun)
+          reset    = -HUGE(reset)
+          READ (iunit,set_stream_element)
+        END SELECT
+      ENDIF
+      IF (p_parallel) THEN
+        CALL p_bcast (ierr,     p_io)
+        CALL p_bcast (stream,   p_io)
+        CALL p_bcast (name,     p_io)
+        CALL p_bcast (longname, p_io)
+        CALL p_bcast (units,    p_io)
+        CALL p_bcast (table,    p_io)
+        CALL p_bcast (code,     p_io)
+        CALL p_bcast (bits,     p_io)
+        CALL p_bcast (lpost,    p_io)
+        CALL p_bcast (lrerun,   p_io)
+        CALL p_bcast (reset,   p_io)
+      ENDIF
+
+      IF (ierr /= POSITIONED) EXIT
+
+     info% name=''
+     DO i = 1, nstreams
+        IF (stream == '' .OR. stream == ostreams(i)% name) THEN
+          strm => ostreams(i)
+          CALL get_stream_element_info (strm, name, info)
+          IF (info% name /= '') EXIT
+        ENDIF
+      END DO
+
+      IF (info% name == '') &
+        CALL finish ('set_stream_element_nml','cannot find '//name)
+
+      IF (longname /= ''           ) info% longname  = longname
+      IF (units    /= ''           ) info% units     = units
+      IF (table    /= -HUGE(table) ) info% gribtable = table
+      IF (code     /= -HUGE(code)  ) info% gribcode  = code
+      IF (bits     /= -HUGE(bits)  ) info% gribbits  = bits
+      IF (lpost    /= -HUGE(lpost) ) info% lpost     = (lpost  == 1)
+      IF (lrerun   /= -HUGE(lrerun)) info% lrerun    = (lrerun == 1)
+      IF (reset    /= -HUGE(reset) ) info% reset     = reset
+
+      CALL set_stream_element_info (strm, name, longname = info% longname,  &
+                                                units    = info% units,     &
+                                                table    = info% gribtable, &
+                                                code     = info% gribcode,  &
+                                                bits     = info% gribbits,  &
+                                                lpost    = info% lpost,     &
+                                                lrerun   = info% lrerun,    &
+                                                reset    = info% reset)
+    END DO
+
+  END SUBROUTINE set_stream_element_nml
+
+!------------------------------------------------------------------------------
+
+  !>
+  !! Sets properties of streams using namelist group /SET_STREAM/.
+  !!
+  !! Each stream to be set needs its own SET_STREAM group
+  !! with the respective stream name, like this:
+  !! @verbatim
+  !! &SET_STREAM stream = 'g3b' lpost = false /
+  !! &SET_STREAM stream = 'g2a' interval = 1,'days','last',0 /
+  !! @endverbatim
+  !!
+  !! Currently the output file format, suffixes for rerun, output,
+  !! and initialization files, availability for these files,
+  !! and output interval may be controlled.
+  !!
+  SUBROUTINE set_stream_nml(nml_name)
+
+    CHARACTER(*), INTENT(IN), OPTIONAL :: nml_name
+
+    CHARACTER(len=64)   :: filename
+    CHARACTER(len=16)   :: stream   ! output stream to change
+    INTEGER             :: filetype ! 'GRIB' or 'NetCDF'
+    CHARACTER(len=8)    :: post_suf ! suffix of output  file
+    CHARACTER(len=8)    :: rest_suf ! suffix of restart file
+    CHARACTER(len=8)    :: init_suf ! suffix of initial file
+    INTEGER             :: lpost    ! in standard output file
+    INTEGER             :: lrerun   ! in standard restartfile
+!sschr: lcontnorest is needed in the SET_STREAM namelist for some specific usages
+    INTEGER             :: lcontnorest ! run if restart not available 
+    INTEGER             :: linit    ! in standard initialfile
+    TYPE(io_time_event) :: interval ! output interval
+
+    NAMELIST /SET_STREAM/ stream, filetype, post_suf, rest_suf, init_suf, &
+!sschr: I need lcontnorest!
+                          lpost, lrerun, lcontnorest, linit, interval
+
+    INTEGER                    :: i
+    INTEGER                    :: ierr
+    TYPE(t_stream)    ,POINTER :: strm
+
+    INTEGER :: inml, iunit
+
+    IF (present(nml_name)) THEN
+      filename = nml_name
+    ELSE
+      filename = 'namelist.echam'
+    END IF
+
+    IF (p_parallel_io) THEN
+      inml = open_nml(filename)
+    END IF
+    DO
+      IF (p_parallel_io) THEN
+        iunit = position_nml ('SET_STREAM', inml, rewind=.false., status=ierr)
+        SELECT CASE (ierr)
+        CASE (POSITIONED)
+          stream   = ''
+          filetype = 0
+          post_suf = ''
+          rest_suf = ''
+          init_suf = ''
+          lpost    = -1
+          lrerun   = -1
+          lcontnorest = -1 !sschr
+          linit    = -1
+          interval = io_time_event (0,'','',0)
+          READ (iunit,set_stream)
+        END SELECT
+      ENDIF
+      IF (p_parallel) THEN
+        CALL   p_bcast (ierr,                 p_io)
+        IF (ierr==POSITIONED) THEN
+          CALL p_bcast (stream,               p_io)
+          CALL p_bcast (filetype,             p_io)
+          CALL p_bcast (post_suf,             p_io)
+          CALL p_bcast (rest_suf,             p_io)
+          CALL p_bcast (init_suf,             p_io)
+          CALL p_bcast (lpost,                p_io)
+          CALL p_bcast (lrerun,               p_io)
+          CALL p_bcast (lcontnorest,          p_io) !sschr
+          CALL p_bcast (linit,                p_io)
+          CALL p_bcast (interval% counter,    p_io)
+          CALL p_bcast (interval% unit,       p_io)
+          CALL p_bcast (interval% adjustment, p_io)
+          CALL p_bcast (interval% offset,     p_io)
+        ENDIF
+      ENDIF
+      IF (ierr /= POSITIONED) EXIT
+
+      DO i=1,nstreams
+        IF (stream == ostreams(i)% name) THEN
+          strm => ostreams(i)
+          IF (filetype          /= 0) strm% filetype = filetype
+          IF (post_suf          /='') strm% post_suf = post_suf
+          IF (rest_suf          /='') strm% rest_suf = rest_suf          
+          IF (init_suf          /='') strm% init_suf = init_suf
+          IF (lpost             /=-1) strm% lpost    = lpost ==1
+          IF (lrerun            /=-1) strm% lrerun   = lrerun==1
+          IF (lcontnorest       /=-1) strm% lcontnorest = lcontnorest ==1 !sschr
+          IF (linit             /=-1) strm% linit    = linit ==1
+          IF (interval% counter /= 0) strm% post_idx = &
+                        get_new_ev_putdata (interval)
+          EXIT
+        ENDIF
+      END DO
+
+    END DO
+
+  END SUBROUTINE set_stream_nml
+
+!==============================================================================
+END MODULE mo_sub_nml
