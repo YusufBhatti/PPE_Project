@@ -70,7 +70,8 @@ MODULE mo_hammoz_perturbations
             scale_emi_bb_so2, scale_emi_bb_bc, scale_emi_bb_oc, &
 	    scale_emi_antns_so2, scale_emi_shp_so2, &
 	    scale_fi, scale_gi, scale_activation, scale_fricv, &
-        scale_cprcon, scale_entrpen, KK_exponent, KK_LWP_exponent 
+        scale_cprcon, scale_entrpen, KK_exponent, KK_LWP_exponent, &
+        scale_ccsaut, scale_ccraut
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
 
@@ -120,8 +121,8 @@ MODULE mo_hammoz_perturbations
                  scale_emi_ant_so2 = 1.0_dp, &! Scale factor for so2 emissions (ant sectors) 
                  scale_emi_antns_so2 = 1.0_dp, & ! Scale factor for so2 emissions (ant sectors without shipping)
                  scale_emi_shp_so2 = 1.0_dp, & ! Scale factor for so2 emissions (shipping sector)
-                 scale_emi_ant_bc = 1.0_dp, & ! Scale factor for bc emissions (ant sectors)
-                 scale_emi_ant_oc = 1.0_dp, & ! Scale factor for oc emissions (ant sectors)
+                 scale_emi_ant_bc = 1.0_dp, & ! Scale factor for bc emissions (ant sectors) (emi_ant_bc)
+                 scale_emi_ant_oc = 1.0_dp, & ! Scale factor for oc emissions (ant sectors) (emi_ant_oc)
                  scale_emi_bb_so2 = 1.0_dp, & ! Scale factor for so2 emissions (fire/bb sectors)
                  scale_emi_bb_bc = 1.0_dp,  & ! Scale factor for bc emissions (fire/bb sectors)
                  scale_emi_bb_oc = 1.0_dp,  &   ! Scale factor for oc emissions (fire/bb sectors)
@@ -132,9 +133,11 @@ MODULE mo_hammoz_perturbations
   REAL(dp)    :: scale_wetdep_ic = 1.0_dp, & ! Scale factor for in-cloud wet deposition
                  scale_wetdep_bc = 1.0_dp  ! Scale factor for below-cloud wet deposition
 
-  REAL(dp)    :: scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0
-  REAL(wp)    :: scale_cprcon = 9.E-04_wp ! (abs) Conversion rate from cloud water to rain in convective clouds
-  REAL(wp)    :: scale_entrpen = 2.E-4_wp ! (abs) Entrainment rate for deep convection
+  REAL(dp)    :: scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0 (activ_cwturb)
+
+  REAL(wp)    :: scale_cprcon = 9.E-04_wp, & ! (abs) Conversion rate from cloud water to rain in convective clouds (conv_cprcon)
+                 scale_entrpen = 2.E-4_wp, & ! (abs) Entrainment rate for deep convection (conv_entrpen)
+                 scale_cmfctop = 0.2_wp      ! fractional convective mass flux across the top of cloud (conv_cmfctop)
 
   REAL(dp)    :: kappa_ss  = 1.0_dp, & ! Sea salt kappa
                  kappa_so4 = 0.6_dp, & ! Sulfate kappa
@@ -144,7 +147,6 @@ MODULE mo_hammoz_perturbations
                  oc_rad_ni = 0.0055_dp, & ! Absolute value of imaginary part of the refractive index (for OC) at 550 nm (default)
                  du_rad_ni = 0.001_dp   ! Absolute value of imaginary part of the refractive index (for DUST) at 550 nm (default)
 
-
   REAL(dp)    :: scale_so4_coating = 1.0_dp  ! Scale the coating thickness of SO4 required to 'age' particles (move them
                                              !  from insoluble to soluble modes)
   REAL(dp)    :: KK_exponent = -1.79_dp, & ! The exponent to use in the KK autoconversion scheme
@@ -152,7 +154,10 @@ MODULE mo_hammoz_perturbations
 
   REAL(dp)    :: scale_fi  = 1.0_dp, & ! Scale fi in activation scheme
                  scale_gi  = 1.0_dp, & ! Scale gi in activation scheme
-                 scale_activation  = 1.0_dp   ! Scale the activation of particles
+                 scale_activation  = 1.0_dp   ! Scale the activation of particles (activ_aero)
+
+  REAL(dp)    :: scale_ccsaut  = 900._dp, & ! Scale fi in activation scheme
+                 scale_ccraut  = 2.8_dp, & ! Scale gi in activation scheme
 
 CONTAINS
 
@@ -303,6 +308,8 @@ CONTAINS
        CALL p_bcast (scale_fricv,        p_io)
        CALL p_bcast (scale_cprcon,        p_io)
        CALL p_bcast (scale_entrpen,        p_io)
+       CALL p_bcast (scale_ccraut,        p_io)
+       CALL p_bcast (scale_ccsaut,        p_io)
 
     END IF
 
@@ -388,6 +395,9 @@ CONTAINS
     CALL print_value('FI Scale in the activation scheme', scale_fi)
     CALL print_value('GI Scale in the activation scheme', scale_gi)
     CALL print_value('Scale in the activation scheme', scale_activation)
+
+    CALL print_value('scale_ccraut', scale_ccraut)
+    CALL print_value('scale_ccsaut', scale_ccsaut)
 
     CALL message('', '---')
     CALL print_value('The scaling of SO4 layer thickness cutoff (scale_so4_coating)', scale_so4_coating)

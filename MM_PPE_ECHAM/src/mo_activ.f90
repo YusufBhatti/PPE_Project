@@ -351,7 +351,7 @@ CONTAINS
                                       ncd_activ, nactivpdf, nic_cirrus, lcdnc_progn, &
                                       cdnc_min_fixed
     USE mo_tracer,             ONLY: get_tracer
-
+   USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_ccsaut, scale_ccraut
     CHARACTER(len=24)      :: csubmname
 
     !--- Set number of updraft bins: 
@@ -389,8 +389,15 @@ CONTAINS
                   SELECT CASE(cdnc_min_fixed)
                      CASE(10)
                         !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
-                        ccsaut = 900._dp
-                        ccraut = 2.8_dp
+                        ! < YAB add PPE:
+                        IF (lo_hammoz_perturbations) THEN
+                           ccsaut = scale_ccsaut
+                           ccraut = scale_ccraut
+                        ELSE
+                           ccsaut = 900._dp
+                           ccraut = 2.8_dp
+                        ENDIF
+                        !  YAB  >
                      CASE(40)
                         !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
                         ccsaut = 900._dp
@@ -411,8 +418,15 @@ CONTAINS
                   SELECT CASE(cdnc_min_fixed) ! This will be used for MM-PPE
                      CASE(10)
                         !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
-                        ccsaut = 900._dp
-                        ccraut = 2.8_dp
+                        ! < YAB add PPE:
+                        IF (lo_hammoz_perturbations) THEN
+                           ccsaut = scale_ccsaut
+                           ccraut = scale_ccraut
+                        ELSE
+                           ccsaut = 900._dp
+                           ccraut = 2.8_dp
+                        ENDIF
+                        !  YAB  >
                      CASE(40)
                         !SF: updated on 2017.02.14 (David Neubauer, pure atm run, HAM-M7)
                         ccsaut = 900._dp

@@ -91,7 +91,7 @@ CONTAINS
                                 lcdnc_progn !SF
    !<<SF
     !YAB
-    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_cprcon, scale_entrpen
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_cprcon, scale_entrpen, scale_cmfctop
     !YAB
 
 
@@ -171,15 +171,19 @@ CONTAINS
               CASE(2) ! AR&G activation # We do CASE (2) for PPE 
                  !SF: updated on 2017.01.27 (David Neubauer, pure atm run, HAM-M7) 
                  entrscv = 3.0E-3_wp
-                 entrpen = 2.E-4_wp
-                 cmfctop = 0.2_wp
-                 !YAB Added cprcon and entrpen to PPE 
+                 ! YAB
+!                 entrpen = 2.E-4_wp
+!                 cmfctop = 0.2_wp
+!                 cprcon  = 9.E-04_wp
+                 !YAB Added cmfctop, cprcon and entrpen to PPE 
                  IF (lo_hammoz_perturbations) THEN
                     cprcon = scale_cprcon
                     entrpen = scale_entrpen
+                    cmfctop = scale_cmfctop
                  ELSE
                     cprcon  = 9.E-04_wp
                     entrpen = 2.E-4_wp
+                    cmfctop = 0.2_wp
                  ENDIF !YAB
            END SELECT
         ENDIF 
