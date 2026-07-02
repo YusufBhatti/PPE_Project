@@ -71,7 +71,10 @@ MODULE mo_hammoz_perturbations
 	    scale_emi_antns_so2, scale_emi_shp_so2, &
 	    scale_fi, scale_gi, scale_activation, scale_fricv, &
         scale_cprcon, scale_entrpen, KK_exponent, KK_LWP_exponent, &
-        scale_ccsaut, scale_ccraut
+        scale_ccsaut, scale_ccraut, scale_cmfctop, scale_entrscv, &
+        scale_entrmid, cld_cov_crs, cld_cov_crt, scale_micro_icefall, &
+        cld_opt_cinhomi, cld_opt_cinhoml1, cld_opt_cinhoml3
+        
 
   LOGICAL :: lo_hammoz_perturbations=.TRUE.
 
@@ -133,11 +136,21 @@ MODULE mo_hammoz_perturbations
   REAL(dp)    :: scale_wetdep_ic = 1.0_dp, & ! Scale factor for in-cloud wet deposition
                  scale_wetdep_bc = 1.0_dp  ! Scale factor for below-cloud wet deposition
 
-  REAL(dp)    :: scale_vertical_velocity = 1.0_dp ! Scale (total) vertical velocity - ONLY for nactivpdf == 0 (activ_cwturb)
+  REAL(dp)    :: scale_vertical_velocity = 1.0_dp, & ! Scale (total) vertical velocity - ONLY for nactivpdf == 0 (activ_cwturb)
+                 scale_micro_icefall =   1.0_dp   ! Scale factor for terminal fall velocity of cloud ice crystals 
+
 
   REAL(wp)    :: scale_cprcon = 9.E-04_wp, & ! (abs) Conversion rate from cloud water to rain in convective clouds (conv_cprcon)
                  scale_entrpen = 2.E-4_wp, & ! (abs) Entrainment rate for deep convection (conv_entrpen)
-                 scale_cmfctop = 0.2_wp      ! fractional convective mass flux across the top of cloud (conv_cmfctop)
+                 scale_cmfctop = 0.2_wp,   & ! fractional convective mass flux across the top of cloud (conv_cmfctop)
+                 scale_entrscv = 3.0E-3_wp,& ! entrainment rate for shallow convection
+                 scale_entrmid = 1.0E-4_wp,& ! entrainment rate for midlevel convection
+                 cld_cov_crs = 0.975_wp,&    ! critical relative humidity at surface
+                 cld_cov_crt = 0.75_wp,&     ! critical relative humidity aloft
+                 cld_opt_cinhomi = 0.80_wp, &!Inhomogeneity factor for ice clouds
+                 cld_opt_cinhoml1 = 0.80_wp, &!Inhomogeneity factor for stratiform clouds
+                 cld_opt_cinhoml3 = 0.80_wp  !Inhomogeneity factor for deep/mid-level convection
+
 
   REAL(dp)    :: kappa_ss  = 1.0_dp, & ! Sea salt kappa
                  kappa_so4 = 0.6_dp, & ! Sulfate kappa
@@ -157,8 +170,7 @@ MODULE mo_hammoz_perturbations
                  scale_activation  = 1.0_dp   ! Scale the activation of particles (activ_aero)
 
   REAL(dp)    :: scale_ccsaut  = 900._dp, & ! Scale fi in activation scheme
-                 scale_ccraut  = 2.8_dp, & ! Scale gi in activation scheme
-
+                 scale_ccraut  = 2.8_dp ! Scale gi in activation scheme
 CONTAINS
 
 
@@ -308,8 +320,18 @@ CONTAINS
        CALL p_bcast (scale_fricv,        p_io)
        CALL p_bcast (scale_cprcon,        p_io)
        CALL p_bcast (scale_entrpen,        p_io)
+       CALL p_bcast (scale_entrscv,        p_io)
+       CALL p_bcast (scale_entrmid,        p_io)
+       CALL p_bcast (cld_cov_crs,        p_io)
+       CALL p_bcast (cld_cov_crt,        p_io)
+       CALL p_bcast (scale_micro_icefall,        p_io)
+       CALL p_bcast (cld_opt_cinhomi,        p_io)
+       CALL p_bcast (cld_opt_cinhoml1,        p_io)
+       CALL p_bcast (cld_opt_cinhoml3,        p_io)
        CALL p_bcast (scale_ccraut,        p_io)
        CALL p_bcast (scale_ccsaut,        p_io)
+       CALL p_bcast (scale_cmfctop,        p_io)
+
 
     END IF
 
@@ -359,6 +381,14 @@ CONTAINS
     CALL print_value('Emission scaling factor (threshold of friction velocity for DUST)', scale_fricv)
     CALL print_value('ABS scaling (scale_cprcon) (Conversion rate from cloud water to rain in convective clouds)', scale_cprcon)
     CALL print_value('ABS scaling (scale_entrpen) (Entrainment rate for deep convection)', scale_entrpen)
+    CALL print_value('ABS scaling (scale_entrscv) (Entrainment rate for shallow convection)', scale_entrscv)
+    CALL print_value('ABS scaling (scale_entrmid) (Entrainment rate for mid convection)', scale_entrmid)
+    CALL print_value('ABS scaling (cld_cov_crs) (Critical RH at surface)', cld_cov_crs)
+    CALL print_value('ABS scaling (cld_cov_crt) (Critical RH aloft)', cld_cov_crt)
+    CALL print_value('ABS scaling (scale_micro_icefall) (Ice-fall speed scale)', scale_micro_icefall)
+    CALL print_value('ABS scaling (cld_opt_cinhomi) (Ice-cloud inhomogeneity)', cld_opt_cinhomi)
+    CALL print_value('ABS scaling (cld_opt_cinhoml1) (Liquid-cloud inhomogeneity without convection)', cld_opt_cinhoml1)
+    CALL print_value('ABS scaling (cld_opt_cinhoml3) (Liquid-cloud inhomogeneity with deep/mid-level convection)', cld_opt_cinhoml3)
 
     CALL print_value('Emission scaling factor (scale_emi_ant_so2)', scale_emi_ant_so2 )
     CALL print_value('Emission scaling factor (scale_emi_antns_so2)', scale_emi_antns_so2 )
@@ -398,6 +428,15 @@ CONTAINS
 
     CALL print_value('scale_ccraut', scale_ccraut)
     CALL print_value('scale_ccsaut', scale_ccsaut)
+    CALL print_value('scale_cmfctop', scale_cmfctop)
+
+    CALL print_value('cld_cov_crs', cld_cov_crs)
+    CALL print_value('cld_cov_crt', cld_cov_crt)
+    CALL print_value('scale_micro_icefall', scale_micro_icefall)
+
+    CALL print_value('cld_opt_cinhomi', cld_opt_cinhomi)
+    CALL print_value('cld_opt_cinhoml1', cld_opt_cinhoml1)
+    CALL print_value('cld_opt_cinhoml3', cld_opt_cinhoml3)
 
     CALL message('', '---')
     CALL print_value('The scaling of SO4 layer thickness cutoff (scale_so4_coating)', scale_so4_coating)

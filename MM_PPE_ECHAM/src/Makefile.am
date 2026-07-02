@@ -341,8 +341,9 @@ mo_cloud_micro_2m.o: mo_activ.o mo_boundary_condition.o mo_cirrus.o \
 	mo_physical_constants.o mo_submodel_interface.o mo_time_control.o \
 	mo_vphysc.o
 mo_cloud_optics.o: mo_cloud_micro_2m.o mo_control.o mo_echam_cloud_params.o \
-	mo_exception.o mo_io.o mo_kind.o mo_math_constants.o mo_mpi.o \
-	mo_netcdf.o mo_param_switches.o mo_physical_constants.o
+	mo_exception.o mo_hammoz_perturbations.o mo_io.o mo_kind.o \
+	mo_math_constants.o mo_mpi.o mo_netcdf.o mo_param_switches.o \
+	mo_physical_constants.o
 mo_cloud_utils.o: mo_boundary_condition.o mo_echam_cloud_params.o \
 	mo_external_field_processor.o mo_kind.o mo_math_constants.o \
 	mo_param_switches.o mo_physical_constants.o
@@ -445,8 +446,9 @@ mo_dynveg.o: mo_cbal_bethy.o mo_cbal_cpools.o mo_climbuf.o mo_disturbance.o \
 	mo_land_surface.o mo_linked_list.o mo_memory_base.o mo_mpi.o \
 	mo_namelist.o mo_netcdf.o mo_output.o mo_temp.o mo_time_control.o \
 	mo_tr_scatter.o $(INCLUDE)/dynveg_ctl.inc
-mo_echam_cloud_params.o: mo_control.o mo_exception.o mo_kind.o \
-	mo_physical_constants.o mo_submodel.o
+mo_echam_cloud_params.o: mo_control.o mo_exception.o \
+	mo_hammoz_perturbations.o mo_kind.o mo_physical_constants.o \
+	mo_submodel.o
 mo_echam_conv_constants.o: mo_control.o mo_exception.o \
 	mo_hammoz_perturbations.o mo_kind.o mo_param_switches.o
 mo_echam_convect_tables.o: mo_echam_cloud_params.o mo_exception.o mo_kind.o \

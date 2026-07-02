@@ -26,6 +26,7 @@ MODULE mo_echam_cloud_params
   USE mo_submodel,           ONLY: print_value
   USE mo_exception,          ONLY: finish
 #endif
+ USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, cld_cov_crs, cld_cov_crt,scale_micro_icefall
 
   IMPLICIT NONE
   PRIVATE
@@ -185,9 +186,20 @@ CONTAINS
     ! -- set resolution dependent parameters
     !
 #ifdef __ICON__
+  ! < YAB 
+  IF (lo_hammoz_perturbations) THEN
+    crs     = cld_cov_crs
+    crt     = cld_cov_crt
+    cvtfall = 2.5_wp * scale_micro_icefall
+  ELSE
     crs     = 0.975_wp
     crt     = 0.75_wp
     cvtfall = 2.5_wp
+  END IF
+!    crs     = 0.975_wp
+!    crt     = 0.75_wp
+!    cvtfall = 2.5_wp
+! > YAB
     csecfrl = 5.e-6_wp
     clwprat = 4.0_wp
     csatsc  = 0.7_wp
@@ -196,9 +208,20 @@ CONTAINS
     nadd    = 0
 #else
     IF (nn == 31) THEN
+    ! < YAB Adding crs and crt to the PPE 
+    IF (lo_hammoz_perturbations) THEN
+      crs  = cld_cov_crs ! critical relative humidity at surface
+      crt  = cld_cov_crt ! critical relative humidity aloft
+      cvtfall = 3.0_wp * scale_micro_icefall
+    ELSE
       crs     = 0.95_wp
-      crt     = 0.85_wp
+      crt     = 0.85_wp 
       cvtfall = 3.0_wp
+    ENDIF 
+!      crs     = 0.95_wp
+!      crt     = 0.85_wp
+!      cvtfall = 3.0_wp
+! > YAB
       csecfrl = 5.E-7_wp
       clwprat = 0.0_wp
       csatsc  = 0.1_wp
@@ -206,9 +229,21 @@ CONTAINS
       nex     = 1
       nadd    = 1
     ELSE IF (nn == 63) THEN
+    ! < YAB Adding crs and crt to the PPE 
+    IF (lo_hammoz_perturbations) THEN
+      crs  = cld_cov_crs ! critical relative humidity at surface
+      crt  = cld_cov_crt ! critical relative humidity aloft
+      cvtfall = 3.0_wp * scale_micro_icefall
+    ELSE
       crs     = 0.975_wp
-      crt     = 0.75_wp
-      cvtfall = 2.5_wp
+      crt     = 0.75_wp 
+      cvtfall = 2.5_wp 
+    ENDIF 
+!      crs     = 0.975_wp
+!      crt     = 0.75_wp 
+!      cvtfall = 2.5_wp
+
+    ! > YAB
       csecfrl = 5.E-6_wp
       clwprat = 4.0_wp
       csatsc  = 0.7_wp
@@ -216,9 +251,20 @@ CONTAINS
       nex     = 2
       nadd    = 0
     ELSE IF (nn==127) THEN
+    ! < YAB Adding crs and crt to the PPE 
+    IF (lo_hammoz_perturbations) THEN
+      crs  = cld_cov_crs ! critical relative humidity at surface
+      crt  = cld_cov_crt ! critical relative humidity aloft
+      cvtfall = 3.0_wp * scale_micro_icefall
+    ELSE
       crs     = 0.994_wp
-      crt     = 0.75_wp
+      crt     = 0.75_wp 
       cvtfall = 3.0_wp
+    ENDIF 
+!      crs     = 0.994_wp
+!      crt     = 0.75_wp 
+!      cvtfall = 3.0_wp
+! > YAB
       csecfrl = 1.E-5_wp
       clwprat = 4.0_wp
       csatsc  = 0.7_wp
@@ -226,9 +272,20 @@ CONTAINS
       nex     = 2
       nadd    = 0
     ELSE IF (nn==255) THEN
+    ! < YAB Adding crs and crt to the PPE 
+    IF (lo_hammoz_perturbations) THEN
+      crs  = cld_cov_crs ! critical relative humidity at surface
+      crt  = cld_cov_crt ! critical relative humidity aloft
+      cvtfall = 3.0_wp * scale_micro_icefall
+    ELSE
       crs     = 0.994_wp
-      crt     = 0.75_wp
+      crt     = 0.75_wp 
       cvtfall = 3.0_wp
+    ENDIF 
+!      crs     = 0.994_wp
+!      crt     = 0.75_wp
+!      cvtfall = 3.0_wp
+! > YAB 
       csecfrl = 1.E-5_wp
       clwprat = 4.0_wp
       csatsc  = 0.7_wp

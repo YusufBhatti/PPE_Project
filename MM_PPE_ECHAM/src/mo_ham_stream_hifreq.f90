@@ -32,14 +32,13 @@ CONTAINS
 
     !--- Create new stream and add stream references for diagnostics:
 
-    CALL new_stream (hifreq ,'hifreq', interval=io_time_event(3,'hours','first',0), lrerun=.FALSE.)
+    CALL new_stream (hifreq ,'hifreq', interval=io_time_event(6,'hours','first',0), lrerun=.FALSE.)
 
 
     CALL add_stream_reference (hifreq, 'TAU_2D_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'ABS_2D_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'ANG_440nm_670nm' ,'rad',lpost=.TRUE.)
-!!    CALL add_stream_reference (hifreq, 'TAU_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'ABS_2D_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'ANG_440nm_670nm' ,'rad',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'TAU_3D_355nm','rad',lpost=.TRUE.)
 !
 !    CALL add_stream_reference (hifreq, 'REFFL_CT','activ',lpost=.TRUE.)
@@ -53,12 +52,12 @@ CONTAINS
 !!    CALL add_stream_reference (hifreq, 'CCN_0.500','ham',lpost=.TRUE.)
 !    CALL add_stream_reference (hifreq, 'CCN_1.500','ham',lpost=.TRUE.)
 !
-!    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_KS_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_CS_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_AS_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_KI_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_AI_550nm','rad',lpost=.TRUE.)
-!    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_CI_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_KS_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_CS_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_AS_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_KI_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_AI_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'TAU_2D_MODE_CI_550nm','rad',lpost=.TRUE.)
 !
 !
 !!    CALL add_stream_reference (hifreq, 'burden_DMS','burden',lpost=.TRUE.)

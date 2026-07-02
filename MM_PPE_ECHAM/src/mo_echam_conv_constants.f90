@@ -91,7 +91,7 @@ CONTAINS
                                 lcdnc_progn !SF
    !<<SF
     !YAB
-    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_cprcon, scale_entrpen, scale_cmfctop
+    USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, scale_cprcon, scale_entrpen, scale_cmfctop,scale_entrmid, scale_entrscv
     !YAB
 
 
@@ -111,7 +111,13 @@ CONTAINS
   cminbuoy = 0.2_wp
   cmaxbuoy = 1.0_wp
   cbfac    = 1.0_wp
-  entrmid  = 1.0E-4_wp ! Average entrainment rate for midlevel convection
+  ! < YAB Added entrmid to PPE 
+  IF (lo_hammoz_perturbations) THEN
+    entrmid  = scale_entrmid ! Average entrainment rate for midlevel convection
+  ELSE
+    entrmid  = 1.0E-4_wp ! Average entrainment rate for midlevel convection
+  ENDIF 
+!  entrmid  = 1.0E-4_wp ! Average entrainment rate for midlevel convection !YAB >
   entrdd   = 2.0E-4_wp ! Average entrainment rate for downdrafts
   centrmax = 3.E-4_wp !
   cmfcmax  = 1.0_wp ! Maximum massflux value allowed for updrafts etc
@@ -170,17 +176,19 @@ CONTAINS
                  cprcon  = 2.5E-04_wp
               CASE(2) ! AR&G activation # We do CASE (2) for PPE 
                  !SF: updated on 2017.01.27 (David Neubauer, pure atm run, HAM-M7) 
-                 entrscv = 3.0E-3_wp
                  ! YAB
+!                 entrscv = 3.0E-3_wp
 !                 entrpen = 2.E-4_wp
 !                 cmfctop = 0.2_wp
 !                 cprcon  = 9.E-04_wp
                  !YAB Added cmfctop, cprcon and entrpen to PPE 
                  IF (lo_hammoz_perturbations) THEN
-                    cprcon = scale_cprcon
+                    entrscv = scale_entrscv
+                    cprcon  = scale_cprcon
                     entrpen = scale_entrpen
                     cmfctop = scale_cmfctop
                  ELSE
+                    entrscv = 3.0E-3_wp
                     cprcon  = 9.E-04_wp
                     entrpen = 2.E-4_wp
                     cmfctop = 0.2_wp

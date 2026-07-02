@@ -37,6 +37,8 @@ MODULE mo_cloud_optics
   USE mo_echam_cloud_params, ONLY: crhoi, cthomi
   USE mo_param_switches,     ONLY: nic_cirrus, lcdnc_progn
   USE mo_control,            ONLY: nlev
+  USE mo_hammoz_perturbations, ONLY: lo_hammoz_perturbations, cld_opt_cinhoml1, cld_opt_cinhoml3, cld_opt_cinhomi
+
 !<<SF
 
   IMPLICIT NONE
@@ -113,25 +115,55 @@ CONTAINS
     l_variable_inhoml = .FALSE.
 
     IF (nn == 31) THEN
-      zinhoml1      = 0.80_wp
-      zinhoml2      = 0.40_wp
-      zinhoml3      = 0.40_wp
-      zinhomi       = 0.80_wp
+    ! < YAB Adding cloud and optics  to the PPE 
+      IF (lo_hammoz_perturbations) THEN
+        zinhoml1      = cld_opt_cinhoml1
+        zinhoml2      = 0.40_wp
+        zinhoml3      = cld_opt_cinhoml3
+        zinhomi       = cld_opt_cinhomi
+      ELSE
+        zinhoml1      = 0.80_wp
+        zinhoml2      = 0.40_wp
+        zinhoml3      = 0.40_wp
+        zinhomi       = 0.80_wp
+      ENDIF
     ELSE IF (nn == 63) THEN
-      zinhoml1      = 0.80_wp
-      zinhoml2      = 0.40_wp
-      zinhoml3      = 0.80_wp
-      zinhomi       = 0.80_wp
+    ! < YAB Adding cloud and optics  to the PPE 
+      IF (lo_hammoz_perturbations) THEN
+        zinhoml1      = cld_opt_cinhoml1
+        zinhoml2      = 0.40_wp
+        zinhoml3      = cld_opt_cinhoml3
+        zinhomi       = cld_opt_cinhomi
+      ELSE
+        zinhoml1      = 0.80_wp
+        zinhoml2      = 0.40_wp
+        zinhoml3      = 0.80_wp
+        zinhomi       = 0.80_wp
+      ENDIF
     ELSE IF (nn == 127) THEN
-      zinhoml1      = 0.80_wp
-      zinhoml2      = 0.40_wp
-      zinhoml3      = 0.80_wp
-      zinhomi       = 0.85_wp
+      IF (lo_hammoz_perturbations) THEN
+        zinhoml1      = cld_opt_cinhoml1
+        zinhoml2      = 0.40_wp
+        zinhoml3      = cld_opt_cinhoml3
+        zinhomi       = cld_opt_cinhomi
+      ELSE
+        zinhoml1      = 0.80_wp
+        zinhoml2      = 0.40_wp
+        zinhoml3      = 0.80_wp
+        zinhomi       = 0.85_wp
+      ENDIF
     ELSE IF (nn == 255) THEN
-      zinhoml1      = 0.80_wp
-      zinhoml2      = 0.40_wp
-      zinhoml3      = 0.80_wp
-      zinhomi       = 0.85_wp
+      IF (lo_hammoz_perturbations) THEN
+        zinhoml1      = cld_opt_cinhoml1
+        zinhoml2      = 0.40_wp
+        zinhoml3      = cld_opt_cinhoml3
+        zinhomi       = cld_opt_cinhomi
+      ELSE
+        zinhoml1      = 0.80_wp
+        zinhoml2      = 0.40_wp
+        zinhoml3      = 0.80_wp
+        zinhomi       = 0.85_wp
+      ENDIF
     ELSE
       CALL finish ('mo_cloud_optics', 'Truncation not supported.')
     ENDIF
@@ -143,25 +175,41 @@ CONTAINS
              SELECT CASE(ncd_activ)
                 CASE(1) ! LL activation
                    !SF: updated on 2015.02.25 (David Neubauer / Katty Huang, pure atm run, HAM-M7, LL activation)
-                   zinhomi = 0.7_wp
+                   zinhomi = cld_opt_cinhomi
                 CASE(2) ! AR&G activation
                    !SF: updated on 2017.04.27 (David Neubauer, pure atm run, HAM-M7)
-                   zinhomi  = 0.7_wp
-                   zinhoml1 = 0.8_wp
-                   zinhoml2 = 0.4_wp
-                   zinhoml3 = 0.8_wp
+                   ! < YAB
+                    IF (lo_hammoz_perturbations) THEN
+                      zinhoml1      = cld_opt_cinhoml1
+                      zinhoml2      = 0.40_wp
+                      zinhoml3      = cld_opt_cinhoml3
+                      zinhomi       = cld_opt_cinhomi
+                    ELSE
+                      zinhomi  = 0.7_wp
+                      zinhoml1 = 0.8_wp
+                      zinhoml2 = 0.4_wp
+                      zinhoml3 = 0.8_wp
+                    ENDIF ! > YAB
              END SELECT
           ELSE IF (nlev == 47) THEN
              SELECT CASE(ncd_activ)
                 CASE(1) ! LL activation
                    !SF: updated on 2015.02.25 (David Neubauer / Katty Huang, pure atm run, HAM-M7, LL activation)
-                   zinhomi = 0.8_wp
+                   zinhomi = cld_opt_cinhomi
                 CASE(2) ! AR&G activation
                    !SF: updated on 2017.04.27 (David Neubauer, pure atm run, HAM-M7)
-                   zinhomi  = 0.7_wp
-                   zinhoml1 = 0.8_wp
-                   zinhoml2 = 0.4_wp
-                   zinhoml3 = 0.8_wp
+                   ! < YAB
+                    IF (lo_hammoz_perturbations) THEN
+                      zinhoml1      = cld_opt_cinhoml1
+                      zinhoml2      = 0.40_wp
+                      zinhoml3      = cld_opt_cinhoml3
+                      zinhomi       = cld_opt_cinhomi
+                    ELSE
+                      zinhomi  = 0.7_wp
+                      zinhoml1 = 0.8_wp
+                      zinhoml2 = 0.4_wp
+                      zinhoml3 = 0.8_wp
+                    ENDIF ! > YAB
              END SELECT
           ENDIF
        ENDIF

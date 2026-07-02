@@ -90,7 +90,7 @@ NAMELIST /hammoz_perturbations/ &
   du_rad_ni,          & ! Scale the imaginary part of the refractive index (for DUST)
 !--- Cloud scheme (ONLY for naut == 2):
   KK_exponent,              & ! The exponent to use in the KK autoconversion scheme
-  KK_LWP_exponent,            & ! The LWP exponent in the KK autoconversion scheme.
+  KK_LWP_exponent,          & ! The LWP exponent in the KK autoconversion scheme.
   scale_activation,         & ! Scale the number of ARG activated particles
   scale_fi,  &
   scale_gi, &
@@ -106,8 +106,20 @@ NAMELIST /hammoz_perturbations/ &
   kappa_ss, &
   kappa_so4, &
   kappa_oc, &
-  !scale_dms_sc, &           ! Scale the imaginary part of the refractive index (for DUST)
+  !scale_dms_sc, &   ! Scale the imaginary part of the refractive index (for DUST)
   scale_seasalt_expo, &
-  scale_fricv, &
-  scale_cprcon, &  !Conversion rate from cloud water to rain in convective clouds
-  scale_entrpen    !Entrainment rate for deep convection
+  scale_fricv,   &
+  scale_cprcon,  &   !Conversion rate from cloud water to rain in convective clouds
+  scale_entrpen, &   !Entrainment rate for deep convection
+  scale_entrscv, &   !Entrainment rate for shallow convection
+  scale_entrmid, &   !Entrainment rate for midlevel convection
+  scale_cmfctop, &  !fractional convective mass flux across the top of cloud
+  cld_cov_crs, &    !Critical RH at surface for cloud cover
+  cld_cov_crt, &    !Critical RH aloft for cloud cover
+  scale_micro_icefall, & !Scaling for ice-fall speed in cloud microphysics
+  cld_opt_cinhomi, & !Ice-cloud inhomogeneity factor
+  cld_opt_cinhoml1, & !Liquid-cloud inhomogeneity without convection
+  cld_opt_cinhoml3, & !Liquid-cloud inhomogeneity with deep/mid-level convection
+
+  scale_ccsaut,  &   !Scale factor for autoconversion rate from cloud ice to snow
+  scale_ccraut      !Scale factor for autoconversion rate from cloud droplets to rain in stratiform clouds
