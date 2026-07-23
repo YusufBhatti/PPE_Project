@@ -44,40 +44,31 @@
 #      https://redmine.hammoz.ethz.ch/projects/hammoz/wiki/2_Technical_Documentation#ECHAM
 #
 
-# Agricultural:
-AGR=EF_FILE,       ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_agr,  EF_LONLAT,  surface
-# Agricultural waste burning:
-#AWB=EF_FILE,      accmip_interpolated/%G0/1850/accmip_interpolated_emissions_%R0_%C0_anthropogenic_1850_%G0.nc, emiss_awb,  EF_LONLAT,  surface
-# Aircraft:
-AIRC=EF_FILE,     ceds/%T0/1850/em-aircraft_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc,      emiss_air,  EF_3D,      volume, nlev=25
-# Biogenic:
-BIOGENIC=EF_FILE, aerocom_II/%T0/2000/emiss_aerocom_%C0_monthly_2000_%T0.nc,                           emiss_biogenic,  EF_LONLAT, EF_IGNOREYEAR, surface
-# Domestic:
-DOM=EF_FILE,      ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_dom,  EF_LONLAT,  surface
-# Energy:
-ENE=EF_FILE,
-ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_ene,  EF_LONLAT, level50m
-# Total fire:
-TFIRE=EF_FILE,    dddddddddCMIP6biomassburning/%G0/1850/em-biomassburning_input4MIPs_emissions_CMIP_VUA-CMIP-BB4CMIP6-1-2_gn_totfire_1850_%C0_1850_%G0.nc, emiss_fire,  EF_LONLAT, fire
-# Forest fire:
-#FFIRE=EF_FILE,    accmip_interpolated/%G0/1850/accmip_interpolated_emissions_%R0_%C0_biomassburning_1850_%G0.nc,emiss_for,  EF_LONLAT, fire
-# Grass fire:
-#GFIRE=EF_FILE,    accmip_interpolated/%G0/1850/accmip_interpolated_emissions_%R0_%C0_biomassburning_1850_%G0.nc,emiss_gra,  EF_LONLAT, fire
-# Industry:
-IND=EF_FILE,
-ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_ind,  EF_LONLAT,  surface
-# Ships:
-SHIPS=EF_FILE,
-ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc,         emiss_shp,  EF_LONLAT,  level50m
-# Solvent:
-SLV=EF_FILE,
-ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_slv,  EF_LONLAT,  surface
-# Terrestrial:
-TERR=EF_FILE,     aerocom_II/%T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc,                                      DMS_terr,  EF_LONLAT, EF_IGNOREYEAR, surface
-# Transport:
-TRA=EF_FILE,      ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_tra,  EF_LONLAT,  surface
-# Waste:
-WST=EF_FILE,      ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%G0.nc, emiss_wst,  EF_LONLAT,  surface
+# Agricultural:  
+AGR    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_agr,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Aircraft:  
+AIRC   = EF_FILE, ceds/%T0/1850/em-aircraft_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_air,  EF_3D,  EF_IGNOREYEAR,  volume  
+# Biogenic:  
+BIOGENIC = EF_FILE, aerocom_II/%T0/2000/emiss_aerocom_%C0_monthly_2000_%T0.nc, emiss_biogenic,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Domestic:  
+DOM    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_dom,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Energy:  
+ENE    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_ene,  EF_LONLAT,  EF_IGNOREYEAR,  level50m  
+# Total fire:  
+TFIRE  = EF_FILE, CMIP6biomassburning/%T0/1850/em-biomassburning_input4MIPs_emissions_CMIP_VUA-CMIP-BB4CMIP6-1-2_gn_totfire_%C0_1850_%T0.nc, emiss_fire,  EF_LONLAT,  EF_IGNOREYEAR,  fire  
+# Industry:  
+IND    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_ind,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Ships:  
+SHIPS  = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_shp,  EF_LONLAT,  EF_IGNOREYEAR,  level50m  
+# Solvent:  
+SLV    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_slv,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Terrestrial:  
+TERR   = EF_FILE, aerocom_II/%T0/emiss_aerocom_%C0_monthly_CLIM_%T0.nc, DMS_terr,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Transport:  
+TRA    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_tra,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+# Waste:  
+WST    = EF_FILE, ceds/%T0/1850/em-anthropogenic_input4MIPs_emissions_CMIP_CEDS_%C0_1850_%T0.nc, emiss_wst,  EF_LONLAT,  EF_IGNOREYEAR,  surface  
+
 
 # Dust:
 DUST=EF_MODULE,    surface

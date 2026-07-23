@@ -1,0 +1,290 @@
+#!/bin/bash
+#-------------------------------------------------------------------------------------------------------
+# Sylvaine Ferrachat 2012
+# 
+# The following is the middle part (body) of a settings file that will be sourced 
+# by jobsubm_echam.sh to setup and launch an echam job.
+#
+# The task of assembling together all the pieces of the settings file is done by prepare_run.sh.
+#
+# These pieces are:
+#
+#     - Header: general settings and compute settings:
+#               - there are mostly machine-dependent, and not echam version-dependent
+#               --> to be found in each machine_config/machine_name/
+#
+#     - Body [current file]: echam(-hammoz) settings: 
+#               - these are machine-independent, and echam version-dependent
+#               --> to be found in the model distribution (distribution default templates), in
+#                   any user's already existing settings, or in run_configs/ as a rescue for model versions
+#                   older than the first inclusion of this into echam distributions
+#
+#     - Tail: settings for launching any arbitrary slave p-proc job at the end of each echam integration:
+#               - these are machine-dependent, and echam version-independent
+#               --> to be found in each machine_config/machine_name/
+#
+#-------------------------------------------------------------------------------------------------------
+
+#-Body-begin. Do not delete this line!
+#------------------------------------------------------------------------------------------------------
+#-- ECHAM6-HAMMOZ settings:
+
+   #-- General:
+
+model_type="echam6-moz"                           # model type (echam5.5-ham, echam6, echam6-hammoz, echam6-moz)
+model_bin=${model_dir}/bin/echam6                 # model bin name
+#CSW?
+emissions_spec=${script_dir}/emi_spec_${exp}.txt  # name of your exp emi_spec file to copy to $exp_dir
+
+hres="T63"                    # horizontal spectral truncation
+vres="L47"                    # vertical resolution
+oceres="GR15"                 # resolution of the ocean model used to produce the land-sea mask
+ntiles=11                     # number of tiles in the vegetation model
+
+no_cycles=1                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
+init_restart_flag=.false.     # echam restart flag at launch of this job 
+                              # (in case of job chaining, the proper rerun flag will be automatically 
+                              #  set when further jobs will be started)
+
+date_start="1850,01,01,0,0,0" # start of the experiment - Should never be modified when making a rerun
+date_stop="1880,01,01,12,0,0"  # end of the experiment - Can be freely adjusted during the whole experiment
+
+input_files_version="v0002" # version label for input files !!do not change if you don't know about it!!
+#CSW?
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
+                              # ozone or climatologic aerosols, AND the experiment's time range 
+                              # overlaps with [2009,2100]), choose here the scenario you'd like
+                              # (RCP45, XXX, all case insensitive)
+
+   #-- ECHAM6-HAMMOZ namelists:
+
+       #-- ECHAM:
+
+cat > ${script_dir}/namelist_${exp}.echam << EOF
+&PARCTL
+ nproca = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+ nprocb = WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID VALUE HERE
+/
+&RUNCTL 
+ nproma         = ${nproma}
+ lresume        = $init_restart_flag,
+ lmidatm        = .true.
+ out_datapath   = "$exp_dir"
+ out_expname    = "$exp"
+! as long as bug #426 (out_filetype=6 causes model to crash) isn't fixed, use NetCDF
+!out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4
+ out_filetype   = 2     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
+ trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
+ rerun_filetype = 2     ! 2--> NetCDF; 4--> NetCDF2
+ dt_start       = $date_start
+ dt_stop        = $date_stop
+ putdata        = 6,'hours','first',0
+ trigfiles      = 1,'months', 'first', 0
+ putrerun       = 12,'months','last',0
+ no_cycles      = ${no_cycles}, 
+ lamip          = .false.
+ lnudge         = .false.
+ ltimer         = .false.
+ ltdiag         = .true.
+/
+&SUBMODELCTL
+ lco2          = .false.
+ lchemfeedback = .true.
+ linterh2o     = .true.
+ lchemrad      = .true.
+ lburden       = .false.
+ lmethox       = .true.
+ lham          = .false.
+ lmoz          = .true.
+ lhammoz       = .false.
+ lhammonia     = .false.
+ llght         = .true.
+ lemissions    = .false.
+ emi_basepath  = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
+/
+&SUBMDIAGCTL
+ vphysc_lpost     = .false.
+ vphyscnam        = 'all'
+ wetdep_lpost     = .false. 
+ wetdepnam        = 'all' 
+ wetdep_gastrac   = 'default'
+ wetdep_keytype   = 1 
+ drydep_lpost     = .false. 
+ drydepnam        = 'all' 
+ drydep_gastrac   = 'default'
+ drydep_keytype   = 1 
+ sedi_lpost       = .false. 
+ sedinam          = 'all' 
+ sedi_keytype     = 1 
+ emi_lpost        = .false.
+ emi_lpost_sector = .false.
+ eminam           = 'all'
+ emi_gastrac      = 'all'
+/
+&DEBUGSCTL
+ putdebug_stream = 1, 'days', 'last', 0
+/
+&RADCTL
+ iaero   = 3     ! 1 for interactive (lham=true), 2 for Tanre 3 for Kinne  
+ io3 = 1
+ isolrad = 2     ! 2 = piControl solar constant
+ icfc = 1
+ ich4 = 1
+ in2o = 1
+ ico2 = 1
+ co2vmr = 284.725e-6
+ ch4vmr = 0.79097924e-6
+ n2ovmr = 0.2754250e-6
+ yr_perp = 1850   
+/
+&PHYSCTL
+ lcdnc_progn    = .false.
+/
+&MOZCTL
+  out_species    = 'default'
+  lbc_species = 'CCL4', 'CFC12', 'CF2CLBR', 'CF3BR', 'CFC113', 'CFC11',
+                  'CH3BR', 'CH3CCL3', 'CH3CL', 'CH4', 'CO2', 'H2', 'HCFC22',
+                  'N2O'
+  burden_species = 'O3', 'NO2', 'NO', 'CO'
+  lstrathet      = .true.  
+  ltrophet       = .false.
+/
+&tdiagctl
+    puttdiag = 6, 'hours', 'first', 0
+    tdiagnam = 'radheat'
+/
+&co2ctl
+    lco2_scenario = .false.
+/
+&set_stream stream="surf",lpost=1 /
+&set_stream stream="photo",lpost=0 /
+&set_stream stream="lghtng",lpost=0 /
+&set_stream stream="moz",lpost=0 /
+&set_stream_element stream = 'tdiag',name = 'st',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'H2O',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'CO2',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'CH4',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'CFC11',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'CFC12',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'O3',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'N2O5',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'CH2O',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'H2O2',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'HO2',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'HO2NO2',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'NO2',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'NO3',lpost = 1 /
+&set_stream_element stream = 'tracer',name = 'CH3OOH',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'CL',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'CL2',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'BR',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'BRO',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'OH',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'CLO',lpost = 0 /
+&set_stream_element stream = 'tracer',name = 'HNO3',lpost = 0 /
+
+EOF
+
+       #-- JS-BACH:
+
+cat > ${script_dir}/namelist_${exp}.jsbach <<EOF
+&JSBACH_CTL
+  standalone = .false.
+  ! --- number of tiles ---
+  ntiles = ${ntiles}
+
+  ! --- options to activate the different jsbach modules ---
+  use_bethy = .true.
+  use_phenology = .true.
+  use_albedo = .true.
+  use_dynveg = .false.
+
+  ! these settings are taken from MPIESM sstClim settings
+  use_disturbance = .true.
+  with_nitrogen = .false.
+  lcc_forcing_type = 'transitions'
+  use_roughness_lai = .true.
+  use_roughness_oro = .false.
+  test_cconservation = .true.
+  read_cover_fract = .false.
+  with_yasso = .false.
+
+  ! --- output options ---
+  file_type = 2 
+  lpost_echam = .false.
+  debug = .false.
+/
+&ALBEDO_CTL
+  use_albedocanopy = .false.
+/
+&CBALANCE_CTL
+  read_cpools = .false.
+  read_npools = .false.
+  read_ndepo = .false.
+/
+&DYNVEG_CTL
+  read_fpc = .false.
+  dynveg_feedback = .false.
+/
+&CLIMBUF_CTL
+  init_running_means = .false.
+  read_climbuf = .false.
+/
+&disturbance_ctl
+    fire_name = ''
+/
+&windbreak_jsbach_ctl
+    wind_damage_scale = 0.01
+/
+&soil_ctl
+    nsoil = 5
+/
+EOF
+
+       #-- Mean-values streams:
+
+#SF uncomment the following if you need to compute online monthly means:
+
+#cat >> ${script_dir}/namelist_${exp}.echam << EOF
+#&MVSTREAMCTL
+#  m_stream_name = 'ham', 'rad', 'tracer', 'vphysc', 'activ' 
+#/
+#EOF
+
+cat > ${script_dir}/ham.nml <<EOF
+&MVCTL
+  PUTMEAN = 1,'months','last',0
+  meannam = 'all'
+/
+EOF
+
+cat > ${script_dir}/rad.nml <<EOF
+&MVCTL
+  PUTMEAN = 1,'months','last',0
+  meannam = 'all'
+/
+EOF
+
+cat > ${script_dir}/tracer.nml <<EOF
+&MVCTL
+  PUTMEAN = 1,'months','last',0
+  meannam = 'all' 
+/
+EOF
+
+cat > ${script_dir}/vphysc.nml <<EOF
+&MVCTL
+  PUTMEAN = 1,'months','last',0
+  meannam = 'all'
+/
+EOF
+
+cat > ${script_dir}/activ.nml <<EOF
+&MVCTL
+  PUTMEAN = 1,'months','last',0
+  meannam = 'all'
+/
+EOF
+
+#-Body-end. Do not delete this line!
+

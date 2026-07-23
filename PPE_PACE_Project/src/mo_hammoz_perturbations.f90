@@ -474,6 +474,7 @@ CONTAINS
     sectors_shp(1) = 'SHIPS'
 
     sectors_dms(1) = 'OCEANI'
+    sectors_dms(2) = 'TERR'
     CALL message('',separator)
 
     !--- Left emission sectors: AGR, BIOGENIC SLV TERR DUST OCEANI SEASALT VOLCE VOLCC
@@ -599,15 +600,15 @@ CONTAINS
 
     !--- DMS:
 
-    DO ind=1, maxsectors
-      ! Find any sectors that are type DMS since it can change for different emissions datasets
-      nvars=ematrix%em_sectors(ind)%es_nvars
-      DO i=1, nvars
-        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "DMS") THEN
-          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_dms
-        END IF
-      ENDDO
-    ENDDO
+!    DO ind=1, maxsectors
+!       Find any sectors that are type DMS since it can change for different emissions datasets
+!      nvars=ematrix%em_sectors(ind)%es_nvars
+!      DO i=1, nvars
+!        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "DMS") THEN
+!          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_
+!        END IF
+!      ENDDO
+!    ENDDO
 
    !    --- DMS:
 
@@ -620,6 +621,17 @@ CONTAINS
 !
 !
 
+    nsec=SIZE(sectors_dms)
+    DO isec=1, nsec
+      ind=em_get_SectorIndex(TRIM(sectors_dms(isec)))
+      nvars=ematrix%em_sectors(ind)%es_nvars
+      DO i=1, nvars
+        !dms
+        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "DMS") THEN
+          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_dms
+        END IF
+      ENDDO
+    ENDDO
     !--- Output all emission factors
 
     DO ind=1, maxsectors

@@ -1,0 +1,17 @@
+The executable\index{executable echam6} is called {\tt echam6} and is put into {\tt
+  echam-$<$tag\_number$>$/bin}. The actual command to call the
+executable depends on the computer system. On the supercomputer
+platform \blizzard{} at DKRZ, the command would be {\tt poe echam6}, on
+Linux platforms you can use {\tt mpirun} in order to call a parallel
+program. The {\tt echam6} command itself can take the arguments {\tt
+  -i} or {\tt --init} that both have the same effect. This argument
+forces an initial run and overrides any namelist setting in this respect. It is
+therefore possible to use this command line option to perform a chain
+job in which the subsequent calls of {\tt echam6} perform restarts
+except the initial call for which the {\tt -i} or {\tt --init} option
+has to be used. In such a case, the namelist for the first and
+subsequent calls of {\tt echam6} can be identical although the first
+call is an initial run and the subsequent calls are restarts. See
+also the description of the {\tt lresume}
+\index{namelist variables!lresume} namelist--variable in 
+Tab.~\ref{tabrunctl}. 

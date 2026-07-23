@@ -298,7 +298,7 @@ MODULE mo_ham_species
      !  density here is that of H2SO4 
 
 !>>DT
-     !>>hjia Added for PPE
+     !>>YAB and hjia Added for PPE
 !     kappa_tmp = 0.60_dp ! default value
      IF (lo_hammoz_perturbations) THEN
         kappa_tmp = kappa_so4  
@@ -321,7 +321,7 @@ MODULE mo_ham_species
                       nion         = 2,                  &
                       osm          = 1._dp,              &
 !                      kappa        = 0.60_dp,            & 
-                      kappa        = kappa_tmp,           &  !hjia
+                      kappa        = kappa_tmp,           &  !YAB
                       lburden      = .TRUE.,             &
                       idx          = id_so4              )
 !<<DT
@@ -374,7 +374,7 @@ MODULE mo_ham_species
         !--------- 10b. Organic Carbon (Primary organic aerosol)
         !
        
-        !>>hjia Added for PPE
+        !>>YAB hjia Added for PPE
 !+     ! kappa_oc=0.06._dp ! default value
         IF (lo_hammoz_perturbations) THEN
            kappa_tmp = kappa_oc
@@ -392,7 +392,7 @@ MODULE mo_ham_species
                          iaerorad     = iradoc,              &
                          lwatsol      = .TRUE.,              &  
 !                         kappa        = 0.06_dp,             &
-                         kappa        = kappa_tmp,           &  !hjia
+                         kappa        = kappa_tmp,           &  !YAB 
                          ldrydep      = .TRUE.,              &
                          lwetdep      = .TRUE.,              &   
                          idx          = id_oc                   )
@@ -403,7 +403,7 @@ MODULE mo_ham_species
      !
 
 
-     !>>hjia Added for PPE
+     !>>hjia Added for PPE and YAB
 !     !kappa_ss=1._dp ! default value
      IF (lo_hammoz_perturbations) THEN
         kappa_tmp = kappa_ss
@@ -424,7 +424,7 @@ MODULE mo_ham_species
                       nion         = 2,                   &
                       osm          = 1._dp,               & 
 !                      kappa        = 1._dp,               &    !>>dod<<
-                      kappa        = kappa_tmp,           &  !hjia
+                      kappa        = kappa_tmp,           &  !YAB
                       ldrydep      = .TRUE.,              &
                       lwetdep      = .TRUE.,              &   
                       idx          = id_ss                   )

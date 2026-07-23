@@ -1,0 +1,511 @@
+
+
+\subsection{Define a Variable: {\tt vlistDefVar}}
+\index{vlistDefVar}
+\label{vlistDefVar}
+
+The function {\tt vlistDefVar} adds a new variable to vlistID.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistDefVar(INTEGER vlistID, INTEGER gridID, INTEGER zaxisID, 
+                                 INTEGER tsteptype)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt tsteptype\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt zaxisID}]
+Z-axis ID, from a previous call to {\htmlref{\tt zaxisCreate}{zaxisCreate}}.
+\item[{\tt tsteptype}]
+One of the set of predefined {\CDI} timestep types.
+                     The valid {\CDI} timestep types are {\tt TSTEP\_CONSTANT} and {\tt TSTEP\_INSTANT}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistDefVar} returns an identifier to the new variable.
+
+
+\subsubsection*{Example}
+
+Here is an example using {\tt vlistCreate} to create a variable list
+and add a variable with {\tt vlistDefVar}.
+
+\begin{lstlisting}[language=Fortran, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    INCLUDE 'cdi.h'
+       ...
+    INTEGER vlistID, varID
+       ...
+    vlistID = vlistCreate()
+    varID = vlistDefVar(vlistID, gridID, zaxisID, TIME_INSTANT)
+       ...
+    streamDefVlist(streamID, vlistID)
+       ...
+    vlistDestroy(vlistID)
+       ...
+\end{lstlisting}
+
+
+\subsection{Get the Grid ID of a Variable: {\tt vlistInqVarGrid}}
+\index{vlistInqVarGrid}
+\label{vlistInqVarGrid}
+
+The function {\tt vlistInqVarGrid} returns the grid ID of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarGrid(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarGrid} returns the grid ID of the variable.
+
+
+
+\subsection{Get the Zaxis ID of a Variable: {\tt vlistInqVarZaxis}}
+\index{vlistInqVarZaxis}
+\label{vlistInqVarZaxis}
+
+The function {\tt vlistInqVarZaxis} returns the zaxis ID of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarZaxis(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarZaxis} returns the zaxis ID of the variable.
+
+
+
+\subsection{Define the code number of a Variable: {\tt vlistDefVarCode}}
+\index{vlistDefVarCode}
+\label{vlistDefVarCode}
+
+The function {\tt vlistDefVarCode} defines the code number of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarCode(INTEGER vlistID, INTEGER varID, INTEGER code)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt code}]
+Code number.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the Code number of a Variable: {\tt vlistInqVarCode}}
+\index{vlistInqVarCode}
+\label{vlistInqVarCode}
+
+The function {\tt vlistInqVarCode} returns the code number of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarCode(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarCode} returns the code number of the variable.
+
+
+
+\subsection{Define the name of a Variable: {\tt vlistDefVarName}}
+\index{vlistDefVarName}
+\label{vlistDefVarName}
+
+The function {\tt vlistDefVarName} defines the name of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarName(INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt name}]
+Name of the variable.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the name of a Variable: {\tt vlistInqVarName}}
+\index{vlistInqVarName}
+\label{vlistInqVarName}
+
+The function {\tt vlistInqVarName} returns the name of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarName(INTEGER vlistID, INTEGER varID, CHARACTER*(*) name)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt name}]
+Returned variable name. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarName} returns the name of the variable to the parameter name if available,
+otherwise the result is an empty string.
+
+
+
+\subsection{Define the long name of a Variable: {\tt vlistDefVarLongname}}
+\index{vlistDefVarLongname}
+\label{vlistDefVarLongname}
+
+The function {\tt vlistDefVarLongname} defines the long name of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarLongname(INTEGER vlistID, INTEGER varID, 
+                                   CHARACTER*(*) longname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt longname}]
+Long name of the variable.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the longname of a Variable: {\tt vlistInqVarLongname}}
+\index{vlistInqVarLongname}
+\label{vlistInqVarLongname}
+
+The function {\tt vlistInqVarLongname} returns the longname of a variable if available,
+otherwise the result is an empty string.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarLongname(INTEGER vlistID, INTEGER varID, 
+                                   CHARACTER*(*) longname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt longname}]
+Long name of the variable. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVaeLongname} returns the longname of the variable to the parameter longname.
+
+
+
+\subsection{Define the standard name of a Variable: {\tt vlistDefVarStdname}}
+\index{vlistDefVarStdname}
+\label{vlistDefVarStdname}
+
+The function {\tt vlistDefVarStdname} defines the standard name of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt stdname}]
+Standard name of the variable.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the standard name of a Variable: {\tt vlistInqVarStdname}}
+\index{vlistInqVarStdname}
+\label{vlistInqVarStdname}
+
+The function {\tt vlistInqVarStdname} returns the standard name of a variable if available,
+otherwise the result is an empty string.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarStdname(INTEGER vlistID, INTEGER varID, 
+                                  CHARACTER*(*) stdname)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt stdname}]
+Standard name of the variable. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarName} returns the standard name of the variable to the parameter stdname.
+
+
+
+\subsection{Define the units of a Variable: {\tt vlistDefVarUnits}}
+\index{vlistDefVarUnits}
+\label{vlistDefVarUnits}
+
+The function {\tt vlistDefVarUnits} defines the units of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarUnits(INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt units}]
+Units of the variable.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the units of a Variable: {\tt vlistInqVarUnits}}
+\index{vlistInqVarUnits}
+\label{vlistInqVarUnits}
+
+The function {\tt vlistInqVarUnits} returns the units of a variable if available,
+otherwise the result is an empty string.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistInqVarUnits(INTEGER vlistID, INTEGER varID, CHARACTER*(*) units)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt units}]
+Units of the variable. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarUnits} returns the units of the variable to the parameter units.
+
+
+
+\subsection{Define the data type of a Variable: {\tt vlistDefVarDatatype}}
+\index{vlistDefVarDatatype}
+\label{vlistDefVarDatatype}
+
+The function {\tt vlistDefVarDatatype} defines the data type of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarDatatype(INTEGER vlistID, INTEGER varID, INTEGER datatype)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt datatype\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt datatype}]
+The data type identifier.
+                    The valid {\CDI} data types are {\tt DATATYPE\_PACK8}, {\tt DATATYPE\_PACK16},
+                    {\tt DATATYPE\_PACK24}, {\tt DATATYPE\_FLT32}, {\tt DATATYPE\_FLT64},
+                    {\tt DATATYPE\_INT8}, {\tt DATATYPE\_INT16} and {\tt DATATYPE\_INT32}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the data type of a Variable: {\tt vlistInqVarDatatype}}
+\index{vlistInqVarDatatype}
+\label{vlistInqVarDatatype}
+
+The function {\tt vlistInqVarDatatype} returns the data type of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    INTEGER FUNCTION vlistInqVarDatatype(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarDatatype} returns an identifier to the data type of the variable.
+The valid {\CDI} data types are {\tt DATATYPE\_PACK8}, {\tt DATATYPE\_PACK16}, {\tt DATATYPE\_PACK24},
+{\tt DATATYPE\_FLT32}, {\tt DATATYPE\_FLT64}, {\tt DATATYPE\_INT8}, {\tt DATATYPE\_INT16} and 
+{\tt DATATYPE\_INT32}.
+
+
+
+\subsection{Define the missing value of a Variable: {\tt vlistDefVarMissval}}
+\index{vlistDefVarMissval}
+\label{vlistDefVarMissval}
+
+The function {\tt vlistDefVarMissval} defines the missing value of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    SUBROUTINE vlistDefVarMissval(INTEGER vlistID, INTEGER varID, REAL*8 missval)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}}.
+\item[{\tt varID}]
+Variable identifier.
+\item[{\tt missval}]
+Missing value.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the missing value of a Variable: {\tt vlistInqVarMissval}}
+\index{vlistInqVarMissval}
+\label{vlistInqVarMissval}
+
+The function {\tt vlistInqVarMissval} returns the missing value of a variable.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    REAL*8 FUNCTION vlistInqVarMissval(INTEGER vlistID, INTEGER varID)
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt vlistID\ }
+\item[{\tt vlistID}]
+Variable list ID, from a previous call to {\htmlref{\tt vlistCreate}{vlistCreate}} or {\htmlref{\tt streamInqVlist}{streamInqVlist}}.
+\item[{\tt varID}]
+Variable identifier.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt vlistInqVarMissval} returns the missing value of the variable.
+

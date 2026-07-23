@@ -2,7 +2,7 @@
 module purge
 cwd=${PWD}/
 
-if_clean="yes"
+if_clean="no"
 #if_clean="no"
 compile="yes"
 
@@ -10,9 +10,9 @@ compile="yes"
 
 # Important
 # Note in order to change the dependencies of the modules, you need to modify 
-# /projects/0/prjs1474/aarifi/ECHAM-HAMMOZ/RUNDIR/COMPILE/mh-linux
+# /projects/0/prjs1474/ /ECHAM-HAMMOZ/RUNDIR/COMPILE/mh-linux
 # also very important is that you need to set the correct compiler verision for the packages to align with your echam version, you need to check
-# /projects/0/prjs1474/aarifi/ECHAM-HAMMOZ/presetups_aarifi/install.sh
+# /projects/0/prjs1474/ /ECHAM-HAMMOZ/presetups_aarifi/install.sh
 
 # Load modules
 ml 2024
@@ -29,7 +29,7 @@ ml netCDF-Fortran/4.6.1-gompi-2024a
 
 export ECHAM_MAIN_DIR="/projects/0/prjs1474/ybhatti/PPE_Project"
  
-DIR_ECHAM_MAIN="$ECHAM_MAIN_DIR/PPE_PACE_Project"
+DIR_ECHAM_MAIN="$ECHAM_MAIN_DIR/Jasper_echam/"
 
 #########################################################################
 
@@ -68,7 +68,7 @@ printf "Hello, %s!\n" "Module loading"
 	
 
 
-##cd ${DIR_ECHAM_MAIN}
+cd ${DIR_ECHAM_MAIN}
 ##
 if [[ ${if_clean} == "yes" ]]; then
 	make clean

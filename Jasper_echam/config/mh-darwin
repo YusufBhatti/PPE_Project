@@ -1,0 +1,62 @@
+#_____________________________________________________________________________
+#
+# Mac OS X (Darwin)
+#
+#_____________________________________________________________________________
+#
+SRCDIRS     = support blas lapack 
+#
+SUPPORTROOT = ..
+SUPPORT_LIB = '-L$(SUPPORTROOT)/lib -lsupport'
+#
+#_____________________________________________________________________________
+#
+CC          = gcc
+CFLAGS      = -std=gnu99 -msse2 -O -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE
+ccversion   = $(gcc --version 2>&1 | awk 'NR==1') 
+#
+case $fortran_compiler in
+    default|gcc)
+        configured_compiler = gcc
+        compiler_version    = $(gfortran --version | awk 'NR==1{split($NF,v,"."); printf("gcc%1d%1d", v[1], v[2])}')
+        CFLAGS      = $CFLAGS -DgFortran
+        FC          = gfortran
+        FCFLAGS     = -msse2 -O -ffloat-store -pthread
+        F77         = gfortran
+        F77FLAGS    = -msse2  -O -ffloat-store -g
+        ;;
+    nag)
+        configured_compiler = nag
+        compiler_version    = $(nagfor -v 2>&1 | awk 'NR==1{split($5,v,"."); printf("nag%1d%1d", v[1],substr(v[2],1,1))}')
+        CFLAGS      = $CFLAGS -DNAGf90Fortran
+        FC          = nagfor
+        FCFLAGS     = -f2003
+        F77         = nagfor
+        F77FLAGS    = -w=obs -O -dcfuns -mismatch_all
+        ;;
+esac
+
+#>>SF for HAMMOZ
+FCFLAGS = $FCFLAGS -DHAMMOZ
+#<<SF
+
+#_____________________________________________________________________________
+#
+# Define site dependent settings
+#
+NETCDFFROOT = /opt/local
+NETCDFROOT  = /opt/local
+HDF5ROOT    = /opt/local
+SZIPROOT    = /opt/local
+ZLIBROOT    = /usr
+case $ac_hostname in
+    d133*|bailung*|wanglung*|feilung*|cinglung*|huanglung*|tienlung*|wulung*)
+        case $fortran_compiler in
+            default|gcc) 
+                MPIROOT    = /opt/local
+                MPI_LIB    = -lmpifort -lmpi -lpmpi
+		MPI_LAUNCH = $MPIROOT/bin/mpiexec
+		;;
+        esac
+        ;;
+esac

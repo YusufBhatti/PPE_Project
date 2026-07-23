@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: yaxt
+Description: Distributed memory data (re-)distribution library.
+URL: http://www.dkrz.de/redmine/projects/yaxt
+Version: @VERSION@
+Requires:
+Libs: -L@libdir@ -lyaxt
+Cflags: -I@includedir@

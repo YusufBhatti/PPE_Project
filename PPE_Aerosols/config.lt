@@ -9,16 +9,14 @@ export SHELL
 
 # Be more Bourne compatible
 DUALCASE=1; export DUALCASE # for MKS sh
-as_nop=:
-if test ${ZSH_VERSION+y} && (emulate sh) >/dev/null 2>&1
-then :
+if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then :
   emulate sh
   NULLCMD=:
   # Pre-4.2 versions of Zsh do word splitting on ${1+"$@"}, which
   # is contrary to our usage.  Disable this feature.
   alias -g '${1+"$@"}'='"$@"'
   setopt NO_GLOB_SUBST
-else $as_nop
+else
   case `(set -o) 2>/dev/null` in #(
   *posix*) :
     set -o posix ;; #(
@@ -28,46 +26,46 @@ esac
 fi
 
 
-
-# Reset variables that may have inherited troublesome values from
-# the environment.
-
-# IFS needs to be set, to space, tab, and newline, in precisely that order.
-# (If _AS_PATH_WALK were called with IFS unset, it would have the
-# side effect of setting IFS to empty, thus disabling word splitting.)
-# Quoting is to prevent editors from complaining about space-tab.
 as_nl='
 '
 export as_nl
-IFS=" ""	$as_nl"
-
-PS1='$ '
-PS2='> '
-PS4='+ '
-
-# Ensure predictable behavior from utilities with locale-dependent output.
-LC_ALL=C
-export LC_ALL
-LANGUAGE=C
-export LANGUAGE
-
-# We cannot yet rely on "unset" to work, but we need these variables
-# to be unset--not just set to an empty or harmless value--now, to
-# avoid bugs in old shells (e.g. pre-3.0 UWIN ksh).  This construct
-# also avoids known problems related to "unset" and subshell syntax
-# in other old shells (e.g. bash 2.01 and pdksh 5.2.14).
-for as_var in BASH_ENV ENV MAIL MAILPATH CDPATH
-do eval test \${$as_var+y} \
-  && ( (unset $as_var) || exit 1) >/dev/null 2>&1 && unset $as_var || :
-done
-
-# Ensure that fds 0, 1, and 2 are open.
-if (exec 3>&0) 2>/dev/null; then :; else exec 0</dev/null; fi
-if (exec 3>&1) 2>/dev/null; then :; else exec 1>/dev/null; fi
-if (exec 3>&2)            ; then :; else exec 2>/dev/null; fi
+# Printing a long string crashes Solaris 7 /usr/bin/printf.
+as_echo='\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\'
+as_echo=$as_echo$as_echo$as_echo$as_echo$as_echo
+as_echo=$as_echo$as_echo$as_echo$as_echo$as_echo$as_echo
+# Prefer a ksh shell builtin over an external printf program on Solaris,
+# but without wasting forks for bash or zsh.
+if test -z "$BASH_VERSION$ZSH_VERSION" \
+    && (test "X`print -r -- $as_echo`" = "X$as_echo") 2>/dev/null; then
+  as_echo='print -r --'
+  as_echo_n='print -rn --'
+elif (test "X`printf %s $as_echo`" = "X$as_echo") 2>/dev/null; then
+  as_echo='printf %s\n'
+  as_echo_n='printf %s'
+else
+  if test "X`(/usr/ucb/echo -n -n $as_echo) 2>/dev/null`" = "X-n $as_echo"; then
+    as_echo_body='eval /usr/ucb/echo -n "$1$as_nl"'
+    as_echo_n='/usr/ucb/echo -n'
+  else
+    as_echo_body='eval expr "X$1" : "X\\(.*\\)"'
+    as_echo_n_body='eval
+      arg=$1;
+      case $arg in #(
+      *"$as_nl"*)
+	expr "X$arg" : "X\\(.*\\)$as_nl";
+	arg=`expr "X$arg" : ".*$as_nl\\(.*\\)"`;;
+      esac;
+      expr "X$arg" : "X\\(.*\\)" | tr -d "$as_nl"
+    '
+    export as_echo_n_body
+    as_echo_n='sh -c $as_echo_n_body as_echo'
+  fi
+  export as_echo_body
+  as_echo='sh -c $as_echo_body as_echo'
+fi
 
 # The user is always right.
-if ${PATH_SEPARATOR+false} :; then
+if test "${PATH_SEPARATOR+set}" != set; then
   PATH_SEPARATOR=:
   (PATH='/bin;/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 && {
     (PATH='/bin:/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 ||
@@ -75,6 +73,13 @@ if ${PATH_SEPARATOR+false} :; then
   }
 fi
 
+
+# IFS
+# We need space, tab and new line, in precisely that order.  Quoting is
+# there to prevent editors from complaining about space-tab.
+# (If _AS_PATH_WALK were called with IFS unset, it would disable word
+# splitting by setting IFS to empty value.)
+IFS=" ""	$as_nl"
 
 # Find who we are.  Look in the path if we contain no directory separator.
 as_myself=
@@ -84,12 +89,8 @@ case $0 in #((
 for as_dir in $PATH
 do
   IFS=$as_save_IFS
-  case $as_dir in #(((
-    '') as_dir=./ ;;
-    */) ;;
-    *) as_dir=$as_dir/ ;;
-  esac
-    test -r "$as_dir$0" && as_myself=$as_dir$0 && break
+  test -z "$as_dir" && as_dir=.
+    test -r "$as_dir/$0" && as_myself=$as_dir/$0 && break
   done
 IFS=$as_save_IFS
 
@@ -101,10 +102,30 @@ if test "x$as_myself" = x; then
   as_myself=$0
 fi
 if test ! -f "$as_myself"; then
-  printf "%s\n" "$as_myself: error: cannot find myself; rerun with an absolute file name" >&2
+  $as_echo "$as_myself: error: cannot find myself; rerun with an absolute file name" >&2
   exit 1
 fi
 
+# Unset variables that we do not need and which cause bugs (e.g. in
+# pre-3.0 UWIN ksh).  But do not cause bugs in bash 2.01; the "|| exit 1"
+# suppresses any "Segmentation fault" message there.  '((' could
+# trigger a bug in pdksh 5.2.14.
+for as_var in BASH_ENV ENV MAIL MAILPATH
+do eval test x\${$as_var+set} = xset \
+  && ( (unset $as_var) || exit 1) >/dev/null 2>&1 && unset $as_var || :
+done
+PS1='$ '
+PS2='> '
+PS4='+ '
+
+# NLS nuisances.
+LC_ALL=C
+export LC_ALL
+LANGUAGE=C
+export LANGUAGE
+
+# CDPATH.
+(unset CDPATH) >/dev/null 2>&1 && unset CDPATH
 
 
 # as_fn_error STATUS ERROR [LINENO LOG_FD]
@@ -117,12 +138,11 @@ as_fn_error ()
   as_status=$1; test $as_status -eq 0 && as_status=1
   if test "$4"; then
     as_lineno=${as_lineno-"$3"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-    printf "%s\n" "$as_me:${as_lineno-$LINENO}: error: $2" >&$4
+    $as_echo "$as_me:${as_lineno-$LINENO}: error: $2" >&$4
   fi
-  printf "%s\n" "$as_me: error: $2" >&2
+  $as_echo "$as_me: error: $2" >&2
   as_fn_exit $as_status
 } # as_fn_error
-
 
 
 # as_fn_set_status STATUS
@@ -151,20 +171,18 @@ as_fn_unset ()
   { eval $1=; unset $1;}
 }
 as_unset=as_fn_unset
-
 # as_fn_append VAR VALUE
 # ----------------------
 # Append the text in VALUE to the end of the definition contained in VAR. Take
 # advantage of any shell optimizations that allow amortized linear growth over
 # repeated appends, instead of the typical quadratic growth present in naive
 # implementations.
-if (eval "as_var=1; as_var+=2; test x\$as_var = x12") 2>/dev/null
-then :
+if (eval "as_var=1; as_var+=2; test x\$as_var = x12") 2>/dev/null; then :
   eval 'as_fn_append ()
   {
     eval $1+=\$2
   }'
-else $as_nop
+else
   as_fn_append ()
   {
     eval $1=\$$1\$2
@@ -176,13 +194,12 @@ fi # as_fn_append
 # Perform arithmetic evaluation on the ARGs, and store the result in the
 # global $as_val. Take advantage of shells that can avoid forks. The arguments
 # must be portable across $(()) and expr.
-if (eval "test \$(( 1 + 1 )) = 2") 2>/dev/null
-then :
+if (eval "test \$(( 1 + 1 )) = 2") 2>/dev/null; then :
   eval 'as_fn_arith ()
   {
     as_val=$(( $* ))
   }'
-else $as_nop
+else
   as_fn_arith ()
   {
     as_val=`expr "$@" || test $? -eq 1`
@@ -213,7 +230,7 @@ as_me=`$as_basename -- "$0" ||
 $as_expr X/"$0" : '.*/\([^/][^/]*\)/*$' \| \
 	 X"$0" : 'X\(//\)$' \| \
 	 X"$0" : 'X\(/\)' \| . 2>/dev/null ||
-printf "%s\n" X/"$0" |
+$as_echo X/"$0" |
     sed '/^.*\/\([^/][^/]*\)\/*$/{
 	    s//\1/
 	    q
@@ -235,10 +252,6 @@ as_cr_Letters=$as_cr_letters$as_cr_LETTERS
 as_cr_digits='0123456789'
 as_cr_alnum=$as_cr_Letters$as_cr_digits
 
-
-# Determine whether it's possible to make 'echo' print without a newline.
-# These variables are no longer used directly by Autoconf, but are AC_SUBSTed
-# for compatibility with existing Makefiles.
 ECHO_C= ECHO_N= ECHO_T=
 case `echo -n x` in #(((((
 -n*)
@@ -251,12 +264,6 @@ case `echo -n x` in #(((((
 *)
   ECHO_N='-n';;
 esac
-
-# For backward compatibility with old third-party macros, we provide
-# the shell variables $as_echo and $as_echo_n.  New code should use
-# AS_ECHO(["message"]) and AS_ECHO_N(["message"]), respectively.
-as_echo='printf %s\n'
-as_echo_n='printf %s'
 
 rm -f conf$$ conf$$.exe conf$$.file
 if test -d conf$$.dir; then
@@ -299,7 +306,7 @@ as_fn_mkdir_p ()
     as_dirs=
     while :; do
       case $as_dir in #(
-      *\'*) as_qdir=`printf "%s\n" "$as_dir" | sed "s/'/'\\\\\\\\''/g"`;; #'(
+      *\'*) as_qdir=`$as_echo "$as_dir" | sed "s/'/'\\\\\\\\''/g"`;; #'(
       *) as_qdir=$as_dir;;
       esac
       as_dirs="'$as_qdir' $as_dirs"
@@ -308,7 +315,7 @@ $as_expr X"$as_dir" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
 	 X"$as_dir" : 'X\(//\)[^/]' \| \
 	 X"$as_dir" : 'X\(//\)$' \| \
 	 X"$as_dir" : 'X\(/\)' \| . 2>/dev/null ||
-printf "%s\n" X"$as_dir" |
+$as_echo X"$as_dir" |
     sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
 	    s//\1/
 	    q
@@ -387,7 +394,7 @@ Report bugs to <bug-libtool@gnu.org>."
 
 lt_cl_version="\
 echam config.lt 6.3.00
-configured by $0, generated by GNU Autoconf 2.71.
+configured by $0, generated by GNU Autoconf 2.69.
 
 Copyright (C) 2011 Free Software Foundation, Inc.
 This config.lt script is free software; the Free Software Foundation
@@ -426,29 +433,29 @@ fi
 sed_quote_subst='s/\(["`$\\]\)/\\\1/g'
 double_quote_subst='s/\(["`\\]\)/\\\1/g'
 delay_variable_subst='s/\\\\\\\\\\\$/\\\\\\$/g'
-macro_version='2.4.7'
-macro_revision='2.4.7'
+macro_version='2.4.6'
+macro_revision='2.4.6'
 enable_shared='yes'
 enable_static='yes'
 pic_mode='default'
-enable_fast_install='needless'
+enable_fast_install='yes'
 shared_archive_member_spec=''
 SHELL='/bin/sh'
 ECHO='printf %s\n'
 PATH_SEPARATOR=':'
 host_alias=''
-host='x86_64-unknown-linux-gnu'
+host='x86_64-pc-linux-gnu'
 host_os='linux-gnu'
 build_alias=''
-build='x86_64-unknown-linux-gnu'
+build='x86_64-pc-linux-gnu'
 build_os='linux-gnu'
-SED='/bin/sed'
-Xsed='/bin/sed -e 1s/^X//'
-GREP='/bin/grep'
-EGREP='/bin/grep -E'
-FGREP='/bin/grep -F'
-LD='/sw/arch/RHEL8/EB_production/2023/software/binutils/2.40-GCCcore-12.3.0/bin/ld -m elf_x86_64'
-NM='/sw/arch/RHEL8/EB_production/2023/software/binutils/2.40-GCCcore-12.3.0/bin/nm -B'
+SED='/usr/bin/sed'
+Xsed='/usr/bin/sed -e 1s/^X//'
+GREP='/usr/bin/grep'
+EGREP='/usr/bin/grep -E'
+FGREP='/usr/bin/grep -F'
+LD='/sw/arch/RHEL9/EB_production/2024/software/binutils/2.42-GCCcore-13.3.0/bin/ld -m elf_x86_64'
+NM='/sw/arch/RHEL9/EB_production/2024/software/binutils/2.42-GCCcore-13.3.0/bin/nm -B'
 LN_S='ln -s'
 max_cmd_len='4718592'
 ac_objext='o'
@@ -460,7 +467,6 @@ lt_cv_to_host_file_cmd='func_convert_file_noop'
 lt_cv_to_tool_file_cmd='func_convert_file_noop'
 reload_flag=' -r'
 reload_cmds='$LD$reload_flag -o $output$reload_objs'
-FILECMD='file'
 OBJDUMP='objdump'
 deplibs_check_method='pass_all'
 file_magic_cmd='$MAGIC_CMD'
@@ -469,8 +475,7 @@ want_nocaseglob='no'
 DLLTOOL='false'
 sharedlib_from_linklib_cmd='printf %s\n'
 AR='ar'
-lt_ar_flags='cr'
-AR_FLAGS='cr'
+AR_FLAGS='cru'
 archiver_list_spec='@'
 STRIP='strip'
 RANLIB='ranlib'
@@ -478,19 +483,19 @@ old_postinstall_cmds='chmod 644 $oldlib~$RANLIB $tool_oldlib'
 old_postuninstall_cmds=''
 old_archive_cmds='$AR $AR_FLAGS $oldlib$oldobjs~$RANLIB $tool_oldlib'
 lock_old_archive_extraction='no'
-CC='/home/ybhatti/TOOLS/MPI/mpich-4.0.3/bin/mpicc'
+CC='/sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/bin/mpicc'
 CFLAGS='-std=gnu99 -msse2 -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE'
-compiler='/home/ybhatti/TOOLS/MPI/mpich-4.0.3/bin/mpif90'
+compiler='/sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/bin/mpif90'
 GCC='yes'
-lt_cv_sys_global_symbol_pipe='/bin/sed -n -e '\''s/^.*[	 ]\([ABCDGIRSTW][ABCDGIRSTW]*\)[	 ][	 ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p'\'' | /bin/sed '\''/ __gnu_lto/d'\'''
-lt_cv_sys_global_symbol_to_cdecl='/bin/sed -n -e '\''s/^T .* \(.*\)$/extern int \1();/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(.*\)$/extern char \1;/p'\'''
+lt_cv_sys_global_symbol_pipe='sed -n -e '\''s/^.*[	 ]\([ABCDGIRSTW][ABCDGIRSTW]*\)[	 ][	 ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p'\'' | sed '\''/ __gnu_lto/d'\'''
+lt_cv_sys_global_symbol_to_cdecl='sed -n -e '\''s/^T .* \(.*\)$/extern int \1();/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(.*\)$/extern char \1;/p'\'''
 lt_cv_sys_global_symbol_to_import=''
-lt_cv_sys_global_symbol_to_c_name_address='/bin/sed -n -e '\''s/^: \(.*\) .*$/  {"\1", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(.*\)$/  {"\1", (void *) \&\1},/p'\'''
-lt_cv_sys_global_symbol_to_c_name_address_lib_prefix='/bin/sed -n -e '\''s/^: \(.*\) .*$/  {"\1", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(lib.*\)$/  {"\1", (void *) \&\1},/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(.*\)$/  {"lib\1", (void *) \&\1},/p'\'''
+lt_cv_sys_global_symbol_to_c_name_address='sed -n -e '\''s/^: \(.*\) .*$/  {"\1", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(.*\)$/  {"\1", (void *) \&\1},/p'\'''
+lt_cv_sys_global_symbol_to_c_name_address_lib_prefix='sed -n -e '\''s/^: \(.*\) .*$/  {"\1", (void *) 0},/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(lib.*\)$/  {"\1", (void *) \&\1},/p'\'' -e '\''s/^[ABCDGIRSTW][ABCDGIRSTW]* .* \(.*\)$/  {"lib\1", (void *) \&\1},/p'\'''
 lt_cv_nm_interface='BSD nm'
 nm_file_list_spec='@'
 lt_sysroot=''
-lt_cv_truncate_bin='/bin/dd bs=4096 count=1'
+lt_cv_truncate_bin='/usr/bin/dd bs=4096 count=1'
 objdir='.libs'
 MAGIC_CMD='file'
 lt_prog_compiler_no_builtin_flag=' -fno-builtin'
@@ -517,7 +522,7 @@ old_archive_from_new_cmds=''
 old_archive_from_expsyms_cmds=''
 archive_cmds='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname -o $lib'
 archive_expsym_cmds='echo "{ global:" > $output_objdir/$libname.ver~
-            cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
+            cat $export_symbols | sed -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
             echo "local: *; };" >> $output_objdir/$libname.ver~
             $CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname $wl-version-script $wl$output_objdir/$libname.ver -o $lib'
 module_cmds=''
@@ -547,7 +552,7 @@ need_version='no'
 version_type='linux'
 runpath_var='LD_RUN_PATH'
 shlibpath_var='LD_LIBRARY_PATH'
-shlibpath_overrides_runpath='yes'
+shlibpath_overrides_runpath='no'
 libname_spec='lib$name'
 library_names_spec='$libname$release$shared_ext$versuffix $libname$release$shared_ext$major $libname$shared_ext'
 soname_spec='$libname$release$shared_ext$major'
@@ -557,8 +562,8 @@ postuninstall_cmds=''
 finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
 finish_eval=''
 hardcode_into_libs='yes'
-sys_lib_search_path_spec='/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc/x86_64-pc-linux-gnu/12.3.0 /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib/gcc /sw/arch/RHEL8/EB_production/2023/software/libtool/2.4.7-GCCcore-12.3.0/lib64 /sw/arch/RHEL8/EB_production/2023/software/Perl/5.36.1-GCCcore-12.3.0/lib64 /sw/arch/RHEL8/EB_production/2023/software/MPICH/4.2.1-GCC-12.3.0/lib64 /sw/arch/RHEL8/EB_production/2023/software/UCX/1.14.1-GCCcore-12.3.0/lib64 /sw/arch/RHEL8/EB_production/2023/software/numactl/2.0.16-GCCcore-12.3.0/lib64 /sw/arch/RHEL8/EB_production/2023/software/binutils/2.40-GCCcore-12.3.0/lib64 /sw/arch/RHEL8/EB_production/2023/software/zlib/1.2.13-GCCcore-12.3.0/lib64 /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib64 /lib64 /usr/lib64 /sw/arch/RHEL8/EB_production/2023/software/libtool/2.4.7-GCCcore-12.3.0/lib /sw/arch/RHEL8/EB_production/2023/software/Perl/5.36.1-GCCcore-12.3.0/lib /sw/arch/RHEL8/EB_production/2023/software/MPICH/4.2.1-GCC-12.3.0/lib /sw/arch/RHEL8/EB_production/2023/software/UCX/1.14.1-GCCcore-12.3.0/lib /sw/arch/RHEL8/EB_production/2023/software/numactl/2.0.16-GCCcore-12.3.0/lib /sw/arch/RHEL8/EB_production/2023/software/binutils/2.40-GCCcore-12.3.0/lib /sw/arch/RHEL8/EB_production/2023/software/zlib/1.2.13-GCCcore-12.3.0/lib /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL8/EB_production/2023/software/GCCcore/12.3.0/lib /lib /usr/lib '
-configure_time_dlsearch_path='/lib /usr/lib /usr/lib64/dyninst /opt/mellanox/hcoll/lib /usr/lib64/pipewire-0.3/jack/ /opt/mellanox/sharp/lib '
+sys_lib_search_path_spec='/gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL9/EB_production/2024/software/GCCcore/13.3.0/lib/gcc/x86_64-pc-linux-gnu/13.3.0 /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL9/EB_production/2024/software/GCCcore/13.3.0/lib/gcc /sw/arch/RHEL9/EB_production/2024/software/netCDF-Fortran/4.6.1-gompi-2024a/lib64 /sw/arch/RHEL9/EB_production/2024/software/netCDF/4.9.2-gompi-2024a/lib64 /sw/arch/RHEL9/EB_production/2024/software/bzip2/1.0.8-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/zstd/1.5.6-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/lz4/1.9.4-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/cURL/8.7.1-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/HDF5/1.14.5-gompi-2024a/lib64 /sw/arch/RHEL9/EB_production/2024/software/Szip/2.1.1-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/UCC/1.3.0-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/PRRTE/3.0.5-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/PMIx/5.0.2-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/libfabric/1.21.0-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/UCX/1.16.0-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/libevent/2.1.12-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/OpenSSL/3/lib64 /sw/arch/RHEL9/EB_production/2024/software/hwloc/2.10.0-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/libpciaccess/0.18.1-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/libxml2/2.12.7-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/XZ/5.4.5-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/numactl/2.0.18-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/binutils/2.42-GCCcore-13.3.0/lib64 /sw/arch/RHEL9/EB_production/2024/software/zlib/1.3.1-GCCcore-13.3.0/lib64 /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL9/EB_production/2024/software/GCCcore/13.3.0/lib64 /lib64 /usr/lib64 /sw/arch/RHEL9/EB_production/2024/software/netCDF-Fortran/4.6.1-gompi-2024a/lib /sw/arch/RHEL9/EB_production/2024/software/netCDF/4.9.2-gompi-2024a/lib /sw/arch/RHEL9/EB_production/2024/software/bzip2/1.0.8-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/zstd/1.5.6-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/lz4/1.9.4-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/cURL/8.7.1-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/HDF5/1.14.5-gompi-2024a/lib /sw/arch/RHEL9/EB_production/2024/software/Szip/2.1.1-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/UCC/1.3.0-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/PRRTE/3.0.5-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/PMIx/5.0.2-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/libfabric/1.21.0-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/UCX/1.16.0-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/libevent/2.1.12-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/OpenSSL/3/lib /sw/arch/RHEL9/EB_production/2024/software/hwloc/2.10.0-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/libpciaccess/0.18.1-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/libxml2/2.12.7-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/XZ/5.4.5-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/numactl/2.0.18-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/binutils/2.42-GCCcore-13.3.0/lib /sw/arch/RHEL9/EB_production/2024/software/zlib/1.3.1-GCCcore-13.3.0/lib /gpfs/admin/_hpc/sw/arch/AMD-ZEN2/RHEL9/EB_production/2024/software/GCCcore/13.3.0/lib /lib /usr/lib '
+configure_time_dlsearch_path='/lib64 /usr/lib64 /lib /usr/lib /usr/lib64/dyninst /opt/mellanox/hcoll/lib /usr/lib64/pipewire-0.3/jack/ /opt/mellanox/sharp/lib '
 configure_time_lt_sys_library_path=''
 hardcode_action='immediate'
 enable_dlopen='unknown'
@@ -572,16 +577,16 @@ postdep_objects=''
 predeps=''
 postdeps=''
 compiler_lib_search_path=''
-LD_F77='/sw/arch/RHEL8/EB_production/2023/software/binutils/2.40-GCCcore-12.3.0/bin/ld -m elf_x86_64'
-LD_FC='/sw/arch/RHEL8/EB_production/2023/software/binutils/2.40-GCCcore-12.3.0/bin/ld -m elf_x86_64'
+LD_F77='/sw/arch/RHEL9/EB_production/2024/software/binutils/2.42-GCCcore-13.3.0/bin/ld -m elf_x86_64'
+LD_FC='/sw/arch/RHEL9/EB_production/2024/software/binutils/2.42-GCCcore-13.3.0/bin/ld -m elf_x86_64'
 reload_flag_F77=' -r'
 reload_flag_FC=' -r'
 reload_cmds_F77='$LD$reload_flag -o $output$reload_objs'
 reload_cmds_FC='$LD$reload_flag -o $output$reload_objs'
 old_archive_cmds_F77='$AR $AR_FLAGS $oldlib$oldobjs~$RANLIB $tool_oldlib'
 old_archive_cmds_FC='$AR $AR_FLAGS $oldlib$oldobjs~$RANLIB $tool_oldlib'
-compiler_F77='/home/ybhatti/TOOLS/MPI/mpich-4.0.3/bin/mpif90'
-compiler_FC='/home/ybhatti/TOOLS/MPI/mpich-4.0.3/bin/mpif90'
+compiler_F77='/sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/bin/mpif90'
+compiler_FC='/sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/bin/mpif90'
 GCC_F77='yes'
 GCC_FC='yes'
 lt_prog_compiler_no_builtin_flag_F77=''
@@ -611,11 +616,11 @@ old_archive_from_expsyms_cmds_FC=''
 archive_cmds_F77='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname -o $lib'
 archive_cmds_FC='$CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname -o $lib'
 archive_expsym_cmds_F77='echo "{ global:" > $output_objdir/$libname.ver~
-            cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
+            cat $export_symbols | sed -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
             echo "local: *; };" >> $output_objdir/$libname.ver~
             $CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname $wl-version-script $wl$output_objdir/$libname.ver -o $lib'
 archive_expsym_cmds_FC='echo "{ global:" > $output_objdir/$libname.ver~
-            cat $export_symbols | $SED -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
+            cat $export_symbols | sed -e "s/\(.*\)/\1;/" >> $output_objdir/$libname.ver~
             echo "local: *; };" >> $output_objdir/$libname.ver~
             $CC -shared $pic_flag $libobjs $deplibs $compiler_flags $wl-soname $wl$soname $wl-version-script $wl$output_objdir/$libname.ver -o $lib'
 module_cmds_F77=''
@@ -675,9 +680,9 @@ postdeps_FC=''
 compiler_lib_search_path_F77=''
 compiler_lib_search_path_FC=''
 
-LTCC='/home/ybhatti/TOOLS/MPI/mpich-4.0.3/bin/mpicc'
+LTCC='/sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/bin/mpicc'
 LTCFLAGS='-std=gnu99 -msse2 -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE'
-compiler='/home/ybhatti/TOOLS/MPI/mpich-4.0.3/bin/mpicc'
+compiler='/sw/arch/RHEL9/EB_production/2024/software/OpenMPI/5.0.3-GCC-13.3.0/bin/mpicc'
 
 # A function that is used when there is no print builtin or printf.
 func_fallback_echo ()
@@ -688,7 +693,7 @@ _LTECHO_EOF'
 }
 
 # Quote evaled strings.
-for var in SHELL ECHO PATH_SEPARATOR SED GREP EGREP FGREP LD NM LN_S lt_SP2NL lt_NL2SP reload_flag FILECMD OBJDUMP deplibs_check_method file_magic_cmd file_magic_glob want_nocaseglob DLLTOOL sharedlib_from_linklib_cmd AR archiver_list_spec STRIP RANLIB CC CFLAGS compiler lt_cv_sys_global_symbol_pipe lt_cv_sys_global_symbol_to_cdecl lt_cv_sys_global_symbol_to_import lt_cv_sys_global_symbol_to_c_name_address lt_cv_sys_global_symbol_to_c_name_address_lib_prefix lt_cv_nm_interface nm_file_list_spec lt_cv_truncate_bin lt_prog_compiler_no_builtin_flag lt_prog_compiler_pic lt_prog_compiler_wl lt_prog_compiler_static lt_cv_prog_compiler_c_o need_locks MANIFEST_TOOL DSYMUTIL NMEDIT LIPO OTOOL OTOOL64 shrext_cmds export_dynamic_flag_spec whole_archive_flag_spec compiler_needs_object with_gnu_ld allow_undefined_flag no_undefined_flag hardcode_libdir_flag_spec hardcode_libdir_separator exclude_expsyms include_expsyms file_list_spec variables_saved_for_relink libname_spec library_names_spec soname_spec install_override_mode finish_eval old_striplib striplib compiler_lib_search_dirs predep_objects postdep_objects predeps postdeps compiler_lib_search_path LD_F77 LD_FC reload_flag_F77 reload_flag_FC compiler_F77 compiler_FC lt_prog_compiler_no_builtin_flag_F77 lt_prog_compiler_no_builtin_flag_FC lt_prog_compiler_pic_F77 lt_prog_compiler_pic_FC lt_prog_compiler_wl_F77 lt_prog_compiler_wl_FC lt_prog_compiler_static_F77 lt_prog_compiler_static_FC lt_cv_prog_compiler_c_o_F77 lt_cv_prog_compiler_c_o_FC export_dynamic_flag_spec_F77 export_dynamic_flag_spec_FC whole_archive_flag_spec_F77 whole_archive_flag_spec_FC compiler_needs_object_F77 compiler_needs_object_FC with_gnu_ld_F77 with_gnu_ld_FC allow_undefined_flag_F77 allow_undefined_flag_FC no_undefined_flag_F77 no_undefined_flag_FC hardcode_libdir_flag_spec_F77 hardcode_libdir_flag_spec_FC hardcode_libdir_separator_F77 hardcode_libdir_separator_FC exclude_expsyms_F77 exclude_expsyms_FC include_expsyms_F77 include_expsyms_FC file_list_spec_F77 file_list_spec_FC compiler_lib_search_dirs_F77 compiler_lib_search_dirs_FC predep_objects_F77 predep_objects_FC postdep_objects_F77 postdep_objects_FC predeps_F77 predeps_FC postdeps_F77 postdeps_FC compiler_lib_search_path_F77 compiler_lib_search_path_FC; do
+for var in SHELL ECHO PATH_SEPARATOR SED GREP EGREP FGREP LD NM LN_S lt_SP2NL lt_NL2SP reload_flag OBJDUMP deplibs_check_method file_magic_cmd file_magic_glob want_nocaseglob DLLTOOL sharedlib_from_linklib_cmd AR AR_FLAGS archiver_list_spec STRIP RANLIB CC CFLAGS compiler lt_cv_sys_global_symbol_pipe lt_cv_sys_global_symbol_to_cdecl lt_cv_sys_global_symbol_to_import lt_cv_sys_global_symbol_to_c_name_address lt_cv_sys_global_symbol_to_c_name_address_lib_prefix lt_cv_nm_interface nm_file_list_spec lt_cv_truncate_bin lt_prog_compiler_no_builtin_flag lt_prog_compiler_pic lt_prog_compiler_wl lt_prog_compiler_static lt_cv_prog_compiler_c_o need_locks MANIFEST_TOOL DSYMUTIL NMEDIT LIPO OTOOL OTOOL64 shrext_cmds export_dynamic_flag_spec whole_archive_flag_spec compiler_needs_object with_gnu_ld allow_undefined_flag no_undefined_flag hardcode_libdir_flag_spec hardcode_libdir_separator exclude_expsyms include_expsyms file_list_spec variables_saved_for_relink libname_spec library_names_spec soname_spec install_override_mode finish_eval old_striplib striplib compiler_lib_search_dirs predep_objects postdep_objects predeps postdeps compiler_lib_search_path LD_F77 LD_FC reload_flag_F77 reload_flag_FC compiler_F77 compiler_FC lt_prog_compiler_no_builtin_flag_F77 lt_prog_compiler_no_builtin_flag_FC lt_prog_compiler_pic_F77 lt_prog_compiler_pic_FC lt_prog_compiler_wl_F77 lt_prog_compiler_wl_FC lt_prog_compiler_static_F77 lt_prog_compiler_static_FC lt_cv_prog_compiler_c_o_F77 lt_cv_prog_compiler_c_o_FC export_dynamic_flag_spec_F77 export_dynamic_flag_spec_FC whole_archive_flag_spec_F77 whole_archive_flag_spec_FC compiler_needs_object_F77 compiler_needs_object_FC with_gnu_ld_F77 with_gnu_ld_FC allow_undefined_flag_F77 allow_undefined_flag_FC no_undefined_flag_F77 no_undefined_flag_FC hardcode_libdir_flag_spec_F77 hardcode_libdir_flag_spec_FC hardcode_libdir_separator_F77 hardcode_libdir_separator_FC exclude_expsyms_F77 exclude_expsyms_FC include_expsyms_F77 include_expsyms_FC file_list_spec_F77 file_list_spec_FC compiler_lib_search_dirs_F77 compiler_lib_search_dirs_FC predep_objects_F77 predep_objects_FC postdep_objects_F77 postdep_objects_FC predeps_F77 predeps_FC postdeps_F77 postdeps_FC compiler_lib_search_path_F77 compiler_lib_search_path_FC; do
     case `eval \\$ECHO \\""\\$$var"\\"` in
     *[\\\`\"\$]*)
       eval "lt_$var=\\\"\`\$ECHO \"\$$var\" | \$SED \"\$sed_quote_subst\"\`\\\"" ## exclude from sc_prohibit_nested_quotes
@@ -711,7 +716,7 @@ for var in reload_cmds old_postinstall_cmds old_postuninstall_cmds old_archive_c
     esac
 done
 
-ac_aux_dir='./config/'
+ac_aux_dir='config'
 
 # See if we are running on zsh, and set the options that allow our
 # commands through without removal of \ escapes INIT.
@@ -731,8 +736,8 @@ fi
 
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: creating $ofile" >&5
-printf "%s\n" "$as_me: creating $ofile" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: creating $ofile" >&5
+$as_echo "$as_me: creating $ofile" >&6;}
 
 
     # See if we are running on zsh, and set the options that allow our
@@ -868,9 +873,6 @@ to_host_file_cmd=$lt_cv_to_host_file_cmd
 # convert \$build files to toolchain format.
 to_tool_file_cmd=$lt_cv_to_tool_file_cmd
 
-# A file(cmd) program that detects file types.
-FILECMD=$lt_FILECMD
-
 # An object symbol dumper.
 OBJDUMP=$lt_OBJDUMP
 
@@ -895,11 +897,8 @@ sharedlib_from_linklib_cmd=$lt_sharedlib_from_linklib_cmd
 # The archiver.
 AR=$lt_AR
 
-# Flags to create an archive (by configure).
-lt_ar_flags=$lt_ar_flags
-
 # Flags to create an archive.
-AR_FLAGS=\${ARFLAGS-"\$lt_ar_flags"}
+AR_FLAGS=$lt_AR_FLAGS
 
 # How to feed a file listing to the archiver.
 archiver_list_spec=$lt_archiver_list_spec
@@ -1281,7 +1280,6 @@ _LT_EOF
   esac
 
 
-
 ltmain=$ac_aux_dir/ltmain.sh
 
 
@@ -1289,7 +1287,7 @@ ltmain=$ac_aux_dir/ltmain.sh
   # if finds mixed CR/LF and LF-only lines.  Since sed operates in
   # text mode, it properly converts lines to CR/LF.  This bash problem
   # is reportedly fixed, but why not run on old versions too?
-  $SED '$q' "$ltmain" >> "$cfgfile" \
+  sed '$q' "$ltmain" >> "$cfgfile" \
      || (rm -f "$cfgfile"; exit 1)
 
    mv -f "$cfgfile" "$ofile" ||

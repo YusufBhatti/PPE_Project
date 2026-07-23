@@ -61,7 +61,7 @@ MODULE mo_hammoz_perturbations
 	    scale_vertical_velocity
 
 
-  LOGICAL :: lo_hammoz_perturbations=.TRUE.
+  LOGICAL :: lo_hammoz_perturbations=.FALSE.
 
   !--- Parameter list to perturb with short description:
 
@@ -440,12 +440,10 @@ CONTAINS
 !    sectors_sulf(6) = 'TRA'
 !    sectors_sulf(7) = 'AWB'
 !    sectors_sulf(8) = 'WST'
-    CHARACTER(LEN=64), DIMENSION(1) :: sectors_bf
     CHARACTER(LEN=64), DIMENSION(6) :: sectors_ff
     CHARACTER(LEN=64), DIMENSION(8) :: sectors_so2
 
     ! Initialize arrays
-    sectors_bf(1) = 'AWB'
     sectors_ff(1) = 'AIRC'
     sectors_ff(2) = 'DOM'
     sectors_ff(3) = 'ENE'
@@ -455,11 +453,6 @@ CONTAINS
     sectors_so2(1) = 'AIRC'
     sectors_so2(2) = 'DOM'
     sectors_so2(3) = 'ENE'
-    sectors_so2(4) = 'IND'
-    sectors_so2(5) = 'SHIPS'
-    sectors_so2(6) = 'TRA'
-    sectors_so2(7) = 'AWB'
-    sectors_so2(8) = 'WST'
 
 
     CALL message('',separator)
@@ -473,17 +466,6 @@ CONTAINS
 
     CALL message('',separator)
 
-    nsec=SIZE(sectors_bf)
-    DO isec=1, nsec
-      ind=em_get_sectorindex(TRIM(sectors_bf(isec)))
-      nvars=ematrix%em_sectors(ind)%es_nvars
-      ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor=ematrix%em_sectors(ind)%es_variables(1:nvars)%ev_factor*scale_emi_bf
-      CALL message('hammoz_perturbations','BF Emissions scale factor for sector:')
-      CALL message('', ematrix%em_sectors(ind)%es_sectorname )
-      DO i=1, nvars
-        CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
-      ENDDO
-    ENDDO
 
     !    --- Fossil fuel:
 

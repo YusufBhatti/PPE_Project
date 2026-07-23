@@ -1,0 +1,25 @@
+\section{CO2, CH4, N2O, CFCs}
+
+\subsection{1850-present, present to 2100 and beyond}
+
+The data sets for pre-industrial, historical and future concentrations 
+of well mixed greenhouse gases have been provided by IIASA as
+global mean time series at:
+\newline
+{\tt http://www.iiasa.ac.at/web-apps/tnt/RcpDb/}
+
+For historical times and the future until 2100 the Representative Concentration Pathway (RCP)
+scenarios are used. RCP 4.5 is a stabilization scenario where total radiative forcing is stabilized before 2100
+\cite[]{thomson2011}.
+RCP 8.5 is characterized by increasing greenhouse gas emissions over time \cite[]{riahi2011}.
+RCP 2.6, also known as RCP 3-PD, first 
+peaks at 3.1 Wm$^{-2}$ around mid-century, and then declines to 2.6 Wm$^{-2}$ by 2100 \cite[]{vanVuuren2011}.
+
+For the years 2100 to 2300 the proper RCP scenarios have been extended,
+for the purpose of climate modelling \cite[]{meinshausen2011}.
+
+Further information on the original data can be found on the given IIASA website.
+
+Starting from the original data in ASCII-Format the greenhouse gases relevant for \echam{} \newline
+(CO2, CH4, N2O, CFC-11 and CFC-12) were extracted and simply rewritten in netcdf-Format.
+Units are ppmv for CO2, ppbv for CH4 and N2O, and pptv for CFC-11 and CFC-12.

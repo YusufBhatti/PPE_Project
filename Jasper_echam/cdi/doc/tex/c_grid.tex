@@ -1,0 +1,1029 @@
+
+
+\subsection{Create a horizontal Grid: {\tt gridCreate}}
+\index{gridCreate}
+\label{gridCreate}
+
+The function {\tt gridCreate} creates a horizontal Grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridCreate(int gridtype, int size);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridtype\ }
+\item[{\tt gridtype}]
+The type of the grid, one of the set of predefined {\CDI} grid types.
+                     The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
+                     {\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL},
+                     {\tt GRID\_GME}, {\tt GRID\_CURVILINEAR} and {\tt GRID\_UNSTRUCTURED} and.
+\item[{\tt size}]
+Number of gridpoints.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridCreate} returns an identifier to the Grid.
+
+
+\subsubsection*{Example}
+
+Here is an example using {\tt gridCreate} to create a regular lon/lat Grid:
+
+\begin{lstlisting}[language=C, backgroundcolor=\color{pyellow}, basicstyle=\small, columns=flexible]
+
+    #include "cdi.h"
+       ...
+    #define  nlon  12
+    #define  nlat   6
+       ...
+    double lons[nlon] = {0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330};
+    double lats[nlat] = {-75, -45, -15, 15, 45, 75};
+    int gridID;
+       ...
+    gridID = gridCreate(GRID_LONLAT, nlon*nlat);
+    gridDefXsize(gridID, nlon);
+    gridDefYsize(gridID, nlat);
+    gridDefXvals(gridID, lons);
+    gridDefYvals(gridID, lats);
+       ...
+\end{lstlisting}
+
+
+\subsection{Destroy a horizontal Grid: {\tt gridDestroy}}
+\index{gridDestroy}
+\label{gridDestroy}
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDestroy(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Duplicate a horizontal Grid: {\tt gridDuplicate}}
+\index{gridDuplicate}
+\label{gridDuplicate}
+
+The function {\tt gridDuplicate} duplicates a horizontal Grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridDuplicate(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridDuplicate} returns an identifier to the duplicated Grid.
+
+
+
+\subsection{Get the type of a Grid: {\tt gridInqType}}
+\index{gridInqType}
+\label{gridInqType}
+
+The function {\tt gridInqType} returns the type of a Grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqType(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqType} returns the type of the grid,
+one of the set of predefined {\CDI} grid types.
+The valid {\CDI} grid types are {\tt GRID\_GENERIC}, {\tt GRID\_GAUSSIAN},
+{\tt GRID\_LONLAT}, {\tt GRID\_LCC}, {\tt GRID\_SPECTRAL}, {\tt GRID\_GME},
+{\tt GRID\_CURVILINEAR} and {\tt GRID\_UNSTRUCTURED}.
+
+
+
+\subsection{Get the size of a Grid: {\tt gridInqSize}}
+\index{gridInqSize}
+\label{gridInqSize}
+
+The function {\tt gridInqSize} returns the size of a Grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqSize(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqSize} returns the number of grid points of a Grid.
+
+
+
+\subsection{Define the number of values of a X-axis: {\tt gridDefXsize}}
+\index{gridDefXsize}
+\label{gridDefXsize}
+
+The function {\tt gridDefXsize} defines the number of values of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefXsize(int gridID, int xsize);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt xsize}]
+Number of values of a X-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the number of values of a X-axis: {\tt gridInqXsize}}
+\index{gridInqXsize}
+\label{gridInqXsize}
+
+The function {\tt gridInqXsize} returns the number of values of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqXsize(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqXsize} returns the number of values of a X-axis.
+
+
+
+\subsection{Define the number of values of a Y-axis: {\tt gridDefYsize}}
+\index{gridDefYsize}
+\label{gridDefYsize}
+
+The function {\tt gridDefYsize} defines the number of values of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefYsize(int gridID, int ysize);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt ysize}]
+Number of values of a Y-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the number of values of a Y-axis: {\tt gridInqYsize}}
+\index{gridInqYsize}
+\label{gridInqYsize}
+
+The function {\tt gridInqYsize} returns the number of values of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqYsize(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqYsize} returns the number of values of a Y-axis.
+
+
+
+\subsection{Define the number of parallels between a pole and the equator: {\tt gridDefNP}}
+\index{gridDefNP}
+\label{gridDefNP}
+
+The function {\tt gridDefNP} defines the number of parallels between a pole and the equator
+of a Gaussian grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefNP(int gridID, int np);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt np}]
+Number of parallels between a pole and the equator.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the number of parallels between a pole and the equator: {\tt gridInqNP}}
+\index{gridInqNP}
+\label{gridInqNP}
+
+The function {\tt gridInqNP} returns the number of parallels between a pole and the equator
+of a Gaussian grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqNP(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqNP} returns the number of parallels between a pole and the equator.
+
+
+
+\subsection{Define the values of a X-axis: {\tt gridDefXvals}}
+\index{gridDefXvals}
+\label{gridDefXvals}
+
+The function {\tt gridDefXvals} defines all values of the X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefXvals(int gridID, const double *xvals);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt xvals}]
+X-values of the grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get all values of a X-axis: {\tt gridInqXvals}}
+\index{gridInqXvals}
+\label{gridInqXvals}
+
+The function {\tt gridInqXvals} returns all values of the X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqXvals(int gridID, double *xvals);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt xvals}]
+Pointer to the location into which the X-values are read.
+                    The caller must allocate space for the returned values.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+Upon successful completion {\tt gridInqXvals} returns the number of values and
+the values are stored in {\tt xvals}.
+Otherwise, 0 is returned and {\tt xvals} is empty.
+
+
+
+\subsection{Define the values of a Y-axis: {\tt gridDefYvals}}
+\index{gridDefYvals}
+\label{gridDefYvals}
+
+The function {\tt gridDefYvals} defines all values of the Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefYvals(int gridID, const double *yvals);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt yvals}]
+Y-values of the grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get all values of a Y-axis: {\tt gridInqYvals}}
+\index{gridInqYvals}
+\label{gridInqYvals}
+
+The function {\tt gridInqYvals} returns all values of the Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqYvals(int gridID, double *yvals);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt yvals}]
+Pointer to the location into which the Y-values are read.
+                    The caller must allocate space for the returned values.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+Upon successful completion {\tt gridInqYvals} returns the number of values and
+the values are stored in {\tt yvals}.
+Otherwise, 0 is returned and {\tt yvals} is empty.
+
+
+
+\subsection{Define the bounds of a X-axis: {\tt gridDefXbounds}}
+\index{gridDefXbounds}
+\label{gridDefXbounds}
+
+The function {\tt gridDefXbounds} defines all bounds of the X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefXbounds(int gridID, const double *xbounds);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt xbounds\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt xbounds}]
+X-bounds of the grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the bounds of a X-axis: {\tt gridInqXbounds}}
+\index{gridInqXbounds}
+\label{gridInqXbounds}
+
+The function {\tt gridInqXbounds} returns the bounds of the X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqXbounds(int gridID, double *xbounds);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt xbounds\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt xbounds}]
+Pointer to the location into which the X-bounds are read.
+                    The caller must allocate space for the returned values.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+Upon successful completion {\tt gridInqXbounds} returns the number of bounds and
+the bounds are stored in {\tt xbounds}.
+Otherwise, 0 is returned and {\tt xbounds} is empty.
+
+
+
+\subsection{Define the bounds of a Y-axis: {\tt gridDefYbounds}}
+\index{gridDefYbounds}
+\label{gridDefYbounds}
+
+The function {\tt gridDefYbounds} defines all bounds of the Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefYbounds(int gridID, const double *ybounds);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt ybounds\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt ybounds}]
+Y-bounds of the grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the bounds of a Y-axis: {\tt gridInqYbounds}}
+\index{gridInqYbounds}
+\label{gridInqYbounds}
+
+The function {\tt gridInqYbounds} returns the bounds of the Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqYbounds(int gridID, double *ybounds);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt ybounds\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt ybounds}]
+Pointer to the location into which the Y-bounds are read.
+                    The caller must allocate space for the returned values.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+Upon successful completion {\tt gridInqYbounds} returns the number of bounds and
+the bounds are stored in {\tt ybounds}.
+Otherwise, 0 is returned and {\tt ybounds} is empty.
+
+
+
+\subsection{Define the name of a X-axis: {\tt gridDefXname}}
+\index{gridDefXname}
+\label{gridDefXname}
+
+The function {\tt gridDefXname} defines the name of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefXname(int gridID, const char *name);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt name}]
+Name of the X-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the name of a X-axis: {\tt gridInqXname}}
+\index{gridInqXname}
+\label{gridInqXname}
+
+The function {\tt gridInqXname} returns the name of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqXname(int gridID, char *name);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt name}]
+Name of the X-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqXname} returns the name of the X-axis to the parameter name.
+
+
+
+\subsection{Define the longname of a X-axis: {\tt gridDefXlongname}}
+\index{gridDefXlongname}
+\label{gridDefXlongname}
+
+The function {\tt gridDefXlongname} defines the longname of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefXlongname(int gridID, const char *longname);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt longname}]
+Longname of the X-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the longname of a X-axis: {\tt gridInqXlongname}}
+\index{gridInqXlongname}
+\label{gridInqXlongname}
+
+The function {\tt gridInqXlongname} returns the longname of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqXlongname(int gridID, char *longname);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt longname}]
+Longname of the X-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqXlongname} returns the longname of the X-axis to the parameter longname.
+
+
+
+\subsection{Define the units of a X-axis: {\tt gridDefXunits}}
+\index{gridDefXunits}
+\label{gridDefXunits}
+
+The function {\tt gridDefXunits} defines the units of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefXunits(int gridID, const char *units);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt units}]
+Units of the X-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the units of a X-axis: {\tt gridInqXunits}}
+\index{gridInqXunits}
+\label{gridInqXunits}
+
+The function {\tt gridInqXunits} returns the units of a X-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqXunits(int gridID, char *units);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt units}]
+Units of the X-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqXunits} returns the units of the X-axis to the parameter units.
+
+
+
+\subsection{Define the name of a Y-axis: {\tt gridDefYname}}
+\index{gridDefYname}
+\label{gridDefYname}
+
+The function {\tt gridDefYname} defines the name of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefYname(int gridID, const char *name);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt name}]
+Name of the Y-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the name of a Y-axis: {\tt gridInqYname}}
+\index{gridInqYname}
+\label{gridInqYname}
+
+The function {\tt gridInqYname} returns the name of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqYname(int gridID, char *name);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt name}]
+Name of the Y-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqYname} returns the name of the Y-axis to the parameter name.
+
+
+
+\subsection{Define the longname of a Y-axis: {\tt gridDefYlongname}}
+\index{gridDefYlongname}
+\label{gridDefYlongname}
+
+The function {\tt gridDefYlongname} defines the longname of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefYlongname(int gridID, const char *longname);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt longname}]
+Longname of the Y-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the longname of a Y-axis: {\tt gridInqYlongname}}
+\index{gridInqYlongname}
+\label{gridInqYlongname}
+
+The function {\tt gridInqYlongname} returns the longname of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqXlongname(int gridID, char *longname);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt longname\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt longname}]
+Longname of the Y-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqYlongname} returns the longname of the Y-axis to the parameter longname.
+
+
+
+\subsection{Define the units of a Y-axis: {\tt gridDefYunits}}
+\index{gridDefYunits}
+\label{gridDefYunits}
+
+The function {\tt gridDefYunits} defines the units of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefYunits(int gridID, const char *units);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt units}]
+Units of the Y-axis.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the units of a Y-axis: {\tt gridInqYunits}}
+\index{gridInqYunits}
+\label{gridInqYunits}
+
+The function {\tt gridInqYunits} returns the units of a Y-axis.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqYunits(int gridID, char *units);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+\item[{\tt units}]
+Units of the Y-axis. The caller must allocate space for the
+                    returned string. The maximum possible length, in characters, of
+                    the string is given by the predefined constant {\tt CDI\_MAX\_NAME}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqYunits} returns the units of the Y-axis to the parameter units.
+
+
+
+\subsection{Define the reference number for an unstructured grid: {\tt gridDefNumber}}
+\index{gridDefNumber}
+\label{gridDefNumber}
+
+The function {\tt gridDefNumber} defines the reference number for an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefNumber(int gridID, const int number);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt number}]
+Reference number for an unstructured grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the reference number to an unstructured grid: {\tt gridInqNumber}}
+\index{gridInqNumber}
+\label{gridInqNumber}
+
+The function {\tt gridInqNumber} returns the reference number to an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqNumber(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqNumber} returns the reference number to an unstructured grid.
+
+
+\subsection{Define the position of grid in the reference file: {\tt gridDefPosition}}
+\index{gridDefPosition}
+\label{gridDefPosition}
+
+The function {\tt gridDefPosition} defines the position of grid in the reference file.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefPosition(int gridID, const int position);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt position\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt position}]
+Position of grid in the reference file.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the position of grid in the reference file: {\tt gridInqPosition}}
+\index{gridInqPosition}
+\label{gridInqPosition}
+
+The function {\tt gridInqPosition} returns the position of grid in the reference file.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    int gridInqPosition(int gridID);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqPosition} returns the position of grid in the reference file.
+
+
+\subsection{Define the reference URI for an unstructured grid: {\tt gridDefReference}}
+\index{gridDefReference}
+\label{gridDefReference}
+
+The function {\tt gridDefReference} defines the reference URI for an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefReference(int gridID, const char *reference);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt reference\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt reference}]
+Reference URI for an unstructured grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the reference URI to an unstructured grid: {\tt gridInqReference}}
+\index{gridInqReference}
+\label{gridInqReference}
+
+The function {\tt gridInqReference} returns the reference URI to an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    char *gridInqReference(int gridID, char *reference);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqReference} returns the reference URI to an unstructured grid.
+
+
+\subsection{Define the UUID for an unstructured grid: {\tt gridDefUUID}}
+\index{gridDefUUID}
+\label{gridDefUUID}
+
+The function {\tt gridDefUUID} defines the UUID for an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridDefUUID(int gridID, const char *uuid);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}}.
+\item[{\tt uuid}]
+UUID for an unstructured grid.
+
+\end{deflist}
+\end{minipage}
+
+
+\subsection{Get the UUID to an unstructured grid: {\tt gridInqUUID}}
+\index{gridInqUUID}
+\label{gridInqUUID}
+
+The function {\tt gridInqUUID} returns the UUID to an unstructured grid.
+
+\subsubsection*{Usage}
+
+\begin{verbatim}
+    void gridInqUUID(int gridID, char *uuid);
+\end{verbatim}
+
+\hspace*{4mm}\begin{minipage}[]{15cm}
+\begin{deflist}{\tt gridID\ }
+\item[{\tt gridID}]
+Grid ID, from a previous call to {\htmlref{\tt gridCreate}{gridCreate}} or {\htmlref{\tt vlistInqVarGrid}{vlistInqVarGrid}}.
+
+\end{deflist}
+\end{minipage}
+
+\subsubsection*{Result}
+
+{\tt gridInqUUID} returns the UUID to an unstructured grid to the parameter uuid.

@@ -46,8 +46,8 @@
 # Machine-specific (customize your path here):
 #----------------------------------------------
 
-input_basepath="/home/ybhatti/yusufb/MODEL_INPUT/${input_files_version}" # where all input files except nudging data is to be found
-nudg_basepath="/home/ybhatti/yusufb/MODEL_INPUT/Nudging" # where all nudging data is to be found
+input_basepath="/projects/0/prjs1474/aarifi/INPUT/${input_files_version}" # where all input files except nudging data is to be found
+nudg_basepath="/projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/" # where all nudging data is to be found
 
 #--------------------------------------------------
 # You shouldn't need to modify the following
@@ -90,9 +90,9 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
 
       # sst_sic_dataset is set by default to 'amip', you may set an alternate value below:
       # uncomment the following line to override the automatic setting:
-      sst_sic_dataset="amip" #SF tmp
+      sst_sic_dataset="era5" #SF tmp
 
-      possible_values=( amip ) # add additional values in case you want to use an alternate sst/sic dataset
+      possible_values=( amip era5 ) # add additional values in case you want to use an alternate sst/sic dataset
       case_insensitive=true
       if [ ! -z $sst_sic_dataset ] ; then
          flag_check $case_insensitive sst_sic_dataset "${possible_values[@]}"
@@ -211,7 +211,7 @@ echo "Starting input files linking process into $exp_dir..." | tee -a $log_file
 
       # scenario is defined in the settings file:
 
-      possible_values=( "rcp[0-9][0-9]" "historic" ) # add additional patterns in case you want to use an 
+      possible_values=( "ssp[0-9][0-9][0-9]" "historic" ) # add additional patterns in case you want to use an 
                                           # alternate scenario
       case_insensitive=true
       if [ ! -z $scenario ] ; then
@@ -441,9 +441,17 @@ cd $exp_dir
 
 #SF this should not be necessary, but is conserved for security (in case 'ln' is not GNU ln)
 #SF exclude the links to restart files
+#Restart_file = '/home/ybhatti/prjs1076/Restart_Files/PPE_20090901_Restart_Control'
+#Restart_Model = 'restart_PPE_ENS_Control'
+#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
+find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" \
+               -and -not -name "flxatm*" \
+               -and -not -name "sstoce*" \
+               -and -not -name "hdrestart*" \
+     -exec \rm -f {} \;
 
-find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
-
+#find . -type l -and -not -name "${prefix_rerun_file}_${exp}_*${suffix_rerun_file}" -exec \rm -f {} \;
+#restart_Control_Run_20060404234500
 #--------
 # ECHAM6  
 #--------
@@ -465,7 +473,7 @@ ln -sf ${input_basepath}/echam6/greenhouse_${scenario}.nc  greenhouse_gases.nc
 #---------
 
 ln -sf  ${input_basepath}/echam6/jsbach/lctlib_nlct21.def_rev7624 lctlib.def
-ln -sf  ${input_basepath}/jsbach/${hres}/jsbach_${hres}${oceres}_${ntiles}tiles_5layers_2005.nc jsbach.nc
+ln -sf  ${input_basepath}/../v0002/jsbach/${hres}/jsbach_${hres}${oceres}_${ntiles}tiles_5layers_2005.nc jsbach.nc
 
 if $flag_hd ; then
 
@@ -522,8 +530,11 @@ fi
 # Climatologic SST and SIC
 #--------------------------
 
-ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsst_1979-2008_mean.nc unit.20
-ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsic_1979-2008_mean.nc unit.96
+# /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
+ln -sf ${input_basepath}/../v0002/echam6/${hres}/amip/${hres}_amipsst_1979-2008_mean.nc unit.20
+ln -sf ${input_basepath}/../v0002/echam6/${hres}/amip/${hres}_amipsic_1979-2008_mean.nc unit.96
+# ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc unit.20
+# ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc unit.96
 
 #----------------------------
 # Time-dep SST & SIC 
@@ -534,8 +545,14 @@ if $flag_time_dep_sst_sic ; then
    if [[ "$sst_sic_dataset" == "amip" ]] ; then # use amip2 data
 
        for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
-           ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsst_${year}.nc sst${year}
-           ln -sf ${input_basepath}/echam6/${hres}/amip/${hres}_amipsic_${year}.nc ice${year}
+           ln -sf ${input_basepath}/../v0002/echam6/${hres}/amip/${hres}_amipsst_${year}.nc sst${year}
+           ln -sf ${input_basepath}/../v0002/echam6/${hres}/amip/${hres}_amipsic_${year}.nc ice${year}
+       done
+
+   elif [[ "$sst_sic_dataset" == "era5" ]] ; then # use amip2 data
+       for ((year=$start_year_m1; year<=$stop_year_p1; year++)) ; do
+           ln -sf ${input_basepath}/echam6/${hres}/era5/era5_sst_${year}_${hres}.nc sst${year}
+           ln -sf ${input_basepath}/echam6/${hres}/era5/era5_sic_${year}_${hres}.nc ice${year}
        done
 
    # uncomment the following in case of an alternate SST / SIC dataset:
@@ -576,14 +593,17 @@ if $flag_CMIP5_ozon ; then  # ie io3=4
        if $flag_time_dep_sst_sic ; then  # true year-dep input, see comment above
 
           if [[ "$year" -lt "2009" ]] ; then # no scenario
-             scenario_str=""
+             scenario_str="historical_"
           else                               # take user-defined scenario
-             scenario_str=`echo $scenario | tr '[:lower:]' '[:upper:]'`"_"
+             scenario_str="${scenario}_"
           fi
-          ln -sf ${input_basepath}/echam6/${hres}/ozone/${hres}_ozone_CMIP5_${scenario_str}${year}.nc ozon${year}
+          ln -sf ${input_basepath}/../v0002/echam6/${hres}/ozone/${hres}_ozone_${scenario}_${year}.nc ozon${year}
+
+
 
        else # fake year-dep input for using the CMIP5 climatology
-          ln -sf ${input_basepath}/echam6/${hres}/${hres}_ozone_CMIP5_1979-1988.nc ozon${year}
+         # ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc ozon${year}
+         ln -sf ${input_basepath}/../v0002/echam6/${hres}/${hres}_ozone_CMIP5_1979-1988.nc ozon${year}
        fi
    done
 
@@ -955,6 +975,8 @@ if $flag_nudg ; then
    done
 
 fi # end nudging
+
+
 
 #--------------------------------
 # Get back to previous directory
