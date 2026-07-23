@@ -1,0 +1,263 @@
+\section{Cumulus convection}\label{c8}
+
+As in ECHAM4 and ECHAM5, a mass flux scheme \cite[]{tiedtke89} is applied for
+cumulus convection with modifications for penetrative convection
+according to \cite{nordeng94}. The contribution of cumulus convection
+to the large scale budgets of heat, moisture and momentum is
+represented by an ensemble of clouds consisting of updrafts and
+donwdrafts in a steady state. The bulk equations for mass, heat,
+moisture, cloud water and momentum for an ensemble of cumulus
+updrafts are
+
+\begin{eqnarray}
+\dnd{M_{u}}{z}&=&E_{u}-D_{u}\label{8.1}\\
+\dnd{}{z}(M_{u}s_{u})&=&E_{u}\overline{s}-D_{u}s_{u}+L\overline{\rho}c_{u}\label{8.2}\\
+\dnd{}{z}(M_{u}q_{u})&=&E_{u}\overline{q}-D_{u}q_{u}-\overline{\rho}c_{u}\label{8.3}\\
+\dnd{}{z}(M_{u}l_{u})&=&-D_{u}l_{u}+\overline{\rho}c_{u}-\overline{\rho}P_{u}\label{8.4}\\
+\dnd{}{z}(M_{u}u_{u})&=&E_{u}\overline{u}-D_{u}u_{u}\label{8.5}\\
+\dnd{}{z}(M_{u}v_{u})&=&E_{u}\overline{v}-D_{u}v_{u}\label{8.6}
+\end{eqnarray}
+
+where the subscript $u$ denotes updraft variables and the overbar
+denotes large-scale variables. $E$ is entrainment, $D$ is detrainment,
+$s=c_{p}T+gz$ the dry static energy, $\rho$ the air density, $q$ is specific
+humidity, $l$ the cloud water mixing ratio, $c_{u}$ the release of latent
+heat from condensation,  $P_{u}$ the conversion of cloud water to
+precipition, and $ u $ and $ v $ are the components of the horizontal wind
+vector. A corresponding set of equations is used for the cumulus
+downdrafts which are assumed to originate from mixing of cloud air
+with environmental air which has been cooled to its wet bulb
+temperature by evaporation of precipitation generated in the
+updrafts. The cloud water detrainment in \eref{8.4} is used as a source term
+in the stratiform cloud water/ice equations (\ref{9.2}, \ref{9.3}).
+
+\subsection{Organized entrainment}\label{c8.1}
+In \cite{tiedtke89}, organized entrainment is consistent with the
+closure and is based on a moisture convergence
+hypothesis. \cite{nordeng94}, on the other hand, assumes organized
+entrainment to take place as inflow of air into the cloud when cloud
+parcels accelerate upwards, i.e. when the buoyancy is
+positive. Organized detrainment takes place where the air decelerates,
+i.e. when the buoyancy becomes negative. Organized entrainment and
+detrainment are therefore related to the cloud activity
+itself. Fractional entrainment and detrainment rates, $\epsilon_{i}$
+and $\delta_{i}$ \cite[]{turner63}, are introduced so that for an
+individual updraft $i$, $E_{i}=M_{i}\epsilon_{i}$ and
+$D_{i}=M_{i}\delta_{i}$, and for the cloud ensemble
+
+\begin{equation}
+	E=M\epsilon=\sum_{i} M_{i}\epsilon_{i}=\sum_{i}E_{i}
+	\label{8.7}
+\end{equation}
+
+\begin{equation}
+	D=M\delta=\sum_{i} M_{i}\delta_{i}=\sum_{i}D_{i}
+	\label{8.8}
+\end{equation}
+
+where the cloud ensemble mass flux is defined as
+
+\begin{equation}
+	M=\sum_{i} M_{i}=\sum_{i}\overline{\rho}\sigma_{i}w_{i}
+	\label{8.9}
+\end{equation}
+
+with fractional area $\sigma_{i}$ and vertical velocity $w_{i}$. Equation
+\eref{8.1} can then
+be expressed as
+
+\begin{equation}
+\frac{1}{M} \dnd{M}{z}=\epsilon - \delta \label{8.10}
+\end{equation}
+
+where the subscript $u$ denoting the updraft has been omitted for
+convenience (in the following as well). According to \cite{simpson69},
+the steady state vertical momentum equation for an individual updraft
+is given by
+
+\begin{equation}
+w_{i}\dnd{w_{i}}{z}=b_{i}-\epsilon_{i}w^2_{i}\label{8.11}
+\end{equation}
+
+
+where $b_{i}$ is the buoyancy term which may include water loading and
+non-hydrostatic effects. Assuming that the fractional area
+$\sigma_{i}$ of each individual updraft is constant with height
+(except in the ouflow part, see later), organized entrainment,
+according to \eref{8.9} and
+\eref{8.10},
+can be written as
+
+\begin{equation}
+\epsilon_{i}=\frac{1}{M_{i}}\dnd{M_{i}}{z}=\frac{1}{w_{i}}\dnd{w_{i}}{z}+
+\frac{1}{\overline{\rho}}\dnd{\overline{\rho}}{z}
+\label{8.12}
+\end{equation}
+
+
+whenever the buoyancy is positive ($\delta_{i} = 0$). By integrating 
+\eref{8.11} upwards, starting at cloud base ($z = 0$), and using \eref{8.7}, 
+\eref{8.11} and
+\eref{8.12}, the organized entrainment rate of the cloud ensemble becomes
+
+\begin{equation}
+\epsilon=\frac{b}{2\left(w^2_{0}+\int_{o}^z
+bdz\right)}+\frac{1}{\overline{\rho}}\dnd{\overline{\rho}}{z}
+\label{8.13}
+\end{equation}
+
+with the ensemble buoyancy
+$b=\frac{g}{\overline{T}_{v}}(T_{v}-\overline{T}_{v})-gl$.
+
+\subsection{Organized detrainment}\label{s8.2}
+
+Organized detrainment is defined as the loss of total massflux due to
+detrainment of those clouds which are losing their buoyancy, i.e.
+
+\begin{equation}
+D=E-\dnd{M}{z}=\sum_{i}\overline{\rho}\sigma_{i}w_{i}\left(\frac{1}{w_{i}}
+\dnd{w_{i}}{z}+\frac{1}{\overline{\rho}}\dnd{\overline{\rho}}{z}\right)
+-\dnd{}{z}\sum_{i}\overline{\rho}\sigma_{i}w_{i}=
+-\sum_{i}\overline{\rho}w_{i}\dnd{\sigma_{i}}{z}
+\label{8.14}
+\end{equation}
+
+Since the fractional area of each individual member of the ensemble
+is assumed to be constant with height, except for the detrainment
+level, the only contribution to the sum in \eref{8.14} comes from those
+members of the ensemble which detrain at this level ($k$), i.e.,
+
+\begin{equation}
+D=-\sum_{k}\overline{\rho}w_{k}\dnd{\sigma_{k}}{z}\approx
+\frac{\overline{\rho}\sigma_{k}w_{k}}{\Delta z}=\frac{M_{k}}{\Delta z}
+\label{8.15}
+\end{equation}
+
+where $\Delta z$ is the depth over which the detrainment takes place. Thus,
+organized detrainment is equal to the change of mass flux with
+height. Since the in-cloud vertical velocities are primarily a
+function of the height above cloud base and, hence, $w_{k}\approx w$, 
+and due to the
+assumption that individual clouds do not change their area fraction
+before they start to detrain, the individual cloud cover change is
+equal to the total, i.e.,
+
+\begin{equation}
+\dnd{\sigma_{k}}{z}=\dnd{\sigma}{z}
+\label{8.16}
+\end{equation}
+
+so that, according to \eref{8.15} and \eref{8.16}, the organized 
+detrainment may be
+parameterized as
+
+\begin{equation}
+D=-\frac{M}{\sigma}\dnd{\sigma}{z}
+\label{8.17}
+\end{equation}
+
+It remains to determine the variation of cloud cover with height.
+Having obtained the level where clouds start to detrain ($z_{d}$), an
+analytical function $\sigma = \sigma(z)$ is specified with boundary values
+  $\sigma (z_{d})= \sigma_{0}$ and $\sigma = (z_{t})= \sigma_{0}$,
+  where $z_{t}$ is the highest possible cloud level
+obtained from undiluted ascent starting at cloud base. In the
+parameterization, the spectrum of clouds detraining at different
+levels is realized through the following function
+
+\begin{equation}
+\sigma (z)=\sigma_{0}\cos\left[\frac{\pi}{2}\frac{(z-z_{d})}{(z_{t}-z_{d})}
+\right]
+\label{8.18}
+\end{equation}
+
+Except for being continuous at $z = z_{d}$, and satisfying the boundary
+conditions specified above, there is no physical reason for chosing
+this particular function.
+
+\subsection{Adjustment closure}\label{s8.3}
+
+The adjustment-type closure suggested by \cite{nordeng94} relates the
+cloud base mass flux to convective instability. The dominant part of
+convective heating and drying, respectively, is due to compensating
+subsidence in the environment \cite{fritsch80}
+
+\begin{eqnarray}
+\dnd{\overline{T}}{t}&\approx&\frac{1}{\overline{\rho}
+c_{p}}M\dnd{\overline{s}}{z}\label{8.19}\\
+\dnd{\overline{q}}{t}&\approx&\frac{1}{\overline{\rho}}M\dnd{\overline{q}}{z}
+\label{8.20}
+\end{eqnarray}
+
+where $M$ is the massflux.
+
+Convective activity is expressed in terms of $CAPE$ (convective
+available potential energy) which is estimated from the parcel ascent
+incorporating the effects of water loading,
+
+\begin{equation}
+CAPE =
+\int_{base}^{top}\left(\frac{g}{\overline{T}_{v}}\left[T_{v}-\overline{T}_{v}\right]
+-gl\right)dz
+\label{8.21}
+\end{equation}
+
+where cloud ensemble values are used for $T_{v}$ and $l$. The change of $CAPE$
+due to convective heating/moistening is approximated by
+
+\begin{equation}
+\dnd{}{t}CAPE \approx -
+\int_{base}^{top}\frac{g}{\overline{T}_{v}}\dnd{\overline{T}_{v}}{t}dz=-M_{B}
+\int_{base}^{top}\left(\frac{\left[1+\delta \overline{q}\right]}{c_{p}
+\overline{T}_{v}}\dnd{\ovl{s}}{z}+\delta\dnd{\ovl{q}}{z}\right)\eta\frac{g}{\ovl{\rho}}dz
+\label{8.22}
+\end{equation}
+
+with normalized mass flux $\eta$ defined as $M=M_{B}\cdot \eta(z)$  where
+$M_{B}$ is the cloud base mass
+flux. By assuming that convection acts to reduce $CAPE$ towards zero
+over a specified time scale $\tau$, the time rate of change is
+approximated by
+
+\begin{equation}
+\dnd{}{t}CAPE \approx - \frac{CAPE}{\tau}
+\label{8.23}
+\end{equation}
+
+so that the cloud base mass flux can be obtained from \eref{8.22} and
+\eref{8.23}
+according to
+
+\begin{equation}
+M_{B}=\frac{CAPE}{\tau} \left\{
+\int_{base}^{top}\left[\frac{(1+\delta \overline{q})}{c_{p}
+\overline{T}_{v}}\dnd{\ovl{s}}{z}+\delta\dnd{\ovl{q}}{z}\right]
+\eta\frac{g}{\ovl{\rho}}dz\right\}^{-1}.
+\label{8.24}
+\end{equation}
+
+Since $\eta$  is not known before the total mass flux is known, $CAPE$ is
+estimated through a first guess $M_{B}=M_{B}^*$ obtained from first 
+applying the
+moisture convergence scheme. Thus, the cloud base mass can finally be
+written as
+
+\begin{equation}
+M_{B}=\frac{CAPE}{\tau}=M_{B}^* \left\{
+\int_{base}^{top}\left[\frac{(1+\delta \overline{q})}{c_{p}
+\overline{T}_{v}}\dnd{\ovl{s}}{z}+\delta\dnd{}{z}\ovl{q}\right]M^*
+\frac{g}{\ovl{\rho}}dz\right\}^{-1}.
+\label{8.25}
+\end{equation}
+
+Following \cite{nordeng94}, who argued that $\tau$ should be smaller
+(larger) with increasing (decreasing) horizontal resolution, we apply
+an algorithm similar to that used in the ECMWF model, $\tau[s]=\min
+(3\cdot 3600, 2\cdot 3600\cdot 63/N$), where $N$
+denotes the spectral resolution. 
+
+
+
+
+
+

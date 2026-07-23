@@ -1,0 +1,166 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-01-01 00:00:00
+Starting date for this run:        2006-01-01 00:00:00
+Ending date for this run:          2006-02-01 01:00:00
+
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 16 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 192
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/Jasper_echam/my_experiments/Test/echam_jobscript_Test.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: Test
+ - number of cpus: 128
+
+----
+Creating the output directory...
+
+Output directory: /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/
+
+----
+Parsing namelist_Test.echam to get input files-related flags...
+
+----
+Starting input files linking process into /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/...
+
+with:
+
+input_basepath: /projects/0/prjs1474/aarifi/INPUT/v0002
+nudg_basepath: /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging
+exp_dir: /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/
+hres: T63
+vres: L47
+oceres: GR15
+start_yyyymm: 200601
+stop_yyyymm: 200602
+start_year_m1: 2005
+stop_year_p1: 2007
+start_yyyymm_m1: 200512
+stop_yyyymm_p1: 200603
+flag_time_dep_sst_sic: false
+sst_sic_dataset: amip
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: rcp45
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+
+Nudging dataset from 200601 on: era5
+
+----
+Keeping a record of all symbolic links... 
+
+lrwxrwxrwx 1 ybhatti2 prjs1474 69 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.23 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63L47_jan_spec.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 35 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_accw.nc -> restart_Test_20060131234500_accw.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 37 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_tracer.nc -> restart_Test_20060131234500_tracer.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ozon2006 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 37 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_vphysc.nc -> restart_Test_20060131234500_vphysc.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 80 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/dust_potential_sources.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/dust_potential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 73 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/parnuc.15H2SO4.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/parnuc.15H2SO4.A0.total.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 89 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/jsbach.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/jsbach/T63/jsbach_T63GR15_11tiles_5layers_2005.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 66 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/greenhouse_gases.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/greenhouse_rcp45.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 73 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/dust_msg_pot_sources.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/msg_pot_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 85 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.20 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 35 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_nudg.nc -> restart_Test_20060131234500_nudg.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 85 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.96 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 34 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_glm.nc -> restart_Test_20060131234500_glm.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 38 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_acheaci.nc -> restart_Test_20060131234500_acheaci.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 37 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_burden.nc -> restart_Test_20060131234500_burden.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 70 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/dust_regions.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/dust_regions_T63.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 35 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_g3bm.nc -> restart_Test_20060131234500_g3bm.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 68 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/xtsoil.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/soilpHfrac_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 69 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.90 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63GR15_VLTCLIM.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/surface_rough_12m.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/surface_rough_12m_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/megan_fraction_broadl_ev.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_fraction_broadl_ev_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 71 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/pointlocations.txt -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/CFMIP/pointlocations.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 71 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/soil_type_all.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/soil_type_all_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ndg200512.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging/era5_T63L47_netcdf/era5_T63L47_200601.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 38 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_acmmppe.nc -> restart_Test_20060131234500_acmmppe.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/lctlib.def -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/jsbach/lctlib_nlct21.def_rev7624
+lrwxrwxrwx. 1 ybhatti2 prjs1474 34 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_co2.nc -> restart_Test_20060131234500_co2.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 59 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/lut_kappa.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/lut_kappa.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 95 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/explosive_volcanos.dat -> /projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/aerocom_II/explosive_volcanos.dat
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ndg200602.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging/era5_T63L47_netcdf/era5_T63L47_200602.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 57 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/gcr_ipr_solmax.txt -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/solmax.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 84 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/megan_boreal_grasses_limit.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_boreal_grasses_limit_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 68 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ECHAM6_CldOptProps.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/ECHAM6_CldOptProps.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 36 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_echam.nc -> restart_Test_20060131234500_echam.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/megan_boreal_trees_limit.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_boreal_trees_limit_T63.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 34 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_ham.nc -> restart_Test_20060131234500_ham.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 78 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/lut_optical_properties_lw.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/lut_optical_properties_lw_M7.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ozon2005 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 67 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/surface_properties.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/xtsurf_v2_T63.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 35 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_conv.nc -> restart_Test_20060131234500_conv.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 34 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_veg.nc -> restart_Test_20060131234500_veg.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 86 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ham_oxidants_monthly.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/ham_oxidants_monthly_T63L47_macc.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 58 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/rrtmg_sw.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/rrtmg_sw.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 84 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/megan_clm_pft_map.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_mksrf_pft_cesm4_2005_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 79 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ozon2007 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 35 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_surf.nc -> restart_Test_20060131234500_surf.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 36 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_acp3d.nc -> restart_Test_20060131234500_acp3d.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 65 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.92 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_TSLCLIM.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 38 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_achemon.nc -> restart_Test_20060131234500_achemon.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 70 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.24 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63GR15_jan_surf.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/megan_emission_factors.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_ef_specific_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 58 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/rrtmg_lw.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/rrtmg_lw.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 36 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_activ.nc -> restart_Test_20060131234500_activ.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 38 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_forcing.nc -> restart_Test_20060131234500_forcing.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 96 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/continuous_volcanos.dat -> /projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/aerocom_II/continuous_volcanos.dat
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ndg200603.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging/era5_T63L47_netcdf/era5_T63L47_200602.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 57 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/gcr_ipr_solmin.txt -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/solmin.txt
+lrwxrwxrwx. 1 ybhatti2 prjs1474 34 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_rad.nc -> restart_Test_20060131234500_rad.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 108 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/conc_aerocom_DMS_sea.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/others/T63/emiss_fields_dms_sea_monthly_T63.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 37 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_jsbach.nc -> restart_Test_20060131234500_jsbach.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 83 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/dust_preferential_sources.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/dust_preferential_sources_T63.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 34 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_spm.nc -> restart_Test_20060131234500_spm.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/megan_fraction_broadl_de.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/T63/megan_fraction_broadl_de_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/lut_optical_properties.nc -> /projects/0/prjs1474/aarifi/INPUT/v0002/hammoz/lut_optical_properties_M7.nc
+lrwxrwxrwx. 1 ybhatti2 prjs1474 36 Jul  3 20:52 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/restart_Test_acp3m.nc -> restart_Test_20060131234500_acp3m.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/ndg200601.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging/era5_T63L47_netcdf/era5_T63L47_200601.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 71 Jul  3 21:13 /home/ybhatti2/prjs1474/Pace_PPE_Output/Jasper_echam/Test/unit.91 -> /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63GR15_VGRATCLIM.nc
+
+----
+Checking if all symbolic links point to real files...
+
+List of non-existent input files:
+None!
+
+----
+Setting emi_basepath to:
+/projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/
+in
+./namelist_Test.echam
+
+----
+Copying the model binary and the namelists (and emi_spec.txt if relevant) into the output directory...
+... and keeping a record of all namelists (and emi_spec.txt if relevant)...
+

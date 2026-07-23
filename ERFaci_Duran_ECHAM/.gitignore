@@ -1,0 +1,32 @@
+*~
+*#
+
+*.o
+*.mod
+
+# /
+/autom4te.cache
+/config.log
+/config.status
+/Makefile
+/build_echam6.sh
+
+# /bin/
+/bin*/echam6
+
+# /config/
+/config/config.h
+/config/stamp-h1
+
+# /contrib/
+/contrib/generate-scripts/*thunder*
+
+# /src/
+/src/*.mod
+/src/*.lst
+
+# /experiments/
+/experiments/
+
+# /lib/
+/lib/*.a

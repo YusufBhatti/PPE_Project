@@ -1,0 +1,886 @@
+\section{Aerosols}
+
+Aerosols affect the distribution of radiative energy in the atmosphere
+by scattering and absorption of electromagnetic radiation. This is the
+direct aerosol effect. Aerosols also modify cloud optical properties
+and influence the cloud formation processes and precipitation. Since
+this also acts on radiation, but the aerosol particles are involved by
+the intermediate of clouds, this is called the indirect aerosol
+effect. The radiative transfer calculation of
+\echam{} needs time dependent 3--d fields of (1) the extinction $\zeta$
+by aerosols, (2) the single scattering albedo $\omega$ (SSA), and (3) the
+asymmetry factor $g$ for a detailed consideration of the direct
+aerosol effect. These quantities depend on the wavelength of the
+electromagnetic radiation and have to be provided for each of the
+14~solar radiation bands and the 16~thermal radiation bands used in
+\echam. In the thermal radiation range, the knowledge of $\zeta$ and
+$\omega$ is
+sufficient, since the radiative transfer calculation does not account
+for scattering in this wavelength regime.
+
+
+\subsection{Tropospheric aerosols}\label{sec.tropaerosols}
+
+In this section, we describe the generation of a data set of optical
+properties of tropospheric aerosols for the historic period of
+1850 to 2000
+and for three different future 
+emission scenarios (\cite{mos107}) until 2100. 
+Tropospheric aerosol is partly anthropogenic and highly diverse in
+concentration, size, 
+and composition.
+
+We combine complete and consistent background
+maps of monthly mean aerosol optical properties from global model
+results with high 
+quality monthly averages from ground based remote sensing. All
+equations are valid for monthly means. We
+distinguish between 
+fine mode aerosols with 
+particle radii smaller than $\rm 0.5\,\mu m$ and coarse mode aerosols
+with radii equal or larger than $\rm 0.5\,\mu m$. Coarse mode aerosols
+are assumed to be of natural origin comprising dust and sea salt. Fine
+mode aerosols consist of sulfate and organic matter including black
+carbon.
+The general procedure consists of 7~steps: (1) Establishing 2--d maps
+of column properties of the aerosol optical depth (AOD), single
+scattering albedo, and the 
+{\AA}ngstr\"om parameter at 550~nm for the year~2000, (2)~separating the
+AOD into one due to fine and one due to coarse mode aerosols for the year~2000,
+(3)~defining the microphysical properties of the coarse mode,
+(4)~spreading the 
+optical properties to all wavelengths, (5)~defining altitude
+profiles, (6)~establishing an anthropogenic (fine mode) AOD for the
+year~2000, (7)~extending the anthropogenic AOD
+back to the year 1850 and forward to the year~2100 using
+selected future emission scenarios. 
+
+\subsubsection{(1) 2--d maps
+of column aerosol optical properties for the year~2000}
+
+In a first step, monthly mean values of the total aerosol optical
+depth $\tau$ of each column together with one value of the single
+scatter albedo $\omega$, and {\AA}ngstr\"om parameter $\alpha$ for
+that column were 
+determined for light of a wavelength of $\rm 550\,nm$. The background
+data are based on maps of medians
+of an ensemble of up to
+15~different global models all applying a complex aerosol module.
+All models simulated the respective quantities for present
+day conditions in the frame work of the AeroCom project
+(\cite{kin065}). The resulting maps were blended by the use of AERONET 
+ground based sun--/sky--photometer data (\cite{hol981}): We first
+associated a ``factor of influence'' around each AERONET site being
+equal to one at the exact location of the site and tending to zero
+with increasing distance from the site. The rate of decrease depends
+on how well the measurements of this site repesent the aerosol optical
+properties of its
+surroundings. The original medians were then multiplied by the factor
+of influence times the ratio of the AERONET measurement value and the
+original median. Thus, we obtain a map of $\tau$, $\omega$, $\alpha$
+with AERONET--similar values near the AERONET sites and median values of the
+model ensemble at remote places. 
+The above method provides the monthly mean optical properties on a
+$1^\circ\times1^\circ$ longitude--latitude grid for all
+aerosols. 
+
+\subsubsection{(2) Splitting the
+AOD into fine and coarse mode contributions for the year~2000}
+
+In order to split the aerosol optical depth into a part for
+fine and coarse mode, we use the {\AA}ngstr\"om parameter. It is
+assumed that the {\AA}ngstr\"om parameter is zero for the coarse mode
+and that it varies between 1.6 and 2.2 for the fine mode depending on
+humidity. Details of this procedure are described by~\cite{kinxxx}.
+
+\subsubsection{(3) Definition of the coarse mode microphysical properties}
+
+In order to derive the coarse mode aerosol optical properties 
+at 550~nm, the respective composition and particle size has to be known.
+It is assumed that the coarse mode aerosols are ten times less absorbing than
+the fine mode aerosols. The initial guess of the coarse mode single
+scattering albedo $\omega_{\rm c,0}$ depends on the total aerosol
+single scattering albedo $\omega$ and the ratio of the aerosol optical
+depth of the fine mode $\tau_{\rm f}$ and the total aerosol optical
+depth $\tau$:
+
+\begin{displaymath}
+\omega_{\rm c,0}=1-\frac{1-\omega}{1+9\frac{\tau_{\rm f}}{\tau}}
+\end{displaymath}
+
+This choice determines the mixing ratio of dust and sea salt aerosols
+in the coarse mode. For latitudes between 35$^\circ$~S and
+45$^\circ$~N, the fraction of dust was assumed to increase with coarse mode
+aerosol optical depth.
+In the initial guess, it is assumed that
+dust particles have an effective radius of $1.5\,\mu m$
+and sea salt particles have an effective radius of
+$2.5\,\mu m$. 
+However, the size of the dust particles can be set to larger values
+in order to avoid unrealistic small values for the single scattering
+albedo of the fine mode aerosols. In such cases, the single scattering
+albedo of the fine mode is kept at values given by: 
+
+\begin{equation}\label{eqssalimit}
+\omega_{\rm f,0}=1-\left(\frac{1}{10}{\rm
+  e}^{-3\tau}+\frac{1}{4}\frac{\tau_{\rm f}}{\tau}\right).
+\end{equation}
+
+\begin{table}[hp]
+\caption{Wavelengths of the 14~bands in the short wavelength range and
+  the 16~bands in the long wavelength range as they are used in the
+  radiation calculation of \echam{} and the refractive
+  indices of sulfate, dust (\cite{sok983}), and sea salt
+  (\cite{nil797})}\label{tabwavelengths}  
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}ccc}\hline
+$\lambda_{\rm v}/{\rm nm}$ & sulfate & dust & sea salt \\\hline
+\multicolumn{4}{c}{solar radiation}\\\hline
+\cw{00}200 --   \cw{000}263 &$1.450+i1.0\times10^{-9}$&$1.450+i0.025$
+&$1.510+i1\times10^{-5}$\\
+\cw{00}263 --   \cw{000}345 &$1.450+i1.0\times10^{-9}$&$1.450+i0.020$
+&$1.510+i1\times10^{-6}$\\
+\cw{00}345 --   \cw{000}442 &$1.445+i1.0\times10^{-9}$&$1.450+i0.0025$
+&$1.500+i2\times10^{-8}$\\
+\cw{00}442 --   \cw{000}625 &$1.432+i1.0\times10^{-9}$&$1.450+i0.001$
+&$1.490+i1\times10^{-8}$\\
+\cw{00}625 --   \cw{000}778&$1.427+i5.2\times10^{-8}$&$1.450+i0.00095$
+&$1.480+i1\times10^{-7}$\\
+\cw{00}778 --  \cw{00}1242&$1.422+i1.3\times10^{-6}$&$1.450+i0.00075$
+&$1.470+i1\times10^{-4}$\\
+\cw{0}1242 --  \cw{00}1299&$1.413+i7.9\times10^{-6}$&$1.450+i0.00060$
+&$1.470+i3.3\times10^{-4}$\\
+\cw{0}1299 --  \cw{00}1626&$1.406+i9.0\times10^{-5}$&$1.450+i0.00080$
+&$1.460+i5.5\times10^{-4}$\\
+\cw{0}1626 --  \cw{00}1942  &$1.393+i5.1\times10^{-4}$&$1.450+i0.0010$
+&$1.450+i1\times10^{-3}$\\
+\cw{0}1942 --  \cw{00}2151  &$1.382+i1.3\times10^{-3}$&$1.450+i0.0015$
+&$1.450+i1.5\times10^{-3}$\\
+\cw{0}2151 --  \cw{00}2500  &$1.364+i2.1\times10^{-3}$&$1.460+i0.0025$
+&$1.440+i2.5\times10^{-2}$\\
+\cw{0}2500 --  \cw{00}3077  &$1.295+i5.5\times10^{-2}$&$1.460+i0.0060$
+&$1.400+i8\times10^{-3}$\\
+\cw{0}3077 --  \cw{00}3846  &$1.361+i1.4\times10^{-1}$&$1.460+i0.0118$
+&$1.480+i1.3\times10^{-2}$\\
+\cw{0}3846 -- \cw{0}12195   &$1.400+i2.6\times10^{-1}$&$1.170+i0.10$
+&$1.400+i1.4\times10^{-2}$\\\hline
+\multicolumn{4}{c}{thermal radiation}\\\hline
+\cw{0}3078 --  \cw{000}3846 &$1.380+i1.5\times10^{-1}$ &$1.468+i0.011$
+&$1.480+i0.00156$\\ 
+\cw{0}3846 --  \cw{000}4202 &$1.397+i1.3\times10^{-1}$&$1.480+i0.0044$
+&$1.478+i0.00175$\\
+\cw{0}4202 --  \cw{000}4444 &$1.396+i1.2\times10^{-1}$&$1.487+i0.0053$
+&$1.488+i0.00246$ \\
+\cw{0}4444 --  \cw{000}4808 &$1.385+i1.2\times10^{-1}$&$1.502+i0.0092$
+&$1.483+i0.00251$ \\
+\cw{0}4808 --  \cw{000}5556 &$1.348+i1.5\times10^{-1}$&$1.525+i0.0228$
+&$1.459+i0.00288$ \\
+\cw{0}5556 --  \cw{000}6757 &$1.385+i1.7\times10^{-1}$ &$1.423+i0.054$
+&$1.505+i0.0180$ \\
+\cw{0}6757 --  \cw{000}7194 &$1.277+i1.5\times10^{-1}$&$1.439+i0.0976$
+&$1.450+i0.00543$ \\
+\cw{0}7194 --  \cw{000}8474 &$1.180+i4.5\times10^{-1}$ &$1.248+i0.105$
+&$1.401+i0.0138$ \\
+\cw{0}8474 -- \cw{000}9259 &$1.588+i6.7\times10^{-1}$  &$1.613+i0.439$
+&$1.638+i0.0293$ \\
+\cw{0}9259 -- \cw{00}10204 &$1.777+i6.0\times10^{-1}$  &$2.739+i0.783$
+&$1.563+i0.0179$ \\
+10204 -- \cw{00}12195 &$1.799+i3.3\times10^{-1}$ &$1.816+i0.299$
+&$1.485+i0.0140$ \\
+12195 -- \cw{00}14286 &$1.724+i1.6\times10^{-1}$ &$1.697+i0.189$
+&$1.408+i0.0192$ \\
+14286 -- \cw{00}15873 &$1.601+i1.9\times10^{-1}$ &$1.518+i0.231$
+&$1.447+i0.0344$ \\
+15873 -- \cw{00}20000 &$1.758+i4.0\times10^{-1}$ &$1.865+i0.546$
+&$1.763+i0.111$ \\
+20000 -- \cw{00}28571 &$1.850+i2.7\times10^{-1}$ &$2.552+i0.741$
+&$1.754+i0.250$ \\
+28571 -- 1000000 &$1.850+i2.7\times10^{-1}$ &$2.552+i0.741$
+&$1.628+i0.997$ \\
+\hline
+\end{tabular*}
+\end{table} 
+
+\subsubsection{(4) Spreading the 
+optical properties to all wavelengths}
+
+The coarse mode aerosol optical properties for all wavelengths
+are then determined by Mie scattering calculations from the knowledge of
+the refractive indices (see Tab.~\ref{tabwavelengths}), the size, and the 
+composition of the coarse mode. Thus, the fine mode aerosol optical
+properties at~$\rm 550\,nm$ is also determined.
+
+The aerosol optical properties of the fine mode aerosols are required
+at solar wavelengths only since
+the interaction of these small particles with light in the
+thermal spectral range is negligible. In the solar spectral range, the
+aerosol optical depth is given by
+
+\begin{displaymath}
+\tau_{\rm f}(\lambda_i)=\tau_{\rm f}({\rm
+  550\,nm})\left(\frac{\lambda_i}{\rm 550\,nm}\right)^{\rm \alpha_f},\quad
+  i=1,\dots,14 
+\end{displaymath}
+for the 14~solar spectral bands. The single scattering albedo at $\rm
+550\,nm$ is used for shorter wavelengths and reduced towards longer
+wavelengths. 
+The wavelength dependent asymmetry
+factor $g_{\rm f}$ of the fine mode is parametrized as function of the
+{\AA}ngstr\"om parameter $\alpha$ and solar wavelength $\lambda$
+by
+
+\begin{displaymath}
+g_{\rm f}(\lambda)={\rm max}\left\{0.72-0.14\alpha_{\rm
+    f}\sqrt{\frac{\lambda}{\lambda_0}-\frac{1}{4}},0.1\right\},\quad
+\lambda_0=1\,{\rm \mu m},\quad \rm 0.25\,\mu m
+\le \lambda \le 3\,\mu m 
+\end{displaymath}
+
+The aerosol optical properties of the year~2000 are now defined.
+These data serve as a basis for temporal extension.
+
+\subsubsection{(5) Definition of altitude profiles}
+
+To obtain an altitude profile of the aerosol optical depth,
+data from global model studies with ECHAM5--HAM
+were adopted. The single scattering and the asymmetry factor of fine
+and coarse mode do not change with altitude.
+Since the model distinguishes between fine mode and
+coarse mode aerosol, local monthly altitude distributions were separately
+described for fine mode aerosol and for coarse mode aerosol.
+
+\subsubsection{(6) Establishing an anthropogenic (fine mode) AOD for the
+year~2000}
+
+We assume that all anthropogenic aerosols belong to the fine mode
+aerosols. The Laboratoire de
+M\'et\'eorologie Dynamique (LMD) model simulated the aerosol optical
+properties for the year 2000 and the pre--industrial period (\cite{bou028}).
+It is assumed that the emissions are all of natural origin for the
+pre--industrial period. The pre--industrial fine mode
+aerosol optical depths $\tau_{\rm f,pre}^{\rm (LMD)}$ are everywhere lower than
+those for the 
+fine mode of the year 2000 
+$\tau_{\rm f,2000}^{\rm (LMD)}$.
+The anthropogenic
+aerosol optical depth of the year~2000 $\tau_{\rm a,2000}$ is then
+derived from the fine mode aerosol optical depth of the year~2000
+$\tau_{\rm a,2000}$:
+
+\begin{displaymath}
+\tau_{\rm a,2000}:=\tau_{\rm
+  f,2000}\times f_{\rm a,2000},\quad\text{with}\quad f_{\rm
+  a,2000}:=\frac{\tau_{\rm f,2000}^{\rm(LMD)}-\tau_{\rm f,pre}^{\rm(LMD)}}{\tau_{\rm 
+    f,2000}^{\rm (LMD)}}
+\end{displaymath}
+
+We assume that the natural aerosols do not change over time, neither
+in concentration nor size or composition. The composition of the anthropognic
+aerosols is also kept constant in time but its concentration
+changes. 
+
+\subsubsection{(7) Extending the anthropogenic AOD
+back and forward in time}
+
+
+The only quantity that is allowed to vary with time is the
+anthropogenic aerosol optical depth. This means that pre--industrial
+fine mode and coarse mode aerosol optical properties are constant in
+time. The altitude profile associated with the aerosol optical depth
+of coarse and fine mode are also kept constant in time. This implies that
+we assume the same composition and altitude distribution of
+pre--industrial fine mode aerosol and fine mode aerosol for the year
+2000. Nevertheless, note that all aerosol optical properties can
+change their altitude profile with time because of the weighted mean
+values over the various aerosol types that will be discussed in
+the section about the implementation. 
+
+
+\paragraph{Historic}
+The contribution of the anthropogenic aerosols to the
+aerosol optical depth due to fine mode aerosols is estimated in the
+following way: First, an ECHAM5--HAM (\cite{sti055}) hindcast simulation using
+National Institute for Environmental Studies (NIES) emissions was
+performed for the years~1850--2000. 
+The output of the fine mode aerosol optical depth was
+interpolated to a $1^\circ\times1^\circ$ longitude--latitude grid and
+monthly 10--year means were calculated. From these, anthropogenic
+fractions for the year $j$ can be determined by
+
+\begin{displaymath}
+f_{{\rm a},j}^{\rm (HAM)}=\frac{\tau_{{\rm f},j}^{\rm (HAM)} -
+  \tau_{\rm f,pre}^{\rm (HAM)}}{\tau_{{\rm f},2000}^{\rm (HAM)}-\tau_{\rm
+    f,pre}^{\rm (HAM)}}.  
+\end{displaymath}
+
+The ratios were then linearly interpolated to all years 1860 to 2000.
+Then, the anthropogenic contribution to the aerosol optical depth 
+$\tau_{\rm a,2000}$
+was multiplied with this ratio resulting in the anthropogenic part of
+the 
+aerosol optical depth for year $j$:
+
+\begin{displaymath}
+\tau_{{\rm a},j}=\tau_{\rm a,2000}\times f_{{\rm a},j}^{\rm (HAM)}.
+\end{displaymath}
+
+\subsubsection{Scenarios}
+
+%--- K. Zhang, S. Rast, H. Schmidt
+
+Anthropogenic aerosols have been predicted to be 
+an important forcing for the future climate.
+For an ideal climate projection, one would utilize a fully coupled
+Earth system model  
+with online aerosol computations, 
+but such experiments are computationally very expensive.
+An alternative could be to use an atmosphere--only model  
+with a detailed aerosol submodel, to perform simulations with prescribed
+emission scenarios  
+through the projection period (with sea surface temperatures
+from coupled model runs without interactive aerosols), 
+to store the simulated aerosol properties, and to use them as a forcing
+for the Earth system model. In this case, aerosol model simulations would 
+need to be performed for each scenario, which would still be expensive. 
+As a flexible and inexpensive alternative, 
+we generate future scenarios of aerosol radiative properties 
+using the Kinne aerosol climatology of the year 2000, 
+the CMIP5 emission scenarios (RCP2.6, RCP4.5,
+      and RCP8.5, see the description by~\cite{mos107}), and ECHAM5--HAM
+(\cite{sti055}) model 
+simulations. 
+This approach is based on the following assumptions: 
+
+\begin{enumerate}
+\item Vertical profiles of the aerosol optical depth will not change
+  significantly in the future. 
+\item Changes in the vertically integrated aerosol optical depth (column AOD)
+      are approximately linear functions of the changes in emissions.
+\item When forced by fixed emissions (with seasonal cycle but without 
+      interannual variability or trend), the 10--year average of
+      column AOD simulated by ECHAM5--HAM is a good representation of 
+      the steady state.
+\item Contributions of anthropogenic emissions to the total AOD from
+  the 10 regions  
+      identified by the CMIP5 emission scenarios
+      are largely independent and do not interact with each other strongly.
+\end{enumerate}
+
+The first step for constructing the AOD scenarios is to build a
+``database'' that quantifies the impact of a change in the emissions in
+one of the 10~regions on the global column AOD.
+For each of the 10~regions we performed a 10--year 
+simulation using the aerosol climate model ECHAM5--HAM but with 
+the regional emissions reduced to 50\% of the year 2000 level.
+For this purpose, we used ECHAM5--HAM
+in the T42L19 resolution. As boundary conditions of the atmosphere, 
+the climatological sea surface temperature and sea ice concentration
+are used. We only consider the aerosol optical depth caused by fine
+mode aerosols since fine mode aerosols are dominated
+by the anthropogenic aerosols whereas coarse mode aerosols are of
+mostly natural origin. The AOD of the fine mode aerosols is not
+affected by the statistical variability of coarse mode
+particles. Thus, we reduce the statistical noise in our results.
+The resulting 10--year mean column fine mode AOD is then compared with 
+a control experiment with the year 2000 emissions.
+The grid points at which the fine mode AOD changes are statistically
+significant  
+are identified, and a map of differences $\Delta \tau^{\rm (f)}_l$ of the
+fine mode AOD under a 50\% emission reduction in
+region $l$ ($\tau_{l,50\%}^{\rm (f)}$) and the reference AOD of the year 2000
+($\tau_{2000}^{\rm (f)}$) for each 
+region $l=1,\dots,10$ 
+is stored:
+
+\begin{displaymath}
+\Delta\tau_l^{\rm (f)}=\tau_{l,50\%}^{\rm (f)}-\tau_{2000}^{\rm (f)}
+\end{displaymath}
+
+Only the sulfur emissions were reduced in the simulations,  
+because sensitivity simulations indicated that a 
+change of carbonaceous aerosol emissions does not contribute to 
+the AOD change as significantly as changes in sulfur emissions do. 
+
+In the second step, for any prescribed global emission at any time
+instance $j$
+we compute the difference between each regional mean emission
+$q_{l,j}$ of region $l$ and the corresponding 
+year 2000 value $q_{l,2000}$, and then the ratio $\xi_{l,j}$ between this
+difference and the difference between
+50\% regional mean of the year 2000 given by $q_{l,50\%}$ and the
+corresponding emission for the year~2000: 
+
+\begin{displaymath}
+\xi_{l,j}:=\frac{q_{l,j}-q_{l,2000}}{q_{l,50\%}-q_{l,2000}}. 
+\end{displaymath}
+
+The global fine mode AOD resulting from the emissions $q_{l,j}$ is
+then calculated by superposition:
+
+\begin{displaymath}
+\tau_{\rm j}^{\rm (f)}={\rm
+  max}\left\{\sum_{l=1}^{10}\xi_{l,j}\Delta\tau_l^{\rm
+    (f)}+\tau_{2000}^{\rm (f)},\tau_{\rm pre}^{\rm (f)}\right\}, 
+\end{displaymath}
+
+where $\tau_{\rm pre}^{\rm (f)}$ is the pre--industrial fine mode
+aerosol optical depth. It serves as a lower limit of the fine mode
+aerosol optical depth. 
+Fine mode AOD data from the year 2000 to 2100 have been created by
+using this method. These data can then be used to define a scaling
+factor with respect to the AOD of the year~2000.
+
+The main advantage of this method is that one can easily estimate future change 
+of aerosol radiative properties for any given emission scenario without 
+having to repeat the simulation with the global aerosol model, 
+as long as the assumptions listed above are valid.
+On the other hand, the method also has some limitations.  
+For example, at a certain gridbox the reponse of the fine mode AOD
+to emission changes might be non--linear, so the assumption mentioned above    
+may cause some error. Furthermore, in both the historical and scenario aerosol 
+climatology, aerosol compositions are assumed to be fixed. This will
+also bring some 
+error into the estimation. 
+
+Nevertheless, it is believed that in terms of global patterns and
+regional average,  
+the estimated fine mode AOD projections under various scenarios are
+comparable to  
+those predicted by an online global aerosol model. 
+The estimated data for the year 2050 and 2100 were compared with
+ECHAM5--HAM simulations  
+using emissions for the same year. In terms of main features of the
+global distribution  
+and regional mean values, the estimated fine mode AOD agrees well with
+the predicted ones.   
+
+\subsubsection{Summary of assumptions}
+
+{\bf Natural aerosol is assumed to remain constant over time.}
+However, natural aerosol loads depend strongly on meteorological,
+synoptical and surface conditions so that at least locally strong
+inter--annual variations for natural aerosols can be expected. This
+is especially relevant since the AOD of natural aerosol dominates
+anthropogenic aerosol in many regions of the world.
+
+{\bf Anthropogenic aerosol is only found in the fine--mode.}
+This is not completely true, since dust is partly
+of anthropogenic origin, mainly due to man--made changes to
+land--cover. However, 
+since this anthropogenic contribution is generally a minor fraction
+of the dust and in addition highly speculative and uncertain, this
+anthropogenic coarse mode contribution has been ignored.
+  
+{\bf Fine mode aerosol composition does not change with time.}
+It should be noted that in both historical extrapolations and
+future--scenario simulations only changes to the AOD are considered. 
+However, the BC aerosol type had
+relatively strong contributions in the 1930ies, while the sulfate
+aerosols gain more importance in the 1960ies and 1970ies.
+Similarly, changes in the fine--mode composition for future anthropogenic
+aerosol can be expected. 
+
+{\bf Future scenarios are based on changes in sulfate emissions and
+  the superposition principle is applied.}
+However, other aerosol types from anthropogenic sources 
+may become more important in the future. Because of the non--linearity
+of aerosol physics, the superposition principle may become inaccurate.
+
+
+\subsubsection{Implementation}\label{secimpl}
+
+For the shortwave (SW) or solar spectral bands, coarse and fine mode
+aerosol optical properties (column AOD $\tau_{\rm sw}^{\rm (f,c)}$,
+single scattering albedo $\omega_{\rm sw}^{\rm (f,c)}$, and asymmetry
+factor $g_{\rm sw}^{\rm (f,c)}$) have to be combined. 
+Since fine and coarse mode are assigned 
+different normed extinction profiles, $\zeta^{\rm (f)}$ and
+$\zeta^{\rm (c)}$, any changes in the ratio between coarse--mode and fine--mode
+column AOD will modify the vertical profiles of the single scattering
+albedo and the asymmetry factor.
+
+For the longwave (LW) or IR spectral bands only the coarse mode aerosol
+contributes, as fine--mode aerosol is too small to play a significant
+role at these wavelengths. Since the IR radiative transfer code does not
+account for scattering the required properties are the spectrally
+resolved column AOD 
+$\tau_{\rm lw}^{\rm (c)}$, the column single scattering albedo
+$\omega_{\rm lw}^{\rm (c)}$ and coarse--mode altitude distribution via
+the normed extinction profile $\zeta^{\rm (c)}$.
+
+
+The altitude dependent optical depth is calculated in the following
+way. Let $(\Delta z_l)_{l=1,L}$ be the geometrical layer thickness of
+the \echam{} layers $1,\dots,L$. Let the normed $\zeta^{\rm (f,c)}$ extinction of the
+climatology be given for layers $1,\dots,K$ and 
+
+\begin{displaymath}
+k:\left\{\begin{array}{ccc}
+\{1,\dots,L\} & \rightarrow & \{1,\dots,K\}\\
+l & \mapsto & k_l
+\end{array}\right.
+\end{displaymath}
+
+be the function that gives the layer $k_l$ of the climatology inside
+of which the 
+mid point of a given layer $l$ of \echam{} is located. For simplicity, we
+attribute to this \echam{} layer $l$ the normed extinction $\zeta^{\rm
+  (f,c)}_{k_l}$. In general, 
+
+\begin{displaymath}
+Z:=\sum\limits_{l=1}^{L}\zeta^{\rm (f,c)}_{k_l}\Delta z_l\neq 1
+\end{displaymath}
+
+even if $\sum_{k=1}^K \zeta^{\rm (f,c)}_{k}\Delta y_k=1$ for the layer
+thickness $(y_k)_{k=1,K}$ of the climatology. We want to have the same total
+optical depth in the simulation with \echam{} as in the climatology. Thus,
+we introduce renormalized extinctions
+
+\begin{displaymath}
+\tilde{\zeta}_{k_l}^{\rm (f,c)}:=\zeta_{k_l}^{\rm (f,c)}/Z
+\end{displaymath}
+
+With these renormalized extinctions, we can calculate the optical
+depths $\tau_{{\rm sw,lw},l}^{{\rm (f,c)}}$ for each layer $l=1,L$ of
+\echam:
+
+\begin{equation}
+\tau_{{\rm sw,lw},l}^{{\rm (f,c)}}=\tau_{\rm sw,lw}^{\rm
+  (f,c)}\tilde{\zeta}^{\rm (f,c)}_{k_l} 
+\end{equation}
+
+The total column optical depth is then exactly the given optical depth
+$\tau_{\rm sw,lw}^{\rm (c,f)}$ of the climatology.
+
+For the SW bands, the optical properties of the combined fine and
+coarse aerosol modes are obtained by the usual mixing rules.
+This results in the layer dependent optical depth
+$\tau_{{\rm sw},l}$, the layer dependent single scattering albedo
+$\omega_{{\rm sw},l}$, and the layer dependent asymmetry factor
+$g_{{\rm sw},l}$ for each \echam{} layer $l=1,L$:
+
+\begin{align}
+\label{eqswtau}
+\tau_{{\rm sw},l} & = \tau_{{\rm sw},l}^{\rm (f)}+ \tau_{{\rm
+  sw},l}^{\rm (c)}\\
+\label{eqswomega}
+\omega_{{\rm sw},l} & = \frac{\tau_{{\rm sw},l}^{\rm (f)}\omega_{\rm
+    sw}^{\rm (f)}+\tau_{{\rm sw},l}^{\rm (c)}\omega_{\rm
+    sw}^{\rm (c)}}{\tau_{{\rm sw},l}}\\
+\label{eqswg} 
+g_{{\rm sw},l} & = \frac{\tau_{{\rm sw},l}^{\rm (f)}\omega_{\rm
+    sw}^{\rm (f)}g_{\rm
+    sw}^{\rm (f)}+\tau_{{\rm sw},l}^{\rm (c)}\omega_{\rm
+    sw}^{\rm (c)}g_{\rm
+    sw}^{\rm (c)}}{\omega_{{\rm sw},l}}
+\end{align}
+
+For the LW bands, the absorption optical depth is defined by:
+
+\begin{equation}\label{eqlwtau}
+\tau^{\rm (abs)}_{{\rm lw},l}= \tau_{\rm lw}\tilde{\zeta}_{k_l}^{\rm
+  (c)}(1-\omega_{\rm lw}) 
+\end{equation}
+
+The fine mode aerosols of anthropogenic origin have an effect in the
+solar spectrum only and are the sole time dependent
+quantities. Tab.~\ref{tabaerofiles} gives an overview of the files
+used in \echam.
+
+\begin{table}
+\caption{File names of files containing tropospheric aerosol optical
+  properties 
+  for a year {\tt yyyy} and scenario {\tt
+    rcpzz}. The resolution of echam is {\tt \{RES\}}.}\label{tabaerofiles} 
+\begin{tabular*}{\textwidth}{l@{\extracolsep\fill}p{5.1cm}}\\\hline
+ File name & Explanation  \\\hline
+ {\tt T\{RES\}\_aeropt\_kinne\_sw\_b14\_coa.nc} &
+  Aerosol optical properties of coarse mode aerosols in the solar
+  range of the spectrum. The aerosols are of natural origin (dust, sea
+  salt) and independent of the year for historic times.\\
+ {\tt T\{RES\}\_aeropt\_kinne\_lw\_b16\_coa.nc } & Aerosol optical
+ properties of coarse mode aerosols in the thermal range of the
+ spectrum. The aerosols are of natural origin (dust, sea salt) and
+ independent of the year for historic times.\\
+ {\tt  T\{RES\}\_aeropt\_kinne\_sw\_b14\_fin[\_rcpzz]\_yyyy.nc} & Aerosol
+ optical properties of fine mode aerosols in the solar range of the
+ spectrum. These aerosols are of anthropogenic origin and therefore
+ depend on the year.\\\hline
+\end{tabular*}
+\end{table}
+
+\subsection{Stratospheric aerosols}
+
+Stratospheric aerosols modify the heating in the
+stratosphere and have some influence on the radiation budget in the
+troposphere. The optical properties of these aerosols are mainly
+determined by the size and concentration of sulfuric acid droplets
+that form from SO$_2$ gas in the stratosphere. 
+The SO$_2$ gas is either of volcanic origin or is formed from sulfur
+containing species from other sources at the surface of the earth.
+Ash aerosols from volcanic eruptions are of minor importance
+and play a role on short time scales of a few days to weeks only. 
+Consequently, the data set of optical properties of stratospheric aerosols
+only accounts for the effect of volcanic aerosols released by
+eruptions reaching the stratosphere. 
+Since the concentration and size distribution of sulfuric acid
+droplets in the stratosphere are determined by complex chemical
+processes, advective transport, and sedimentation processes in the
+stratosphere, the resulting aerosol optical properties are highly
+variable in space and time. Nevertheless, due to fast transport in
+East--West direction, the optical properties exhibit small variations
+for different longitudes at the same latitude but vary strongly with
+latitude. Therefore, zonal mean values of the optical properties may
+describe the effect of volcanic aerosols on the radiation budget with
+sufficient accuracy. 
+
+
+\subsubsection{Volcanic aerosols from 1850 until 1999}\label{secstenchikov}
+
+The data set of volcanic forcing for the historic period from 1850 to
+1999 has been provided by G.~Stenchikov. It is an extended version of
+the Pinatubo aerosol data set (PADS) derived by~\cite{ste987} from
+stellite measurements of aerosol extinction and effective radii after
+the Pinatubo eruption and successfully applied in climate model
+studies (\cite{ste049,ste093,tho097,tho091}).
+This data set contains monthly mean zonal
+averages of the aerosol extinction $\zeta_{\rm v}$, the single scattering
+albedo $\omega_{\rm v}$, and the asymmetry factor $g_{\rm v}$ as a function of
+altitude, wavelength, and time. Furthermore, the integral aerosol
+optical depth of a column $\tau_{\rm v}$ is given as a function of wavelength
+and time. The data set comprises the years 1850 to 1999. The data are
+given at 40 different mid-level pressures listed in
+table~\ref{tab_pres} together with the corresponding interface
+pressures. The interpolation with respect to altitude is performed in
+a similar way as for the tropospheric aerosols.
+ 
+\begin{table}[hb]
+\caption{Pressure levels, mid level pressures (top), pressure at
+  interfaces (bottom) in Pa}\label{tab_pres}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}cccc}\\\hline
+1& 3& 7& 13& 22\\
+0\hspace{0.3cm} 2&2\hspace{0.3cm} 4&4\hspace{0.3cm} 10&10\hspace{0.3cm}
+16&16\hspace{0.3cm} 28 \\
+\rule{0cm}{0.7cm} 35& 52& 76& 108& 150 \\
+28\hspace{0.3cm}
+42&42\hspace{0.3cm}62&62\hspace{0.3cm} 90&90\hspace{0.3cm} 126&
+126\hspace{0.3cm} 174\\ 
+ \rule{0cm}{0.7cm}207& 283& 383& 516& 692\\
+174\hspace{0.3cm}240&240\hspace{0.3cm} 326&326\hspace{0.3cm}
+440&440\hspace{0.3cm} 592&592\hspace{0.3cm} 
+    792 \\
+\rule{0cm}{0.7cm} 922&    1224& 1619& 2133& 2802\\
+792\hspace{0.3cm}1052&1052\hspace{0.3cm}
+    1396&1396\hspace{0.3cm} 1842&1842\hspace{0.3cm}
+    2424&2424\hspace{0.3cm} 3180\\ 
+ \rule{0cm}{0.7cm}3670& 4793& 6236& 8066& 10362\\
+3180\hspace{0.3cm} 4160&4160\hspace{0.3cm} 5426&5426\hspace{0.3cm}
+7046&7046\hspace{0.3cm} 9086& 9086\hspace{0.3cm}
+    11638 \\
+\rule{0cm}{0.7cm} 13220& 16748&
+    21059& 26192& 32082\\
+11638\hspace{0.3cm} 14802&14802\hspace{0.3cm}
+18694&18694\hspace{0.3cm} 23424&28960\hspace{0.3cm}
+28960&28960\hspace{0.3cm} 35204\\ 
+\rule{0cm}{0.7cm} 38675& 45908& 53672& 61799& 70056 \\
+35204\hspace{0.3cm} 42146&42146\hspace{0.3cm}
+49670&49670\hspace{0.3cm} 57674&
+ 57674\hspace{0.3cm}65924&65924\hspace{0.3cm}
+    74188\\
+\rule{0cm}{0.7cm} 78139& 85673&
+    92219& 97287& 100368\\
+74188\hspace{0.3cm} 82090 &82090\hspace{0.3cm} 89256&89256\hspace{0.3cm} 95182&95182\hspace{0.3cm} 99392&99392\hspace{0.3cm} 101344\\\hline
+\end{tabular*}
+\end{table}
+
+The aerosol optical properties are provided at 30 wavelength bands
+which are listed in 
+table~\ref{tab_bands}. We give the index of the corresponding spectral
+bands in the \echam{}
+radiation code in column three and four of the table. The definition
+of wavelength band~30 is different for the new data set and
+the radiation code of \echam. 
+
+\begin{table}
+\caption{Wavelength bands for optical properties of volcanic aerosols
+  in nm}\label{tab_bands}
+\begin{tabular*}{\textwidth}{c@{\extracolsep\fill}ccc}\hline
+band index & $\lambda_{\rm v}/{\rm nm}$ & \multicolumn{2}{c}{\echam{} band} \\\hline
+\cw{1}1  &   \cw{00}200 --   \cw{000}263 &  solar 13 & \\
+\cw{1}2  &   \cw{00}263 --   \cw{000}345 &  solar 12 & \\
+\cw{1}3  &   \cw{00}345 --   \cw{000}442 &  solar 11 & \\
+\cw{1}4  &   \cw{00}442 --   \cw{000}625 &  solar 10 & \\
+\cw{1}5  &   \cw{00}625 --   \cw{000}778 &  solar \cw{1}9 & \\
+\cw{1}6  &   \cw{00}778 --  \cw{00}1242 &  solar \cw{1}8 & \\
+\cw{1}7  &  \cw{0}1242 --  \cw{00}1299 &  solar \cw{1}7 & \\
+\cw{1}8  &  \cw{0}1299 --  \cw{00}1626 &  solar \cw{1}6 & \\
+\cw{1}9  &  \cw{0}1626 --  \cw{00}1942 &  solar \cw{1}5 & \\
+     10  &  \cw{0}1942 --  \cw{00}2151 &  solar \cw{1}4 & \\
+     11  &  \cw{0}2151 --  \cw{00}2500 &  solar \cw{1}3 & \\
+     12  &  \cw{0}2500 --  \cw{00}3077 &  solar \cw{1}2 & \\
+     13  &  \cw{0}3077 --  \cw{00}3846 &  solar \cw{1}1 & thermal 16 \\
+     14  &  \cw{0}3846 -- \cw{0}12195 &  solar 14 &\\
+     15  &  \cw{0}3333 --  \cw{00}3846 &  \multicolumn{2}{c}{---} \\
+     16  &  \cw{0}3846 --  \cw{00}4202 &                & thermal 15 \\
+     17  &  \cw{0}4202 --  \cw{00}4444 &                & thermal 14 \\
+     18  &  \cw{0}4444 --  \cw{00}4808 &                & thermal 13 \\
+     19  &  \cw{0}4808 --  \cw{00}5556 &                & thermal 12 \\
+     20  &  \cw{0}5556 --  \cw{00}6757 &                & thermal 11 \\
+     21  &  \cw{0}6757 --  \cw{00}7194 &                & thermal 10 \\
+     22  &  \cw{0}7194 --  \cw{00}8474 &                & thermal \cw{1}9\\
+     23  &  \cw{0}8474 -- \cw{00}9259 &                & thermal \cw{1}8\\
+     24  &  \cw{0}9259 -- \cw{0}10204 &                & thermal \cw{1}7\\
+     25  & 10204 -- \cw{0}12195 &                & thermal \cw{1}6\\
+     26  & 12195 -- \cw{0}14286 &                & thermal \cw{1}5\\
+     27  & 14286 -- \cw{0}15873 &                & thermal \cw{1}4\\
+     28  & 15873 -- \cw{0}20000 &                & thermal \cw{1}3\\
+     29  & 20000 -- \cw{0}40000 &                & thermal \cw{1}2\\
+     30  & 40000 -- 250000 &                & thermal \cw{1}1\\
+\hline
+\end{tabular*}
+\end{table}
+
+The aerosol optical properties of the volcanic aerosols in the solar
+wavelength range ($\tau_{\rm v}$, $\omega_{\rm v}$, $g_{\rm v}$) and
+  the thermal wavelength 
+  range ($\tau^{\rm (lw)}_{\rm v}$, 
+  $\omega^{\rm (lw)}_{\rm v}$) are added to
+the given aerosol optical properties in the solar wavelength range
+($\tau$, $\omega$, $g$) and the thermal wavelength range ($\tau^{\rm
+  (lw)}$, $\omega^{\rm (lw)}$ ) by the 
+usual mixing rules (see equations~(\ref{eqmixing1})--(\ref{eqmixing4})) although the
+tropospheric and stratospheric aerosols are separated by
+region. Nevertheless, this procedure assures generality and allows for
+an overlap of these regions.
+
+\begin{eqnarray}
+\label{eqmixing1}
+\tau_{\rm total}&:=&\tau+\tau_{\rm v}\\
+\omega_{\rm total}&:=&\frac{\tau\omega+\tau_{\rm
+  v}\omega_{\rm v}}{\tau_{\rm total}}\\ 
+g_{\rm total}&:=&\frac{\tau\omega g+\tau_{\rm
+  v}\omega_{\rm v}g_{\rm v}}{\tau_{\rm total}\omega_{\rm total}}\\
+\tau^{\rm (lw)}_{\rm total}&:=&\tau^{\rm (lw)}+\tau^{(\rm lw)}_{\rm
+  v}(1-\omega^{\rm (lw)}_{\rm v})\label{eqmixing4}
+\end{eqnarray}
+
+\subsubsection{Volcanic aerosols from 790 until 2010}
+
+The historic record of stratospheric volcanic aerosols by
+G.~Stenchikov (see the previous section) comprises the period
+from 1850 until 1999 only. Volcanic eruptions prior to this period can
+be taken into account by the use of the longterm data set by
+T.~Crowley that gives information about the volcanic forcing in terms
+of total aerosol optical
+depth and the effective radius  since 790. 
+In that
+case, no information about the height distribution of the aerosols is
+available. T.~Crowley estimated the total aerosol optical depth at 550~nm
+for four
+latitude bands ($30^\circ{\rm N}$ -- $90^\circ{\rm N}$, $0^\circ{\rm
+  N}$ -- $30^\circ{\rm N}$, $30^\circ{\rm S}$ -- $0^\circ{\rm N}$,
+$90^\circ{\rm N}$ -- $30^\circ{\rm S}$). For each of these latitude
+bands, he also gives an estimate of the effective radius of the aerosols.
+These original values for the aerosol optical depth and the effective
+radius are linearily interpolated for latitudes
+in $\left[15^\circ{\rm N},45^\circ{\rm N}\left[\right.\right.$
+(between the values for the latitude bands $30^\circ{\rm N}$ --
+$90^\circ{\rm N}$, $0^\circ{\rm 
+  N}$ -- $30^\circ{\rm N}$),
+$\left[15^\circ{\rm S},15^\circ{\rm N}\left[\right.\right.$ (between
+the values for the latitude bands $0^\circ{\rm
+  N}$ -- $30^\circ{\rm N}$, $30^\circ{\rm S}$ -- $0^\circ{\rm N}$),
+and $\left[45^\circ{\rm S},15^\circ{\rm S}\left[\right.\right.$
+(between the values for the latitude bands $30^\circ{\rm S}$ --
+$0^\circ{\rm N}$, 
+$90^\circ{\rm N}$ -- $30^\circ{\rm S}$).
+
+For the radiation calculation, it is assumed that the volcanic
+aerosols consist of 75\% sulfate 
+aerosols. Certain 
+wavelength and radius dependence tables prepared by S.~Kinne are used
+to estimate the aerosol optical properties from the the aerosol
+optical depth at 550~nm and the effective radius $r_{\rm err}$
+assuming a logarithmic normal distribution. 
+For each particle radius
+$r$ and wavelength 
+$\lambda$ a table provides the ratio
+$(r,\lambda)\mapsto\xi(r,\lambda):=\zeta(r,\lambda)/\zeta(r,550{\rm})$
+where $\zeta$ is the extinction coefficient, the single scattering
+albedo $(r,\lambda)\mapsto\omega(r,\lambda)$, and the
+asymmetry factor $(r,\lambda)\mapsto g(r,\lambda)$. Since
+$\zeta$ is assumed 
+to be constant in a model layer, the extinction is proportional to the
+aerosol optical depth in one layer. Therefore, the space, time, and
+wavelength dependent volcanic aerosol optical properties $\tau_{\rm
+  v}$ are given for any position 
+$\vec{x}$ in the atmosphere and time $t$ by:
+
+\begin{eqnarray}\label{eqtau}
+\tau_{\rm v}(\vec{x},t,\lambda)&=&\xi(r_{\rm
+eff}(\vec{x},t),\lambda)\times\tau_{550}(\vec{x},r) \\\label{eqssa}
+\omega_{\rm v}(\vec{x},t,\lambda)&=&\omega(r_{\rm
+eff}(\vec{x},t),\lambda) \\\label{eqasy}
+g_{\rm v}(\vec{x},t,\lambda)&=&g(r_{\rm
+eff}(\vec{x},t),\lambda) 
+\end{eqnarray}
+
+The aerosol optical properties of the volcanic or stratospheric
+aerosols are linearly interpolated in time and then added to the
+aerosol optical properties according to the common mixing rules
+resulting in the following overall aerosol optical properties
+$\tau_{\rm total}$, $\omega_{\rm total}$, $g_{\rm total}$. In the case of solar
+wavelenghts, the full mixing rules are applied:
+
+\begin{eqnarray}\label{eqm1}
+\tau_{\rm total}&=&\sum\limits_{i=1}^l \tau_i\\\label{eqm2}
+\omega_{\rm total}&=&\frac{\sum\limits_{i=1}^l \omega_i\tau_i}{\tau_{\rm total}}\\\label{eqm3}
+g_{\rm total}&=&\frac{\sum\limits_{i=1}^l g_i\omega_i\tau_i}{\tau_{\rm
+    a}\omega_{\rm total}}
+\end{eqnarray}
+
+In the case of thermal wavelengths, only the aerosol optical depth has
+to be provided, but only the ``absorbence'' is taken into account:
+
+\begin{equation}\label{eqm4}
+\tau_{\rm total}=\sum\limits_{i=1}^l \tau_i(1-\omega_i)
+\end{equation}
+
+
+For historic volcanic eruptions, there is no information available
+about the vertical distribution of 
+volcanic aerosols from measurements, but we know that
+the altitude distribution depends on the neutral buoyancy height
+of the volcanic plume at which the 
+aerosols form.
+Furthermore, we know that the neutral buoyancy height is also
+limited because of the gravity effect on the plume as described
+by~\cite{her106, tim093} and by personal communication of H.--F.~Graf~2005. From
+this, we conclude that the aerosols are located mainly in the
+stratosphere. The exact altitude position is not of first order
+relevance for the radiation budget in the troposphere provided that the total
+aerosol optical depth is correct. On the other hand, the influence on
+the dynamics of the stratosphere depends on the exact altitude but is
+not so relevant for simulations with a focus on the climate. We
+therefore decided to use an altitude profile that is similar to the
+injection height of SO$_2$ as it was observed from satellite after the Pinatubo
+eruption, see~\cite{spa1997}. The following pressure dependent weight
+function $w$ is 
+used at all geographical locations:
+
+\begin{equation}
+p\mapsto w(p)=\frac{1}{4}\times{\bf 1}_{[30{\rm hPa},40{\rm hPa}[}(p) +
+\frac{1}{2}\times{\bf 1}_{[40{\rm hPa},50{\rm hPa}[}(p)+\frac{1}{4}\times{\bf 1}_{[50{\rm hPa},60{\rm hPa}[}(p)
+\end{equation}
+
+where ${\bf 1}_{A}$ is the characteristic function of set $A$. Let
+$\vec{y}$ represent a location on the surface of the Earth and be
+$(\vec{y},r)\mapsto\tau_{\rm crow}(\vec{y},r)$ the aerosol optical depth at
+550~nm and a certain effective radius $r$ provided by T.~Crowley, then 
+$\tau_{550}=w\times\tau_{\rm crow}$. The time, space and wavelength
+dependent optical properties of the volcanic aerosols are then given
+by equations~(\ref{eqtau}--\ref{eqasy}). As in the case of the HAM
+derived volcanic aerosol properties, the full mixing rules are applied
+in the case of the solar radiation according to
+equations~(\ref{eqm1}--\ref{eqm3}). In the case of the thermal
+radiation, the simplified
+equation~(\ref{eqm4}) is used.
