@@ -5,16 +5,16 @@
 &RUNCTL 
  lresume        = .false.,
  lmidatm        = .true.
- out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PPE_TEST/"
- out_expname    = "PPE_TEST"
+ out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/"
+ out_expname    = "Jasper_2006"
  out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
  trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
  rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
- dt_start       = 2025,08,01,0,0,0
- dt_stop        = 2025,08,06,1,0,0
- putdata        = 5,'days','last',0
- trigfiles      = 5,'days','first',0
- putrerun       = 1,'days','last',0
+ dt_start       = 2006,01,01,0,0,0
+ dt_stop        = 2006,02,01,1,0,0
+ putdata        = 1,'months','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = 15, 
  lamip          = .false.
  lnudge         = .true.
@@ -28,8 +28,8 @@
  lmoz             = .false.
  lhammoz          = .false.
  lburden          = .true.
- emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
- emi_scenario     = "ssp245"
+ emi_basepath     =  "/projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/"
+ emi_scenario     = "RCP45"
  laerocom_diag    = .true.
 /
 &HAMMOZ_AEROCOMCTL
@@ -85,8 +85,8 @@
 /
 &NDGCTL
  inudgformat     = 2
- dt_nudg_start   = 2025,08,01,0,0,0
- dt_nudg_stop    = 2025,08,06,1,0,0
+ dt_nudg_start   = 2006,01,01,0,0,0
+ dt_nudg_stop    = 2006,02,01,1,0,0
  lnudgdbx        = .false.
  lnudgini        = .false.
  nudglmin        = 1
@@ -100,6 +100,66 @@
  nudgdamp        = 1.
  nudgdsize       = 0.5
  ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&set_stream
+  stream='burden'
+  lpost=1
+  interval = 3,'hours','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='emi'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='activ'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='hifreq'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='rad'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acheaci'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acmmppe'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acp3d'
+  lpost=1
+  interval = 1,'months','last',0
 /
 &HAMMOZ_PERTURBATIONS
 

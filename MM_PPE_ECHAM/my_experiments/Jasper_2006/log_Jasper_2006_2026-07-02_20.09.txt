@@ -1,0 +1,76 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-01-01 00:00:00
+Starting date for this run:        2006-01-01 00:00:00
+Ending date for this run:          2006-01-06 01:00:00
+
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 16 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 192
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/Jasper_2006/echam_jobscript_Jasper_2006.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: Jasper_2006
+ - number of cpus: 128
+
+----
+Creating the output directory...
+
+Output directory: /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/
+
+----
+Parsing namelist_Jasper_2006.echam to get input files-related flags...
+
+----
+Starting input files linking process into /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/...
+
+with:
+
+input_basepath: /home/ybhatti/yusufb/MODEL_INPUT/v0002
+nudg_basepath: /home/ybhatti/yusufb/MODEL_INPUT/Nudging
+exp_dir: /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/
+hres: T63
+vres: L47
+oceres: GR15
+start_yyyymm: 200601
+stop_yyyymm: 200601
+start_year_m1: 2005
+stop_year_p1: 2007
+start_yyyymm_m1: 200512
+stop_yyyymm_p1: 200602
+flag_time_dep_sst_sic: false
+sst_sic_dataset: era5
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: ssp245
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+

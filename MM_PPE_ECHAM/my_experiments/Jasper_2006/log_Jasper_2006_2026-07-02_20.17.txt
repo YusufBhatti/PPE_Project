@@ -1,0 +1,171 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-01-01 00:00:00
+Starting date for this run:        2006-01-01 00:00:00
+Ending date for this run:          2006-01-06 01:00:00
+
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 16 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 192
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/Jasper_2006/echam_jobscript_Jasper_2006.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: Jasper_2006
+ - number of cpus: 128
+
+----
+Creating the output directory...
+
+Output directory: /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/
+
+----
+Parsing namelist_Jasper_2006.echam to get input files-related flags...
+
+----
+Starting input files linking process into /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/...
+
+with:
+
+input_basepath: /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002
+nudg_basepath: /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging
+exp_dir: /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/
+hres: T63
+vres: L47
+oceres: GR15
+start_yyyymm: 200601
+stop_yyyymm: 200601
+start_year_m1: 2005
+stop_year_p1: 2007
+start_yyyymm_m1: 200512
+stop_yyyymm_p1: 200602
+flag_time_dep_sst_sic: false
+sst_sic_dataset: era5
+flag_CMIP5_ozon: true
+flag_time_dep_sol_irr: false
+flag_kinne_aerosols: false
+flag_stenchikov_aerosols: false
+flag_crowley_aerosols: false
+flag_submclim_aerosols: false
+scenario: ssp245
+flag_nudg: true
+flag_nudg_netcdf: true
+flag_hd: false
+aero_micro_scheme: M7
+flag_ham: true
+flag_moz: false
+
+Nudging dataset from 200601 on: era5
+
+----
+Keeping a record of all symbolic links... 
+
+lrwxrwxrwx 1 ybhatti2 prjs1474 86 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.23 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63L47_jan_spec.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 96 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ozon2006 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 97 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/dust_potential_sources.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/dust_potential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 90 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/parnuc.15H2SO4.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/parnuc.15H2SO4.A0.total.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 106 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/jsbach.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/jsbach/T63/jsbach_T63GR15_11tiles_5layers_2005.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 84 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/greenhouse_gases.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/greenhouse_ssp245.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 90 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/dust_msg_pot_sources.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/msg_pot_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 102 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.20 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 102 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.96 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 87 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/dust_regions.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/dust_regions_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 85 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/xtsoil.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/soilpHfrac_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 86 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.90 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63GR15_VLTCLIM.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 92 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/surface_rough_12m.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/surface_rough_12m_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/megan_fraction_broadl_ev.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_fraction_broadl_ev_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 88 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/pointlocations.txt -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/CFMIP/pointlocations.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 88 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/soil_type_all.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/soil_type_all_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ndg200512.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging/era5_T63L47_netcdf/era5_T63L47_200601.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 96 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/lctlib.def -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/jsbach/lctlib_nlct21.def_rev7624
+lrwxrwxrwx 1 ybhatti2 prjs1474 76 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/lut_kappa.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/lut_kappa.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 112 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/explosive_volcanos.dat -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/emissions_inventories/aerocom_II/explosive_volcanos.dat
+lrwxrwxrwx 1 ybhatti2 prjs1474 74 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/gcr_ipr_solmax.txt -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/solmax.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 101 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/megan_boreal_grasses_limit.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_boreal_grasses_limit_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 85 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ECHAM6_CldOptProps.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/ECHAM6_CldOptProps.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/megan_boreal_trees_limit.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_boreal_trees_limit_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 95 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/lut_optical_properties_lw.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/lut_optical_properties_lw_M7.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 96 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ozon2005 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 84 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/surface_properties.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/xtsurf_v2_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 103 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ham_oxidants_monthly.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/ham_oxidants_monthly_T63L47_macc.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/rrtmg_sw.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/rrtmg_sw.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 101 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/megan_clm_pft_map.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_mksrf_pft_cesm4_2005_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 96 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ozon2007 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 82 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.92 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_TSLCLIM.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 87 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.24 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63GR15_jan_surf.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 92 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/megan_emission_factors.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_ef_specific_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 75 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/rrtmg_lw.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/rrtmg_lw.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 113 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/continuous_volcanos.dat -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/emissions_inventories/aerocom_II/continuous_volcanos.dat
+lrwxrwxrwx 1 ybhatti2 prjs1474 74 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/gcr_ipr_solmin.txt -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/solmin.txt
+lrwxrwxrwx 1 ybhatti2 prjs1474 125 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/conc_aerocom_DMS_sea.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/emissions_inventories/others/T63/emiss_fields_dms_sea_monthly_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 100 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/dust_preferential_sources.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/dust_preferential_sources_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/megan_fraction_broadl_de.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_fraction_broadl_de_T63.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 92 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/lut_optical_properties.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/lut_optical_properties_M7.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 99 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/ndg200601.nc -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/Nudging/era5_T63L47_netcdf/era5_T63L47_200601.nc
+lrwxrwxrwx 1 ybhatti2 prjs1474 88 Jul  2 20:17 /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/unit.91 -> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63GR15_VGRATCLIM.nc
+
+----
+Checking if all symbolic links point to real files...
+
+List of non-existent input files:
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/ECHAM6_CldOptProps.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/emissions_inventories/others/T63/emiss_fields_dms_sea_monthly_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/emissions_inventories/aerocom_II/continuous_volcanos.dat
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/msg_pot_sources_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/dust_potential_sources_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/dust_preferential_sources_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/dust_regions_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/emissions_inventories/aerocom_II/explosive_volcanos.dat
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/solmax.txt
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/solmin.txt
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/greenhouse_ssp245.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/ham_oxidants_monthly_T63L47_macc.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/jsbach/T63/jsbach_T63GR15_11tiles_5layers_2005.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/jsbach/lctlib_nlct21.def_rev7624
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/lut_kappa.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/lut_optical_properties_M7.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/lut_optical_properties_lw_M7.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_boreal_grasses_limit_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_boreal_trees_limit_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_mksrf_pft_cesm4_2005_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_ef_specific_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_fraction_broadl_de_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/megan_fraction_broadl_ev_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/parnuc.15H2SO4.A0.total.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/CFMIP/pointlocations.txt
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/rrtmg_lw.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/rrtmg_sw.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/soil_type_all_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/xtsurf_v2_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/surface_rough_12m_T63.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/amip/T63_amipsst_1979-2008_mean.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63L47_jan_spec.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63GR15_jan_surf.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63GR15_VLTCLIM.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63GR15_VGRATCLIM.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/T63_TSLCLIM.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/echam6/T63/amip/T63_amipsic_1979-2008_mean.nc
+-> /home/ybhatti2/ybhatti/prjs1076/yusufb/MODEL_INPUT/v0002/hammoz/T63/soilpHfrac_T63.nc
+

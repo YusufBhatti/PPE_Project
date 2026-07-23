@@ -1,0 +1,48 @@
+----
+Using configuration for machine:  snellius
+
+----
+Checking variables from the settings file...
+
+
+----
+Setting starting and stopping dates of the current run...
+
+Starting date for this experiment: 2006-01-01 00:00:00
+Starting date for this run:        2006-01-01 00:00:00
+Ending date for this run:          2006-01-06 01:00:00
+
+
+----
+Setting nproca and nprocb...
+
+Replacing nproca and nprocb by valid values
+nproca = 16 nprocb = 8
+
+----
+Setting machine-specific variables and create the batch job script...
+WARNING! Your number of CPUs is not a multiple of 192
+----
+Creating the job script for ECHAM
+
+Echam jobscript name: /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/Jasper_2006/echam_jobscript_Jasper_2006.sh
+
+----
+Recording the compute settings:
+ - queue name: genoa
+ - job name: Jasper_2006
+ - number of cpus: 128
+
+----
+Creating the output directory...
+
+Output directory: /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/
+
+----
+Parsing namelist_Jasper_2006.echam to get input files-related flags...
+
+----
+Starting input files linking process into /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/Jasper_2006/...
+Wrong value for scenario (ssp245)!
+It must be one of those (case insensitive): rcp[0-9][0-9] historic
+Exiting

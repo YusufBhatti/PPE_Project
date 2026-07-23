@@ -1,6 +1,9 @@
 #!/bin/bash
 # 
 # Jobscript toolkit version 1.2 (March  2016, svn revision r3070). 
+#
+# 
+# Jobscript toolkit version 1.2 (March  2016, svn revision r3070). 
 
 
 #-------------------------------------------------------------------------------------------------------
@@ -28,7 +31,7 @@ set -e
 #-- General settings:
 
 model_dir="/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM" 
-exp="PPE_TEST" 
+exp="Jasper_2006" 
 script_dir="${model_dir}/my_experiments/${exp}" 
 echam_jobscript=${script_dir}/echam_jobscript_${exp}.sh # echam batch job script name
 
@@ -69,15 +72,16 @@ ntiles=11                     # number of tiles in the vegetation model
 
 no_cycles=15                  # number of cycles in one integration (1 cycle = timespan between 2 'putrerun' events)
 
+faked_restart=.false.
 init_restart_flag=.false.     # echam restart flag at launch of this job 
                               # (in case of job chaining, the proper rerun flag will be automatically 
                               #  set when further jobs will be started)
 
-date_start="2025,08,01,0,0,0"  # 20090829234500
-date_stop="2025,08,06,1,0,0"
+date_start="2006,01,01,0,0,0"  # 20090829234500
+date_stop="2006,02,01,1,0,0"
 
-input_files_version="v0002"   # version label for input files !!do not change if you don't know about it!!
-scenario="ssp245"              # in case it is relevant for the given setup (using either variable GHG's
+input_files_version="v0002"
+scenario="RCP45"              # in case it is relevant for the given setup (using either variable GHG's
                               # ozone or climatologic aerosols, AND the experiment's time range 
                               # overlaps with [2009,2100]), choose here the scenario you'd like
                               # (RCP45, XXX, all case insensitive)
@@ -102,9 +106,9 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
  dt_start       = $date_start
  dt_stop        = $date_stop
- putdata        = 5,'days','last',0
- trigfiles      = 5,'days','first',0
- putrerun       = 1,'days','last',0
+ putdata        = 1,'months','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
@@ -190,6 +194,66 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  nudgdamp        = 1.
  nudgdsize       = 0.5
  ndg_file_nc    = "ndg%y4%m2.nc"
+/
+&set_stream
+  stream='burden'
+  lpost=1
+  interval = 3,'hours','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='emi'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='activ'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='ham'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='tracer'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='hifreq'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='rad'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acheaci'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acmmppe'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acp3d'
+  lpost=1
+  interval = 1,'months','last',0
 /
 &HAMMOZ_PERTURBATIONS
 
