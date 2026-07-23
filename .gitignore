@@ -28,6 +28,15 @@ src/*.lst
 # Ignore everything inside my_experiments
 PPE_PACE_Project/my_experiments/*
 
+# Autotools generated files anywhere
+**/config.guess
+**/config.sub
+**/install-sh
+**/ltmain.sh
+**/Makefile.in
+**/aclocal.m4
+**/config.status
+
 # But allow the directory itself
 !PPE_PACE_Project/my_experiments/
 !PPE_PACE_Project/my_experiments/.gitkeep
