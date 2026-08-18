@@ -80,6 +80,12 @@ MODULE mo_hammoz_aerocom_HEmon
   REAL(dp), PUBLIC, POINTER :: laythick(:,:,:)
   REAL(dp), PUBLIC, POINTER :: mmrso2(:,:,:)
   REAL(dp), PUBLIC, POINTER :: mmrso4(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: mmrdms(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: mmrbc(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: mmroa(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: mmrdust(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: mmrss(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: mmraerh2o(:,:,:)
   REAL(dp), PUBLIC, POINTER :: dry3Dso2(:,:,:)
   REAL(dp), PUBLIC, POINTER :: dry3Dso4(:,:,:)
   REAL(dp), PUBLIC, POINTER :: wet3Dso2(:,:,:)
@@ -168,14 +174,14 @@ MODULE mo_hammoz_aerocom_HEmon
 
     CALL add_stream_element (achemon, 'precip', precip, &
         longname = 'total_precipitation_rate', &
-        units = 'km m-2 s-1', &
+        units = 'kg m-2 s-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
     
     CALL add_stream_element (achemon, 'sprecip', sprecip, &
         longname = 'stratiform_precipitation_rate', &
-        units = 'km m-2 s-1', &
+        units = 'kg m-2 s-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
@@ -389,14 +395,56 @@ MODULE mo_hammoz_aerocom_HEmon
      
      CALL add_stream_element (achemon, 'mmrso2', mmrso2, &
         longname = 'Mass Mixing Ratio of SO2', &
-        units = '1', &
+        units = 'kg kg-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
     
      CALL add_stream_element (achemon, 'mmrso4', mmrso4, &
         longname = 'Mass Mixing Ratio of SO4', &
-        units = '1', &
+        units = 'kg kg-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'mmrdms', mmrdms, &
+        longname = 'Mass Mixing Ratio of DMS', &
+        units = 'kg kg-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'mmrbc', mmrbc, &
+        longname = 'Mass Mixing Ratio of black carbon', &
+        units = 'kg kg-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'mmroa', mmroa, &
+        longname = 'Mass Mixing Ratio of organic matter', &
+        units = 'kg kg-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'mmrdust', mmrdust, &
+        longname = 'Mass Mixing Ratio of dust', &
+        units = 'kg kg-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'mmrss', mmrss, &
+        longname = 'Mass Mixing Ratio of seasalt', &
+        units = 'kg kg-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'mmraerh2o', mmraerh2o, &
+        longname = 'Mass Mixing Ratio of aerosol water', &
+        units = 'kg kg-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
@@ -571,6 +619,13 @@ MODULE mo_hammoz_aerocom_HEmon
     USE mo_echam_cloud_params, ONLY: cthomi
     USE mo_ham,          ONLY: nclass, sizeclass
     USE mo_hammoz_aerocom_MMPPE, ONLY: fliq2d
+    USE mo_ham_m7_trac,   ONLY: idt_so2, idt_dms,                               &
+                                idt_ms4ns, idt_ms4ks, idt_ms4as, idt_ms4cs,     &
+                                idt_mbcki, idt_mbcks, idt_mbcas, idt_mbccs,     &
+                                idt_mocki, idt_mocks, idt_mocas, idt_moccs,     &
+                                idt_mduai, idt_mduas, idt_mduci, idt_mducs,     &
+                                idt_mssas, idt_msscs,                          &
+                                idt_mwans, idt_mwaks, idt_mwaas, idt_mwacs
 
     INTEGER, INTENT(in) :: kproma, kbdim, klev, krow
     INTEGER :: jk
@@ -714,6 +769,41 @@ MODULE mo_hammoz_aerocom_HEmon
     !-- laythick
     laythick(1:kproma,:,krow) = laythick(1:kproma,:,krow) + vphysc%grheightm1(1:kproma,:,krow)&
          *delta_time
+
+    !-- mmrso2
+    mmrso2(1:kproma,:,krow) = mmrso2(1:kproma,:,krow) + xtm1(1:kproma,:,idt_so2,krow)*delta_time
+
+    !-- mmrso4 (sum over NS, KS, AS, CS soluble modes)
+    mmrso4(1:kproma,:,krow) = mmrso4(1:kproma,:,krow) + delta_time * (          &
+         xtm1(1:kproma,:,idt_ms4ns,krow) + xtm1(1:kproma,:,idt_ms4ks,krow) +    &
+         xtm1(1:kproma,:,idt_ms4as,krow) + xtm1(1:kproma,:,idt_ms4cs,krow) )
+
+    !-- mmrdms
+    mmrdms(1:kproma,:,krow) = mmrdms(1:kproma,:,krow) + xtm1(1:kproma,:,idt_dms,krow)*delta_time
+
+    !-- mmrbc (sum over KI, KS, AS, CS modes)
+    mmrbc(1:kproma,:,krow) = mmrbc(1:kproma,:,krow) + delta_time * (            &
+         xtm1(1:kproma,:,idt_mbcki,krow) + xtm1(1:kproma,:,idt_mbcks,krow) +    &
+         xtm1(1:kproma,:,idt_mbcas,krow) + xtm1(1:kproma,:,idt_mbccs,krow) )
+
+    !-- mmroa (sum over KI, KS, AS, CS modes)
+    mmroa(1:kproma,:,krow) = mmroa(1:kproma,:,krow) + delta_time * (            &
+         xtm1(1:kproma,:,idt_mocki,krow) + xtm1(1:kproma,:,idt_mocks,krow) +    &
+         xtm1(1:kproma,:,idt_mocas,krow) + xtm1(1:kproma,:,idt_moccs,krow) )
+
+    !-- mmrdust (sum over AI, AS, CI, CS modes)
+    mmrdust(1:kproma,:,krow) = mmrdust(1:kproma,:,krow) + delta_time * (        &
+         xtm1(1:kproma,:,idt_mduai,krow) + xtm1(1:kproma,:,idt_mduas,krow) +    &
+         xtm1(1:kproma,:,idt_mduci,krow) + xtm1(1:kproma,:,idt_mducs,krow) )
+
+    !-- mmrss (sum over AS, CS modes)
+    mmrss(1:kproma,:,krow) = mmrss(1:kproma,:,krow) + delta_time * (            &
+         xtm1(1:kproma,:,idt_mssas,krow) + xtm1(1:kproma,:,idt_msscs,krow) )
+
+    !-- mmraerh2o (sum over NS, KS, AS, CS modes)
+    mmraerh2o(1:kproma,:,krow) = mmraerh2o(1:kproma,:,krow) + delta_time * (    &
+         xtm1(1:kproma,:,idt_mwans,krow) + xtm1(1:kproma,:,idt_mwaks,krow) +    &
+         xtm1(1:kproma,:,idt_mwaas,krow) + xtm1(1:kproma,:,idt_mwacs,krow) )
 
      !-- conccnmodeXX
     DO jclass = 1, nclass

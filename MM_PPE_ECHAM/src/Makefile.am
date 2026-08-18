@@ -666,12 +666,12 @@ mo_hammoz_aerocom_HEaci.o: mo_cosp_simulator.o mo_decomposition.o \
 	mo_ham_rad_data.o mo_ham_streams.o mo_hammoz_aerocom_data.o mo_kind.o \
 	mo_linked_list.o mo_memory_base.o mo_memory_g1a.o mo_memory_g3b.o \
 	mo_physical_constants.o mo_time_control.o mo_time_event.o mo_vphysc.o
-mo_hammoz_aerocom_HEmon.o: mo_echam_cloud_params.o mo_ham.o mo_ham_rad_data.o \
-	mo_ham_streams.o mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_MMPPE.o \
-	mo_hammoz_aerocom_data.o mo_kind.o mo_linked_list.o mo_memory_base.o \
-	mo_memory_g1a.o mo_memory_g3b.o mo_memory_gl.o \
-	mo_physical_constants.o mo_submodel_diag.o mo_time_control.o \
-	mo_time_event.o mo_vphysc.o
+mo_hammoz_aerocom_HEmon.o: mo_echam_cloud_params.o mo_ham.o mo_ham_m7_trac.o \
+	mo_ham_rad_data.o mo_ham_streams.o mo_hammoz_aerocom_HEaci.o \
+	mo_hammoz_aerocom_MMPPE.o mo_hammoz_aerocom_data.o mo_kind.o \
+	mo_linked_list.o mo_memory_base.o mo_memory_g1a.o mo_memory_g3b.o \
+	mo_memory_gl.o mo_physical_constants.o mo_submodel_diag.o \
+	mo_time_control.o mo_time_event.o mo_vphysc.o
 mo_hammoz_aerocom_HEpro.o: mo_hammoz_aerocom_data.o mo_kind.o \
 	mo_linked_list.o mo_memory_base.o mo_time_event.o
 mo_hammoz_aerocom_MMPPE.o: mo_ham.o mo_ham_streams.o mo_ham_tools.o \

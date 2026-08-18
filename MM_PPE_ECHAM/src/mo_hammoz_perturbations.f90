@@ -126,9 +126,9 @@ MODULE mo_hammoz_perturbations
                  scale_emi_shp_so2 = 1.0_dp, & ! Scale factor for so2 emissions (shipping sector)
                  scale_emi_ant_bc = 1.0_dp, & ! Scale factor for bc emissions (ant sectors) (emi_ant_bc)
                  scale_emi_ant_oc = 1.0_dp, & ! Scale factor for oc emissions (ant sectors) (emi_ant_oc)
-                 scale_emi_bb_so2 = 1.0_dp, & ! Scale factor for so2 emissions (fire/bb sectors)
-                 scale_emi_bb_bc = 1.0_dp,  & ! Scale factor for bc emissions (fire/bb sectors)
-                 scale_emi_bb_oc = 1.0_dp,  &   ! Scale factor for oc emissions (fire/bb sectors)
+                 scale_emi_bb_so2 = 3.7_dp, & ! Scale factor for so2 emissions (fire/bb sectors)
+                 scale_emi_bb_bc = 3.7_dp,  & ! Scale factor for bc emissions (fire/bb sectors)
+                 scale_emi_bb_oc = 3.7_dp,  &   ! Scale factor for oc emissions (fire/bb sectors)
                  scale_fricv = 1.0_dp         ! Scale facotr for threshold of freiction velocity (affecting DU emi)
 
   REAL(dp)    :: scale_drydep_acc = 1.0_dp ! Scale factor for dry deposition of accumulation modes
@@ -140,7 +140,7 @@ MODULE mo_hammoz_perturbations
                  scale_micro_icefall =   1.0_dp   ! Scale factor for terminal fall velocity of cloud ice crystals 
 
 
-  REAL(wp)    :: scale_cprcon = 9.E-04_wp, & ! (abs) Conversion rate from cloud water to rain in convective clouds (conv_cprcon)
+  REAL(wp)    :: scale_cprcon = 9.E-4_wp, & ! (abs) Conversion rate from cloud water to rain in convective clouds (conv_cprcon)
                  scale_entrpen = 2.E-4_wp, & ! (abs) Entrainment rate for deep convection (conv_entrpen)
                  scale_cmfctop = 0.2_wp,   & ! fractional convective mass flux across the top of cloud (conv_cmfctop)
                  scale_entrscv = 3.0E-3_wp,& ! entrainment rate for shallow convection
@@ -507,7 +507,7 @@ CONTAINS
 !    CHARACTER(LEN=64), DIMENSION(7) :: sectors_ant=(/ 'AIRC', 'DOM', 'ENE', 'IND', 'SHIPS', 'TRA', 'WST' /)
     CHARACTER(LEN=64), DIMENSION(6) :: sectors_ff
     CHARACTER(LEN=64), DIMENSION(6) :: sectors_ant
-    CHARACTER(LEN=64), DIMENSION(6) :: sectors_antns
+    CHARACTER(LEN=64), DIMENSION(7) :: sectors_anth
     CHARACTER(LEN=64), DIMENSION(1) :: sectors_shp
     CHARACTER(LEN=64), DIMENSION(1) :: sectors_dms
     !--- Initialize fossil fuel sectors
@@ -523,20 +523,19 @@ CONTAINS
     sectors_ant(2) = 'DOM'
     sectors_ant(3) = 'ENE'
     sectors_ant(4) = 'IND'
-    sectors_ant(1) = 'SHIPS'
+    sectors_ant(7) = 'SHIPS'
     sectors_ant(5) = 'TRA'
     sectors_ant(6) = 'WST'
 
 
     !--- Initialize anthropogenic sectors
-    sectors_antns(1) = 'AIRC'
-    sectors_antns(2) = 'DOM'
-    sectors_antns(3) = 'ENE'
-    sectors_antns(4) = 'IND'
-    sectors_antns(5) = 'TRA'
-    sectors_antns(6) = 'WST'
-
-    sectors_shp(1) = 'SHIPS'
+    sectors_anth(1) = 'AIRC'
+    sectors_anth(2) = 'DOM'
+    sectors_anth(3) = 'ENE'
+    sectors_anth(4) = 'IND'
+    sectors_anth(5) = 'TRA'
+    sectors_anth(6) = 'WST'
+    sectors_anth(7) = 'SHIPS'
 
     sectors_dms(1) = 'OCEANI'
     sectors_dms(2) = 'TERR'
@@ -625,9 +624,9 @@ CONTAINS
 
     !--- SO2 from anthropogenic production without shipping:
 
-    nsec=SIZE(sectors_antns)
+    nsec=SIZE(sectors_anth)
     DO isec=1, nsec
-      ind=em_get_SectorIndex(TRIM(sectors_antns(isec)))
+      ind=em_get_SectorIndex(TRIM(sectors_anth(isec)))
       nvars=ematrix%em_sectors(ind)%es_nvars
       DO i=1, nvars
         !so2
@@ -637,19 +636,33 @@ CONTAINS
       ENDDO
     ENDDO
 
-    !--- SO2 from Shipping:
+!    --- DUST:
 
-    nsec=SIZE(sectors_shp)
-    DO isec=1, nsec
-      ind=em_get_SectorIndex(TRIM(sectors_shp(isec)))
+    DO ind=1, maxsectors
+!       Find any sectors that are type DUST since it can change for different emissions datasets
       nvars=ematrix%em_sectors(ind)%es_nvars
       DO i=1, nvars
-        !so2
-        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "SO2") THEN
-          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_shp_so2
+        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "DU") THEN
+          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_du
+          CALL message('hammoz_perturbations','DUST Emissions scale factor for sector:')
+          CALL message('', ematrix%em_sectors(ind)%es_sectorname )
+          CALL print_value(ematrix%em_sectors(ind)%es_variables(i)%ev_varname, ematrix%em_sectors(ind)%es_variables(i)%ev_factor)
         END IF
       ENDDO
     ENDDO
+!    !--- SO2 from Shipping:
+!
+!    nsec=SIZE(sectors_shp)
+!    DO isec=1, nsec
+!      ind=em_get_SectorIndex(TRIM(sectors_shp(isec)))
+!      nvars=ematrix%em_sectors(ind)%es_nvars
+!      DO i=1, nvars
+!        !so2
+!        IF (TRIM(ematrix%em_sectors(ind)%es_variables(i)%ev_varname) == "SO2") THEN
+!          ematrix%em_sectors(ind)%es_variables(i)%ev_factor=ematrix%em_sectors(ind)%es_variables(i)%ev_factor*scale_emi_shp_so2
+!        END IF
+!      ENDDO
+!    ENDDO
 
    !    --- Sea salt Aerosol:
 

@@ -215,14 +215,14 @@ MODULE mo_hammoz_aerocom_HEaci
 
      CALL add_stream_element (acheaci, 'precip', precip_inst, &
         longname = 'total_precipitation_rate', &
-        units = 'km m-2 s-1', &
+        units = 'kg m-2 s-1', &
         laccu = .FALSE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
     
     CALL add_stream_element (acheaci, 'sprecip', sprecip_inst, &
         longname = 'stratiform_precipitation_rate', &
-        units = 'km m-2 s-1', &
+        units = 'kg m-2 s-1', &
         laccu = .FALSE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
