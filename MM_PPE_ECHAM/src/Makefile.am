@@ -676,8 +676,8 @@ mo_hammoz_aerocom_HEpro.o: mo_hammoz_aerocom_data.o mo_kind.o \
 	mo_linked_list.o mo_memory_base.o mo_time_event.o
 mo_hammoz_aerocom_MMPPE.o: mo_ham.o mo_ham_streams.o mo_ham_tools.o \
 	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_data.o mo_kind.o \
-	mo_linked_list.o mo_memory_base.o mo_memory_g1a.o mo_time_event.o \
-	mo_vphysc.o
+	mo_linked_list.o mo_memory_base.o mo_memory_g1a.o \
+	mo_physical_constants.o mo_time_control.o mo_time_event.o mo_vphysc.o
 mo_hammoz_aerocom_Traj.o: mo_activ.o mo_ham.o mo_ham_streams.o \
 	mo_hammoz_aerocom_data.o mo_kind.o mo_linked_list.o mo_memory_base.o \
 	mo_memory_g1a.o mo_memory_g2a.o mo_memory_g3b.o \

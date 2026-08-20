@@ -36,6 +36,7 @@ CONTAINS
 
 
     CALL add_stream_reference (hifreq, 'TAU_2D_550nm','rad',lpost=.TRUE.)
+    CALL add_stream_reference (hifreq, 'OMEGA_2D_440nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ABS_2D_550nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ANG_550nm_865nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'ANG_440nm_670nm' ,'rad',lpost=.TRUE.)
@@ -59,7 +60,22 @@ CONTAINS
     CALL add_stream_reference (hifreq, 'TAU_2D_MODE_AI_550nm','rad',lpost=.TRUE.)
     CALL add_stream_reference (hifreq, 'TAU_2D_MODE_CI_550nm','rad',lpost=.TRUE.)
 !
+
+    CALL add_stream_reference (hifreq, 'conccnmodeNS','achemon',lpost=.TRUE.) ! Nuc Sol 
+    CALL add_stream_reference (hifreq, 'conccnmodeKS','achemon',lpost=.TRUE.) ! Aitken Sol 
+    CALL add_stream_reference (hifreq, 'conccnmodeAS','achemon',lpost=.TRUE.) !  Accum Sol
+    CALL add_stream_reference (hifreq, 'conccnmodeCS','achemon',lpost=.TRUE.) ! 
 !
+    CALL add_stream_reference (hifreq, 'ccn1_inst','acheaci',lpost=.TRUE.) ! CCN1 
+    CALL add_stream_reference (hifreq, 'ccn3_inst','acheaci',lpost=.TRUE.) ! CCN3
+    CALL add_stream_reference (hifreq, 'dpg','acheaci',lpost=.TRUE.) ! dpg to intigrate ccn with
+    CALL add_stream_reference (hifreq, 't3d','acheaci',lpost=.TRUE.) ! t3d to intigrate ccn with
+    CALL add_stream_reference (hifreq, 'aps','acheaci',lpost=.TRUE.) ! aps to intigrate ccn with
+    CALL add_stream_reference (hifreq, 'hyam','acheaci',lpost=.TRUE.) ! aps to intigrate ccn with
+
+
+    CALL add_stream_reference (hifreq, 'rhoam1','vphysc',lpost=.TRUE.) ! aps to intigrate ccn with
+    CALL add_stream_reference (hifreq, 'rhoam1_moist','vphysc',lpost=.TRUE.) ! aps to intigrate ccn with
 !!    CALL add_stream_reference (hifreq, 'burden_DMS','burden',lpost=.TRUE.)
 !!    CALL add_stream_reference (hifreq, 'burden_SO2','burden',lpost=.TRUE.)
 !!    CALL add_stream_reference (hifreq, 'burden_H2SO4','burden',lpost=.TRUE.)

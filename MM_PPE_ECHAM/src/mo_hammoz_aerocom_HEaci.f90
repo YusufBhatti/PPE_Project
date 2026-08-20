@@ -105,6 +105,7 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: wet3Dso4_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: dry3Dso2_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: dry3Dso4_inst(:,:,:)
+   REAL(dp), PUBLIC, POINTER :: ec355aer(:,:,:)
 
   CONTAINS
 
@@ -517,6 +518,13 @@ MODULE mo_hammoz_aerocom_HEaci
         lpost = .TRUE., &
         lrerun = .FALSE. )
 
+     CALL add_stream_element (acheaci, 'ec355aer', ec355aer, &
+        longname = 'aerosol extinction coefficient at 355 nm', &
+        units = 'm-1', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .FALSE. )
+
      CALL add_stream_element (acheaci, 'wet3Dso2_inst', wet3Dso2_inst, &
         longname = 'wet deposition of SO2(inst.)', &
         units = 'kg m-2 s-1', &
@@ -553,7 +561,7 @@ MODULE mo_hammoz_aerocom_HEaci
     USE mo_memory_g3b,    ONLY: tpot, geosp
     USE mo_memory_g1a,    ONLY: tm1, xlm1, xim1
     USE mo_time_control,  ONLY: delta_time
-    USE mo_ham_streams,   ONLY: tau_2d
+   USE mo_ham_streams,   ONLY: tau_2d, tau355
     USE mo_ham_rad_data,  ONLY: Nwv_sw
     USE mo_cosp_simulator, ONLY: cisccp_cldtau3d
     USE mo_physical_constants, ONLY: grav
@@ -589,6 +597,10 @@ MODULE mo_hammoz_aerocom_HEaci
     !-- od550aer
     od550aer(1:kproma,krow) = od550aer(1:kproma,krow) &
          + tau_2d(Nwv_sw+1)%ptr(1:kproma,krow) * delta_time
+
+       !-- ec355aer
+       ec355aer(1:kproma,:,krow) = tau355%ptr(1:kproma,:,krow) / &
+          vphysc%grheightm1(1:kproma,:,krow)
     
     !-- aerindex
     aerindex(1:kproma,krow) = aerindex(1:kproma,krow) + &

@@ -134,42 +134,42 @@ MODULE mo_hammoz_aerocom_MMPPE
     CALL add_stream_element (acmmppe, 'ccn01', ccn01, &
          longname = 'ccn number concentration at SS=0.1%', &
          units = 'm-3', &
-         laccu = .FALSE., &
+         laccu = .TRUE., &
          lpost = .TRUE., &
          lrerun = .TRUE. )
 
     CALL add_stream_element (acmmppe, 'ccn03', ccn03, &
          longname = 'ccn number concentration at SS=0.3%', &
          units = 'm-3', &
-         laccu = .FALSE., &
+         laccu = .TRUE., &
          lpost = .TRUE., &
          lrerun = .TRUE. )
 
     CALL add_stream_element (acmmppe, 'ccn05', ccn05, &
          longname = 'ccn number concentration at SS=0.5%', &
          units = 'm-3', &
-         laccu = .FALSE., &
+         laccu = .TRUE., &
          lpost = .TRUE., &
          lrerun = .TRUE. )
 
     CALL add_stream_element (acmmppe, 'ccn01vi', ccn01vi, &
          longname = 'vertically integrated CCN number concentration at S=0.1%', &
          units = 'm-2', &
-         laccu = .FALSE., &
+         laccu = .TRUE., &
          lpost = .TRUE., &
          lrerun = .TRUE. )
 
     CALL add_stream_element (acmmppe, 'ccn03vi', ccn03vi, &
          longname = 'vertically integrated CCN number concentration at S=0.3%', &
          units = 'm-2', &
-         laccu = .FALSE., &
+         laccu = .TRUE., &
          lpost = .TRUE., &
          lrerun = .TRUE. )
 
     CALL add_stream_element (acmmppe, 'ccn05vi', ccn05vi, &
          longname = 'vertically integrated CCN number concentration at S=0.5%', &
          units = 'm-2', &
-         laccu = .FALSE., &
+         laccu = .TRUE., &
          lpost = .TRUE., &
          lrerun = .TRUE. )
     
@@ -184,6 +184,7 @@ MODULE mo_hammoz_aerocom_MMPPE
     USE mo_ham_tools,      ONLY: ham_m7_logtail
     USE mo_vphysc,         ONLY: vphysc
     USE mo_memory_g1a,     ONLY: xtm1
+    USE mo_time_control,   ONLY: delta_time
     USE mo_hammoz_aerocom_HEaci, ONLY: f3d, phase3d
     USE mo_physical_constants, ONLY: grav
 
@@ -253,17 +254,20 @@ MODULE mo_hammoz_aerocom_MMPPE
        END DO
     END DO
 
-    ccn01(1:kproma,:,krow) = zccn_mmppe(1:kproma,:,1)
-    ccn03(1:kproma,:,krow) = zccn_mmppe(1:kproma,:,2)
-    ccn05(1:kproma,:,krow) = zccn_mmppe(1:kproma,:,3)
+     ccn01(1:kproma,:,krow) = ccn01(1:kproma,:,krow) + zccn_mmppe(1:kproma,:,1)*delta_time
+     ccn03(1:kproma,:,krow) = ccn03(1:kproma,:,krow) + zccn_mmppe(1:kproma,:,2)*delta_time
+     ccn05(1:kproma,:,krow) = ccn05(1:kproma,:,krow) + zccn_mmppe(1:kproma,:,3)*delta_time
 
     !-- vertical integration (dp/g weighting, same as burden diagnostics)
     zdpg_mmppe(1:kproma,1) = 2._dp*(vphysc%aphm1(1:kproma,2,krow)-vphysc%apm1(1:kproma,1,krow))/grav
     zdpg_mmppe(1:kproma,2:klev) = (vphysc%aphm1(1:kproma,3:klev+1,krow)-vphysc%aphm1(1:kproma,2:klev,krow))/grav
 
-    ccn01vi(1:kproma,krow) = SUM(zccn_mmppe(1:kproma,:,1)/vphysc%rhoam1(1:kproma,:,krow)*zdpg_mmppe(1:kproma,:), DIM=2)
-    ccn03vi(1:kproma,krow) = SUM(zccn_mmppe(1:kproma,:,2)/vphysc%rhoam1(1:kproma,:,krow)*zdpg_mmppe(1:kproma,:), DIM=2)
-    ccn05vi(1:kproma,krow) = SUM(zccn_mmppe(1:kproma,:,3)/vphysc%rhoam1(1:kproma,:,krow)*zdpg_mmppe(1:kproma,:), DIM=2)
+    ccn01vi(1:kproma,krow) = ccn01vi(1:kproma,krow) + &
+         SUM(zccn_mmppe(1:kproma,:,1)/vphysc%rhoam1(1:kproma,:,krow)*zdpg_mmppe(1:kproma,:), DIM=2)*delta_time
+    ccn03vi(1:kproma,krow) = ccn03vi(1:kproma,krow) + &
+         SUM(zccn_mmppe(1:kproma,:,2)/vphysc%rhoam1(1:kproma,:,krow)*zdpg_mmppe(1:kproma,:), DIM=2)*delta_time
+    ccn05vi(1:kproma,krow) = ccn05vi(1:kproma,krow) + &
+         SUM(zccn_mmppe(1:kproma,:,3)/vphysc%rhoam1(1:kproma,:,krow)*zdpg_mmppe(1:kproma,:), DIM=2)*delta_time
     
   END SUBROUTINE update_MMPPE_diags
 

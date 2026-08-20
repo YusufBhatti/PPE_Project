@@ -147,6 +147,7 @@ MODULE mo_ham_streams
   TYPE (vmem2d), PUBLIC :: tau_2d_mode(nmaxclass,Nwv_tot) ! YAB
   TYPE (vmem2d), PUBLIC :: tau_2d(Nwv_tot)
   TYPE (vmem2d), PUBLIC :: abs_2d(Nwv_tot)
+  TYPE (vmem2d), PUBLIC :: omega_2d(Nwv_tot)
   TYPE (vmem2d), PUBLIC :: ant_2d(Nwv_tot)
 !>>NAJS: optical properties of dry aerosol
   TYPE (vmem2d), PUBLIC :: tau_dry(Niwv_sw_dry)
@@ -717,6 +718,9 @@ MODULE mo_ham_streams
 
            CALL add_stream_element(rad, 'ABS_2D'//'_'//cwv,     abs_2d(jwv)%ptr,     units='1',  &
                                    longname='Absorption optical thickness - total '//cwv              )
+
+           CALL add_stream_element(rad, 'OMEGA_2D'//'_'//cwv,   omega_2d(jwv)%ptr,   units='1',  &
+                                   longname='Single scattering albedo - total '//cwv              )
 
 
         END IF !nraddiagwv>1

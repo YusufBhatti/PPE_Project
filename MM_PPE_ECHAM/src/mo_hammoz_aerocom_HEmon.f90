@@ -91,6 +91,7 @@ MODULE mo_hammoz_aerocom_HEmon
   REAL(dp), PUBLIC, POINTER :: wet3Dso2(:,:,:)
   REAL(dp), PUBLIC, POINTER :: wet3Dso4(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ec5503Daer(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: ec3553Daer(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn1(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn3(:,:,:)
@@ -407,6 +408,13 @@ MODULE mo_hammoz_aerocom_HEmon
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
+     CALL add_stream_element (achemon, 'mmrso4_hifreq', mmrso4, &
+        longname = 'Mass Mixing Ratio of SO4', &
+        units = 'kg kg-1', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
      CALL add_stream_element (achemon, 'mmrdms', mmrdms, &
         longname = 'Mass Mixing Ratio of DMS', &
         units = 'kg kg-1', &
@@ -493,6 +501,13 @@ MODULE mo_hammoz_aerocom_HEmon
     
      CALL add_stream_element (achemon, 'ec5503Daer', ec5503Daer, &
         longname = 'Aerosol Extinction@550nm', &
+        units = 'm-1', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+     CALL add_stream_element (achemon, 'ec3553Daer', ec3553Daer, &
+        longname = 'Aerosol Extinction@355nm', &
         units = 'm-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
@@ -607,7 +622,7 @@ MODULE mo_hammoz_aerocom_HEmon
     USE mo_memory_g1a,    ONLY: tm1, qm1, xtm1
     USE mo_memory_gl ,    ONLY: xl, xi
     USE mo_time_control,  ONLY: delta_time
-    USE mo_ham_streams,   ONLY: tau_2d
+   USE mo_ham_streams,   ONLY: tau_2d, tau355
     USE mo_ham_rad_data,  ONLY: Nwv_sw
     USE mo_hammoz_aerocom_HEaci, ONLY: ttop_inst, cdnc_inst, cdr_inst, cod_inst, ccn_inst,&
          ccn1_inst, ccn3_inst, z_inst, cod3dswl, cod3dswi, precip_inst, sprecip_inst,&
@@ -829,6 +844,10 @@ MODULE mo_hammoz_aerocom_HEmon
     !-- ec5503Daer
     ec5503Daer(1:kproma,:,krow) = ec5503Daer(1:kproma,:,krow) + &
          od550aer3d(1:kproma,:,krow)/vphysc%grheightm1(1:kproma,:,krow)*delta_time
+
+       !-- ec3553Daer
+       ec3553Daer(1:kproma,:,krow) = ec3553Daer(1:kproma,:,krow) + &
+          tau355%ptr(1:kproma,:,krow)/vphysc%grheightm1(1:kproma,:,krow)*delta_time
 
     !-- wet deposition
     wet3Dso2(1:kproma,:,krow) = wet3Dso2(1:kproma,:,krow) + wet3Dso2_inst(1:kproma,:,krow)*delta_time
