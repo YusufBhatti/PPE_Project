@@ -181,6 +181,8 @@ MODULE mo_hammoz_aerocom_MMPPEmon
     REAL(dp) :: zdpg(kbdim,klev)    !< delta p over g [kg m-2]
     REAL(dp) :: zload(kbdim,nload)  !< instantaneous burdens [kg m-2]
 
+    ! NUMBER CONCENTATION (km-3): CDNC and IDNC
+
     !-- nmrcdnc, nmricnc (CDNC and ICNC tracers, see ham_define_tracer)
     nmrcdnc(1:kproma,:,krow) = nmrcdnc(1:kproma,:,krow) &
          + xtm1(1:kproma,:,idt_cdnc_ham,krow) * delta_time
@@ -188,16 +190,18 @@ MODULE mo_hammoz_aerocom_MMPPEmon
     nmricnc(1:kproma,:,krow) = nmricnc(1:kproma,:,krow) &
          + xtm1(1:kproma,:,idt_icnc_ham,krow) * delta_time
 
-!-- loadbc, loaddu, loadoc, loadso4, loadss, loadwat
-!   Column burdens as in xt_burden (mo_tracer_processes): the mass mixing ratio
-!   [kg kg-1] is weighted with dp/g and summed over all levels to give [kg m-2].
-!   The burdens are multiplied by dt here and divided by the output interval by
-!   the stream management (laccu), which gives a mean over the output interval.
-!   Difference to xt_burden: everything is taken at t-dt, i.e. the tracer is
-!   xtm1 and dp/g comes from the t-dt pressures held in vphysc, whereas
-!   xt_burden evaluates both at t+dt (xtm1+xtte*time_step_len and papp1/paphp1,
-!   see luse_p1_vars in mo_submodel_interface). This is consistent with the
-!   other AeroCom diagnostics, which all accumulate xtm1.
+    ! BURDEN (kg m-2): AEROSOL SPECIES
+
+    !-- loadbc, loaddu, loadoc, loadso4, loadss, loadwat
+    !   Column burdens as in xt_burden (mo_tracer_processes): the mass mixing ratio
+    !   [kg kg-1] is weighted with dp/g and summed over all levels to give [kg m-2].
+    !   The burdens are multiplied by dt here and divided by the output interval by
+    !   the stream management (laccu), which gives a mean over the output interval.
+    !   Difference to xt_burden: everything is taken at t-dt, i.e. the tracer is
+    !   xtm1 and dp/g comes from the t-dt pressures held in vphysc, whereas
+    !   xt_burden evaluates both at t+dt (xtm1+xtte*time_step_len and papp1/paphp1,
+    !   see luse_p1_vars in mo_submodel_interface). This is consistent with the
+    !   other AeroCom diagnostics, which all accumulate xtm1.
 
     !--- 1) Calculate auxiliary variable dp/g :
 
