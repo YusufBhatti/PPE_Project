@@ -88,6 +88,7 @@ echam6_SOURCES = auxhyb.f90 baresoildiff.f90 clsst.f90 clveg.f90 collect.f90 \
 	mo_hammoz_aerocom_data.f90 mo_hammoz_aerocom_diags.f90 \
 	mo_hammoz_aerocom_HEaci.f90 mo_hammoz_aerocom_HEmon.f90 \
 	mo_hammoz_aerocom_HEpro.f90 mo_hammoz_aerocom_MMPPE.f90 \
+	mo_hammoz_aerocom_MMPPEmon.f90 \
 	mo_hammoz_aerocom_Traj.f90 mo_hammoz_drydep.f90 \
 	mo_hammoz_drydep_lg.f90 mo_hammoz_emi_biogenic.f90 \
 	mo_hammoz_emi_fire.f90 mo_hammoz_emi_ocean.f90 \
@@ -660,6 +661,7 @@ mo_hammoz_aerocom_diags.o: mo_control.o mo_exception.o \
 	mo_hammoz_aerocom_AP3D.o mo_hammoz_aerocom_AP3M.o \
 	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_HEmon.o \
 	mo_hammoz_aerocom_HEpro.o mo_hammoz_aerocom_MMPPE.o \
+	mo_hammoz_aerocom_MMPPEmon.o \
 	mo_hammoz_aerocom_Traj.o mo_kind.o mo_mpi.o mo_namelist.o \
 	mo_submodel.o mo_tracdef.o $(INCLUDE)/hammoz_aerocomctl.inc
 mo_hammoz_aerocom_HEaci.o: mo_cosp_simulator.o mo_decomposition.o \
@@ -678,6 +680,10 @@ mo_hammoz_aerocom_MMPPE.o: mo_ham.o mo_ham_streams.o mo_ham_tools.o \
 	mo_hammoz_aerocom_HEaci.o mo_hammoz_aerocom_data.o mo_kind.o \
 	mo_linked_list.o mo_memory_base.o mo_memory_g1a.o \
 	mo_physical_constants.o mo_time_control.o mo_time_event.o mo_vphysc.o
+mo_hammoz_aerocom_MMPPEmon.o: mo_ham.o mo_ham_m7_trac.o mo_ham_species.o \
+	mo_hammoz_aerocom_data.o mo_kind.o mo_linked_list.o mo_memory_base.o \
+	mo_memory_g1a.o mo_physical_constants.o mo_time_control.o \
+	mo_time_event.o mo_vphysc.o
 mo_hammoz_aerocom_Traj.o: mo_activ.o mo_ham.o mo_ham_streams.o \
 	mo_hammoz_aerocom_data.o mo_kind.o mo_linked_list.o mo_memory_base.o \
 	mo_memory_g1a.o mo_memory_g2a.o mo_memory_g3b.o \

@@ -52,6 +52,7 @@ MODULE mo_hammoz_aerocom_diags
   LOGICAL, PUBLIC :: lHEaci_activ = .TRUE.   !< switch for 'HEaci' activation diags
   LOGICAL, PUBLIC :: lHEpro = .FALSE.   !< switch for 'HEpro' diags
   LOGICAL, PUBLIC :: lMMPPE = .FALSE.   !< switch for 'MMPPE' diags
+  LOGICAL, PUBLIC :: lMMPPEmon = .FALSE.   !< switch for 'MMPPE' monthly diags
   LOGICAL, PUBLIC :: lAP3M = .FALSE.   !< switch for 'AP3 monthly' diags
   LOGICAL, PUBLIC :: lAP3D = .FALSE.   !< switch for 'AP3 daily' diags
 
@@ -114,6 +115,7 @@ SUBROUTINE init_aerocom
         CALL p_bcast (lHEaci_activ, p_io)
         CALL p_bcast (lHEpro, p_io)
         CALL p_bcast (lMMPPE, p_io)
+        CALL p_bcast (lMMPPEmon, p_io)
         CALL p_bcast (lAP3M, p_io)
         CALL p_bcast (lAP3D, p_io)
     END IF
@@ -128,6 +130,7 @@ SUBROUTINE init_aerocom
         CALL print_value('init_aerocom, lHEaci_activ', lHEaci)
         CALL print_value('init_aerocom, lHEpro', lHEpro)
         CALL print_value('init_aerocom, lMMPPE', lMMPPE)
+        CALL print_value('init_aerocom, lMMPPEmon', lMMPPEmon)
         CALL print_value('init_aerocom, lAP3M', lAP3M)
         CALL print_value('init_aerocom, lAP3D', lAP3D)
     ENDIF
@@ -167,6 +170,7 @@ SUBROUTINE init_aerocom_streams
     USE mo_hammoz_aerocom_HEaci, ONLY: construct_HEaci_stream
     USE mo_hammoz_aerocom_HEpro, ONLY: construct_HEpro_stream
     USE mo_hammoz_aerocom_MMPPE, ONLY: construct_MMPPE_stream
+    USE mo_hammoz_aerocom_MMPPEmon, ONLY: construct_MMPPEmon_stream
     USE mo_hammoz_aerocom_AP3M,  ONLY: construct_AP3M_stream
     USE mo_hammoz_aerocom_AP3D,  ONLY: construct_AP3D_stream
                                      
@@ -181,6 +185,7 @@ SUBROUTINE init_aerocom_streams
 
     IF (lHEpro)        CALL construct_HEpro_stream
     IF (lMMPPE)        CALL construct_MMPPE_stream
+    IF (lMMPPEmon)     CALL construct_MMPPEmon_stream
     IF (lAP3M)         CALL construct_AP3M_stream
     IF (lAP3D)         CALL construct_AP3D_stream
 
@@ -211,6 +216,7 @@ SUBROUTINE update_aerocom_diags(kproma, kbdim, klev, krow, pi0)
     USE mo_hammoz_aerocom_HEaci,        ONLY: update_HEaci_diags
     USE mo_hammoz_aerocom_HEpro,        ONLY: update_HEpro_diags
     USE mo_hammoz_aerocom_MMPPE,        ONLY: update_MMPPE_diags
+    USE mo_hammoz_aerocom_MMPPEmon,     ONLY: update_MMPPEmon_diags
     USE mo_hammoz_aerocom_AP3M,         ONLY: update_AP3M_diags
     USE mo_hammoz_aerocom_AP3D,         ONLY: update_AP3D_diags
       
@@ -224,6 +230,7 @@ SUBROUTINE update_aerocom_diags(kproma, kbdim, klev, krow, pi0)
     IF (lHEmon) CALL update_HEmon_diags(kproma, kbdim, klev, krow)
     IF (lHEpro) CALL update_HEpro_diags(kproma, kbdim, klev, krow)
     IF (lMMPPE) CALL update_MMPPE_diags(kproma, kbdim, klev, krow)
+    IF (lMMPPEmon) CALL update_MMPPEmon_diags(kproma, kbdim, klev, krow)
     IF (lAP3M)  CALL update_AP3M_diags(kproma, kbdim, klev, krow)
     IF (lAP3D)  CALL update_AP3D_diags(kproma, kbdim, klev, krow)
 
