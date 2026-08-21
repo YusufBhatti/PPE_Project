@@ -191,6 +191,7 @@ MODULE mo_hammoz_aerocom_MMPPEmon
          + xtm1(1:kproma,:,idt_icnc_ham,krow) * delta_time
 
     ! BURDEN (kg m-2): AEROSOL SPECIES
+    ! Note there's going to ba small deviation to the actual burden output. Here, we're using for simplicity time step t - dt, whereas burden uses t + dt. t + dt is used since it's by convention the output.
 
     !-- loadbc, loaddu, loadoc, loadso4, loadss, loadwat
     !   Column burdens as in xt_burden (mo_tracer_processes): the mass mixing ratio
