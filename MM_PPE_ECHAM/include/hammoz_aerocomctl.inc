@@ -13,5 +13,6 @@ NAMELIST /hammoz_aerocomctl/ &
     lHEaci          , & ! switch for 'HEaci' diags
     lHEpro          , & ! switch for 'HEpro' diags
     lMMPPE          , & ! switch for 'MMPPE' diags
+    lMMPPEmon       , & ! switch for 'MMPPEmon' diags
     lAP3M           , & ! switch for 'AP3M' diags
     lAP3D               ! switch for 'AP3D' diags
