@@ -302,7 +302,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &set_stream
   stream='rad'
   lpost=1
-  interval = 6,'hours','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='echam'
