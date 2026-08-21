@@ -181,7 +181,7 @@ MODULE mo_hammoz_aerocom_MMPPEmon
     REAL(dp) :: zdpg(kbdim,klev)    !< delta p over g [kg m-2]
     REAL(dp) :: zload(kbdim,nload)  !< instantaneous burdens [kg m-2]
 
-    ! NUMBER CONCENTATION (km-3): CDNC and IDNC
+    ! NUMBER CONCENTATION (km-3): CDNC and ICNC
 
     !-- nmrcdnc, nmricnc (CDNC and ICNC tracers, see ham_define_tracer)
     nmrcdnc(1:kproma,:,krow) = nmrcdnc(1:kproma,:,krow) &
