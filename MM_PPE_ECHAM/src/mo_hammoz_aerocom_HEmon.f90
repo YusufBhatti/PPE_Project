@@ -95,6 +95,7 @@ MODULE mo_hammoz_aerocom_HEmon
   REAL(dp), PUBLIC, POINTER :: ccn(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn1(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn3(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: ccn5(:,:,:)
   REAL(dp), PUBLIC, POINTER :: lwc(:,:,:)
   REAL(dp), PUBLIC, POINTER :: rel(:,:,:)
   REAL(dp), PUBLIC, POINTER :: lccl(:,:,:)
@@ -533,7 +534,14 @@ MODULE mo_hammoz_aerocom_HEmon
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
-        
+
+     CALL add_stream_element (achemon, 'ccn5', ccn5, &
+        longname = 'cloud_condensation_nuclei_0.5', &
+        units = 'm-3', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+         
      CALL add_stream_element (achemon, 'lwc', lwc, &
         longname = 'cloud_liquid_water_content', &
         units = 'kg m-3', &
@@ -625,7 +633,7 @@ MODULE mo_hammoz_aerocom_HEmon
    USE mo_ham_streams,   ONLY: tau_2d, tau355
     USE mo_ham_rad_data,  ONLY: Nwv_sw
     USE mo_hammoz_aerocom_HEaci, ONLY: ttop_inst, cdnc_inst, cdr_inst, cod_inst, ccn_inst,&
-         ccn1_inst, ccn3_inst, z_inst, cod3dswl, cod3dswi, precip_inst, sprecip_inst,&
+         ccn1_inst, ccn3_inst, ccn5_inst, z_inst, cod3dswl, cod3dswi, precip_inst, sprecip_inst,&
          auto3d, accret3d, rsut_inst, rsutcs_inst, rsutnoa_inst, rsutcsnoa_inst, rlut_inst,&
          rlutcs_inst, clt_inst, f3d, phase3d, cdr3d, riming3d, qcsedten3d, qcevap3d,&
          od550aer3d, wet3Dso2_inst, wet3Dso4_inst, tmf_cld_inst, dry3Dso2_inst, dry3Dso4_inst,&
@@ -717,6 +725,9 @@ MODULE mo_hammoz_aerocom_HEmon
 
     !-- ccn3
     ccn3(1:kproma,:,krow) = ccn3(1:kproma,:,krow) + ccn3_inst(1:kproma,:,krow)*delta_time
+
+    !-- ccn5
+    ccn5(1:kproma,:,krow) = ccn5(1:kproma,:,krow) + ccn5_inst(1:kproma,:,krow)*delta_time
 
     !-- z
     z(1:kproma,:,krow) = z(1:kproma,:,krow) + z_inst(1:kproma,:,krow)*delta_time

@@ -1451,7 +1451,7 @@ MODULE mo_submodel_interface
    !<<dod
    !>>DN
    USE mo_hammoz_aerocom_diags, ONLY: lHEaci, lHEaci_activ, lMMPPE
-   USE mo_hammoz_aerocom_HEaci, ONLY: ccn_inst, ccn1_inst, ccn3_inst
+   USE mo_hammoz_aerocom_HEaci, ONLY: ccn_inst, ccn1_inst, ccn3_inst, ccn5_inst
    USE mo_activ,                ONLY: swat
    USE mo_param_switches,       ONLY: ac_scale_activation
    !<<DN
@@ -1583,6 +1583,12 @@ MODULE mo_submodel_interface
                   swat(1:kproma,:,krow) = 0.003_wp
                   CALL ham_activ_abdulrazzak_ghan(kproma, kbdim, klev, krow, ktdia, &
                                                ccn3_inst(:,:,krow), pesw, prho,             &
+                                               pxtm1, ptm1, papm1, pqm1,         &
+                                               zw, zwpdf, za, zb, zrdry,         &
+                                               znact, zfracn, zsc, zrc, zsmax)
+                  swat(1:kproma,:,krow) = 0.005_wp
+                  CALL ham_activ_abdulrazzak_ghan(kproma, kbdim, klev, krow, ktdia, &
+                                               ccn5_inst(:,:,krow), pesw, prho,             &
                                                pxtm1, ptm1, papm1, pqm1,         &
                                                zw, zwpdf, za, zb, zrdry,         &
                                                znact, zfracn, zsc, zrc, zsmax)

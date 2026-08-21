@@ -55,6 +55,7 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: emiso2_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: ccn01bl(:,:)
   REAL(dp), PUBLIC, POINTER :: ccn03bl(:,:)
+  REAL(dp), PUBLIC, POINTER :: ccn05bl(:,:)
   REAL(dp), PUBLIC, POINTER :: od550aer(:,:)
   REAL(dp), PUBLIC, POINTER :: aerindex(:,:) 
   REAL(dp), PUBLIC, POINTER :: aerindex_inst(:,:) 
@@ -93,6 +94,7 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: ccn_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn1_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn3_inst(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: ccn5_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: z_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: accret3d(:,:,:)
   REAL(dp), PUBLIC, POINTER :: auto3d(:,:,:)
@@ -192,7 +194,14 @@ MODULE mo_hammoz_aerocom_HEaci
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
-    
+
+    CALL add_stream_element (acheaci, 'ccn05bl', ccn05bl, &
+        longname = 'cloud_condensation_nuclei_0.5_pbl', &
+        units = 'm-3', &
+        laccu = .TRUE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+     
     CALL add_stream_element (acheaci, 'od550aer', od550aer, &
         longname = 'atmosphere_optical_thickness_due_to_aerosol', &
         units = '1', &
@@ -461,6 +470,13 @@ MODULE mo_hammoz_aerocom_HEaci
         laccu = .FALSE., &
         lpost = .TRUE., &
         lrerun = .FALSE. )
+
+     CALL add_stream_element (acheaci, 'ccn5_inst', ccn5_inst, &
+        longname = 'cloud_condensation_nuclei_0.5 (inst.)', &
+        units = 'm-3', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .FALSE. )
      
      CALL add_stream_element (acheaci, 'z_inst', z_inst, &
         longname = 'altitude (inst.)', &
@@ -592,6 +608,7 @@ MODULE mo_hammoz_aerocom_HEaci
     DO jl=1,kproma
        ccn01bl(jl,krow) = ccn1_inst(jl,zindarr(jl),krow)
        ccn03bl(jl,krow) = ccn3_inst(jl,zindarr(jl),krow)
+       ccn05bl(jl,krow) = ccn5_inst(jl,zindarr(jl),krow)
     END DO
     
     !-- od550aer
