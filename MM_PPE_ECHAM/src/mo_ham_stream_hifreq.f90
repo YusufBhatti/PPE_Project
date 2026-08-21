@@ -66,8 +66,8 @@ CONTAINS
     CALL add_stream_reference (hifreq, 'conccnmodeAS','achemon',lpost=.TRUE.) !  Accum Sol
     CALL add_stream_reference (hifreq, 'conccnmodeCS','achemon',lpost=.TRUE.) ! 
 !
-    CALL add_stream_reference (hifreq, 'ccn1_inst','acheaci',lpost=.TRUE.) ! CCN1 
-    CALL add_stream_reference (hifreq, 'ccn3_inst','acheaci',lpost=.TRUE.) ! CCN3
+!    CALL add_stream_reference (hifreq, 'ccn1_inst','acheaci',lpost=.TRUE.) ! CCN1 
+!    CALL add_stream_reference (hifreq, 'ccn3_inst','acheaci',lpost=.TRUE.) ! CCN3
     CALL add_stream_reference (hifreq, 'dpg','acheaci',lpost=.TRUE.) ! dpg to intigrate ccn with
     CALL add_stream_reference (hifreq, 't3d','acheaci',lpost=.TRUE.) ! t3d to intigrate ccn with
     CALL add_stream_reference (hifreq, 'aps','acheaci',lpost=.TRUE.) ! aps to intigrate ccn with
