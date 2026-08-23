@@ -49,7 +49,7 @@ MODULE mo_hammoz_aerocom_MMPPEmon
   PUBLIC :: construct_MMPPEmon_stream
   PUBLIC :: update_MMPPEmon_diags
 
-  TYPE (t_stream), PUBLIC, POINTER :: acmmppem
+  TYPE (t_stream), PUBLIC, POINTER :: acmppem
 
   REAL(dp), PUBLIC, POINTER :: nmrcdnc(:,:,:)
   REAL(dp), PUBLIC, POINTER :: nmricnc(:,:,:)
@@ -89,74 +89,74 @@ MODULE mo_hammoz_aerocom_MMPPEmon
     put_interval%offset       = 0
 
     !-- Create new stream:
-    CALL new_stream (acmmppem ,'acmmppem', &
+    CALL new_stream (acmppem ,'acmppem', &
                      filetype = AEROCOM_FILETYPE, &
                      lrerun = .TRUE., &
                      interval = put_interval, &
                      lpost = .TRUE.)
 
     !-- Add standard fields for post-processing:
-    CALL default_stream_setting (acmmppem, &
+    CALL default_stream_setting (acmppem, &
                                  table = 199, &
                                  code = AUTO )
 
     !-- Basic vars (may sometimes be necessary)
-    CALL add_stream_reference (acmmppem, 'geosp'   ,'g3b'   ,lpost=.TRUE.)
-    CALL add_stream_reference (acmmppem, 'lsp'     ,'sp'    ,lpost=.TRUE.)
-    CALL add_stream_reference (acmmppem, 'aps'     ,'g3b'   ,lpost=.TRUE.)
-    CALL add_stream_reference (acmmppem, 'gboxarea','geoloc',lpost=.TRUE.)
+    CALL add_stream_reference (acmppem, 'geosp'   ,'g3b'   ,lpost=.TRUE.)
+    CALL add_stream_reference (acmppem, 'lsp'     ,'sp'    ,lpost=.TRUE.)
+    CALL add_stream_reference (acmppem, 'aps'     ,'g3b'   ,lpost=.TRUE.)
+    CALL add_stream_reference (acmppem, 'gboxarea','geoloc',lpost=.TRUE.)
 
     !-- Diagnostics table'
-    CALL add_stream_element (acmmppem, 'nmrcdnc', nmrcdnc, &
+    CALL add_stream_element (acmppem, 'nmrcdnc', nmrcdnc, &
         longname = 'cloud droplet number mixing ratio', &
         units = '1 kg-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'nmricnc', nmricnc, &
+    CALL add_stream_element (acmppem, 'nmricnc', nmricnc, &
         longname = 'ice crystal number mixing ratio', &
         units = '1 kg-1', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'loadbc', loadbc, &
+    CALL add_stream_element (acmppem, 'loadbc', loadbc, &
         longname = 'Column black carbon mass load', &
         units = 'kg m-2', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'loaddu', loaddu, &
+    CALL add_stream_element (acmppem, 'loaddu', loaddu, &
         longname = 'Column dust mass load', &
         units = 'kg m-2', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'loadoc', loadoc, &
+    CALL add_stream_element (acmppem, 'loadoc', loadoc, &
         longname = 'Column organic carbon mass load', &
         units = 'kg m-2', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'loadso4', loadso4, &
+    CALL add_stream_element (acmppem, 'loadso4', loadso4, &
         longname = 'Column sulphate mass load', &
         units = 'kg m-2', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'loadss', loadss, &
+    CALL add_stream_element (acmppem, 'loadss', loadss, &
         longname = 'Column seasalt mass load', &
         units = 'kg m-2', &
         laccu = .TRUE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
 
-    CALL add_stream_element (acmmppem, 'loadwat', loadwat, &
+    CALL add_stream_element (acmppem, 'loadwat', loadwat, &
         longname = 'Column aerosol water mass load', &
         units = 'kg m-2', &
         laccu = .TRUE., &
