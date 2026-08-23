@@ -67,7 +67,11 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: cdr_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: lwp(:,:)
   REAL(dp), PUBLIC, POINTER :: cod_inst(:,:)
+  REAL(dp), PUBLIC, POINTER :: codliq_inst(:,:)
+  REAL(dp), PUBLIC, POINTER :: codice_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: clt_inst(:,:)
+  REAL(dp), PUBLIC, POINTER :: lcc_inst(:,:)
+  REAL(dp), PUBLIC, POINTER :: icc_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: accretn(:,:)
   REAL(dp), PUBLIC, POINTER :: autoconv(:,:)
   REAL(dp), PUBLIC, POINTER :: rsut_inst(:,:)
@@ -90,7 +94,7 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: cdnc3d(:,:,:)
   REAL(dp), PUBLIC, POINTER :: cdr3d(:,:,:)
   REAL(dp), PUBLIC, POINTER :: phase3d(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: lts(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: lts_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: ccn_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn1_inst(:,:,:)
   REAL(dp), PUBLIC, POINTER :: ccn3_inst(:,:,:)
@@ -160,10 +164,10 @@ MODULE mo_hammoz_aerocom_HEaci
   
     !-- Diagnostics table'
     !-- Diagnostics table'
-    CALL add_stream_element (acheaci, 'lts', lts, &
+    CALL add_stream_element (acheaci, 'lts', lts_inst, &
         longname = 'lower tropospheric stability', &
         units = 'K', &
-        laccu = .TRUE., &
+        laccu = .FALSE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
     
@@ -279,16 +283,105 @@ MODULE mo_hammoz_aerocom_HEaci
         ref_longname = 'temperature', &
         ref_units = 'K', &
         lpost = .TRUE. )
-   
+
+    !-- direct ECHAM fields needed in 6-hourly AeroCom output
+    CALL add_stream_reference (acheaci, 'rsdt', 'g3b', &
+        ref_name = 'srad0d', &
+        ref_longname = 'toa_incoming_shortwave_flux', &
+        ref_units = 'W m-2', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'pr', 'g3b', &
+        ref_name = 'precip_na', &
+        ref_longname = 'precipitation_flux', &
+        ref_units = 'kg m-2 s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'prls', 'g3b', &
+        ref_name = 'aprs', &
+        ref_longname = 'stratiform_solid_precipitation_flux', &
+        ref_units = 'kg m-2 s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'sftlf', 'g3b', &
+        ref_name = 'slm', &
+        ref_longname = 'land_area_fraction', &
+        ref_units = '1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'albsrfc', 'g3b', &
+        ref_name = 'albedo', &
+        ref_longname = 'surface_albedo', &
+        ref_units = '1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'ua10m', 'g3b', &
+        ref_name = 'u10', &
+        ref_longname = 'eastward_wind_at_10m', &
+        ref_units = 'm s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'va10m', 'g3b', &
+        ref_name = 'v10', &
+        ref_longname = 'northward_wind_at_10m', &
+        ref_units = 'm s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'hfls', 'g3b', &
+        ref_name = 'ahfl', &
+        ref_longname = 'surface_upward_latent_heat_flux', &
+        ref_units = 'W m-2', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'hfss', 'g3b', &
+        ref_name = 'ahfs', &
+        ref_longname = 'surface_upward_sensible_heat_flux', &
+        ref_units = 'W m-2', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (acheaci, 'prw', 'g3b', &
+        ref_name = 'qvi', &
+        ref_longname = 'atmosphere_mass_content_of_water_vapor', &
+        ref_units = 'kg m-2', &
+        lpost = .TRUE. )
+    
     CALL add_stream_element (acheaci, 'cod', cod_inst, &
         longname = 'cloud_optical_depth', &
         units = '1', &
         laccu = .FALSE., &
         lpost = .TRUE., &
         lrerun = .TRUE. )
+
+    CALL add_stream_element (acheaci, 'codliq', codliq_inst, &
+        longname = 'cloud_optical_depth_due_to_liq', &
+        units = '1', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .FALSE. )
+
+    CALL add_stream_element (acheaci, 'codice', codice_inst, &
+        longname = 'cloud_optical_depth_due_to_ice', &
+        units = '1', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .FALSE. )
         
     CALL add_stream_element (acheaci, 'clt', clt_inst, &
         longname = 'cloud_area_fraction', &
+        units = '1', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+    CALL add_stream_element (acheaci, 'lcc', lcc_inst, &
+        longname = 'liquid_cloud_area_fraction', &
+        units = '1', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+    CALL add_stream_element (acheaci, 'icc', icc_inst, &
+        longname = 'ice_cloud_area_fraction', &
         units = '1', &
         laccu = .FALSE., &
         lpost = .TRUE., &
@@ -587,14 +680,22 @@ MODULE mo_hammoz_aerocom_HEaci
     INTEGER :: jl,jk,jt
     INTEGER :: icld_top(kbdim) !< highest cloud top index (strat or conv)
     INTEGER :: itmp(kbdim), zindarr(kbdim)
+    INTEGER :: idx700(kbdim), idx1000(kbdim)
     REAL(dp) :: zeps
     REAL(dp) :: ztemp(kbdim,klev)
+    REAL(dp) :: ptemp(kbdim,klev)
     LOGICAL :: ll1(kbdim), lll1(kbdim,klev)
     
     zeps=EPSILON(1.0_dp)
     
-    !-- lts
-    lts(1:kproma,:,krow) = lts(1:kproma,:,krow) + tpot(1:kproma,:,krow)*delta_time
+    !-- lts: compute instantaneous lower-tropospheric stability (theta@700hPa - theta@1000hPa)
+    ptemp(1:kproma,:) = vphysc%apm1(1:kproma,:,krow)
+    idx700(1:kproma) = MINLOC(ABS(ptemp(1:kproma,:)-70000._dp),2,(.true.))
+    idx1000(1:kproma) = MINLOC(ABS(ptemp(1:kproma,:)-100000._dp),2,(.true.))
+
+    DO jl = 1, kproma
+       lts_inst(jl,krow) = tpot(jl,idx700(jl),krow) - tpot(jl,idx1000(jl),krow)
+    END DO
     
     !-- emiso2
     emiso2(1:kproma,krow) = emiso2(1:kproma,krow) + emiso2_inst(1:kproma,krow)*delta_time
@@ -659,6 +760,14 @@ MODULE mo_hammoz_aerocom_HEaci
     !DO jk=1,klev
     !   cod_inst(1:kproma,krow) = cod_inst(1:kproma,krow) + cod3d(1:kproma,jk,krow)
     !END DO
+
+    !-- codliq and codice (sum water/ice contributions from level-resolved fields)
+    codliq_inst(1:kproma,krow) = 0._dp
+    codice_inst(1:kproma,krow) = 0._dp
+    DO jk=1,klev
+       codliq_inst(1:kproma,krow) = codliq_inst(1:kproma,krow) + cod3dswl(1:kproma,jk,krow)
+       codice_inst(1:kproma,krow) = codice_inst(1:kproma,krow) + cod3dswi(1:kproma,jk,krow)
+    END DO
 
     !-- phase3d
     phase3d(1:kproma,:,krow) = xlm1(1:kproma,:,krow) / &

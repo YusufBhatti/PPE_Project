@@ -38,6 +38,7 @@
  lMMPPE = .TRUE.
  lAP3M = .TRUE.
  lAP3D = .TRUE.
+ lMMPPEmon= .TRUE.
 /
 &cfdiagctl
     locfdiag = .true.
@@ -108,6 +109,11 @@
 /
 &set_stream
   stream='acmmppe'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acmmppemon'
   lpost=1
   interval = 1,'months','last',0
 /

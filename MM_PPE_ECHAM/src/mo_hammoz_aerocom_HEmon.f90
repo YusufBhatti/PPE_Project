@@ -107,7 +107,7 @@ MODULE mo_hammoz_aerocom_HEmon
   REAL(dp), PUBLIC, POINTER :: qcsedten(:,:,:)
   REAL(dp), PUBLIC, POINTER :: qcevap(:,:,:)
   REAL(dp), PUBLIC, POINTER :: riming(:,:,:)
-  REAL(dp), PUBLIC, POINTER :: lts(:,:,:)
+  REAL(dp), PUBLIC, POINTER :: lts(:,:)
 
   TYPE (vmem3d), PUBLIC, ALLOCATABLE :: conccnmode(:)        
   
@@ -167,6 +167,66 @@ MODULE mo_hammoz_aerocom_HEmon
          ref_longname = 'emission of SO2', &
          lpost=.TRUE.)
     
+    CALL add_stream_reference (achemon, 'rsdt', 'g3b', &
+        ref_name = 'srad0d', &
+        ref_longname = 'toa_incoming_shortwave_flux', &
+        ref_units = 'W m-2', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'pr', 'g3b', &
+        ref_name = 'precip_na', &
+        ref_longname = 'precipitation_flux', &
+        ref_units = 'kg m-2 s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'prls', 'g3b', &
+        ref_name = 'aprs', &
+        ref_longname = 'stratiform_solid_precipitation_flux', &
+        ref_units = 'kg m-2 s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'sftlf', 'g3b', &
+        ref_name = 'slm', &
+        ref_longname = 'land_area_fraction', &
+        ref_units = '1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'albsrfc', 'g3b', &
+        ref_name = 'albedo', &
+        ref_longname = 'surface_albedo', &
+        ref_units = '1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'ua10m', 'g3b', &
+        ref_name = 'u10', &
+        ref_longname = 'eastward_wind_at_10m', &
+        ref_units = 'm s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'va10m', 'g3b', &
+        ref_name = 'v10', &
+        ref_longname = 'northward_wind_at_10m', &
+        ref_units = 'm s-1', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'hfls', 'g3b', &
+        ref_name = 'ahfl', &
+        ref_longname = 'surface_upward_latent_heat_flux', &
+        ref_units = 'W m-2', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'hfss', 'g3b', &
+        ref_name = 'ahfs', &
+        ref_longname = 'surface_upward_sensible_heat_flux', &
+        ref_units = 'W m-2', &
+        lpost = .TRUE. )
+
+    CALL add_stream_reference (achemon, 'prw', 'g3b', &
+        ref_name = 'qvi', &
+        ref_longname = 'atmosphere_mass_content_of_water_vapor', &
+        ref_units = 'kg m-2', &
+        lpost = .TRUE. )
+
     CALL add_stream_element (achemon, 'od550aer', od550aer, &
         longname = 'atmosphere_optical_thickness_due_to_aerosol', &
         units = '1', &
@@ -637,7 +697,7 @@ MODULE mo_hammoz_aerocom_HEmon
          auto3d, accret3d, rsut_inst, rsutcs_inst, rsutnoa_inst, rsutcsnoa_inst, rlut_inst,&
          rlutcs_inst, clt_inst, f3d, phase3d, cdr3d, riming3d, qcsedten3d, qcevap3d,&
          od550aer3d, wet3Dso2_inst, wet3Dso4_inst, tmf_cld_inst, dry3Dso2_inst, dry3Dso4_inst,&
-         rlutnoa_inst, rlutcsnoa_inst
+         rlutnoa_inst, rlutcsnoa_inst, lts_inst
     USE mo_physical_constants,ONLY: tmelt, grav
     USE mo_echam_cloud_params, ONLY: cthomi
     USE mo_ham,          ONLY: nclass, sizeclass
@@ -663,8 +723,8 @@ MODULE mo_hammoz_aerocom_HEmon
     INTEGER :: jclass
     REAL(dp), POINTER :: conccnmode_p(:,:,:)
 
-    !-- lts
-    lts(1:kproma,:,krow) = lts(1:kproma,:,krow) + tpot(1:kproma,:,krow)*delta_time
+    !-- lts: accumulate instantaneous lower-tropospheric stability from HEaci
+    lts(1:kproma,krow) = lts(1:kproma,krow) + lts_inst(1:kproma,krow)*delta_time
     
     !-- od550aer
     od550aer(1:kproma,krow) = od550aer(1:kproma,krow) &
