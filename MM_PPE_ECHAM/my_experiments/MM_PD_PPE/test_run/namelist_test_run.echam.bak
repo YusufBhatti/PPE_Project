@@ -5,16 +5,16 @@
 &RUNCTL 
  lresume        = .false.,
  lmidatm        = .true.
- out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BASELINE_TEST/"
- out_expname    = "BASELINE_TEST"
+ out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/test_run/"
+ out_expname    = "test_run"
  out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
  trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
  rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
  dt_start       = 2025,01,01,0,0,0
- dt_stop        = 2026,01,01,1,0,0
+ dt_stop        = 2025,02,01,1,0,0
  putdata        = 1,'months','last',0
- trigfiles      = 12,'months','first',0
- putrerun       = 12,'months','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = 15, 
  lamip          = .false.
  lnudge         = .true.
@@ -38,6 +38,7 @@
  lMMPPE = .TRUE.
  lAP3M = .TRUE.
  lAP3D = .TRUE.
+ lMMPPEmon= .TRUE.
 /
 &cfdiagctl
     locfdiag = .true.
@@ -86,7 +87,7 @@
 &NDGCTL
  inudgformat     = 2
  dt_nudg_start   = 2025,01,01,0,0,0
- dt_nudg_stop    = 2026,01,01,1,0,0
+ dt_nudg_stop    = 2025,02,01,1,0,0
  lnudgdbx        = .false.
  lnudgini        = .false.
  nudglmin        = 1
@@ -102,99 +103,94 @@
  ndg_file_nc    = "ndg%y4%m2.nc"
 /
 &set_stream
-  stream='acheaci'
-  lpost=1
-  interval = 1,'days','last',0
-/
-&set_stream
   stream='achemon'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='acmmppe'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
+/
+&set_stream
+  stream='acmmppemon'
+  lpost=1
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='acp3d'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='accw'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='co2'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='conv'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='drydep'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='wetdep'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='land'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='nudg'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='sedi'
   lpost=1
-  interval = 1,'days','last',0
-/
-&set_stream
-  stream='echamm'
-  lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='jsbash'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='veg'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='acheaci'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='activ'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='ham'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='tracer'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='burden'
@@ -204,32 +200,32 @@
 &set_stream
   stream='rad'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='echam'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='emi'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='jsbash'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='surf'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='vphysc'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='hifreq'
