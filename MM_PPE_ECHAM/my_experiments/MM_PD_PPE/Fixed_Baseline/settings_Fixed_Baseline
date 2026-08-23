@@ -260,11 +260,6 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   interval = 1,'months','last',0
 /
 &set_stream
-  stream='echamm'
-  lpost=1
-  interval = 6,'hours','last',0
-/
-&set_stream
   stream='jsbash'
   lpost=1
   interval = 1,'months','last',0

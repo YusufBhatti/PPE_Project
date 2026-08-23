@@ -5,16 +5,16 @@
 &RUNCTL 
  lresume        = .false.,
  lmidatm        = .true.
- out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/"
- out_expname    = "Omega"
+ out_datapath   = "/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/"
+ out_expname    = "Test"
  out_filetype   = 6     ! 1--> grib; 2--> NetCDF; 6--> NetCDF4;
  trac_filetype  = 2     ! 1--> grib; 2--> NetCDF;
  rerun_filetype = 4     ! 2--> NetCDF; 4--> NetCDF2
  dt_start       = 2025,01,01,0,0,0
- dt_stop        = 2025,01,02,1,0,0
- putdata        = 1,'days','last',0
- trigfiles      = 1,'days','first',0
- putrerun       = 1,'days','last',0
+ dt_stop        = 2025,02,01,1,0,0
+ putdata        = 1,'months','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = 15, 
  lamip          = .false.
  lnudge         = .true.
@@ -28,7 +28,7 @@
  lmoz             = .false.
  lhammoz          = .false.
  lburden          = .true.
- emi_basepath     = "[WILL BE AUTOMATICALLY SET HERE UNLESS YOU DEFINE A VALID PATH HERE]"
+ emi_basepath     =  "/projects/0/prjs1474/aarifi/INPUT/v0002/emissions_inventories/"
  emi_scenario     = "ssp245"
  laerocom_diag    = .true.
 /
@@ -86,7 +86,7 @@
 &NDGCTL
  inudgformat     = 2
  dt_nudg_start   = 2025,01,01,0,0,0
- dt_nudg_stop    = 2025,01,02,1,0,0
+ dt_nudg_stop    = 2025,02,01,1,0,0
  lnudgdbx        = .false.
  lnudgini        = .false.
  nudglmin        = 1
@@ -157,11 +157,6 @@
   interval = 1,'months','last',0
 /
 &set_stream
-  stream='echamm'
-  lpost=1
-  interval = 6,'hours','last',0
-/
-&set_stream
   stream='jsbash'
   lpost=1
   interval = 1,'months','last',0
@@ -199,7 +194,7 @@
 &set_stream
   stream='rad'
   lpost=1
-  interval = 6,'hours','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='echam'

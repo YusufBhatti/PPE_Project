@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name="Omega"
+#SBATCH --job-name="Test"
 #SBATCH --nodes=1
 #SBATCH --ntasks=192
 #SBATCH --time=14:00:00
 #SBATCH --partition genoa
-###SBATCH --output=slurm_Omega_%j.txt
-###SBATCH --error=slurm_Omega_%j.txt
-#SBATCH --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/Omega.out
-#SBATCH --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/Omega.err
+###SBATCH --output=slurm_Test_%j.txt
+###SBATCH --error=slurm_Test_%j.txt
+#SBATCH --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/Test.out
+#SBATCH --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/Test.err
 #SBATCH --account="srs25001"
 #!/bin/bash -l
 
@@ -35,7 +35,7 @@ export MPICH_UNEX_BUFFER_SIZE=
 #----------------------------------------------------------------------------------------
 #--- Start the run:
 
-cd /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/
+cd /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/
 
 set +e
 srun --exclusive --ntasks=192 ./echam6
@@ -53,46 +53,46 @@ set -e
 #--- Launch some p-proc job here:
 
 ### Add my CDO command here for P-processing the TAU 3D into 2D (vert int) modes
-#cwd=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/
+#cwd=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/
 ## Copy the CDO.sh template to a new script based on jobname
-#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Omega.sh
+#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Test.sh
 #
 ## Replace line 6 with the exp_dir variable value
-##sed -i '6c\ name='"~/prjs1076/PPE_Output/PPE_Experiments/Omega/" ~/prjs1076/yusufb/Scripts/CDO_PP_PI/Omega.sh
-#sed -i "7c\ name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/Omega/\"" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Omega.sh
+##sed -i '6c\ name='"~/prjs1076/PPE_Output/PPE_Experiments/Test/" ~/prjs1076/yusufb/Scripts/CDO_PP_PI/Test.sh
+#sed -i "7c\ name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/Test/\"" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Test.sh
 #
 ## Replace line 14 with the jobname variable value
-#sed -i "6c\ jobname='Omega'" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Omega.sh 
-#sed -i "6c\mv -f ~/prjs1076/PPE_Output/Pace_PPE_Experiments/Omega /archive/ybhatti1/Pace_PPE/PPE_Experiments/" ~/Scripts/CDO_PP/Omega.sh
+#sed -i "6c\ jobname='Test'" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Test.sh 
+#sed -i "6c\mv -f ~/prjs1076/PPE_Output/Pace_PPE_Experiments/Test /archive/ybhatti1/Pace_PPE/PPE_Experiments/" ~/Scripts/CDO_PP/Test.sh
 
 # -----------------------------------------------------
 
 # Define target script once
-target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Omega.sh"
+target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Test.sh"
 
 # Define paths for reuse
-output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/Omega/"
-archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/Omega"
+output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/Test/"
+archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/Test"
 
 # Copy the CDO.sh template to a new script based on jobname
-#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Omega.sh
-#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Defaults_PI.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Omega.sh
+#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Test.sh
+#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Defaults_PI.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Test.sh
 
 # Update placeholders inside the copied script in a single sed call
-#sed -i #    -e "6c jobname='Omega'" #    -e "7c name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/PI_PPE_Experiments/Omega\"" #    "/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Omega.sh"
+#sed -i #    -e "6c jobname='Test'" #    -e "7c name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/PI_PPE_Experiments/Test\"" #    "/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Test.sh"
 
 set +e   # allow errors
 module load 2024                                                                                                                                                                                                                    
 module load CDO/2.4.4-gompi-2024a
 module load NCO/5.2.9-foss-2024a
 
-#. /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Omega.sh
+#. /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/Test.sh
 
 set -e   # restore strict mode
 # -----------------------------------------------------
 
 # Command line prompt tester
-#jobname="PPE_ENS_1"; #target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Omega.sh"; #output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/Omega/"; #archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/Omega"; #cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh ""; #sed -i -e "6c jobname='Omega'" -e "7c name=\"\"" ""
+#jobname="PPE_ENS_1"; #target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/Test.sh"; #output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/Test/"; #archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/Test"; #cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh ""; #sed -i -e "6c jobname='Test'" -e "7c name=\"\"" ""
 
 
 flag_p_proc=false                # flag to launch the p-proc
@@ -105,17 +105,17 @@ if $flag_p_proc ; then # this submits a job to be executed on the p-proc machine
                        # you need to declare them as environment variables before
                        # launching the script
 
-   declare -x exp=Omega
-   declare -x exp_dir=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/
-   declare -x p_proc_dir=/path/to/post_proc_disk/ybhatti2/Omega
+   declare -x exp=Test
+   declare -x exp_dir=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/
+   declare -x p_proc_dir=/path/to/post_proc_disk/ybhatti2/Test
 
 #   sbatch -M julier \
 #                       --job-name="p-proc" \
 #                       --nodes=1 \
 #                       --ntasks=1 \
 #                       --time=24:00:00 \
-#                       --output=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Omega/slurm_p-proc_%j.txt \
-#                       --error=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Omega/slurm_p-proc_%j.txt \
+#                       --output=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Test/slurm_p-proc_%j.txt \
+#                       --error=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Test/slurm_p-proc_%j.txt \
 #                       --account="srs25001" \
 #                       --export=ALL \
 #                             /path/to/some/post-processing script
@@ -125,8 +125,8 @@ if $flag_p_proc ; then # this submits a job to be executed on the p-proc machine
                        --nodes=1               \
                        --ntasks=1 \
                        --time=24:00:00 \
-                       --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/Omega.out \
-                       --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Omega/Omega.err \
+                       --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/Test.out \
+                       --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/Test/Test.err \
                        --account="srs25001" \
                        --export=ALL \
                              /path/to/some/post-processing script
@@ -144,13 +144,13 @@ module load 2024
 module load netCDF/4.9.2-gompi-2024a
 #<<SF
 
-rerun_echam="restart_Omega_echam.nc"
+rerun_echam="restart_Test_echam.nc"
 
 if [ -e ${rerun_echam} ] ; then
    rerun_date=`ncdump -h ${rerun_echam} | grep ":vdate =" | cut -c12-19`
-   rerun_tar=restart_Omega_${rerun_date}.tar
+   rerun_tar=restart_Test_${rerun_date}.tar
 
-   tar cvf $rerun_tar restart_Omega_[a-z]*
+   tar cvf $rerun_tar restart_Test_[a-z]*
 else
    echo "No rerun file was produced: Don't do any job chaining and stop execution here"
    exit # no need to prepare a potential namelist file for a next submission if there's no rerun file
@@ -166,7 +166,7 @@ cat namelist.echam.bak | sed -e 's/^ *[lL][rR][eE][sS][uU][mM][eE].*$/lresume=.t
 #--- Submit the next job:
 
    if [[ "$status_echam" -eq "0" ]] ; then
-      cd /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Omega
-      sbatch /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Omega/echam_jobscript_Omega.sh
+      cd /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Test
+      sbatch /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/Test/echam_jobscript_Test.sh
    fi
 

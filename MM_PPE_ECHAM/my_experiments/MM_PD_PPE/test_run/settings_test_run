@@ -8,6 +8,12 @@
 # 
 # Jobscript toolkit version 1.2 (March  2016, svn revision r3070). 
 #
+# 
+# Jobscript toolkit version 1.2 (March  2016, svn revision r3070). 
+#
+# 
+# Jobscript toolkit version 1.2 (March  2016, svn revision r3070). 
+#
 
 
 #-------------------------------------------------------------------------------------------------------
@@ -35,7 +41,7 @@ set -e
 #-- General settings:
 
 model_dir="/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM" 
-exp="BASELINE_TEST" 
+exp="test_run" 
 script_dir="${model_dir}/my_experiments/MM_PD_PPE/${exp}" 
 echam_jobscript=${script_dir}/echam_jobscript_${exp}.sh # echam batch job script name
 
@@ -84,7 +90,7 @@ init_restart_flag=.false.     # echam restart flag at launch of this job
                               #  set when further jobs will be started)
 
 date_start="2025,01,01,0,0,0"  # 20090829234500
-date_stop="2026,01,01,1,0,0"
+date_stop="2025,02,01,1,0,0"
 
 input_files_version="v0002"   # version label for input files !!do not change if you don't know about it!!
 scenario="ssp245"              # in case it is relevant for the given setup (using either variable GHG's
@@ -113,8 +119,8 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  dt_start       = $date_start
  dt_stop        = $date_stop
  putdata        = 1,'months','last',0
- trigfiles      = 12,'months','first',0
- putrerun       = 12,'months','last',0
+ trigfiles      = 1,'months','first',0
+ putrerun       = 1,'months','last',0
  no_cycles      = ${no_cycles}, 
  lamip          = .false.
  lnudge         = .true.
@@ -138,6 +144,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  lMMPPE = .TRUE.
  lAP3M = .TRUE.
  lAP3D = .TRUE.
+ lMMPPEmon= .TRUE.
 /
 &cfdiagctl
     locfdiag = .true.
@@ -202,11 +209,6 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  ndg_file_nc    = "ndg%y4%m2.nc"
 /
 &set_stream
-  stream='acheaci'
-  lpost=1
-  interval = 6,'days','last',0
-/
-&set_stream
   stream='achemon'
   lpost=1
   interval = 1,'months','last',0
@@ -217,84 +219,84 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
   interval = 1,'months','last',0
 /
 &set_stream
+  stream='acmmppemon'
+  lpost=1
+  interval = 1,'months','last',0
+/
+&set_stream
   stream='acp3d'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='accw'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='co2'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='conv'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='drydep'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='wetdep'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='land'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='nudg'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='sedi'
   lpost=1
-  interval = 1,'days','last',0
-/
-&set_stream
-  stream='echamm'
-  lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='jsbash'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='veg'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='acheaci'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='activ'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='ham'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='tracer'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='burden'
@@ -304,32 +306,32 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
 &set_stream
   stream='rad'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='echam'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='emi'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='jsbash'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='surf'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 1,'months','last',0
 /
 &set_stream
   stream='vphysc'
   lpost=1
-  interval = 1,'days','last',0
+  interval = 6,'hours','last',0
 /
 &set_stream
   stream='hifreq'
