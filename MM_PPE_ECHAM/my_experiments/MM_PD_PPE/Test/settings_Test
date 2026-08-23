@@ -147,6 +147,7 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  lMMPPE = .TRUE.
  lAP3M = .TRUE.
  lAP3D = .TRUE.
+ lMMPPEmon= .TRUE.
 /
 &cfdiagctl
     locfdiag = .true.
