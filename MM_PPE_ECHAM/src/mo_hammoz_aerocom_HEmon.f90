@@ -758,13 +758,16 @@ MODULE mo_hammoz_aerocom_HEmon
   
        ztmp3_1d(1:kproma) = lcc_tmp(1:kproma) + phase3d(1:kproma,jk,krow) * zdeltacc(1:kproma)
        lcc_tmp(1:kproma) = MERGE(ztmp3_1d(1:kproma), lcc_tmp(1:kproma), ll_vis(1:kproma,jk))
-!       icc_tmp(1:kproma) = MERGE(ztmp3_1d(1:kproma), icc_tmp(1:kproma), ll_vis(1:kproma,jk))
+
+       ztmp3_1d(1:kproma) = icc_tmp(1:kproma) + (1._dp - phase3d(1:kproma,jk,krow)) * zdeltacc(1:kproma)
+       icc_tmp(1:kproma) = MERGE(ztmp3_1d(1:kproma), icc_tmp(1:kproma), ll_vis(1:kproma,jk))
 
        !-- final:
        tcc(1:kproma) = MERGE(zacltot(1:kproma), tcc(1:kproma), ll_vis(1:kproma,jk))
     ENDDO
     fliq2d(1:kproma,krow) = lcc_tmp(1:kproma)
     lcc(1:kproma,krow) = lcc(1:kproma,krow) + lcc_tmp(1:kproma)*delta_time
+    icc(1:kproma,krow) = icc(1:kproma,krow) + icc_tmp(1:kproma)*delta_time
         
     !--lccl, mccl, iccl
     ll_liq(1:kproma,:) = (tm1(1:kproma,:,krow) >= tmelt)
