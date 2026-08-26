@@ -82,7 +82,7 @@ date_start="2024,10,01,0,0,0"  # 20090829234500
 date_stop="2025,01,01,1,0,0"
 
 input_files_version="v0002"   # version label for input files !!do not change if you don't know about it!!
-scenario="ssp245"             # scenario you'd like (e.g. 'ssp245' ). That values doesn't change the scenario for ozon and ghg. For ozon "vl" is chosen and for ghg "m".
+scenario="rcp45"             # scenario you'd like (e.g. 'ssp245' ). That values doesn't change the scenario for ozon and ghg. For ozon "vl" is chosen and for ghg "m".
 
 
    #-- ECHAM6-HAMMOZ namelists:

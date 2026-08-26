@@ -1,4 +1,4 @@
-P# HAMMOZ emission matrix
+# HAMMOZ emission matrix
 #
 # This is an example emi_spec file for echam-hammoz with HAM switched on, with:
 #   * ACCMIP interpolated for most of the sectors that are read from files
@@ -97,13 +97,13 @@ VOLCE=EF_MODULE,   volume
 #
 
 MATRIX
-  SPEC   AGR AWB AIRC BIOGENIC DOM ENE FFIRE GFIRE IND SHIPS SLV TERR TRA WST DUST OCEANI SEASALT VOLCE VOLCC
-  BC      -   0    1     -      1   1   1     0     1    1    -   -    1   1  -     -      -       -     -
-  DMS     -   -    -     -      -   -   1     0     -    -    -   1    -   -  -     1      -       -     -
-  DU      -   -    -     -      -   -   -     -     -    -    -   -    -   -  1     -      -       -     -
-  OC      -   0    -     1      1   1   1     0     1    1    -   -    1   1  -     -      -       -     -	
-  SO2     -   0    -     -      1   1   1     0     1    1    -   -    1   1  -     -      -       1     1	
-  SS      -   -    -     -      -   -   -     -     -    -    -   -    -   -  -     -      1       -     -
+  SPEC   AGR AWB AIRC BIOGENIC DOM ENE FIRE IND SHIPS SLV TERR TRA WST DUST OCEANI SEASALT VOLCE VOLCC
+  BC      -   -    1     -      1   1   1    1    1    -   -    1   1  -     -      -       -     -
+  DMS     -   -    -     -      -   -   1    -    -    -   1    -   -  -     1      -       -     -
+  DU      -   -    -     -      -   -   -    -    -    -   -    -   -  1     -      -       -     -
+  OC      -   -    1     1      1   1   1    1    1    -   -    1   1  -     -      -       -     -
+  SO2     -   -    1     -      1   1   1    1    1    -   -    1   1  -     -      -       1     1
+  SS      -   -    -     -      -   -   -    -    -    -   -    -   -  -     -      1       -     -
 
 # 2.b translation table for emission matrix
 #
