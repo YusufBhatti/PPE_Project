@@ -47,7 +47,7 @@
 #----------------------------------------------
 
 input_basepath="/projects/0/prjs1474/aarifi/INPUT/${input_files_version}" # where all input files except nudging data is to be found
-nudg_basepath="/projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T63L47/" # where all nudging data is to be found
+nudg_basepath="/projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T${hres}L${vres}/" # where all nudging data is to be found
 
 #--------------------------------------------------
 # You shouldn't need to modify the following
