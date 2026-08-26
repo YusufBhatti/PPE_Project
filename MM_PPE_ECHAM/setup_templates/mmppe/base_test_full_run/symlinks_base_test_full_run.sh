@@ -29,7 +29,7 @@
 #    flag_stenchikov_aerosols="[flag to use Stenchikov volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
 #    flag_crowley_aerosols="[flag to use crowley volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
 #    flag_submclim_aerosols="[flag to use submodel climatology volcanic aerosols (radiative prop): 'false' (no volcano aerosols) or 'true']"
-#    scenario="[future climate scenarios for GHG, ozone and aerosol climatology: RCP45, XXX (case insensitive)]"
+#    scenario="[future climate scenarios for aerosol climatology: RCP45, XXX (case insensitive)]." For GHG and ozone the scenario is hardcoded, we use scenario m (medium) for ghg and vl (very-low) for ozone scenario v for ozone, respectively.
 #    flag_nudg="[flag to switch on nudging: 'false' (no nudging) or 'true']"
 #    flag_nudg_netcdf="[flag to switch on netcdf format for nudging: 'false' (binary) or 'true' (netcdf)]"
 #    flag_hd="[flag to switch on hydrology in jsbach: 'false' (no hydrology) or 'true']"
@@ -466,7 +466,7 @@ ln -sf  ${input_basepath}/echam6/rrtmg_sw.nc               rrtmg_sw.nc
 ln -sf  ${input_basepath}/echam6/rrtmg_lw.nc               rrtmg_lw.nc
 ln -sf  ${input_basepath}/echam6/ECHAM6_CldOptProps.nc     ECHAM6_CldOptProps.nc
 
-ln -sf ${input_basepath}/echam6/greenhouse_${scenario}.nc  greenhouse_gases.nc
+ln -sf ${input_basepath}/echam6/bc_greenhouse_m_1750_2100.nc  greenhouse_gases.nc
 
 #---------
 # JS-BACH  
@@ -592,14 +592,7 @@ if $flag_CMIP5_ozon ; then  # ie io3=4
 
        if $flag_time_dep_sst_sic ; then  # true year-dep input, see comment above
 
-          if [[ "$year" -lt "2009" ]] ; then # no scenario
-             scenario_str="historical_"
-          else                               # take user-defined scenario
-             scenario_str="${scenario}_"
-          fi
-          ln -sf ${input_basepath}/echam6/${hres}/ozone/${hres}_ozone_${scenario}_${year}.nc ozon${year}
-
-
+          ln -sf ${input_basepath}/echam6/${hres}/ozone/cmip7/${hres}_ozone_vl_${year}.nc ozon${year}
 
        else # fake year-dep input for using the CMIP5 climatology
          # ln -sf /projects/0/prjs1474/aarifi/INPUT/v0002/echam6/T63/T63_ozone_CMIP5_1979-1988.nc ozon${year}

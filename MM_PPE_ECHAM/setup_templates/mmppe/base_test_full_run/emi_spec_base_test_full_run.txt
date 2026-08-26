@@ -1,4 +1,4 @@
-# HAMMOZ emission matrix
+P# HAMMOZ emission matrix
 #
 # This is an example emi_spec file for echam-hammoz with HAM switched on, with:
 #   * ACCMIP interpolated for most of the sectors that are read from files

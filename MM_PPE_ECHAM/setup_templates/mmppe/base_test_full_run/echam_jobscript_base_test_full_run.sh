@@ -1,13 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name="BAse_test_full_run"
+#SBATCH --job-name="base_test_full_run"
 #SBATCH --nodes=1
 #SBATCH --ntasks=192
 #SBATCH --time=14:00:00
 #SBATCH --partition genoa
 ###SBATCH --output=slurm_BAse_test_full_run_%j.txt
 ###SBATCH --error=slurm_BAse_test_full_run_%j.txt
-#SBATCH --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/BAse_test_full_run.out
-#SBATCH --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/BAse_test_full_run.err
+#SBATCH --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/base_test_full_run.out
+#SBATCH --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/base_test_full_run.err
 #SBATCH --account="srs25001"
 #!/bin/bash -l
 
@@ -35,7 +35,7 @@ export MPICH_UNEX_BUFFER_SIZE=
 #----------------------------------------------------------------------------------------
 #--- Start the run:
 
-cd /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/
+cd /home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/
 
 set +e
 srun --exclusive --ntasks=192 ./echam6
@@ -53,45 +53,45 @@ set -e
 #--- Launch some p-proc job here:
 
 ### Add my CDO command here for P-processing the TAU 3D into 2D (vert int) modes
-#cwd=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/
+#cwd=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/
 ## Copy the CDO.sh template to a new script based on jobname
-#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/BAse_test_full_run.sh
+#cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/base_test_full_run.sh
 #
 ## Replace line 6 with the exp_dir variable value
-##sed -i '6c\ name='"~/prjs1076/PPE_Output/PPE_Experiments/BAse_test_full_run/" ~/prjs1076/yusufb/Scripts/CDO_PP_PI/BAse_test_full_run.sh
-#sed -i "7c\ name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/BAse_test_full_run/\"" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/BAse_test_full_run.sh
+##sed -i '6c\ name='"~/prjs1076/PPE_Output/PPE_Experiments/base_test_full_run/" ~/prjs1076/yusufb/Scripts/CDO_PP_PI/base_test_full_run.sh
+#sed -i "7c\ name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/base_test_full_run/\"" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/base_test_full_run.sh
 #
 ## Replace line 14 with the jobname variable value
-#sed -i "6c\ jobname='BAse_test_full_run'" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/BAse_test_full_run.sh 
-#sed -i "6c\mv -f ~/prjs1076/PPE_Output/Pace_PPE_Experiments/BAse_test_full_run /archive/ybhatti1/Pace_PPE/PPE_Experiments/" ~/Scripts/CDO_PP/BAse_test_full_run.sh
+#sed -i "6c\ jobname='base_test_full_run'" /home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/base_test_full_run.sh 
+#sed -i "6c\mv -f ~/prjs1076/PPE_Output/Pace_PPE_Experiments/base_test_full_run /archive/ybhatti1/Pace_PPE/PPE_Experiments/" ~/Scripts/CDO_PP/base_test_full_run.sh
 
 # -----------------------------------------------------
 
 # Define target script once
-target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/BAse_test_full_run.sh"
+target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP_PI/base_test_full_run.sh"
 
 # Define paths for reuse
-output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/"
-archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/MM_PPE_Experiments/PD_PPE/BAse_test_full_run"
+output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/MM_PPE_Experiments/PD_PPE/base_test_full_run/"
+archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/MM_PPE_Experiments/PD_PPE/base_test_full_run"
 
 # Copy the CDO.sh template to a new script based on jobname
-cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_Processing.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_PPE/BAse_test_full_run.sh
+cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_Processing.sh /home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_PPE/base_test_full_run.sh
 
 # Update placeholders inside the copied script in a single sed call
-sed -i     -e "24c jobname='BAse_test_full_run'"     -e "23c name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run\""     "/home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_PPE/BAse_test_full_run.sh"
+sed -i     -e "24c jobname='base_test_full_run'"     -e "23c name=\"/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run\""     "/home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_PPE/base_test_full_run.sh"
 
 set +e   # allow errors
 module load 2024                                                                                                                                                                                                                    
 module load CDO/2.4.4-gompi-2024a
 module load NCO/5.2.9-foss-2024a
 
-. /home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_PPE/BAse_test_full_run.sh
+. /home/ybhatti2/prjs1474/Utils/CDO_Scripts/MM_PPE/base_test_full_run.sh
 
 set -e   # restore strict mode
 # -----------------------------------------------------
 
 # Command line prompt tester
-#jobname="PPE_ENS_1"; #target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/BAse_test_full_run.sh"; #output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/BAse_test_full_run/"; #archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/BAse_test_full_run"; #cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh ""; #sed -i -e "6c jobname='BAse_test_full_run'" -e "7c name=\"\"" ""
+#jobname="PPE_ENS_1"; #target="/home/ybhatti2/prjs1474/Utils/CDO_Scripts/CDO_PP/base_test_full_run.sh"; #output_dir="/home/ybhatti2/prjs1474/Pace_PPE_Output/PPE_Experiments/base_test_full_run/"; #archive_dir="~/prjs1076/PPE_Output/Pace_PPE_Experiments/base_test_full_run"; #cp -f /home/ybhatti2/prjs1474/Utils/CDO_Scripts/PPE_ENS_Example.sh ""; #sed -i -e "6c jobname='base_test_full_run'" -e "7c name=\"\"" ""
 
 
 flag_p_proc=false                # flag to launch the p-proc
@@ -104,17 +104,17 @@ if $flag_p_proc ; then # this submits a job to be executed on the p-proc machine
                        # you need to declare them as environment variables before
                        # launching the script
 
-   declare -x exp=BAse_test_full_run
-   declare -x exp_dir=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/
-   declare -x p_proc_dir=/path/to/post_proc_disk/ybhatti2/BAse_test_full_run
+   declare -x exp=base_test_full_run
+   declare -x exp_dir=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/
+   declare -x p_proc_dir=/path/to/post_proc_disk/ybhatti2/base_test_full_run
 
 #   sbatch -M julier \
 #                       --job-name="p-proc" \
 #                       --nodes=1 \
 #                       --ntasks=1 \
 #                       --time=24:00:00 \
-#                       --output=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/BAse_test_full_run/slurm_p-proc_%j.txt \
-#                       --error=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/BAse_test_full_run/slurm_p-proc_%j.txt \
+#                       --output=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/base_test_full_run/slurm_p-proc_%j.txt \
+#                       --error=/gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/base_test_full_run/slurm_p-proc_%j.txt \
 #                       --account="srs25001" \
 #                       --export=ALL \
 #                             /path/to/some/post-processing script
@@ -124,8 +124,8 @@ if $flag_p_proc ; then # this submits a job to be executed on the p-proc machine
                        --nodes=1               \
                        --ntasks=1 \
                        --time=24:00:00 \
-                       --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/BAse_test_full_run.out \
-                       --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/BAse_test_full_run/BAse_test_full_run.err \
+                       --output=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/base_test_full_run.out \
+                       --error=/home/ybhatti2/prjs1474/Pace_PPE_Output/MM_PPE_Experiments/PD_PPE/base_test_full_run/base_test_full_run.err \
                        --account="srs25001" \
                        --export=ALL \
                              /path/to/some/post-processing script
@@ -165,7 +165,7 @@ cat namelist.echam.bak | sed -e 's/^ *[lL][rR][eE][sS][uU][mM][eE].*$/lresume=.t
 #--- Submit the next job:
 
    if [[ "$status_echam" -eq "0" ]] ; then
-      cd /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/BAse_test_full_run
-      sbatch /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/BAse_test_full_run/echam_jobscript_BAse_test_full_run.sh
+      cd /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/base_test_full_run
+      sbatch /gpfs/work3/0/prjs1474/ybhatti/PPE_Project/MM_PPE_ECHAM/my_experiments/MM_PD_PPE/base_test_full_run/echam_jobscript_BAse_test_full_run.sh
    fi
 
