@@ -189,15 +189,13 @@ cat > ${script_dir}/namelist_${exp}.echam << EOF
  lnudgdbx        = .false.
  lnudgini        = .false.
  nudglmin        = 1
- nudglmax        = ${vres#L}
+ nudglmax        = 40                 ! <-- CHANGED: 795 hPa / ~2.0 km; levels 41-47 free-running
  nudgsmin        = 0
  nudgsmax        = ${hres#T}
  lnudgimp        = .true.
- nudgt           = ${vres#L}*0.0 !SF switch off temperature nudging (recommended, see Zhang et al, ACP 2014) 
- !-- Nudging weights for winds (vorticity & divergence): 6-hour relaxation above BL (~2km)
- !-- For L47: first 10 levels (from top) are below ~2 km; set these to 0.0, remaining to 4.6296 (6h)
- nudgd = 10*0.0,37*4.6296  ! divergence nudging weights (use 6h above BL)
- nudgv = 10*0.0,37*4.6296  ! vorticity nudging weights (use 6h above BL)
+ nudgv           = ${vres#L}*4.6296   ! <-- ADDED (explicit): vorticity,  6 h
+ nudgd           = ${vres#L}*4.6296   ! <-- CHANGED: divergence, 48 h -> 6 h
+ nudgt           = ${vres#L}*0.0      !     temperature off (unchanged)
  ltintlin        = .false.
  ldamplin        = .true.
  nudgdamp        = 1.

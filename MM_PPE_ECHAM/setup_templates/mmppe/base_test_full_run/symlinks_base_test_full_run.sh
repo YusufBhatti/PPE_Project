@@ -47,7 +47,9 @@
 #----------------------------------------------
 
 input_basepath="/projects/0/prjs1474/aarifi/INPUT/${input_files_version}" # where all input files except nudging data is to be found
-nudg_basepath="/projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_T${hres}L${vres}/" # where all nudging data is to be found
+nudg_basepath="/projects/0/prjs1474/aarifi/INPUT/process_NDG/monthly_${hres}${vres}/" # where all nudging data is to be found
+                                                                                      # note: $hres and $vres already contain
+                                                                                      # their letter, e.g. T63 and L47
 
 #--------------------------------------------------
 # You shouldn't need to modify the following
@@ -883,7 +885,7 @@ if $flag_nudg ; then
 
    #-- Initialization of the default preferred order for the nudging prefixes, if not already set by user
    if [ -z $nudg_prefix_order ] ; then 
-      declare -a nudg_prefix_order=( "eraia" "era40"  "ana" )
+      declare -a nudg_prefix_order=( "era5" "eraia" "era40"  "ana" )
    fi
 
    #-- Loop over YYYYMM:
@@ -897,7 +899,9 @@ if $flag_nudg ; then
        flag_not_found=true
        for prefix in ${nudg_prefix_order[*]} ; do
 
-           nudg_subdir_attempt=${nudg_basepath}/${prefix}/${prefix}${subdir_tail}
+           nudg_subdir_attempt=${nudg_basepath}/${prefix}${subdir_tail} # flat layout (no ${prefix}/ parent dir).
+                                                                       # Nested layouts are still picked up by the
+                                                                       # find fallback below (-maxdepth 2).
 
            if [ -d ${nudg_subdir_attempt} ] ; then
               flag_not_found=false
