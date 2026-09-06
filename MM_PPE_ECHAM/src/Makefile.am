@@ -664,7 +664,7 @@ mo_hammoz_aerocom_diags.o: mo_control.o mo_exception.o \
 	mo_hammoz_aerocom_MMPPEmon.o mo_hammoz_aerocom_Traj.o mo_kind.o \
 	mo_mpi.o mo_namelist.o mo_submodel.o mo_tracdef.o \
 	$(INCLUDE)/hammoz_aerocomctl.inc
-mo_hammoz_aerocom_HEaci.o: mo_cosp_simulator.o mo_decomposition.o \
+mo_hammoz_aerocom_HEaci.o: mo_activ.o mo_cosp_simulator.o mo_decomposition.o \
 	mo_ham_rad_data.o mo_ham_streams.o mo_hammoz_aerocom_data.o mo_kind.o \
 	mo_linked_list.o mo_memory_base.o mo_memory_g1a.o mo_memory_g3b.o \
 	mo_physical_constants.o mo_time_control.o mo_time_event.o mo_vphysc.o

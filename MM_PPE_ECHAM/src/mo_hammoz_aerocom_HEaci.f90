@@ -65,6 +65,7 @@ MODULE mo_hammoz_aerocom_HEaci
   REAL(dp), PUBLIC, POINTER :: tmf_cld_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: cdnc_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: cdr_inst(:,:)
+  REAL(dp), PUBLIC, POINTER :: reffclitop_inst(:,:)  ! ice cloud-top effective radius (inst.) [m]
   REAL(dp), PUBLIC, POINTER :: lwp(:,:)
   REAL(dp), PUBLIC, POINTER :: cod_inst(:,:)
   REAL(dp), PUBLIC, POINTER :: codliq_inst(:,:)
@@ -135,6 +136,7 @@ MODULE mo_hammoz_aerocom_HEaci
     USE mo_memory_base,       ONLY: new_stream, add_stream_element, AUTO,  &
                                     default_stream_setting, add_stream_reference
     USE mo_time_event,        ONLY: io_time_event
+    USE mo_activ,             ONLY: reffi
 
     TYPE(io_time_event) :: put_interval
 
@@ -266,6 +268,13 @@ MODULE mo_hammoz_aerocom_HEaci
     
     CALL add_stream_element (acheaci, 'cdr', cdr_inst, &
         longname = 'liquid_cloud-top_droplet_effective_radius', &
+        units = 'm', &
+        laccu = .FALSE., &
+        lpost = .TRUE., &
+        lrerun = .TRUE. )
+
+    CALL add_stream_element (acheaci, 'reffclitop', reffclitop_inst, &
+        longname = 'ice_cloud-top_effective_radius', &
         units = 'm', &
         laccu = .FALSE., &
         lpost = .TRUE., &
@@ -674,6 +683,7 @@ MODULE mo_hammoz_aerocom_HEaci
     USE mo_ham_rad_data,  ONLY: Nwv_sw
     USE mo_cosp_simulator, ONLY: cisccp_cldtau3d
     USE mo_physical_constants, ONLY: grav
+    USE mo_activ,         ONLY: reffi
 
     INTEGER, INTENT(in) :: kproma, kbdim, klev, krow
     REAL(dp), INTENT(IN )  :: pi0(kbdim)
@@ -752,6 +762,27 @@ MODULE mo_hammoz_aerocom_HEaci
     DO jk=1,kproma
        cdnc_inst(jk,krow) = MERGE(cdnc3d(jk,itmp(jk),krow)*f3d(jk,itmp(jk),krow),0._dp,ll1(jk))
        cdr_inst(jk,krow) = MERGE(cdr3d(jk,itmp(jk),krow)*f3d(jk,itmp(jk),krow),0._dp,ll1(jk))
+    END DO
+
+    !-- reffclitop: ice cloud-top effective radius computed from 3D reffi
+    !   Use overall cloud-top index nstr_cld_top and require ice presence
+    !   Pull reffi (units um) from mo_activ and convert to m here.
+    !   reffclitop_inst = reffi(level_top) * fice3d(level_top) [converted um->m]
+    ll1(1:kproma) = (nstr_cld_top(1:kproma,krow) >= 1) &
+         .AND. (nstr_cld_top(1:kproma,krow) <= klev) 
+    itmp(1:kproma) = MERGE(nstr_cld_top(1:kproma,krow),1,ll1(1:kproma))
+
+    DO jk=1,kproma
+       IF (ll1(jk)) THEN
+          ! check ice fraction at the top level and use reffi from activ (um -> m)
+          IF (fice3d(jk,itmp(jk),krow) > 0._dp) THEN
+             reffclitop_inst(jk,krow) = reffi(jk,itmp(jk),krow)*1.e-6_dp * fice3d(jk,itmp(jk),krow)
+          ELSE
+             reffclitop_inst(jk,krow) = 0._dp
+          END IF
+       ELSE
+          reffclitop_inst(jk,krow) = 0._dp
+       END IF
     END DO
 
     !-- cod
